@@ -10,14 +10,14 @@
     android:id="@+id/widget_preview_root"
     android:theme="@android:style/Theme.DeviceDefault">
 
-    <!-- CarÃ¡tula de ejemplo -->
+    <!-- CarÃƒÂ¡tula de ejemplo -->
     <ImageView
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:id="@+id/Book_art_preview"
-        android:src="@drawable/rounded_Book_24" />
+        android:src="@drawable/rounded_book_24" />
 
-    <!-- TÃ­tulo y Authora de ejemplo -->
+    <!-- TÃƒÂ­tulo y Authora de ejemplo -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TÃ­tulo de CanciÃ³n"
+            android:text="TÃƒÂ­tulo de CanciÃƒÂ³n"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />

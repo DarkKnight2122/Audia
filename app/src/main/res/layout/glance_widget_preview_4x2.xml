@@ -19,8 +19,8 @@
             android:id="@+id/Book_art_preview"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:background="@drawable/widget_preview_Book_art_background"
-            android:src="@drawable/ic_Audiobook_placeholder_preview"
+            android:background="@drawable/widget_preview_book_art_background"
+            android:src="@drawable/ic_audiobook_placeholder_preview"
             android:scaleType="centerInside"
             android:padding="18dp" />
 
