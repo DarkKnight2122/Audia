@@ -100,7 +100,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÃƒâ€°TODO
+    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÃƒÆ’Ã¢â‚¬Â°TODO
         return database.searchHistoryDao()
     }
 
@@ -251,7 +251,7 @@ object AppModule {
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val requestWithUserAgent = originalRequest.newBuilder()
-                    .header("User-Agent", "AudioBookPlayer/1.0 (Android; Audiobook Player)")
+                    .header("User-Agent", "audia/1.0 (Android; Audiobook Player)")
                     .build()
                 chain.proceed(requestWithUserAgent)
             }
@@ -286,7 +286,7 @@ object AppModule {
     }
 
     /**
-     * Provee una instancia de OkHttpClient con timeouts para bÃƒÂºsquedas de Transcript.
+     * Provee una instancia de OkHttpClient con timeouts para bÃƒÆ’Ã‚Âºsquedas de Transcript.
      * Includes DNS resolver, modern TLS, connection pool, and retry logic.
      */
     @Provides
@@ -334,7 +334,7 @@ object AppModule {
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val requestWithHeaders = originalRequest.newBuilder()
-                    .header("User-Agent", "AudioBookPlayer/1.0 (Android; Audiobook Player)")
+                    .header("User-Agent", "audia/1.0 (Android; Audiobook Player)")
                     .header("Accept", "application/json")
                     .build()
                 chain.proceed(requestWithHeaders)
@@ -389,7 +389,7 @@ object AppModule {
     }
 
     /**
-     * Provee el repositorio de imÃƒÂ¡genes de Authoras.
+     * Provee el repositorio de imÃƒÆ’Ã‚Â¡genes de Authoras.
      */
     @Provides
     @Singleton

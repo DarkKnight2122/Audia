@@ -40,7 +40,7 @@ import com.oakiha.audia.AudioBookApp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.PlayerInfo // Import new data class
 import com.oakiha.audia.data.repository.AudiobookRepository
-import com.oakiha.audia.ui.glancewidget.AudioBookPlayerGlanceWidget
+import com.oakiha.audia.ui.glancewidget.audiaGlanceWidget
 import com.oakiha.audia.ui.glancewidget.PlayerActions
 import com.oakiha.audia.ui.glancewidget.PlayerInfoStateDefinition
 import com.oakiha.audia.utils.LogUtils
@@ -92,7 +92,7 @@ class AudiobookService : MediaSessionService() {
     private var countedBooklistener: Player.Listener? = null
 
     companion object {
-        private const val TAG = "AudiobookService_AudioBookPlayer"
+        private const val TAG = "AudiobookService_audia"
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.oakiha.audia.ACTION_SLEEP_TIMER_EXPIRED"
     }
@@ -244,7 +244,7 @@ class AudiobookService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider.Builder(this)
                 .build()
-                .also { it.setSmallIcon(R.drawable.audiobookplayer_base_monochrome) }
+                .also { it.setSmallIcon(R.drawable.audia_base_monochrome) }
         )
         mediaSession?.let { refreshMediaSessionUi(it) }
 
@@ -380,7 +380,7 @@ class AudiobookService : MediaSessionService() {
         )
     }
 
-    // --- LÃƒâ€œGICA PARA ACTUALIZACIÃƒâ€œN DE WIDGETS Y DATOS ---
+    // --- LÃƒÆ’Ã¢â‚¬Å“GICA PARA ACTUALIZACIÃƒÆ’Ã¢â‚¬Å“N DE WIDGETS Y DATOS ---
     private var debouncedWidgetUpdateJob: Job? = null
     private val WIDGET_STATE_DEBOUNCE_MS = 300L
 
@@ -425,10 +425,10 @@ class AudiobookService : MediaSessionService() {
             val window = androidx.media3.common.Timeline.Window()
             val currentWindowIndex = withContext(Dispatchers.Main) { player.currentMediaItemIndex }
 
-            // Empezar desde la Next canciÃƒÂ³n en la cola
+            // Empezar desde la Next canciÃƒÆ’Ã‚Â³n en la cola
             val startIndex = if (currentWindowIndex + 1 < timeline.windowCount) currentWindowIndex + 1 else 0
 
-            // Limitar el nÃƒÂºmero de elementos de la cola a 4
+            // Limitar el nÃƒÆ’Ã‚Âºmero de elementos de la cola a 4
             val endIndex = (startIndex + 4).coerceAtMost(timeline.windowCount)
             for (i in startIndex until endIndex) {
                 timeline.getWindow(i, window)
@@ -484,12 +484,12 @@ class AudiobookService : MediaSessionService() {
     private suspend fun updateGlanceWidgets(playerInfo: PlayerInfo) = withContext(Dispatchers.IO) {
         try {
             val glanceManager = GlanceAppWidgetManager(applicationContext)
-            val glanceIds = glanceManager.getGlanceIds(AudioBookPlayerGlanceWidget::class.java)
+            val glanceIds = glanceManager.getGlanceIds(audiaGlanceWidget::class.java)
             if (glanceIds.isNotEmpty()) {
                 glanceIds.forEach { id ->
                     updateAppWidgetState(applicationContext, PlayerInfoStateDefinition, id) { playerInfo }
                 }
-                AudioBookPlayerGlanceWidget().update(applicationContext, glanceIds.first())
+                audiaGlanceWidget().update(applicationContext, glanceIds.first())
                 Log.d(TAG, "Widget actualizado: ${playerInfo.TrackTitle}")
             } else {
                 Log.w(TAG, "No se encontraron widgets para actualizar")

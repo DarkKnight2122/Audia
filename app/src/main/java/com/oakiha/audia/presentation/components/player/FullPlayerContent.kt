@@ -242,11 +242,11 @@ fun FullPlayerContent(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 
-    // LÃƒÂ³gica para el botÃƒÂ³n de Transcript en el reproductor expandido
+    // LÃƒÆ’Ã‚Â³gica para el botÃƒÆ’Ã‚Â³n de Transcript en el reproductor expandido
     val onTranscriptClick = {
         val Transcript = TranscriptProvider()
         if (Transcript?.synced.isNullOrEmpty() && Transcript?.plain.isNullOrEmpty()) {
-            // Si no hay letra, mostramos el diÃƒÂ¡logo para buscar
+            // Si no hay letra, mostramos el diÃƒÆ’Ã‚Â¡logo para buscar
             showFetchTranscriptDialog = true
         } else {
             // Si hay letra, mostramos el sheet directamente
@@ -259,7 +259,7 @@ fun FullPlayerContent(
             uiState = TranscriptSearchUiState,
             currentTrack = Track, // Use 'Track' which is derived from args/retained
             onConfirm = { forcePick ->
-                // El usuario confirma, iniciamos la bÃƒÂºsqueda
+                // El usuario confirma, iniciamos la bÃƒÆ’Ã‚Âºsqueda
                 playerViewModel.fetchTranscriptForCurrentTrack(forcePick)
             },
             onPickResult = { result ->
@@ -269,7 +269,7 @@ fun FullPlayerContent(
                 playerViewModel.searchTranscriptManually(title, Author)
             },
             onDismiss = {
-                // El usuario cancela o cierra el diÃƒÂ¡logo
+                // El usuario cancela o cierra el diÃƒÆ’Ã‚Â¡logo
                 showFetchTranscriptDialog = false
                 playerViewModel.resetTranscriptSearchState()
             },
@@ -279,7 +279,7 @@ fun FullPlayerContent(
         )
     }
 
-    // Observador para reaccionar al resultado de la bÃƒÂºsqueda de letras
+    // Observador para reaccionar al resultado de la bÃƒÆ’Ã‚Âºsqueda de letras
     LaunchedEffect(TranscriptSearchUiState) {
         when (val state = TranscriptSearchUiState) {
             is TranscriptSearchUiState.Success -> {
@@ -616,13 +616,13 @@ fun FullPlayerContent(
                     navigationIcon = {
                         Box(
                             modifier = Modifier
-                                // Ancho total = 14dp de padding + 42dp del botÃƒÂ³n
+                                // Ancho total = 14dp de padding + 42dp del botÃƒÆ’Ã‚Â³n
                                 .width(56.dp)
                                 .height(42.dp),
-                            // 2. Alinea el contenido (el botÃƒÂ³n) al final (derecha) y centrado verticalmente
+                            // 2. Alinea el contenido (el botÃƒÆ’Ã‚Â³n) al final (derecha) y centrado verticalmente
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            // 3. Tu botÃƒÂ³n circular original, sin cambios
+                            // 3. Tu botÃƒÆ’Ã‚Â³n circular original, sin cambios
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -726,7 +726,7 @@ fun FullPlayerContent(
                                             Spacer(Modifier.width(8.dp))
                                             AnimatedContent(
                                                 targetState = when {
-                                                    isCastConnecting -> "ConnectingÃ¢â‚¬Â¦"
+                                                    isCastConnecting -> "ConnectingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦"
                                                     isRemotePlaybackActive && selectedRouteName != null -> selectedRouteName ?: ""
                                                     else -> ""
                                                 },
@@ -1424,7 +1424,7 @@ private fun BookPlaceholder(height: Dp, color: Color, onColor: Color) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Icon(
                 modifier = Modifier.size(86.dp),
-                painter = painterResource(R.drawable.audiobookplayer_base_monochrome),
+                painter = painterResource(R.drawable.audia_base_monochrome),
                 contentDescription = null,
                 tint = onColor
             )

@@ -16,7 +16,7 @@ import okio.IOException
 import java.io.File
 
 object PlayerInfoStateDefinition : GlanceStateDefinition<PlayerInfo> { // Changed to PlayerInfo
-    private const val DATASTORE_FILE_NAME = "AudioBookPlayerPlayerInfo_v1_json" // Changed filename suffix
+    private const val DATASTORE_FILE_NAME = "audiaPlayerInfo_v1_json" // Changed filename suffix
 
     // Json instance for serialization. Could be injected if this object were a class.
     // For simplicity here, using a default configured instance.

@@ -472,7 +472,7 @@ fun BrickBreakerOverlay(
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
-                        text = "AudioBookPlayer",
+                        text = "audia",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface

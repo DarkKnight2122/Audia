@@ -37,7 +37,7 @@ class PlayerControlActionCallback : ActionCallback {
                     putExtra("Track_id", TrackId)
                 } else {
                     Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no TrackId found.")
-                    return // No hacer nada si no hay ID de canciÃƒÂ³n
+                    return // No hacer nada si no hay ID de canciÃƒÆ’Ã‚Â³n
                 }
             }
         }
@@ -58,9 +58,9 @@ class PlayerControlActionCallback : ActionCallback {
 object PlayerActions {
     val key = ActionParameters.Key<String>("playerActionKey_v1")
     val TrackIdKey = ActionParameters.Key<Long>("TrackIdKey_v1")
-    const val PLAY_PAUSE = "com.example.AudioBookPlayer.ACTION_WIDGET_PLAY_PAUSE"
-    const val NEXT = "com.example.AudioBookPlayer.ACTION_WIDGET_NEXT"
-    const val PREVIOUS = "com.example.AudioBookPlayer.ACTION_WIDGET_PREVIOUS"
-    const val FAVORITE = "com.example.AudioBookPlayer.ACTION_WIDGET_FAVORITE"
-    const val PLAY_FROM_QUEUE = "com.example.AudioBookPlayer.ACTION_WIDGET_PLAY_FROM_QUEUE"
+    const val PLAY_PAUSE = "com.example.audia.ACTION_WIDGET_PLAY_PAUSE"
+    const val NEXT = "com.example.audia.ACTION_WIDGET_NEXT"
+    const val PREVIOUS = "com.example.audia.ACTION_WIDGET_PREVIOUS"
+    const val FAVORITE = "com.example.audia.ACTION_WIDGET_FAVORITE"
+    const val PLAY_FROM_QUEUE = "com.example.audia.ACTION_WIDGET_PLAY_FROM_QUEUE"
 }

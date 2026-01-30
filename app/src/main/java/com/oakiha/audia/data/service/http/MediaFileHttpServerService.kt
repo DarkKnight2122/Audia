@@ -68,7 +68,7 @@ class MediaFileHttpServerService : Service() {
     }
 
     private fun startForegroundService() {
-        val channelId = "AudioBookPlayer_cast_server"
+        val channelId = "audia_cast_server"
         val channelName = "Cast Media Server"
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

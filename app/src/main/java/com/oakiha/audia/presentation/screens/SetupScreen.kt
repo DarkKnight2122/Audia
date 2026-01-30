@@ -435,7 +435,7 @@ fun WelcomePage() {
                 ),
             )
             Text(
-                text = "AudioBookPlayer",
+                text = "audia",
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontFamily = GoogleSansRounded,
                     fontSize = 46.sp,
@@ -458,7 +458,7 @@ fun WelcomePage() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "ÃŽÂ²",
+                    text = "ÃƒÅ½Ã‚Â²",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Black
                 )
@@ -552,7 +552,7 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "Media Permission",
         granted = isGranted,
-        description = "AudioBookPlayer needs access to your audio files to build your Audiobook library.",
+        description = "audia needs access to your audio files to build your Audiobook library.",
         buttonText = if (isGranted) "Permission Granted" else "Grant Media Permission",
         buttonEnabled = !isGranted,
         icons = mediaIcons,
@@ -614,7 +614,7 @@ fun AlarmsPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "Alarms & Reminders",
         granted = isGranted,
-        description = "To ensure the Sleep Timer works reliably and pauses Audiobook exactly when you want, AudioBookPlayer needs permission to schedule exact alarms.",
+        description = "To ensure the Sleep Timer works reliably and pauses Audiobook exactly when you want, audia needs permission to schedule exact alarms.",
         buttonText = if (isGranted) "Permission Granted" else "Grant Permission",
         buttonEnabled = !isGranted,
         icons = icons,
@@ -645,7 +645,7 @@ fun AllFilesPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "All Files Access",
         granted = isGranted,
-        description = "For some Android versions, AudioBookPlayer needs broader file access to find all your Audiobook.",
+        description = "For some Android versions, audia needs broader file access to find all your Audiobook.",
         buttonText = if(isGranted) "Permission Granted" else "Go to Settings",
         buttonEnabled = !isGranted,
         icons = fileIcons,
@@ -966,7 +966,7 @@ fun BatteryOptimizationPage(
     PermissionPageLayout(
         title = "Battery Optimization",
         granted = isIgnoringBatteryOptimizations,
-        description = "Some Android devices aggressively kill background apps. Disable battery optimization for AudioBookPlayer to prevent unexpected playback interruptions.",
+        description = "Some Android devices aggressively kill background apps. Disable battery optimization for audia to prevent unexpected playback interruptions.",
         buttonText = if (isIgnoringBatteryOptimizations) "Permission Granted" else "Disable Optimization",
         buttonEnabled = !isIgnoringBatteryOptimizations,
         icons = batteryIcons,
@@ -1119,13 +1119,13 @@ fun LibraryNavigationPillSetupShow(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÆ’Ã‚Â¡ expandido/seleccionado (totalmente redondo)
     val expandedRadius = 60.dp
 
-    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
+    // AnimaciÃƒÆ’Ã‚Â³n Esquina Flecha (Interna):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÆ’Ã‚Â¡ndose visualmente.
+    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÆ’Ã‚Â­tulo.
     val animatedArrowCorner by animateFloatAsState(
         targetValue = if (isExpanded) pillRadius.value else innerRadius.value,
         label = "ArrowCornerAnimation"
@@ -1200,7 +1200,7 @@ fun LibraryNavigationPillSetupShow(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÆ’Ã‚Âºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner.dp, // Anima entre 4.dp y 26.dp
@@ -1235,7 +1235,7 @@ fun LibraryNavigationPillSetupShow(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menÃƒÂº",
+                    contentDescription = "Expandir menÃƒÆ’Ã‚Âº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1244,13 +1244,13 @@ fun LibraryNavigationPillSetupShow(
 }
 
 /**
- * Una Bottom Bar flotante con un diseÃƒÂ±o expresivo inspirado en Material 3,
+ * Una Bottom Bar flotante con un diseÃƒÆ’Ã‚Â±o expresivo inspirado en Material 3,
  * que incluye una onda sinusoidal animada en la parte superior.
  *
  * @param modifier Modificador para el Composable.
- * @param pagerState El estado del Pager para mostrar el indicador de pÃƒÂ¡gina.
- * @param onNextClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Next".
- * @param onFinishClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Finalizar".
+ * @param pagerState El estado del Pager para mostrar el indicador de pÃƒÆ’Ã‚Â¡gina.
+ * @param onNextClicked Lambda que se invoca al pulsar el botÃƒÆ’Ã‚Â³n "Next".
+ * @param onFinishClicked Lambda que se invoca al pulsar el botÃƒÆ’Ã‚Â³n "Finalizar".
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -1264,14 +1264,14 @@ fun SetupBottomBar(
     onFinishClicked: () -> Unit,
     isFinishButtonEnabled: Boolean
 ) {
-    // --- Animaciones para el Morphing y RotaciÃƒÂ³n ---
+    // --- Animaciones para el Morphing y RotaciÃƒÆ’Ã‚Â³n ---
     val morphAnimationSpec = tween<Float>(durationMillis = 600, easing = FastOutSlowInEasing)
-    // AnimaciÃƒÂ³n mÃƒÂ¡s lenta y sutil para la rotaciÃƒÂ³n
+    // AnimaciÃƒÆ’Ã‚Â³n mÃƒÆ’Ã‚Â¡s lenta y sutil para la rotaciÃƒÆ’Ã‚Â³n
     val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
 
     // 1. Determina los porcentajes de las esquinas para la forma objetivo
     val targetShapeValues = when (pagerState.currentPage % 3) {
-        0 -> listOf(50f, 50f, 50f, 50f) // CÃƒÂ­rculo (50% en todas las esquinas)
+        0 -> listOf(50f, 50f, 50f, 50f) // CÃƒÆ’Ã‚Â­rculo (50% en todas las esquinas)
         1 -> listOf(26f, 26f, 26f, 26f) // Cuadrado Redondeado
         else -> listOf(18f, 50f, 18f, 50f) // Forma de "Hoja"
     }
@@ -1282,7 +1282,7 @@ fun SetupBottomBar(
     val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
     val animatedBottomEnd by animateFloatAsState(targetShapeValues[3], morphAnimationSpec, label = "BottomEnd")
 
-    // 3. Anima la rotaciÃƒÂ³n del botÃƒÂ³n para que gire 360 grados en cada cambio de pÃƒÂ¡gina.
+    // 3. Anima la rotaciÃƒÆ’Ã‚Â³n del botÃƒÆ’Ã‚Â³n para que gire 360 grados en cada cambio de pÃƒÆ’Ã‚Â¡gina.
     val animatedRotation by animateFloatAsState(
         targetValue = pagerState.currentPage * 360f,
         animationSpec = rotationAnimationSpec,
@@ -1366,7 +1366,7 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                // 4. Aplica la forma y rotaciÃƒÂ³n animadas al botÃƒÂ³n
+                // 4. Aplica la forma y rotaciÃƒÆ’Ã‚Â³n animadas al botÃƒÆ’Ã‚Â³n
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
                     shape = AbsoluteSmoothCornerShape(
@@ -1386,7 +1386,7 @@ fun SetupBottomBar(
                         .rotate(animatedRotation)
                         .padding(end = 0.dp)
                 ) {
-                    // 5. Aplica una contra-rotaciÃƒÂ³n al contenido del botÃƒÂ³n (el icono)
+                    // 5. Aplica una contra-rotaciÃƒÆ’Ã‚Â³n al contenido del botÃƒÆ’Ã‚Â³n (el icono)
                     AnimatedContent(
                         modifier = Modifier.rotate(-animatedRotation),
                         targetState = pagerState.currentPage < pagerState.pageCount - 1,

@@ -50,8 +50,8 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val issuesUrl = "https://github.com/theovilardo/AudioBookPlayer/issues"
-    val reportUrl = "https://github.com/theovilardo/AudioBookPlayer/issues/new/choose"
+    val issuesUrl = "https://github.com/theovilardo/audia/issues"
+    val reportUrl = "https://github.com/theovilardo/audia/issues/new/choose"
 
     val fabCornerRadius = 18.dp
 
@@ -129,7 +129,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Î²",
+                                text = "ÃŽÂ²",
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black

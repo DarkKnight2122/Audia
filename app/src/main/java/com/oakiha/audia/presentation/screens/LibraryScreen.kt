@@ -84,7 +84,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -196,10 +196,10 @@ fun LibraryScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     BooklistViewModel: BooklistViewModel = hiltViewModel()
 ) {
-    // La recolecciÃƒÂ³n de estados de alto nivel se mantiene mÃƒÂ­nima.
+    // La recolecciÃƒÆ’Ã‚Â³n de estados de alto nivel se mantiene mÃƒÆ’Ã‚Â­nima.
     val context = LocalContext.current // Added context
     val lastTabIndex by playerViewModel.lastLibraryTabIndexFlow.collectAsState()
-    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃƒÂ­
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃƒÆ’Ã‚Â­
     val scope = rememberCoroutineScope() // Mantener si se usa para acciones de UI
     val syncManager = playerViewModel.syncManager
     var isRefreshing by remember { mutableStateOf(false) }
@@ -273,7 +273,7 @@ fun LibraryScreen(
             }
         }
     }
-    // La lÃƒÂ³gica de carga diferida (lazy loading) se mantiene.
+    // La lÃƒÆ’Ã‚Â³gica de carga diferida (lazy loading) se mantiene.
     LaunchedEffect(Unit) {
         Trace.beginSection("LibraryScreen.InitialTabLoad")
         playerViewModel.onLibraryTabSelected(lastTabIndex)
@@ -295,7 +295,7 @@ fun LibraryScreen(
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
 
-    val dm = LocalAudioBookPlayerDarkTheme.current
+    val dm = LocalaudiaDarkTheme.current
 
     val iconRotation by transition.animateFloat(
         label = "Action Button Icon Rotation",
@@ -399,14 +399,14 @@ fun LibraryScreen(
             )
         }
     ) { innerScaffoldPadding ->
-        Box( // Box para permitir superposiciÃƒÂ³n del indicador de carga
+        Box( // Box para permitir superposiciÃƒÆ’Ã‚Â³n del indicador de carga
             modifier = Modifier
                 .padding(top = innerScaffoldPadding.calculateTopPadding())
                 .fillMaxSize()
         ) {
             Column(
                 modifier = Modifier
-                    // .padding(innerScaffoldPadding) // El padding ya estÃƒÂ¡ en el Box contenedor
+                    // .padding(innerScaffoldPadding) // El padding ya estÃƒÆ’Ã‚Â¡ en el Box contenedor
                     .background(brush = Brush.verticalGradient(gradientColors))
                     .fillMaxSize()
             ) {
@@ -477,7 +477,7 @@ fun LibraryScreen(
                     // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        // OPTIMIZACIÃƒâ€œN: La lÃƒÂ³gica de ordenamiento ahora es mÃƒÂ¡s eficiente.
+                        // OPTIMIZACIÃƒÆ’Ã¢â‚¬Å“N: La lÃƒÆ’Ã‚Â³gica de ordenamiento ahora es mÃƒÆ’Ã‚Â¡s eficiente.
                         val availableSortOptions by playerViewModel.availableSortOptions.collectAsState()
                         val sanitizedSortOptions = remember(availableSortOptions, currentTabId) {
                             val cleaned = availableSortOptions.filterIsInstance<SortOption>()
@@ -991,13 +991,13 @@ fun LibraryNavigationPill(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÆ’Ã‚Â¡ expandido/seleccionado (totalmente redondo)
     val expandedRadius = 60.dp
 
-    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
+    // AnimaciÃƒÆ’Ã‚Â³n Esquina Flecha (Interna):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÆ’Ã‚Â¡ndose visualmente.
+    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÆ’Ã‚Â­tulo.
     val animatedArrowCorner by animateDpAsState(
         targetValue = if (isExpanded) pillRadius else innerRadius,
         label = "ArrowCornerAnimation"
@@ -1072,7 +1072,7 @@ fun LibraryNavigationPill(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÆ’Ã‚Âºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner, // Anima entre 4.dp y 26.dp
@@ -1107,7 +1107,7 @@ fun LibraryNavigationPill(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menÃƒÂº",
+                    contentDescription = "Expandir menÃƒÆ’Ã‚Âº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1525,7 +1525,7 @@ private fun AudiobookFolder.collectAllTracks(): List<Track> {
     return Tracks + subFolders.flatMap { it.collectAllTracks() }
 }
 
-// NUEVA PestaÃƒÂ±a para Favoritos
+// NUEVA PestaÃƒÆ’Ã‚Â±a para Favoritos
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryFavoritesTab(
@@ -1677,7 +1677,7 @@ fun LibraryTracksTab(
     } else {
         // Determine content based on loading state and data availability
         when {
-            isLoadingInitial && Tracks.isEmpty() -> { // Este caso ya estÃƒÂ¡ cubierto arriba, pero es bueno para claridad
+            isLoadingInitial && Tracks.isEmpty() -> { // Este caso ya estÃƒÆ’Ã‚Â¡ cubierto arriba, pero es bueno para claridad
                 val allTracksPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -1784,8 +1784,8 @@ fun LibraryTracksTab(
                                 // Estabilizar lambdas
                                 val rememberedOnMoreOptionsClick: (Track) -> Unit =
                                     remember(onMoreOptionsClick) {
-                                        // Esta es la lambda que `remember` ejecutarÃƒÂ¡ para producir el valor recordado.
-                                        // El valor recordado es la propia funciÃƒÂ³n `onMoreOptionsClick` (o una lambda que la llama).
+                                        // Esta es la lambda que `remember` ejecutarÃƒÆ’Ã‚Â¡ para producir el valor recordado.
+                                        // El valor recordado es la propia funciÃƒÆ’Ã‚Â³n `onMoreOptionsClick` (o una lambda que la llama).
                                         { TrackFromListItem -> // Esta es la lambda (Track) -> Unit que se recuerda
                                             onMoreOptionsClick(TrackFromListItem)
                                         }
@@ -2042,7 +2042,7 @@ fun EnhancedTrackListItem(
     onMoreOptionsClick: (Track) -> Unit,
     onClick: () -> Unit
 ) {
-    // Animamos el radio de las esquinas basÃƒÂ¡ndonos en si la canciÃƒÂ³n es la actual.
+    // Animamos el radio de las esquinas basÃƒÆ’Ã‚Â¡ndonos en si la canciÃƒÆ’Ã‚Â³n es la actual.
     val animatedCornerRadius by animateDpAsState(
         targetValue = if (isCurrentTrack && !isLoading) 50.dp else 22.dp,
         animationSpec = tween(durationMillis = 400),
@@ -2380,7 +2380,7 @@ fun LibraryBooksTab(
                             Book = Book,
                             BookColorSchemePairFlow = BookspecificColorSchemeFlow,
                             onClick = rememberedOnClick,
-                            isLoading = isLoading && Books.isEmpty() // Shimmer solo si estÃƒÂ¡ cargando Y la lista estÃƒÂ¡ vacÃƒÂ­a
+                            isLoading = isLoading && Books.isEmpty() // Shimmer solo si estÃƒÆ’Ã‚Â¡ cargando Y la lista estÃƒÆ’Ã‚Â¡ vacÃƒÆ’Ã‚Â­a
                         )
                     }
                 }
@@ -2408,9 +2408,9 @@ fun BookGridItemRedesigned(
     isLoading: Boolean = false
 ) {
     val BookColorSchemePair by BookColorSchemePairFlow.collectAsState()
-    val systemIsDark = LocalAudioBookPlayerDarkTheme.current
+    val systemIsDark = LocalaudiaDarkTheme.current
 
-    // 1. ObtÃƒÂ©n el colorScheme del tema actual aquÃƒÂ­, en el scope Composable.
+    // 1. ObtÃƒÆ’Ã‚Â©n el colorScheme del tema actual aquÃƒÆ’Ã‚Â­, en el scope Composable.
     val currentMaterialColorScheme = MaterialTheme.colorScheme
 
     val itemDesignColorScheme = remember(BookColorSchemePair, systemIsDark, currentMaterialColorScheme) {
@@ -2487,10 +2487,10 @@ fun BookGridItemRedesigned(
                     var isLoadingImage by remember { mutableStateOf(true) }
                     SmartImage(
                         model = Book.BookArtUriString,
-                        contentDescription = "CarÃƒÂ¡tula de ${Book.title}",
+                        contentDescription = "CarÃƒÆ’Ã‚Â¡tula de ${Book.title}",
                         contentScale = ContentScale.Crop,
-                            // Reducido el tamaÃƒÂ±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
-                            // ContentScale.Crop se encargarÃƒÂ¡ de ajustar la imagen al aspect ratio.
+                            // Reducido el tamaÃƒÆ’Ã‚Â±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
+                            // ContentScale.Crop se encargarÃƒÆ’Ã‚Â¡ de ajustar la imagen al aspect ratio.
                             targetSize = Size(256, 256),
                         modifier = Modifier
                             .aspectRatio(3f / 2f)

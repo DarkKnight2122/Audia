@@ -272,7 +272,7 @@ fun SettingsCategoryScreen(
                                 onFullSync = {
                                     if (isSyncing) return@RefreshLibraryItem
                                     refreshRequested = true
-                                    Toast.makeText(context, "Full rescan startedÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Full rescan startedÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦", Toast.LENGTH_SHORT).show()
                                     settingsViewModel.fullSyncLibrary()
                                 },
                                 onRebuild = {
@@ -644,7 +644,7 @@ fun SettingsCategoryScreen(
                         }
                         SettingsCategory.ABOUT -> {
                              SettingsItem(
-                                title = "About AudioBookPlayer",
+                                title = "About audia",
                                 subtitle = "App version, credits, and more.",
                                 leadingIcon = { Icon(Icons.Outlined.Info, null, tint = MaterialTheme.colorScheme.secondary) },
                                 trailingIcon = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
@@ -741,7 +741,7 @@ fun SettingsCategoryScreen(
                     onClick = { 
                         showRebuildDatabaseWarning = false
                         refreshRequested = true
-                        Toast.makeText(context, "Rebuilding databaseÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Rebuilding databaseÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦", Toast.LENGTH_SHORT).show()
                         settingsViewModel.rebuildDatabase() 
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)

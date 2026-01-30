@@ -80,7 +80,7 @@ private fun DrawerContent(
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp)
         ) {
             Text(
-                text = "AudioBookPlayer",
+                text = "audia",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

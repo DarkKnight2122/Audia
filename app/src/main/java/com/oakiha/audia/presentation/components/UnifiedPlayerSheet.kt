@@ -72,7 +72,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -830,7 +830,7 @@ fun UnifiedPlayerSheet(
 
     // val currentBookColorSchemePair by playerViewModel.currentBookArtColorSchemePair.collectAsState() // Replaced by activePlayerColorSchemePair
     val activePlayerSchemePair by playerViewModel.activePlayerColorSchemePair.collectAsState()
-    val isDarkTheme = LocalAudioBookPlayerDarkTheme.current
+    val isDarkTheme = LocalaudiaDarkTheme.current
     val systemColorScheme = MaterialTheme.colorScheme // This is the standard M3 theme
 
     val targetColorScheme = remember(activePlayerSchemePair, isDarkTheme, systemColorScheme) {
@@ -882,7 +882,7 @@ fun UnifiedPlayerSheet(
     val expandedY = rememberUpdatedState(sheetExpandedTargetY)
     val canShow = rememberUpdatedState(showPlayerContentArea)
     val miniH = rememberUpdatedState(miniPlayerContentHeightPx)
-    val dens = rememberUpdatedState(LocalDensity.current) // opcional; ÃƒÂºtil para thresholds
+    val dens = rememberUpdatedState(LocalDensity.current) // opcional; ÃƒÆ’Ã‚Âºtil para thresholds
 
     if (actuallyShowSheetContent) {
         Surface(
@@ -1447,10 +1447,10 @@ fun UnifiedPlayerSheet(
 
                             // Show TrackInfoBottomSheet when a Track is selected
                             selectedTrackForInfo?.let { staticTrack ->
-                                // Observar cambios en la canciÃƒÂ³n (metadata o favorite status) reactivamente
+                                // Observar cambios en la canciÃƒÆ’Ã‚Â³n (metadata o favorite status) reactivamente
                                 val liveTrackstate by remember(staticTrack.id) {
                                     playerViewModel.observeTrack(staticTrack.id)
-                                        .map { it ?: staticTrack } // Si no estÃƒÂ¡ en la librerÃƒÂ­a, usar la estÃƒÂ¡tica como fallback
+                                        .map { it ?: staticTrack } // Si no estÃƒÆ’Ã‚Â¡ en la librerÃƒÆ’Ã‚Â­a, usar la estÃƒÆ’Ã‚Â¡tica como fallback
                                 }.collectAsState(initial = staticTrack)
 
                                 val liveTrack = liveTrackstate ?: staticTrack
@@ -1591,13 +1591,13 @@ private fun CastConnectingDialog() {
                 CircularProgressIndicator()
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "MantÃƒÂ©n la app abierta",
+                        text = "MantÃƒÆ’Ã‚Â©n la app abierta",
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Estamos transfiriendo la reproducciÃƒÂ³n. It may take a few seconds to disconnect or reconnect.",
+                        text = "Estamos transfiriendo la reproducciÃƒÆ’Ã‚Â³n. It may take a few seconds to disconnect or reconnect.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -1639,7 +1639,7 @@ private fun MiniPlayerContentInternal(
         Box(contentAlignment = Alignment.Center) {
             SmartImage(
                 model = Track.BookArtUriString,
-                contentDescription = "CarÃƒÂ¡tula de ${Track.title}",
+                contentDescription = "CarÃƒÆ’Ã‚Â¡tula de ${Track.title}",
                 shape = CircleShape,
                 targetSize = Size(150, 150),
                 modifier = Modifier
@@ -1674,7 +1674,7 @@ private fun MiniPlayerContentInternal(
             )
 
             AutoScrollingText(
-                text = if (isCastConnecting) "Connecting to deviceÃ¢â‚¬Â¦" else Track.title,
+                text = if (isCastConnecting) "Connecting to deviceÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦" else Track.title,
                 style = titleStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer
             )

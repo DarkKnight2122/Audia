@@ -16,14 +16,14 @@ class WidgetUpdateReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "onReceive: Received action: ${intent.action}")
-        if (intent.action == "com.example.AudioBookPlayer.ACTION_WIDGET_UPDATE_PLAYBACK_STATE") {
+        if (intent.action == "com.example.audia.ACTION_WIDGET_UPDATE_PLAYBACK_STATE") {
             coroutineScope.launch {
                 try {
                     val glanceAppWidgetManager = GlanceAppWidgetManager(context)
-                    val glanceIds = glanceAppWidgetManager.getGlanceIds(AudioBookPlayerGlanceWidget::class.java)
+                    val glanceIds = glanceAppWidgetManager.getGlanceIds(audiaGlanceWidget::class.java)
                     Log.d(TAG, "Found glanceIds to update: $glanceIds")
                     glanceIds.forEach { glanceId ->
-                        AudioBookPlayerGlanceWidget().update(context, glanceId)
+                        audiaGlanceWidget().update(context, glanceId)
                         Log.d(TAG, "Requested update for glanceId: $glanceId")
                     }
                 } catch (e: Exception) {

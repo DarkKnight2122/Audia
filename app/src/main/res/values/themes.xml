@@ -2,12 +2,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base app theme -->
-    <style name="Theme.AudioBookPlayer" parent="Theme.Material3.DynamicColors.DayNight">
+    <style name="Theme.audia" parent="Theme.Material3.DynamicColors.DayNight">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.AudioBookPlayer.ExternalPlayer" parent="Theme.Material3.DynamicColors.DayNight">
+    <style name="Theme.audia.ExternalPlayer" parent="Theme.Material3.DynamicColors.DayNight">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -21,6 +21,6 @@
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
 <!--        <item name="windowSplashScreenBackground">@color/light_background</item>-->
 <!--        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>-->
-<!--        <item name="postSplashScreenTheme">@style/Theme.AudioBookPlayer</item>-->
+<!--        <item name="postSplashScreenTheme">@style/Theme.audia</item>-->
     </style>
 </resources>

@@ -23,34 +23,34 @@ import com.oakiha.audia.presentation.viewmodel.ColorSchemePair
 import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.unit.dp
 
-val LocalAudioBookPlayerDarkTheme = staticCompositionLocalOf { false }
+val LocalaudiaDarkTheme = staticCompositionLocalOf { false }
 
 val DarkColorScheme = darkColorScheme(
-    primary = AudioBookPlayerPurplePrimary,
-    secondary = AudioBookPlayerPink,
-    tertiary = AudioBookPlayerOrange,
-    background = AudioBookPlayerPurpleDark,
-    surface = AudioBookPlayerSurface,
-    onPrimary = AudioBookPlayerWhite,
-    onSecondary = AudioBookPlayerWhite,
-    onTertiary = AudioBookPlayerWhite,
-    onBackground = AudioBookPlayerWhite,
-    onSurface = AudioBookPlayerLightPurple, // Texto sobre superficies
+    primary = audiaPurplePrimary,
+    secondary = audiaPink,
+    tertiary = audiaOrange,
+    background = audiaPurpleDark,
+    surface = audiaSurface,
+    onPrimary = audiaWhite,
+    onSecondary = audiaWhite,
+    onTertiary = audiaWhite,
+    onBackground = audiaWhite,
+    onSurface = audiaLightPurple, // Texto sobre superficies
     error = Color(0xFFFF5252),
-    onError = AudioBookPlayerWhite
+    onError = audiaWhite
 )
 
 val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
-    onPrimary = AudioBookPlayerWhite,
+    onPrimary = audiaWhite,
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightOnPrimaryContainer,
-    secondary = AudioBookPlayerPink,
-    onSecondary = AudioBookPlayerWhite,
-    secondaryContainer = AudioBookPlayerPink.copy(alpha = 0.15f),
-    onSecondaryContainer = AudioBookPlayerPink.copy(alpha = 0.85f),
-    tertiary = AudioBookPlayerOrange,
-    onTertiary = AudioBookPlayerBlack,
+    secondary = audiaPink,
+    onSecondary = audiaWhite,
+    secondaryContainer = audiaPink.copy(alpha = 0.15f),
+    onSecondaryContainer = audiaPink.copy(alpha = 0.85f),
+    tertiary = audiaOrange,
+    onTertiary = audiaBlack,
     background = LightBackground,
     onBackground = LightOnSurface,
     surface = LightSurface,
@@ -61,11 +61,11 @@ val LightColorScheme = lightColorScheme(
     outlineVariant = LightOutline.copy(alpha = 0.6f),
     surfaceTint = LightPrimary,
     error = Color(0xFFD32F2F),
-    onError = AudioBookPlayerWhite
+    onError = audiaWhite
 )
 
 @Composable
-fun AudioBookPlayerTheme(
+fun audiaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
@@ -73,7 +73,7 @@ fun AudioBookPlayerTheme(
     val context = LocalContext.current
     val finalColorScheme = when {
         colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            // Tema dinámico del sistema como prioridad si no hay override
+            // Tema dinÃ¡mico del sistema como prioridad si no hay override
             try {
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } catch (e: Exception) {
@@ -82,7 +82,7 @@ fun AudioBookPlayerTheme(
             }
         }
         colorSchemePairOverride != null -> {
-            // Usar el esquema del álbum si se proporciona
+            // Usar el esquema del Ã¡lbum si se proporciona
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
         // Fallback final a los defaults si no hay override ni dynamic colors aplicables
@@ -103,7 +103,7 @@ fun AudioBookPlayerTheme(
         }
     }
 
-    CompositionLocalProvider(LocalAudioBookPlayerDarkTheme provides darkTheme) {
+    CompositionLocalProvider(LocalaudiaDarkTheme provides darkTheme) {
         MaterialTheme(
             colorScheme = finalColorScheme,
             typography = Typography,

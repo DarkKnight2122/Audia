@@ -145,7 +145,7 @@ fun AboutScreen(
 
     val authors = remember {
         listOf(
-            Contributor(name = "The AudioBookPlayer Team", role = "Developers")
+            Contributor(name = "The audia Team", role = "Developers")
         )
     }
 
@@ -253,7 +253,7 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 32.dp, bottom = 24.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.audiobookplayer_base_monochrome),
+                        painter = painterResource(id = R.drawable.audia_base_monochrome),
                         contentDescription = "App Icon",
                         colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
                         modifier = Modifier
@@ -265,7 +265,7 @@ fun AboutScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "AudioBookPlayer",
+                            text = "audia",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -309,7 +309,7 @@ fun AboutScreen(
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)
                     ) {
                         Text(
-                            text = "Thanks for using AudioBookPlayer!",
+                            text = "Thanks for using audia!",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,

@@ -14,7 +14,7 @@ import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.components.external.ExternalPlayerOverlay
-import com.oakiha.audia.ui.theme.AudioBookPlayerTheme
+import com.oakiha.audia.ui.theme.audiaTheme
 import android.content.Intent.EXTRA_STREAM
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.data.preferences.AppThemeMode
@@ -43,7 +43,7 @@ class ExternalPlayerActivity : ComponentActivity() {
                 AppThemeMode.LIGHT -> false
                 else -> systemDarkTheme
             }
-            AudioBookPlayerTheme(darkTheme = useDarkTheme) {
+            audiaTheme(darkTheme = useDarkTheme) {
                 ExternalPlayerOverlay(
                     playerViewModel = playerViewModel,
                     onDismiss = { finish() },

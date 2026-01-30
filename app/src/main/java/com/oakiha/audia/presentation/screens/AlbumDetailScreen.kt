@@ -65,7 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -109,7 +109,7 @@ fun BookDetailScreen(
     var showBooklistBottomSheet by remember { mutableStateOf(false) }
     val surfaceColor = MaterialTheme.colorScheme.surface
     val statusBarColor =
-        if (LocalAudioBookPlayerDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
+        if (LocalaudiaDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
             alpha = 0.4f
         )
     val density = LocalDensity.current
@@ -356,7 +356,7 @@ private fun CollapsingBookTopBar(
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
     val statusBarColor =
-        if (LocalAudioBookPlayerDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
+        if (LocalaudiaDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
             alpha = 0.4f
         )
 
@@ -468,7 +468,7 @@ private fun CollapsingBookTopBar(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${Book.Author} Ã¢â‚¬Â¢ $TracksCount Tracks",
+                        text = "${Book.Author} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ $TracksCount Tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

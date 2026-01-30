@@ -203,7 +203,7 @@ fun ChangelogBottomSheet(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val changelogUrl = "https://github.com/theovilardo/AudioBookPlayer/blob/master/CHANGELOG.md"
+    val changelogUrl = "https://github.com/theovilardo/audia/blob/master/CHANGELOG.md"
 
     val fabCornerRadius = 16.dp
 

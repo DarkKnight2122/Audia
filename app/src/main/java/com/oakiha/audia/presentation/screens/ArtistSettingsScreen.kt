@@ -257,7 +257,7 @@ fun AuthorsettingsScreen(
             item {
                 InfoCard(
                     title = "About Multi-Author Parsing",
-                    content = "AudioBookPlayer automatically splits Author tags containing multiple Authors. This is useful for Tracks downloaded with yt-dlp or other tools that use delimiters like '/' to separate Authors.\n\nBackslash (\\) can be used to escape delimiters."
+                    content = "audia automatically splits Author tags containing multiple Authors. This is useful for Tracks downloaded with yt-dlp or other tools that use delimiters like '/' to separate Authors.\n\nBackslash (\\) can be used to escape delimiters."
                 )
             }
 
@@ -479,7 +479,7 @@ private fun ExamplesCard(
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Ã¢â„¢Âª",
+                        text = "ÃƒÂ¢Ã¢â€žÂ¢Ã‚Âª",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(end = 8.dp)
@@ -491,7 +491,7 @@ private fun ExamplesCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = " Ã¢â€ â€™ ",
+                        text = " ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

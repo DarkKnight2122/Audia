@@ -54,10 +54,10 @@ import com.oakiha.audia.data.model.QueueItem
 import com.oakiha.audia.utils.createScalableBackgroundBitmap
 import timber.log.Timber
 
-class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
+class audiaGlanceWidget : GlanceAppWidget() {
 
     companion object {
-        // TamaÃƒÂ±os definidos para diferentes configuraciones del widget
+        // TamaÃƒÆ’Ã‚Â±os definidos para diferentes configuraciones del widget
         private val VERY_THIN_LAYOUT_SIZE = DpSize(width = 200.dp, height = 60.dp)
         private val THIN_LAYOUT_SIZE = DpSize(width = 250.dp, height = 80.dp)
         private val SMALL_HORIZONTAL_LAYOUT_SIZE = DpSize(width = 110.dp, height = 60.dp)
@@ -102,7 +102,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
             val playerInfo = currentState<PlayerInfo>()
             val currentSize = LocalSize.current
 
-            Timber.tag("AudioBookPlayerGlanceWidget")
+            Timber.tag("audiaGlanceWidget")
                 .d("Providing Glance. PlayerInfo: title='${playerInfo.TrackTitle}', Author='${playerInfo.AuthorName}', isPlaying=${playerInfo.isPlaying}, hasBitmap=${playerInfo.BookArtBitmapData != null}, progress=${playerInfo.currentPositionMs}/${playerInfo.totalDurationMs}")
 
             GlanceTheme {
@@ -117,13 +117,13 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         size: DpSize,
         context: Context
     ) {
-        val title = playerInfo.TrackTitle.ifEmpty { "AudioBookPlayer" }
+        val title = playerInfo.TrackTitle.ifEmpty { "audia" }
         val Author = playerInfo.AuthorName.ifEmpty { "Toca para abrir" }
         val isPlaying = playerInfo.isPlaying
         val isFavorite = playerInfo.isFavorite
         val BookArtBitmapData = playerInfo.BookArtBitmapData
 
-        Timber.tag("AudioBookPlayerGlanceWidget")
+        Timber.tag("audiaGlanceWidget")
             .d("WidgetUi: PlayerInfo received. Title: $title, Author: $Author, HasBitmapData: ${BookArtBitmapData != null}, BitmapDataSize: ${BookArtBitmapData?.size ?: "N/A"}")
 
         val actualBackgroundColor = GlanceTheme.colors.surface
@@ -1338,7 +1338,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
     }
 }
 
-// Helper para formatear duraciÃƒÂ³n en Glance (no puede usar TimeUnit directamente)
+// Helper para formatear duraciÃƒÆ’Ã‚Â³n en Glance (no puede usar TimeUnit directamente)
 private fun formatDurationGlance(millis: Long): String {
     if (millis < 0) return "00:00"
     val totalSeconds = millis / 1000

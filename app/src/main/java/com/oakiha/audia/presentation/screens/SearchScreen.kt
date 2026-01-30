@@ -72,7 +72,7 @@ import com.oakiha.audia.presentation.components.SmartImage
 import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import android.util.Log
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.BooklistPlay
 import androidx.compose.material.icons.rounded.History
@@ -152,7 +152,7 @@ fun SearchScreen(
 
     val searchbarCornerRadius = 28.dp
 
-    val dm = LocalAudioBookPlayerDarkTheme.current
+    val dm = LocalaudiaDarkTheme.current
 
     val gradientColorsDark = listOf(
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
@@ -200,7 +200,7 @@ fun SearchScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // CORREGIDO: Agregamos un padding mÃƒÂ­nimo para evitar crashes
+            // CORREGIDO: Agregamos un padding mÃƒÆ’Ã‚Â­nimo para evitar crashes
             val safePadding = maxOf(0.dp, searchbarHorizontalPadding)
 
             Box(
@@ -1037,14 +1037,14 @@ fun SearchResultBooklistItem(
 @Composable
 fun SearchFilterChip(
     filterType: SearchFilterType,
-    currentFilter: SearchFilterType, // Este valor deberÃƒÂ­a provenir del estado de tu PlayerViewModel
+    currentFilter: SearchFilterType, // Este valor deberÃƒÆ’Ã‚Â­a provenir del estado de tu PlayerViewModel
     playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
     val selected = filterType == currentFilter
 
     FilterChip(
-        selected = selected, // FilterChip tiene un parÃƒÂ¡metro 'selected'
+        selected = selected, // FilterChip tiene un parÃƒÆ’Ã‚Â¡metro 'selected'
         onClick = { playerViewModel.updateSearchFilter(filterType) },
         label = { Text(filterType.name.lowercase().replaceFirstChar { it.titlecase() }) },
         modifier = modifier,

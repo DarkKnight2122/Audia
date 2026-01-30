@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -94,7 +94,7 @@ fun AuthorDetailScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    // --- LÃƒÂ³gica del Header Colapsable ---
+    // --- LÃƒÆ’Ã‚Â³gica del Header Colapsable ---
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val minTopBarHeight = 64.dp + statusBarHeight
     val maxTopBarHeight = 300.dp
@@ -160,7 +160,7 @@ fun AuthorDetailScreen(
             }
         }
     }
-    // --- Fin de la lÃƒÂ³gica del Header ---
+    // --- Fin de la lÃƒÆ’Ã‚Â³gica del Header ---
 
     BackHandler(enabled = playerSheetState == PlayerSheetState.EXPANDED) {
         playerViewModel.collapsePlayerSheet()
@@ -369,7 +369,7 @@ private fun BooksectionHeader(
                 val subtitle = buildString {
                     section.year?.takeIf { it > 0 }?.let {
                         append(it.toString())
-                        append(" Ã¢â‚¬Â¢ ")
+                        append(" ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ ")
                     }
                     append("${section.Tracks.size} Tracks")
                 }
@@ -405,7 +405,7 @@ private fun CustomCollapsingTopBar(
     onPlayClick: () -> Unit
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
-    val statusBarColor = if (LocalAudioBookPlayerDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.4f)
+    val statusBarColor = if (LocalaudiaDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.4f)
 
     // --- Animation Values ---
     val fabScale = 1f - collapseFraction
@@ -428,7 +428,7 @@ private fun CustomCollapsingTopBar(
             .height(headerHeight)
             .background(surfaceColor.copy(alpha = backgroundAlpha))
     ) {
-        // --- Contenido del Header (visible cuando estÃƒÂ¡ expandido) ---
+        // --- Contenido del Header (visible cuando estÃƒÆ’Ã‚Â¡ expandido) ---
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -486,7 +486,7 @@ private fun CustomCollapsingTopBar(
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
 
-            // Box contenedor para el tÃƒÂ­tulo
+            // Box contenedor para el tÃƒÆ’Ã‚Â­tulo
             Box(
                 modifier = Modifier
                     .align(animatedTitleAlignment)
@@ -526,7 +526,7 @@ private fun CustomCollapsingTopBar(
                 }
             }
 
-            // BotÃƒÂ³n de Play
+            // BotÃƒÆ’Ã‚Â³n de Play
             LargeExtendedFloatingActionButton(
                 onClick = onPlayClick,
                 shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),

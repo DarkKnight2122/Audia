@@ -55,7 +55,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
+import com.oakiha.audia.ui.theme.LocalaudiaDarkTheme
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
@@ -88,7 +88,7 @@ fun CategoryDetailScreen(
     val playerSheetState by playerViewModel.sheetState.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
 
-    val darkMode = LocalAudioBookPlayerDarkTheme.current
+    val darkMode = LocalaudiaDarkTheme.current
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState()

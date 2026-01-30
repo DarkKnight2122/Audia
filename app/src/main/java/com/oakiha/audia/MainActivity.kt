@@ -65,7 +65,7 @@ import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.screens.SetupScreen
 import com.oakiha.audia.presentation.viewmodel.MainViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.ui.theme.AudioBookPlayerTheme
+import com.oakiha.audia.ui.theme.audiaTheme
 import com.oakiha.audia.utils.CrashHandler
 import com.oakiha.audia.utils.LogUtils
 import com.oakiha.audia.presentation.components.CrashReportDialog
@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        // LEER SEÃƒâ€˜AL DE BENCHMARK
+        // LEER SEÃƒÆ’Ã¢â‚¬ËœAL DE BENCHMARK
         val isBenchmarkMode = intent.getBooleanExtra("is_benchmark", false)
 
         setContent {
@@ -213,7 +213,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            AudioBookPlayerTheme(
+            audiaTheme(
                 darkTheme = useDarkTheme
             ) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -409,7 +409,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Estado para controlar si el indicador de carga puede mostrarse despuÃƒÂ©s de un delay
+        // Estado para controlar si el indicador de carga puede mostrarse despuÃƒÆ’Ã‚Â©s de un delay
         var canShowLoadingIndicator by remember { mutableStateOf(false) }
         // Track when the loading indicator was first shown for minimum display time
         var loadingShownTimestamp by remember { mutableStateOf(0L) }
@@ -419,11 +419,11 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(shouldPotentiallyShowLoading) {
             if (shouldPotentiallyShowLoading) {
-                // Espera un breve perÃƒÂ­odo antes de permitir que se muestre el indicador de carga
-                // Ajusta este valor segÃƒÂºn sea necesario (por ejemplo, 300-500 ms)
+                // Espera un breve perÃƒÆ’Ã‚Â­odo antes de permitir que se muestre el indicador de carga
+                // Ajusta este valor segÃƒÆ’Ã‚Âºn sea necesario (por ejemplo, 300-500 ms)
                 delay(300L)
-                // Vuelve a verificar la condiciÃƒÂ³n despuÃƒÂ©s del delay,
-                // ya que el estado podrÃƒÂ­a haber cambiado.
+                // Vuelve a verificar la condiciÃƒÆ’Ã‚Â³n despuÃƒÆ’Ã‚Â©s del delay,
+                // ya que el estado podrÃƒÆ’Ã‚Â­a haber cambiado.
                 if (mainViewModel.isSyncing.value && mainViewModel.isLibraryEmpty.value) {
                     canShowLoadingIndicator = true
                     loadingShownTimestamp = System.currentTimeMillis()

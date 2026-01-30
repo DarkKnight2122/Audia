@@ -383,7 +383,7 @@ private fun CastPermissionStep(
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
         )
         Text(
-            text = "Allow AudioBookPlayer to see your nearby devices and current Wi‑Fi so we can keep your cast, Bluetooth audio, and speakers in sync.",
+            text = "Allow audia to see your nearby devices and current Wiâ€‘Fi so we can keep your cast, Bluetooth audio, and speakers in sync.",
             style = MaterialTheme.typography.bodyMedium,
             color = colors.onSurfaceVariant
         )
@@ -406,8 +406,8 @@ private fun CastPermissionStep(
                 )
                 PermissionHighlight(
                     icon = Icons.Rounded.Wifi,
-                    title = "Location for Wi‑Fi",
-                    description = "Android requires Location to share the Wi‑Fi network (SSID) you're on so we can find compatible cast devices."
+                    title = "Location for Wiâ€‘Fi",
+                    description = "Android requires Location to share the Wiâ€‘Fi network (SSID) you're on so we can find compatible cast devices."
                 )
             }
         }
@@ -422,7 +422,7 @@ private fun CastPermissionStep(
 
         if (missingPermissions.isNotEmpty()) {
             Text(
-                text = "We only use these permissions for device interconnectivity — casting, controlling nearby speakers, and keeping audio in sync.",
+                text = "We only use these permissions for device interconnectivity â€” casting, controlling nearby speakers, and keeping audio in sync.",
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.onSurfaceVariant
             )
@@ -1081,7 +1081,7 @@ private fun ActiveDeviceHero(
 
                     val statusText = buildString {
                         append(device.subtitle)
-                        append(" • ")
+                        append(" â€¢ ")
                         append(device.connectionLabel)
                     }
 
@@ -1117,7 +1117,7 @@ private fun ActiveDeviceHero(
                 }
             }
 
-            // Sección de Volumen (Sin cambios)
+            // SecciÃ³n de Volumen (Sin cambios)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1221,7 +1221,7 @@ private fun EmptyDeviceState() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Make sure your TV or speaker is on and sharing the same Wi‑Fi network.",
+                text = "Make sure your TV or speaker is on and sharing the same Wiâ€‘Fi network.",
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1291,7 +1291,7 @@ private fun CastDeviceRow(
             Box(
                 modifier = Modifier
                     .size(52.dp)
-                    .padding(start = 4.dp), // Tamaño fijo para asegurar simetría
+                    .padding(start = 4.dp), // TamaÃ±o fijo para asegurar simetrÃ­a
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -1437,7 +1437,7 @@ private fun QuickSettingTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Definimos la forma específica para el estado activo
+    // Definimos la forma especÃ­fica para el estado activo
     val activeShape = remember {
         AbsoluteSmoothCornerShape(
             cornerRadiusTL = 18.dp,
@@ -1451,11 +1451,11 @@ private fun QuickSettingTile(
         )
     }
 
-    // El fondo del Tile ahora siempre es surface, pero mantenemos una transición suave si quisieras cambiarlo levemente
+    // El fondo del Tile ahora siempre es surface, pero mantenemos una transiciÃ³n suave si quisieras cambiarlo levemente
     val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val contentColor = MaterialTheme.colorScheme.onSurface
 
-    // Colores dinámicos para el ICONO (Círculo interno)
+    // Colores dinÃ¡micos para el ICONO (CÃ­rculo interno)
     val iconBoxColor by animateColorAsState(
         targetValue = if (isActive) MaterialTheme.colorScheme.primary else contentColor.copy(alpha = 0.1f),
         label = "iconBoxColor"
@@ -1468,7 +1468,7 @@ private fun QuickSettingTile(
     Surface(
         modifier = modifier
             .height(72.dp)
-            // Aquí alternamos la forma según el estado
+            // AquÃ­ alternamos la forma segÃºn el estado
             .clip(if (isActive) activeShape else CircleShape)
             .clickable(onClick = onClick),
         color = containerColor,
@@ -1482,7 +1482,7 @@ private fun QuickSettingTile(
             // El contenedor del icono es el que lleva el color primario ahora
             Box(
                 modifier = Modifier
-                    .size(40.dp) // Un poco más grande para lucir la forma y el color
+                    .size(40.dp) // Un poco mÃ¡s grande para lucir la forma y el color
                     .clip(CircleShape)
                     .background(iconBoxColor),
                 contentAlignment = Alignment.Center
@@ -1562,7 +1562,7 @@ private fun WifiOffIllustration(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
             )
             Text(
-                text = "Turn on Wi‑Fi or Bluetooth to discover nearby devices",
+                text = "Turn on Wiâ€‘Fi or Bluetooth to discover nearby devices",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1580,7 +1580,7 @@ private fun WifiOffIllustration(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("Turn on Wi‑Fi")
+                    Text("Turn on Wiâ€‘Fi")
                 }
 
                 Button(

@@ -22,7 +22,7 @@ data class CrashLogData(
      */
     fun getFullLog(): String {
         return buildString {
-            appendLine("=== AudioBookPlayer Crash Report ===")
+            appendLine("=== audia Crash Report ===")
             appendLine("Date: $formattedDate")
             appendLine("Exception: $exceptionMessage")
             appendLine()
