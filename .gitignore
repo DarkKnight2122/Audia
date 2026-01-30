@@ -1,0 +1,16 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+/build
+/app/build
+*.class
+*.apk
+key.properties
+*.keystore
+*.jks
+
+# Ignore local reference, archive folders, and AI memory
+_archive/
+_reference/
+GEMINI.md
