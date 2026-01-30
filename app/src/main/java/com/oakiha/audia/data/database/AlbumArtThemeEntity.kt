@@ -16,12 +16,12 @@ data class StoredColorSchemeValues(
     val outline: String, val errorContainer: String, val onErrorContainer: String,
     val inversePrimary: String, val inverseSurface: String, val inverseOnSurface: String,
     val surfaceTint: String, val outlineVariant: String, val scrim: String
-    // Añade aquí todos los roles de ColorScheme que quieras persistir
+    // AÃ±ade aquÃ­ todos los roles de ColorScheme que quieras persistir
 )
 
-@Entity(tableName = "album_art_themes")
-data class AlbumArtThemeEntity(
-    @PrimaryKey val albumArtUriString: String,
+@Entity(tableName = "Book_art_themes")
+data class BookArtThemeEntity(
+    @PrimaryKey val BookArtUriString: String,
     @Embedded(prefix = "light_") val lightThemeValues: StoredColorSchemeValues,
     @Embedded(prefix = "dark_") val darkThemeValues: StoredColorSchemeValues
 )

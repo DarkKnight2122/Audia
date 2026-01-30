@@ -37,7 +37,7 @@ import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.AlertDialog
@@ -84,14 +84,14 @@ import com.oakiha.audia.data.preferences.LaunchTab
 import com.oakiha.audia.data.preferences.LibraryNavigationMode
 import com.oakiha.audia.data.preferences.NavBarStyle
 import com.oakiha.audia.data.preferences.ThemePreference
-import com.oakiha.audia.data.model.LyricsSourcePreference
+import com.oakiha.audia.data.model.TranscriptSourcePreference
 import com.oakiha.audia.data.worker.SyncProgress
 import com.oakiha.audia.presentation.components.ExpressiveTopBarContent
 import com.oakiha.audia.presentation.components.FileExplorerDialog
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.model.SettingsCategory
 import com.oakiha.audia.presentation.navigation.Screen
-import com.oakiha.audia.presentation.viewmodel.LyricsRefreshProgress
+import com.oakiha.audia.presentation.viewmodel.TranscriptRefreshProgress
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 
@@ -128,7 +128,7 @@ fun SettingsCategoryScreen(
     // Local State
     var showExplorerSheet by remember { mutableStateOf(false) }
     var refreshRequested by remember { mutableStateOf(false) }
-    var showClearLyricsDialog by remember { mutableStateOf(false) }
+    var showClearTranscriptDialog by remember { mutableStateOf(false) }
     var showRebuildDatabaseWarning by remember { mutableStateOf(false) }
     var showRegenerateDailyMixDialog by remember { mutableStateOf(false) }
     var showRegenerateStatsDialog by remember { mutableStateOf(false) }
@@ -272,7 +272,7 @@ fun SettingsCategoryScreen(
                                 onFullSync = {
                                     if (isSyncing) return@RefreshLibraryItem
                                     refreshRequested = true
-                                    Toast.makeText(context, "Full rescan started…", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Full rescan startedÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
                                     settingsViewModel.fullSyncLibrary()
                                 },
                                 onRebuild = {
@@ -284,27 +284,27 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
 
                             SettingsItem(
-                                title = "Reset Imported Lyrics",
-                                subtitle = "Remove all imported lyrics from the database.",
+                                title = "Reset Imported Transcript",
+                                subtitle = "Remove all imported Transcript from the database.",
                                 leadingIcon = { Icon(Icons.Outlined.ClearAll, null, tint = MaterialTheme.colorScheme.secondary) },
-                                onClick = { showClearLyricsDialog = true }
+                                onClick = { showClearTranscriptDialog = true }
                             )
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
-                                label = "Lyrics Source Priority",
-                                description = "Choose which source to try first when fetching lyrics.",
+                                label = "Transcript Source Priority",
+                                description = "Choose which source to try first when fetching Transcript.",
                                 options = mapOf(
-                                    LyricsSourcePreference.EMBEDDED_FIRST.name to "Embedded First",
-                                    LyricsSourcePreference.API_FIRST.name to "Online First",
-                                    LyricsSourcePreference.LOCAL_FIRST.name to "Local (.lrc) First"
+                                    TranscriptSourcePreference.EMBEDDED_FIRST.name to "Embedded First",
+                                    TranscriptSourcePreference.API_FIRST.name to "Online First",
+                                    TranscriptSourcePreference.LOCAL_FIRST.name to "Local (.lrc) First"
                                 ),
-                                selectedKey = uiState.lyricsSourcePreference.name,
+                                selectedKey = uiState.TranscriptSourcePreference.name,
                                 onSelectionChanged = { key ->
-                                    settingsViewModel.setLyricsSourcePreference(
-                                        LyricsSourcePreference.fromName(key)
+                                    settingsViewModel.setTranscriptSourcePreference(
+                                        TranscriptSourcePreference.fromName(key)
                                     )
                                 },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_lyrics_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_Transcript_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
                             SwitchSettingItem(
@@ -316,11 +316,11 @@ fun SettingsCategoryScreen(
                             )
                             Spacer(Modifier.height(4.dp))
                             SettingsItem(
-                                title = "Artists",
-                                subtitle = "Multi-artist parsing and organization options.",
+                                title = "Authors",
+                                subtitle = "Multi-Author parsing and organization options.",
                                 leadingIcon = { Icon(Icons.Outlined.Person, null, tint = MaterialTheme.colorScheme.secondary) },
                                 trailingIcon = { Icon(Icons.Rounded.ChevronRight, "Open", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                                onClick = { navController.navigate(Screen.ArtistSettings.route) }
+                                onClick = { navController.navigate(Screen.Authorsettings.route) }
                             )
                         }
                         SettingsCategory.APPEARANCE -> {
@@ -352,7 +352,7 @@ fun SettingsCategoryScreen(
                                 label = "Player Theme",
                                 description = "Choose the appearance for the floating player.",
                                 options = mapOf(
-                                    ThemePreference.ALBUM_ART to "Album Art",
+                                    ThemePreference.Book_ART to "Book Art",
                                     ThemePreference.DYNAMIC to "System Dynamic"
                                 ),
                                 selectedKey = uiState.playerThemePreference,
@@ -373,14 +373,14 @@ fun SettingsCategoryScreen(
                             )
                             Spacer(Modifier.height(4.dp))
                             SwitchSettingItem(
-                                title = "Immersive Lyrics",
+                                title = "Immersive Transcript",
                                 subtitle = "Auto-hide controls and enlarge text.",
-                                checked = uiState.immersiveLyricsEnabled,
-                                onCheckedChange = { settingsViewModel.setImmersiveLyricsEnabled(it) },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_lyrics_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                checked = uiState.immersiveTranscriptEnabled,
+                                onCheckedChange = { settingsViewModel.setImmersiveTranscriptEnabled(it) },
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_Transcript_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
 
-                            if (uiState.immersiveLyricsEnabled) {
+                            if (uiState.immersiveTranscriptEnabled) {
                                 Spacer(Modifier.height(4.dp))
                                 ThemeSelectorItem(
                                     label = "Auto-hide Delay",
@@ -391,8 +391,8 @@ fun SettingsCategoryScreen(
                                         "5000" to "5s",
                                         "6000" to "6s"
                                     ),
-                                    selectedKey = uiState.immersiveLyricsTimeout.toString(),
-                                    onSelectionChanged = { settingsViewModel.setImmersiveLyricsTimeout(it.toLong()) },
+                                    selectedKey = uiState.immersiveTranscriptTimeout.toString(),
+                                    onSelectionChanged = { settingsViewModel.setImmersiveTranscriptTimeout(it.toLong()) },
                                     leadingIcon = { Icon(Icons.Rounded.Timer, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
                             }
@@ -409,7 +409,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
                                 label = "Carousel Style",
-                                description = "Choose the appearance for the album carousel.",
+                                description = "Choose the appearance for the Book carousel.",
                                 options = mapOf(
                                     CarouselStyle.NO_PEEK to "No Peek",
                                     CarouselStyle.ONE_PEEK to "One Peek"
@@ -441,7 +441,7 @@ fun SettingsCategoryScreen(
                                 ),
                                 selectedKey = uiState.libraryNavigationMode,
                                 onSelectionChanged = { settingsViewModel.setLibraryNavigationMode(it) },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_library_music_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_library_Audiobook_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                         }
                         SettingsCategory.PLAYBACK -> {
@@ -451,7 +451,7 @@ fun SettingsCategoryScreen(
                                 options = mapOf("true" to "On", "false" to "Off"),
                                 selectedKey = if (uiState.keepPlayingInBackground) "true" else "false",
                                 onSelectionChanged = { settingsViewModel.setKeepPlayingInBackground(it.toBoolean()) },
-                                leadingIcon = { Icon(Icons.Rounded.MusicNote, null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(Icons.Rounded.AudiobookNote, null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
@@ -465,7 +465,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
                                 label = "Crossfade",
-                                description = "Enable smooth transition between songs.",
+                                description = "Enable smooth transition between books.",
                                 options = mapOf("true" to "Enabled", "false" to "Disabled"),
                                 selectedKey = if (uiState.isCrossfadeEnabled) "true" else "false",
                                 onSelectionChanged = { settingsViewModel.setCrossfadeEnabled(it.toBoolean()) },
@@ -492,10 +492,10 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             SwitchSettingItem(
                                 title = "Show queue history",
-                                subtitle = "Show previously played songs in the queue.",
+                                subtitle = "Show previously played Tracks in the queue.",
                                 checked = uiState.showQueueHistory,
                                 onCheckedChange = { settingsViewModel.setShowQueueHistory(it) },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_queue_music_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_queue_Audiobook_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
                             SettingsItem(
@@ -612,7 +612,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             ActionSettingsItem(
                                 title = "Force Daily Mix Regeneration",
-                                subtitle = "Re-creates the daily mix playlist immediately.",
+                                subtitle = "Re-creates the daily mix Booklist immediately.",
                                 icon = { Icon(painterResource(R.drawable.rounded_instant_mix_24), null, tint = MaterialTheme.colorScheme.secondary) },
                                 primaryActionLabel = "Regenerate Daily Mix",
                                 onPrimaryAction = { showRegenerateDailyMixDialog = true }
@@ -718,14 +718,14 @@ fun SettingsCategoryScreen(
     )
     
      // Dialogs logic (copied)
-    if (showClearLyricsDialog) {
+    if (showClearTranscriptDialog) {
         AlertDialog(
             icon = { Icon(Icons.Outlined.Warning, null) },
-            title = { Text("Reset imported lyrics?") },
+            title = { Text("Reset imported Transcript?") },
             text = { Text("This action cannot be undone.") },
-            onDismissRequest = { showClearLyricsDialog = false },
-            confirmButton = { TextButton(onClick = { showClearLyricsDialog = false; playerViewModel.resetAllLyrics() }) { Text("Confirm") } },
-            dismissButton = { TextButton(onClick = { showClearLyricsDialog = false }) { Text("Cancel") } }
+            onDismissRequest = { showClearTranscriptDialog = false },
+            confirmButton = { TextButton(onClick = { showClearTranscriptDialog = false; playerViewModel.resetAllTranscript() }) { Text("Confirm") } },
+            dismissButton = { TextButton(onClick = { showClearTranscriptDialog = false }) { Text("Cancel") } }
         )
     }
 
@@ -734,14 +734,14 @@ fun SettingsCategoryScreen(
         AlertDialog(
             icon = { Icon(Icons.Outlined.Warning, null, tint = MaterialTheme.colorScheme.error) },
             title = { Text("Rebuild database?") },
-            text = { Text("This will completely rebuild your music library from scratch. All imported lyrics, favorites, and custom metadata will be lost. This action cannot be undone.") },
+            text = { Text("This will completely rebuild your Audiobook library from scratch. All imported Transcript, favorites, and custom metadata will be lost. This action cannot be undone.") },
             onDismissRequest = { showRebuildDatabaseWarning = false },
             confirmButton = { 
                 TextButton(
                     onClick = { 
                         showRebuildDatabaseWarning = false
                         refreshRequested = true
-                        Toast.makeText(context, "Rebuilding database…", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Rebuilding databaseÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
                         settingsViewModel.rebuildDatabase() 
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)

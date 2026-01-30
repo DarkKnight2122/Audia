@@ -8,7 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
-import com.oakiha.audia.data.service.MusicNotificationProvider
+import com.oakiha.audia.data.service.AudiobookNotificationProvider
 import com.oakiha.audia.data.service.SleepTimerReceiver
 import com.oakiha.audia.data.EotStateHolder
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -55,7 +55,7 @@ class SleepTimerStateHolder @Inject constructor(
 
     // Internal jobs
     private var sleepTimerJob: Job? = null
-    private var eotSongMonitorJob: Job? = null
+    private var eotTrackMonitorJob: Job? = null
 
     // Dependencies that will be injected via initialize
     private val alarmManager: AlarmManager =
@@ -64,8 +64,8 @@ class SleepTimerStateHolder @Inject constructor(
     private var scope: CoroutineScope? = null
     private var toastEmitter: (suspend (String) -> Unit)? = null
     private var mediaControllerProvider: (() -> MediaController?)? = null
-    private var currentSongIdProvider: (() -> StateFlow<String?>)? = null
-    private var songTitleResolver: ((String?) -> String)? = null
+    private var currentTrackIdProvider: (() -> StateFlow<String?>)? = null
+    private var TrackTitleResolver: ((String?) -> String)? = null
 
     /**
      * Initialize with dependencies from ViewModel.
@@ -75,14 +75,14 @@ class SleepTimerStateHolder @Inject constructor(
         scope: CoroutineScope,
         toastEmitter: suspend (String) -> Unit,
         mediaControllerProvider: () -> MediaController?,
-        currentSongIdProvider: () -> StateFlow<String?>,
-        songTitleResolver: (String?) -> String
+        currentTrackIdProvider: () -> StateFlow<String?>,
+        TrackTitleResolver: (String?) -> String
     ) {
         this.scope = scope
         this.toastEmitter = { msg -> scope.launch { toastEmitter(msg) } }
         this.mediaControllerProvider = mediaControllerProvider
-        this.currentSongIdProvider = currentSongIdProvider
-        this.songTitleResolver = songTitleResolver
+        this.currentTrackIdProvider = currentTrackIdProvider
+        this.TrackTitleResolver = TrackTitleResolver
     }
 
     /**
@@ -94,7 +94,7 @@ class SleepTimerStateHolder @Inject constructor(
 
         // Cancel any existing EOT timer first
         if (_isEndOfTrackTimerActive.value) {
-            eotSongMonitorJob?.cancel()
+            eotTrackMonitorJob?.cancel()
             cancelSleepTimer(suppressDefaultToast = true)
         }
 
@@ -174,7 +174,7 @@ class SleepTimerStateHolder @Inject constructor(
     fun playCounted(count: Int) {
         val args = Bundle().apply { putInt("count", count) }
         mediaControllerProvider?.invoke()?.sendCustomCommand(
-            SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY, Bundle.EMPTY),
+            SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY, Bundle.EMPTY),
             args
         )
     }
@@ -186,7 +186,7 @@ class SleepTimerStateHolder @Inject constructor(
         val args = Bundle()
         _playCount.value = 1f
         mediaControllerProvider?.invoke()?.sendCustomCommand(
-            SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY, Bundle.EMPTY),
+            SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY, Bundle.EMPTY),
             args
         )
     }
@@ -194,46 +194,46 @@ class SleepTimerStateHolder @Inject constructor(
     /**
      * Set or cancel end-of-track timer.
      */
-    fun setEndOfTrackTimer(enable: Boolean, currentSongId: String?) {
+    fun setEndOfTrackTimer(enable: Boolean, currentTrackId: String?) {
         val scope = this.scope ?: return
 
         if (enable) {
-            if (currentSongId == null) {
-                scope.launch { toastEmitter?.invoke("Cannot enable End of Track: No active song.") }
+            if (currentTrackId == null) {
+                scope.launch { toastEmitter?.invoke("Cannot enable End of Track: No active Track.") }
                 return
             }
 
             _activeTimerValueDisplay.value = "End of Track"
             _isEndOfTrackTimerActive.value = true
-            EotStateHolder.setEotTargetSong(currentSongId)
+            EotStateHolder.setEotTargetTrack(currentTrackId)
 
             sleepTimerJob?.cancel()
             _sleepTimerEndTimeMillis.value = null
 
-            // Monitor for song changes
-            eotSongMonitorJob?.cancel()
-            eotSongMonitorJob = scope.launch {
-                currentSongIdProvider?.invoke()?.collect { newSongId ->
+            // Monitor for Track changes
+            eotTrackMonitorJob?.cancel()
+            eotTrackMonitorJob = scope.launch {
+                currentTrackIdProvider?.invoke()?.collect { newTrackId ->
                     if (_isEndOfTrackTimerActive.value &&
-                        EotStateHolder.eotTargetSongId.value != null &&
-                        newSongId != EotStateHolder.eotTargetSongId.value) {
+                        EotStateHolder.eotTargetTrackId.value != null &&
+                        newTrackId != EotStateHolder.eotTargetTrackId.value) {
 
-                        val oldSongTitle = songTitleResolver?.invoke(EotStateHolder.eotTargetSongId.value) ?: "Previous track"
-                        val newSongTitle = songTitleResolver?.invoke(newSongId) ?: "Current track"
+                        val oldTrackTitle = TrackTitleResolver?.invoke(EotStateHolder.eotTargetTrackId.value) ?: "Previous track"
+                        val newTrackTitle = TrackTitleResolver?.invoke(newTrackId) ?: "Current track"
 
-                        toastEmitter?.invoke("End of Track timer deactivated: song changed from $oldSongTitle to $newSongTitle.")
+                        toastEmitter?.invoke("End of Track timer deactivated: Track changed from $oldTrackTitle to $newTrackTitle.")
                         cancelSleepTimer(suppressDefaultToast = true)
 
-                        eotSongMonitorJob?.cancel()
-                        eotSongMonitorJob = null
+                        eotTrackMonitorJob?.cancel()
+                        eotTrackMonitorJob = null
                     }
                 }
             }
 
             scope.launch { toastEmitter?.invoke("Playback will stop at end of track.") }
         } else {
-            eotSongMonitorJob?.cancel()
-            if (_isEndOfTrackTimerActive.value && EotStateHolder.eotTargetSongId.value != null) {
+            eotTrackMonitorJob?.cancel()
+            if (_isEndOfTrackTimerActive.value && EotStateHolder.eotTargetTrackId.value != null) {
                 cancelSleepTimer()
             }
         }
@@ -262,10 +262,10 @@ class SleepTimerStateHolder @Inject constructor(
         _sleepTimerEndTimeMillis.value = null
 
         // Cancel EOT timer
-        eotSongMonitorJob?.cancel()
-        eotSongMonitorJob = null
+        eotTrackMonitorJob?.cancel()
+        eotTrackMonitorJob = null
         _isEndOfTrackTimerActive.value = false
-        EotStateHolder.setEotTargetSong(null)
+        EotStateHolder.setEotTargetTrack(null)
 
         // Clear display
         _activeTimerValueDisplay.value = null
@@ -289,11 +289,11 @@ class SleepTimerStateHolder @Inject constructor(
      */
     fun onCleared() {
         sleepTimerJob?.cancel()
-        eotSongMonitorJob?.cancel()
+        eotTrackMonitorJob?.cancel()
         scope = null
         toastEmitter = null
         mediaControllerProvider = null
-        currentSongIdProvider = null
-        songTitleResolver = null
+        currentTrackIdProvider = null
+        TrackTitleResolver = null
     }
 }

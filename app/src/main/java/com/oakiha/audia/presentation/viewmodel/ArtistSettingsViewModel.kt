@@ -14,21 +14,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ArtistSettingsUiState(
-    val artistDelimiters: List<String> = UserPreferencesRepository.DEFAULT_ARTIST_DELIMITERS,
-    val groupByAlbumArtist: Boolean = false,
+data class AuthorsettingsUiState(
+    val AuthorDelimiters: List<String> = UserPreferencesRepository.DEFAULT_Author_DELIMITERS,
+    val groupByBookAuthor: Boolean = false,
     val rescanRequired: Boolean = false,
     val isResyncing: Boolean = false
 )
 
 @HiltViewModel
-class ArtistSettingsViewModel @Inject constructor(
+class AuthorsettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val syncManager: SyncManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ArtistSettingsUiState())
-    val uiState: StateFlow<ArtistSettingsUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AuthorsettingsUiState())
+    val uiState: StateFlow<AuthorsettingsUiState> = _uiState.asStateFlow()
 
     val isSyncing: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
@@ -39,19 +39,19 @@ class ArtistSettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userPreferencesRepository.artistDelimitersFlow.collect { delimiters ->
-                _uiState.update { it.copy(artistDelimiters = delimiters) }
+            userPreferencesRepository.AuthorDelimitersFlow.collect { delimiters ->
+                _uiState.update { it.copy(AuthorDelimiters = delimiters) }
             }
         }
 
         viewModelScope.launch {
-            userPreferencesRepository.groupByAlbumArtistFlow.collect { enabled ->
-                _uiState.update { it.copy(groupByAlbumArtist = enabled) }
+            userPreferencesRepository.groupByBookAuthorFlow.collect { enabled ->
+                _uiState.update { it.copy(groupByBookAuthor = enabled) }
             }
         }
 
         viewModelScope.launch {
-            userPreferencesRepository.artistSettingsRescanRequiredFlow.collect { required ->
+            userPreferencesRepository.AuthorsettingsRescanRequiredFlow.collect { required ->
                 _uiState.update { it.copy(rescanRequired = required) }
             }
         }
@@ -63,15 +63,15 @@ class ArtistSettingsViewModel @Inject constructor(
         }
     }
 
-    fun setGroupByAlbumArtist(enabled: Boolean) {
+    fun setGroupByBookAuthor(enabled: Boolean) {
         viewModelScope.launch {
-            userPreferencesRepository.setGroupByAlbumArtist(enabled)
+            userPreferencesRepository.setGroupByBookAuthor(enabled)
         }
     }
 
-    fun setArtistDelimiters(delimiters: List<String>) {
+    fun setAuthorDelimiters(delimiters: List<String>) {
         viewModelScope.launch {
-            userPreferencesRepository.setArtistDelimiters(delimiters)
+            userPreferencesRepository.setAuthorDelimiters(delimiters)
         }
     }
 
@@ -79,27 +79,27 @@ class ArtistSettingsViewModel @Inject constructor(
         val trimmed = delimiter.trim()
         if (trimmed.isEmpty()) return false
         
-        val current = _uiState.value.artistDelimiters
+        val current = _uiState.value.AuthorDelimiters
         if (current.contains(trimmed)) return false
         
         viewModelScope.launch {
-            userPreferencesRepository.setArtistDelimiters(current + trimmed)
+            userPreferencesRepository.setAuthorDelimiters(current + trimmed)
         }
         return true
     }
 
     fun removeDelimiter(delimiter: String) {
-        val current = _uiState.value.artistDelimiters
+        val current = _uiState.value.AuthorDelimiters
         if (current.size <= 1) return // Keep at least one delimiter
         
         viewModelScope.launch {
-            userPreferencesRepository.setArtistDelimiters(current - delimiter)
+            userPreferencesRepository.setAuthorDelimiters(current - delimiter)
         }
     }
 
     fun resetDelimitersToDefault() {
         viewModelScope.launch {
-            userPreferencesRepository.resetArtistDelimitersToDefault()
+            userPreferencesRepository.resetAuthorDelimitersToDefault()
         }
     }
 

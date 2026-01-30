@@ -5,14 +5,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import androidx.compose.ui.graphics.toArgb
 import android.util.Log
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.LibraryTabId
-import com.oakiha.audia.data.model.MusicFolder
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.AudiobookFolder
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -29,27 +29,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manages the data state of the music library: Songs, Albums, Artists, Folders.
+ * Manages the data state of the Audiobook library: Tracks, Books, Authors, Folders.
  * Handles loading from Repository and applying SortOptions.
  */
 @Singleton
 class LibraryStateHolder @Inject constructor(
-    private val musicRepository: MusicRepository,
+    private val AudiobookRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
 
     // --- State ---
-    private val _allSongs = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
-    val allSongs = _allSongs.asStateFlow()
+    private val _allTracks = MutableStateFlow<ImmutableList<Track>>(persistentListOf())
+    val allTracks = _allTracks.asStateFlow()
 
-    private val _albums = MutableStateFlow<ImmutableList<Album>>(persistentListOf())
-    val albums = _albums.asStateFlow()
+    private val _Books = MutableStateFlow<ImmutableList<Book>>(persistentListOf())
+    val Books = _Books.asStateFlow()
 
-    private val _artists = MutableStateFlow<ImmutableList<Artist>>(persistentListOf())
-    val artists = _artists.asStateFlow()
+    private val _Authors = MutableStateFlow<ImmutableList<Author>>(persistentListOf())
+    val Authors = _Authors.asStateFlow()
 
-    private val _musicFolders = MutableStateFlow<ImmutableList<MusicFolder>>(persistentListOf())
-    val musicFolders = _musicFolders.asStateFlow()
+    private val _AudiobookFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
+    val AudiobookFolders = _AudiobookFolders.asStateFlow()
 
     private val _isLoadingLibrary = MutableStateFlow(false)
     val isLoadingLibrary = _isLoadingLibrary.asStateFlow()
@@ -58,49 +58,49 @@ class LibraryStateHolder @Inject constructor(
     val isLoadingCategories = _isLoadingCategories.asStateFlow()
 
     // Sort Options
-    private val _currentSongSortOption = MutableStateFlow<SortOption>(SortOption.SongDefaultOrder)
-    val currentSongSortOption = _currentSongSortOption.asStateFlow()
+    private val _currentTracksortOption = MutableStateFlow<SortOption>(SortOption.TrackDefaultOrder)
+    val currentTracksortOption = _currentTracksortOption.asStateFlow()
 
-    private val _currentAlbumSortOption = MutableStateFlow<SortOption>(SortOption.AlbumTitleAZ)
-    val currentAlbumSortOption = _currentAlbumSortOption.asStateFlow()
+    private val _currentBooksortOption = MutableStateFlow<SortOption>(SortOption.BookTitleAZ)
+    val currentBooksortOption = _currentBooksortOption.asStateFlow()
 
-    private val _currentArtistSortOption = MutableStateFlow<SortOption>(SortOption.ArtistNameAZ)
-    val currentArtistSortOption = _currentArtistSortOption.asStateFlow()
+    private val _currentAuthorsortOption = MutableStateFlow<SortOption>(SortOption.AuthorNameAZ)
+    val currentAuthorsortOption = _currentAuthorsortOption.asStateFlow()
 
     private val _currentFolderSortOption = MutableStateFlow<SortOption>(SortOption.FolderNameAZ)
     val currentFolderSortOption = _currentFolderSortOption.asStateFlow()
 
-    private val _currentFavoriteSortOption = MutableStateFlow<SortOption>(SortOption.LikedSongTitleAZ)
+    private val _currentFavoriteSortOption = MutableStateFlow<SortOption>(SortOption.LikedTrackTitleAZ)
     val currentFavoriteSortOption = _currentFavoriteSortOption.asStateFlow()
 
 
 
     @OptIn(ExperimentalStdlibApi::class)
-    val genres: kotlinx.coroutines.flow.Flow<ImmutableList<com.oakiha.audia.data.model.Genre>> = _allSongs
-        .map { songs ->
-            val genreMap = mutableMapOf<String, MutableList<Song>>()
-            val unknownGenreName = "Unknown Genre"
+    val Categories: kotlinx.coroutines.flow.Flow<ImmutableList<com.oakiha.audia.data.model.Category>> = _allTracks
+        .map { Tracks ->
+            val CategoryMap = mutableMapOf<String, MutableList<Track>>()
+            val unknownCategoryName = "Unknown Category"
 
-            songs.forEach { song ->
-                val genreName = song.genre?.trim()
-                if (genreName.isNullOrBlank()) {
-                    genreMap.getOrPut(unknownGenreName) { mutableListOf() }.add(song)
+            Tracks.forEach { Track ->
+                val CategoryName = Track.Category?.trim()
+                if (CategoryName.isNullOrBlank()) {
+                    CategoryMap.getOrPut(unknownCategoryName) { mutableListOf() }.add(Track)
                 } else {
-                    genreMap.getOrPut(genreName) { mutableListOf() }.add(song)
+                    CategoryMap.getOrPut(CategoryName) { mutableListOf() }.add(Track)
                 }
             }
 
-            genreMap.toList().mapIndexedNotNull { index, (genreName, songs) ->
-                if (songs.isNotEmpty()) {
-                    val id = if (genreName.equals(unknownGenreName, ignoreCase = true)) {
+            CategoryMap.toList().mapIndexedNotNull { index, (CategoryName, Tracks) ->
+                if (Tracks.isNotEmpty()) {
+                    val id = if (CategoryName.equals(unknownCategoryName, ignoreCase = true)) {
                         "unknown"
                     } else {
-                        genreName.lowercase().replace(" ", "_").replace("/", "_")
+                        CategoryName.lowercase().replace(" ", "_").replace("/", "_")
                     }
-                    val color = com.oakiha.audia.ui.theme.GenreColors.colors[index % com.oakiha.audia.ui.theme.GenreColors.colors.size]
-                    com.oakiha.audia.data.model.Genre(
+                    val color = com.oakiha.audia.ui.theme.CategoryColors.colors[index % com.oakiha.audia.ui.theme.CategoryColors.colors.size]
+                    com.oakiha.audia.data.model.Category(
                         id = id,
-                        name = genreName,
+                        name = CategoryName,
                         lightColorHex = color.lightColor.toHexString(),
                         onLightColorHex = color.onLightColor.toHexString(),
                         darkColorHex = color.darkColor.toHexString(),
@@ -126,18 +126,18 @@ class LibraryStateHolder @Inject constructor(
         this.scope = scope
         // Initial load of sort preferences
         scope.launch {
-            val songSortKey = userPreferencesRepository.songsSortOptionFlow.first()
-            _currentSongSortOption.value = SortOption.SONGS.find { it.storageKey == songSortKey } ?: SortOption.SongDefaultOrder
+            val TracksortKey = userPreferencesRepository.TracksSortOptionFlow.first()
+            _currentTracksortOption.value = SortOption.Tracks.find { it.storageKey == TracksortKey } ?: SortOption.TrackDefaultOrder
 
-            val albumSortKey = userPreferencesRepository.albumsSortOptionFlow.first()
-            _currentAlbumSortOption.value = SortOption.ALBUMS.find { it.storageKey == albumSortKey } ?: SortOption.AlbumTitleAZ
+            val BooksortKey = userPreferencesRepository.BooksSortOptionFlow.first()
+            _currentBooksortOption.value = SortOption.Books.find { it.storageKey == BooksortKey } ?: SortOption.BookTitleAZ
             
-            val artistSortKey = userPreferencesRepository.artistsSortOptionFlow.first()
-            _currentArtistSortOption.value = SortOption.ARTISTS.find { it.storageKey == artistSortKey } ?: SortOption.ArtistNameAZ
+            val AuthorsortKey = userPreferencesRepository.AuthorsSortOptionFlow.first()
+            _currentAuthorsortOption.value = SortOption.Authors.find { it.storageKey == AuthorsortKey } ?: SortOption.AuthorNameAZ
             
             
-            val likedSortKey = userPreferencesRepository.likedSongsSortOptionFlow.first()
-            _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedSongDateLiked
+            val likedSortKey = userPreferencesRepository.likedTracksSortOptionFlow.first()
+            _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedTrackDateLiked
         }
     }
 
@@ -152,64 +152,64 @@ class LibraryStateHolder @Inject constructor(
     // Actually, explicit "load" functions are legacy imperative style.
     // We should launch collectors in initialize() that update the state.
     
-    private var songsJob: Job? = null
-    private var albumsJob: Job? = null
-    private var artistsJob: Job? = null
+    private var TracksJob: Job? = null
+    private var BooksJob: Job? = null
+    private var AuthorsJob: Job? = null
     private var foldersJob: Job? = null
     
     fun startObservingLibraryData() {
-        if (songsJob?.isActive == true) return
+        if (TracksJob?.isActive == true) return
         
         Log.d("LibraryStateHolder", "startObservingLibraryData called.")
         
-        songsJob = scope?.launch {
+        TracksJob = scope?.launch {
             _isLoadingLibrary.value = true
-            musicRepository.getAudioFiles().collect { songs ->
+            AudiobookRepository.getAudioFiles().collect { Tracks ->
                  // When the repository emits a new list (triggered by directory changes),
                  // we update our state and re-apply current sorting.
-                 _allSongs.value = songs.toImmutableList()
+                 _allTracks.value = Tracks.toImmutableList()
                  // Apply sort to the new data
-                 sortSongs(_currentSongSortOption.value, persist = false)
+                 sortTracks(_currentTracksortOption.value, persist = false)
                  _isLoadingLibrary.value = false
             }
         }
         
-        albumsJob = scope?.launch {
+        BooksJob = scope?.launch {
             _isLoadingCategories.value = true
-            musicRepository.getAlbums().collect { albums ->
-                _albums.value = albums.toImmutableList()
-                sortAlbums(_currentAlbumSortOption.value, persist = false)
+            AudiobookRepository.getBooks().collect { Books ->
+                _Books.value = Books.toImmutableList()
+                sortBooks(_currentBooksortOption.value, persist = false)
                 _isLoadingCategories.value = false
             }
         }
         
-        artistsJob = scope?.launch {
+        AuthorsJob = scope?.launch {
             _isLoadingCategories.value = true
-            musicRepository.getArtists().collect { artists ->
-                _artists.value = artists.toImmutableList()
-                sortArtists(_currentArtistSortOption.value, persist = false)
+            AudiobookRepository.getAuthors().collect { Authors ->
+                _Authors.value = Authors.toImmutableList()
+                sortAuthors(_currentAuthorsortOption.value, persist = false)
                 _isLoadingCategories.value = false
             }
         }
         
         foldersJob = scope?.launch {
-            musicRepository.getMusicFolders().collect { folders ->
-                 _musicFolders.value = folders.toImmutableList()
+            AudiobookRepository.getAudiobookFolders().collect { folders ->
+                 _AudiobookFolders.value = folders.toImmutableList()
                  sortFolders(_currentFolderSortOption.value)
             }
         }
     }
 
     // Deprecated imperative loaders - redirected to observer start
-    fun loadSongsFromRepository() {
+    fun loadTracksFromRepository() {
          startObservingLibraryData()
     }
 
-    fun loadAlbumsFromRepository() {
+    fun loadBooksFromRepository() {
          startObservingLibraryData()
     }
 
-    fun loadArtistsFromRepository() {
+    fun loadAuthorsFromRepository() {
          startObservingLibraryData()
     }
     
@@ -224,80 +224,80 @@ class LibraryStateHolder @Inject constructor(
     // If we are already observing, startObservingLibraryData returns early.
     // If we are not (e.g. process death recovery?), it restarts.
     
-    fun loadSongsIfNeeded() {
+    fun loadTracksIfNeeded() {
          startObservingLibraryData()
     }
 
-    fun loadAlbumsIfNeeded() {
+    fun loadBooksIfNeeded() {
         startObservingLibraryData()
     }
 
-    fun loadArtistsIfNeeded() {
+    fun loadAuthorsIfNeeded() {
         startObservingLibraryData()
     }
 
     // --- Sorting ---
 
-    fun sortSongs(sortOption: SortOption, persist: Boolean = true) {
+    fun sortTracks(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setSongsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setTracksSortOption(sortOption.storageKey)
             }
-            _currentSongSortOption.value = sortOption
+            _currentTracksortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.SongTitleAZ -> _allSongs.value.sortedBy { it.title.lowercase() }
-                SortOption.SongTitleZA -> _allSongs.value.sortedByDescending { it.title.lowercase() }
-                SortOption.SongArtist -> _allSongs.value.sortedBy { it.artist.lowercase() }
-                SortOption.SongAlbum -> _allSongs.value.sortedBy { it.album.lowercase() }
-                SortOption.SongDateAdded -> _allSongs.value.sortedByDescending { it.dateAdded }
-                SortOption.SongDuration -> _allSongs.value.sortedBy { it.duration }
-                else -> _allSongs.value // Default or unhandled
+                SortOption.TrackTitleAZ -> _allTracks.value.sortedBy { it.title.lowercase() }
+                SortOption.TrackTitleZA -> _allTracks.value.sortedByDescending { it.title.lowercase() }
+                SortOption.TrackAuthor -> _allTracks.value.sortedBy { it.Author.lowercase() }
+                SortOption.TrackBook -> _allTracks.value.sortedBy { it.Book.lowercase() }
+                SortOption.TrackDateAdded -> _allTracks.value.sortedByDescending { it.dateAdded }
+                SortOption.TrackDuration -> _allTracks.value.sortedBy { it.duration }
+                else -> _allTracks.value // Default or unhandled
             }
-            _allSongs.value = sorted.toImmutableList()
+            _allTracks.value = sorted.toImmutableList()
         }
     }
 
-    fun sortAlbums(sortOption: SortOption, persist: Boolean = true) {
+    fun sortBooks(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setAlbumsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setBooksSortOption(sortOption.storageKey)
             }
-            _currentAlbumSortOption.value = sortOption
+            _currentBooksortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.AlbumTitleAZ -> _albums.value.sortedBy { it.title.lowercase() }
-                SortOption.AlbumTitleZA -> _albums.value.sortedByDescending { it.title.lowercase() }
-                SortOption.AlbumArtist -> _albums.value.sortedBy { it.artist.lowercase() }
-                SortOption.AlbumReleaseYear -> _albums.value.sortedByDescending { it.year }
-                SortOption.AlbumSizeAsc -> _albums.value.sortedWith(compareBy<Album> { it.songCount }.thenBy { it.title.lowercase() })
-                SortOption.AlbumSizeDesc -> _albums.value.sortedWith(compareByDescending<Album> { it.songCount }.thenBy { it.title.lowercase() })
-                 else -> _albums.value
+                SortOption.BookTitleAZ -> _Books.value.sortedBy { it.title.lowercase() }
+                SortOption.BookTitleZA -> _Books.value.sortedByDescending { it.title.lowercase() }
+                SortOption.BookAuthor -> _Books.value.sortedBy { it.Author.lowercase() }
+                SortOption.BookReleaseYear -> _Books.value.sortedByDescending { it.year }
+                SortOption.BooksizeAsc -> _Books.value.sortedWith(compareBy<Book> { it.TrackCount }.thenBy { it.title.lowercase() })
+                SortOption.BooksizeDesc -> _Books.value.sortedWith(compareByDescending<Book> { it.TrackCount }.thenBy { it.title.lowercase() })
+                 else -> _Books.value
             }
-            _albums.value = sorted.toImmutableList()
+            _Books.value = sorted.toImmutableList()
         }
     }
     
-    fun sortArtists(sortOption: SortOption, persist: Boolean = true) {
+    fun sortAuthors(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setArtistsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setAuthorsSortOption(sortOption.storageKey)
             }
-            _currentArtistSortOption.value = sortOption
+            _currentAuthorsortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.ArtistNameAZ -> _artists.value.sortedBy { it.name.lowercase() }
-                SortOption.ArtistNameZA -> _artists.value.sortedByDescending { it.name.lowercase() }
-                else -> _artists.value
+                SortOption.AuthorNameAZ -> _Authors.value.sortedBy { it.name.lowercase() }
+                SortOption.AuthorNameZA -> _Authors.value.sortedByDescending { it.name.lowercase() }
+                else -> _Authors.value
             }
-            _artists.value = sorted.toImmutableList()
+            _Authors.value = sorted.toImmutableList()
         }
     }
 
     fun sortFolders(sortOption: SortOption) {
         scope?.launch {
             // Folders sort preference might not be persisted in the same way or done elsewhere?
-            // ViewModel checked "setFoldersPlaylistView" but not explicitly saving sort option in "sortFolders" function 
+            // ViewModel checked "setFoldersBooklistView" but not explicitly saving sort option in "sortFolders" function 
             // except locally in state?
             // Checking ViewModel: it just updates _playerUiState.
             // But wait, initialize() loads getFolderSortOption(). So it should be persisted.
@@ -310,18 +310,18 @@ class LibraryStateHolder @Inject constructor(
             _currentFolderSortOption.value = sortOption
             
             val sorted = when (sortOption) {
-                SortOption.FolderNameAZ -> _musicFolders.value.sortedBy { it.name.lowercase() }
-                SortOption.FolderNameZA -> _musicFolders.value.sortedByDescending { it.name.lowercase() }
-                else -> _musicFolders.value
+                SortOption.FolderNameAZ -> _AudiobookFolders.value.sortedBy { it.name.lowercase() }
+                SortOption.FolderNameZA -> _AudiobookFolders.value.sortedByDescending { it.name.lowercase() }
+                else -> _AudiobookFolders.value
             }
-            _musicFolders.value = sorted.toImmutableList()
+            _AudiobookFolders.value = sorted.toImmutableList()
         }
     }
 
-    fun sortFavoriteSongs(sortOption: SortOption, persist: Boolean = true) {
+    fun sortFavoriteTracks(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setLikedSongsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setLikedTracksSortOption(sortOption.storageKey)
             }
             _currentFavoriteSortOption.value = sortOption
             // The actual filtering/sorting of favorites happens in ViewModel using this flow
@@ -329,12 +329,12 @@ class LibraryStateHolder @Inject constructor(
     }
 
     /**
-     * Updates a single song in the in-memory list.
+     * Updates a single Track in the in-memory list.
      * Used effectively after metadata edits to reflect changes immediately.
      */
-    fun updateSong(updatedSong: Song) {
-        _allSongs.update { currentList ->
-            currentList.map { if (it.id == updatedSong.id) updatedSong else it }.toImmutableList()
+    fun updateTrack(updatedTrack: Track) {
+        _allTracks.update { currentList ->
+            currentList.map { if (it.id == updatedTrack.id) updatedTrack else it }.toImmutableList()
         }
     }
 }

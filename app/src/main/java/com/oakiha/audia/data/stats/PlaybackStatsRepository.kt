@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.time.DayOfWeek
@@ -38,42 +38,42 @@ class PlaybackStatsRepository @Inject constructor(
     private val sessionGapThresholdMs = TimeUnit.MINUTES.toMillis(30)
 
     data class PlaybackEvent(
-        val songId: String,
+        val TrackId: String,
         val timestamp: Long,
         val durationMs: Long,
         val startTimestamp: Long? = null,
         val endTimestamp: Long? = null
     )
 
-    data class SongPlaybackSummary(
-        val songId: String,
+    data class TrackPlaybackSummary(
+        val TrackId: String,
         val title: String,
-        val artist: String,
-        val albumArtUri: String?,
+        val Author: String,
+        val BookArtUri: String?,
         val totalDurationMs: Long,
         val playCount: Int
     )
 
-    data class ArtistPlaybackSummary(
-        val artist: String,
+    data class AuthorPlaybackSummary(
+        val Author: String,
         val totalDurationMs: Long,
         val playCount: Int,
-        val uniqueSongs: Int
+        val uniqueTracks: Int
     )
 
-    data class GenrePlaybackSummary(
-        val genre: String,
+    data class CategoryPlaybackSummary(
+        val Category: String,
         val totalDurationMs: Long,
         val playCount: Int,
-        val uniqueArtists: Int
+        val uniqueAuthors: Int
     )
 
-    data class AlbumPlaybackSummary(
-        val album: String,
-        val albumArtUri: String?,
+    data class BookPlaybackSummary(
+        val Book: String,
+        val BookArtUri: String?,
         val totalDurationMs: Long,
         val playCount: Int,
-        val uniqueSongs: Int
+        val uniqueTracks: Int
     )
 
     data class TimelineEntry(
@@ -83,7 +83,7 @@ class PlaybackStatsRepository @Inject constructor(
     )
 
     data class PlaybackSegment(
-        val songId: String,
+        val TrackId: String,
         val startMillis: Long,
         val endMillis: Long
     ) {
@@ -124,14 +124,14 @@ class PlaybackStatsRepository @Inject constructor(
         val endTimestamp: Long,
         val totalDurationMs: Long,
         val totalPlayCount: Int,
-        val uniqueSongs: Int,
+        val uniqueTracks: Int,
         val averageDailyDurationMs: Long,
-        val songs: List<SongPlaybackSummary> = emptyList(),
-        val topSongs: List<SongPlaybackSummary> = emptyList(),
-        val topGenres: List<GenrePlaybackSummary> = emptyList(),
+        val Tracks: List<TrackPlaybackSummary> = emptyList(),
+        val topTracks: List<TrackPlaybackSummary> = emptyList(),
+        val topCategories: List<CategoryPlaybackSummary> = emptyList(),
         val timeline: List<TimelineEntry>,
-        val topArtists: List<ArtistPlaybackSummary>,
-        val topAlbums: List<AlbumPlaybackSummary>,
+        val topAuthors: List<AuthorPlaybackSummary>,
+        val topBooks: List<BookPlaybackSummary>,
         val activeDays: Int,
         val longestStreakDays: Int,
         val totalSessions: Int,
@@ -145,16 +145,16 @@ class PlaybackStatsRepository @Inject constructor(
     )
 
     fun recordPlayback(
-        songId: String,
+        TrackId: String,
         durationMs: Long,
         timestamp: Long = System.currentTimeMillis()
     ) {
-        if (songId.isBlank()) return
+        if (TrackId.isBlank()) return
         val coercedTimestamp = timestamp.coerceAtLeast(0L)
         val coercedDuration = durationMs.coerceAtLeast(0L)
         val start = (coercedTimestamp - coercedDuration).coerceAtLeast(0L)
         val sanitizedEvent = PlaybackEvent(
-            songId = songId,
+            TrackId = TrackId,
             timestamp = coercedTimestamp,
             durationMs = coercedDuration,
             startTimestamp = start,
@@ -173,7 +173,7 @@ class PlaybackStatsRepository @Inject constructor(
 
     fun loadSummary(
         range: StatsTimeRange,
-        songs: List<Song>,
+        Tracks: List<Track>,
         nowMillis: Long = System.currentTimeMillis()
     ): PlaybackStatsSummary {
         val zoneId = ZoneId.systemDefault()
@@ -208,16 +208,16 @@ class PlaybackStatsRepository @Inject constructor(
             )
         }
 
-        val songMap = songs.associateBy { it.id }
+        val TrackMap = Tracks.associateBy { it.id }
         val normalizedEvents = filteredEvents.map { event ->
-            normalizeEventDuration(event, songMap[event.songId])
+            normalizeEventDuration(event, TrackMap[event.TrackId])
         }
 
-        val segmentsBySong = normalizedEvents
-            .groupBy { it.songId }
-            .mapValues { (_, eventsForSong) -> mergeSongEvents(eventsForSong) }
+        val segmentsByTrack = normalizedEvents
+            .groupBy { it.TrackId }
+            .mapValues { (_, eventsForTrack) -> mergeTrackEvents(eventsForTrack) }
 
-        val overallSpans = mergeSpans(segmentsBySong.values.flatten().map { PlaybackSpan(it.startMillis, it.endMillis) })
+        val overallSpans = mergeSpans(segmentsByTrack.values.flatten().map { PlaybackSpan(it.startMillis, it.endMillis) })
 
         val effectiveStart = startBound
             ?: overallSpans.minOfOrNull { it.startMillis }
@@ -226,52 +226,52 @@ class PlaybackStatsRepository @Inject constructor(
         val effectiveEnd = overallSpans.maxOfOrNull { it.endMillis } ?: endBound
 
         val totalDuration = overallSpans.sumOf { it.durationMs }
-        val totalPlays = segmentsBySong.values.sumOf { it.size }
-        val uniqueSongs = segmentsBySong.keys.size
+        val totalPlays = segmentsByTrack.values.sumOf { it.size }
+        val uniqueTracks = segmentsByTrack.keys.size
 
-        val allSongs = segmentsBySong
-            .mapNotNull { (songId, segmentsForSong) ->
-                val song = songMap[songId] ?: return@mapNotNull null
-                val title = song.title.takeIf { it.isNotBlank() }
-                    ?: song.path.substringAfterLast('/').ifBlank { return@mapNotNull null }
-                val artist = song.displayArtist.takeIf { it.isNotBlank() } ?: "Unknown Artist"
-                SongPlaybackSummary(
-                    songId = songId,
+        val allTracks = segmentsByTrack
+            .mapNotNull { (TrackId, segmentsForTrack) ->
+                val Track = TrackMap[TrackId] ?: return@mapNotNull null
+                val title = Track.title.takeIf { it.isNotBlank() }
+                    ?: Track.path.substringAfterLast('/').ifBlank { return@mapNotNull null }
+                val Author = Track.displayAuthor.takeIf { it.isNotBlank() } ?: "Unknown Author"
+                TrackPlaybackSummary(
+                    TrackId = TrackId,
                     title = title,
-                    artist = artist,
-                    albumArtUri = song.albumArtUriString,
-                    totalDurationMs = segmentsForSong.sumOf { it.durationMs },
-                    playCount = segmentsForSong.size
+                    Author = Author,
+                    BookArtUri = Track.BookArtUriString,
+                    totalDurationMs = segmentsForTrack.sumOf { it.durationMs },
+                    playCount = segmentsForTrack.size
                 )
             }
             .sortedWith(
-                compareByDescending<SongPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<TrackPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
-        val topSongs = allSongs.take(5)
+        val topTracks = allTracks.take(5)
 
-        val topGenres = segmentsBySong.entries
-            .groupBy { (songId, _) ->
-                val genre = songMap[songId]?.genre
-                if (genre.isNullOrBlank()) "Unknown Genre" else genre
+        val topCategories = segmentsByTrack.entries
+            .groupBy { (TrackId, _) ->
+                val Category = TrackMap[TrackId]?.Category
+                if (Category.isNullOrBlank()) "Unknown Category" else Category
             }
-            .map { (genre, groupedSongs) ->
-                val flattened = groupedSongs.flatMap { it.value }
-                val uniqueArtists = groupedSongs
-                    .mapNotNull { (songId, _) ->
-                        songMap[songId]?.artist?.takeIf { it.isNotBlank() }
+            .map { (Category, groupedTracks) ->
+                val flattened = groupedTracks.flatMap { it.value }
+                val uniqueAuthors = groupedTracks
+                    .mapNotNull { (TrackId, _) ->
+                        TrackMap[TrackId]?.Author?.takeIf { it.isNotBlank() }
                     }
                     .toSet()
                     .size
-                GenrePlaybackSummary(
-                    genre = genre,
+                CategoryPlaybackSummary(
+                    Category = Category,
                     totalDurationMs = flattened.sumOf { it.durationMs },
                     playCount = flattened.size,
-                    uniqueArtists = uniqueArtists
+                    uniqueAuthors = uniqueAuthors
                 )
             }
             .sortedWith(
-                compareByDescending<GenrePlaybackSummary> { it.totalDurationMs }
+                compareByDescending<CategoryPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
             .take(5)
@@ -323,48 +323,48 @@ class PlaybackStatsRepository @Inject constructor(
         )
         val timelineEntries = accumulateTimelineEntries(timelineBuckets, overallSpans)
 
-        val topArtists = segmentsBySong.entries
-            .groupBy { (songId, _) ->
-                songMap[songId]?.artist?.takeIf { it.isNotBlank() } ?: "Unknown Artist"
+        val topAuthors = segmentsByTrack.entries
+            .groupBy { (TrackId, _) ->
+                TrackMap[TrackId]?.Author?.takeIf { it.isNotBlank() } ?: "Unknown Author"
             }
-            .map { (artist, groupedSongs) ->
-                val flattened = groupedSongs.flatMap { it.value }
-                val uniqueSongCount = groupedSongs.size
-                ArtistPlaybackSummary(
-                    artist = artist,
+            .map { (Author, groupedTracks) ->
+                val flattened = groupedTracks.flatMap { it.value }
+                val uniqueTrackCount = groupedTracks.size
+                AuthorPlaybackSummary(
+                    Author = Author,
                     totalDurationMs = flattened.sumOf { it.durationMs },
                     playCount = flattened.size,
-                    uniqueSongs = uniqueSongCount
+                    uniqueTracks = uniqueTrackCount
                 )
             }
             .sortedWith(
-                compareByDescending<ArtistPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<AuthorPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
             .take(5)
 
-        val topAlbums = segmentsBySong.entries
-            .groupBy { (songId, _) ->
-                val song = songMap[songId]
-                song?.album?.takeIf { it.isNotBlank() } ?: "Unknown Album"
+        val topBooks = segmentsByTrack.entries
+            .groupBy { (TrackId, _) ->
+                val Track = TrackMap[TrackId]
+                Track?.Book?.takeIf { it.isNotBlank() } ?: "Unknown Book"
             }
-            .map { (album, groupedSongs) ->
-                val flattened = groupedSongs.flatMap { it.value }
-                val uniqueSongCount = groupedSongs.size
-                val firstSong = groupedSongs
+            .map { (Book, groupedTracks) ->
+                val flattened = groupedTracks.flatMap { it.value }
+                val uniqueTrackCount = groupedTracks.size
+                val firstTrack = groupedTracks
                     .asSequence()
-                    .mapNotNull { songMap[it.key] }
+                    .mapNotNull { TrackMap[it.key] }
                     .firstOrNull()
-                AlbumPlaybackSummary(
-                    album = album,
-                    albumArtUri = firstSong?.albumArtUriString,
+                BookPlaybackSummary(
+                    Book = Book,
+                    BookArtUri = firstTrack?.BookArtUriString,
                     totalDurationMs = flattened.sumOf { it.durationMs },
                     playCount = flattened.size,
-                    uniqueSongs = uniqueSongCount
+                    uniqueTracks = uniqueTrackCount
                 )
             }
             .sortedWith(
-                compareByDescending<AlbumPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<BookPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
             .take(5)
@@ -395,14 +395,14 @@ class PlaybackStatsRepository @Inject constructor(
             endTimestamp = endBound,
             totalDurationMs = totalDuration,
             totalPlayCount = totalPlays,
-            uniqueSongs = uniqueSongs,
+            uniqueTracks = uniqueTracks,
             averageDailyDurationMs = averageDailyDuration,
-            songs = allSongs,
-            topSongs = topSongs,
+            Tracks = allTracks,
+            topTracks = topTracks,
             timeline = timelineEntries,
-            topGenres = topGenres,
-            topArtists = topArtists,
-            topAlbums = topAlbums,
+            topCategories = topCategories,
+            topAuthors = topAuthors,
+            topBooks = topBooks,
             activeDays = activeDays,
             longestStreakDays = longestStreak,
             totalSessions = totalSessions,
@@ -457,7 +457,7 @@ class PlaybackStatsRepository @Inject constructor(
         }
         val finalStart = (safeEnd - finalDuration).coerceAtLeast(0L)
         return event.copy(
-            songId = event.songId,
+            TrackId = event.TrackId,
             timestamp = safeEnd,
             durationMs = finalDuration,
             startTimestamp = finalStart,
@@ -467,10 +467,10 @@ class PlaybackStatsRepository @Inject constructor(
 
     private fun normalizeEventDuration(
         event: PlaybackEvent,
-        song: Song?
+        Track: Track?
     ): PlaybackEvent {
         val safeEnd = event.endMillis()
-        val trackDuration = song?.duration?.takeIf { it > 0L }
+        val trackDuration = Track?.duration?.takeIf { it > 0L }
         val boundedDuration = event.durationMs
             .coerceAtLeast(0L)
             .let { duration ->
@@ -489,10 +489,10 @@ class PlaybackStatsRepository @Inject constructor(
         )
     }
 
-    private fun mergeSongEvents(events: List<PlaybackEvent>): List<PlaybackSegment> {
+    private fun mergeTrackEvents(events: List<PlaybackEvent>): List<PlaybackSegment> {
         if (events.isEmpty()) return emptyList()
         val sorted = events.sortedBy { it.startMillis() }
-        val songId = sorted.first().songId
+        val TrackId = sorted.first().TrackId
         val segments = mutableListOf<PlaybackSegment>()
         var currentStart = sorted.first().startMillis()
         var currentEnd = sorted.first().endMillis()
@@ -503,12 +503,12 @@ class PlaybackStatsRepository @Inject constructor(
             if (start <= currentEnd + SEGMENT_JOIN_TOLERANCE_MS) {
                 currentEnd = max(currentEnd, end)
             } else {
-                segments += PlaybackSegment(songId, currentStart, currentEnd)
+                segments += PlaybackSegment(TrackId, currentStart, currentEnd)
                 currentStart = start
                 currentEnd = end
             }
         }
-        segments += PlaybackSegment(songId, currentStart, currentEnd)
+        segments += PlaybackSegment(TrackId, currentStart, currentEnd)
         return segments
     }
 

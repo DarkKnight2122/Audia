@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.AudiobookNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,7 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.*
 import com.oakiha.audia.presentation.components.subcomps.PlayingEqIcon
 import com.oakiha.audia.presentation.navigation.Screen
@@ -60,14 +60,14 @@ fun HomeScreen(
         (context as? android.app.Activity)?.intent?.getBooleanExtra("is_benchmark", false) ?: false
     }
     val statsViewModel: StatsViewModel = hiltViewModel()
-    val allSongs by playerViewModel.allSongsFlow.collectAsState(initial = emptyList())
+    val allTracks by playerViewModel.allTracksFlow.collectAsState(initial = emptyList())
 
     ReportDrawnWhen {
-        allSongs.isNotEmpty() || isBenchmarkMode
+        allTracks.isNotEmpty() || isBenchmarkMode
     }
 
-    val currentSong by remember(playerViewModel.stablePlayerState) {
-        playerViewModel.stablePlayerState.map { it.currentSong }
+    val currentTrack by remember(playerViewModel.stablePlayerState) {
+        playerViewModel.stablePlayerState.map { it.currentTrack }
     }.collectAsState(initial = null)
 
     val isShuffleEnabled by remember(playerViewModel.stablePlayerState) {
@@ -76,7 +76,7 @@ fun HomeScreen(
             .distinctUntilChanged()
     }.collectAsState(initial = false)
 
-    val bottomPadding = if (currentSong != null) MiniPlayerHeight else 0.dp
+    val bottomPadding = if (currentTrack != null) MiniPlayerHeight else 0.dp
 
     var showChangelogBottomSheet by remember { mutableStateOf(false) }
     var showBetaInfoBottomSheet by remember { mutableStateOf(false) }
@@ -119,19 +119,19 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 item(key = "continue_listening_header") {
-                    val songToResume = currentSong ?: allSongs.firstOrNull()
+                    val TrackToResume = currentTrack ?: allTracks.firstOrNull()
                     ContinueListeningHeader(
-                        song = songToResume?.title ?: "No books found",
-                        author = songToResume?.displayArtist ?: "Scan your library",
+                        Track = TrackToResume?.title ?: "No books found",
+                        author = TrackToResume?.displayAuthor ?: "Scan your library",
                         onPlayPressed = {
-                            songToResume?.let {
-                                playerViewModel.showAndPlaySong(it, allSongs, "Library")
+                            TrackToResume?.let {
+                                playerViewModel.showAndPlayTrack(it, allTracks, "Library")
                             }
                         }
                     )
                 }
 
-                if (allSongs.isNotEmpty()) {
+                if (allTracks.isNotEmpty()) {
                     item(key = "recently_added_label") {
                         Text(
                             text = "Recently Added",
@@ -142,13 +142,13 @@ fun HomeScreen(
                         )
                     }
 
-                    val recentSubset = allSongs.take(10)
-                    items(items = recentSubset, key = { "recent_${it.id}" }) { song ->
-                        SongListItemFavsWrapper(
-                            song = song,
+                    val recentSubset = allTracks.take(10)
+                    items(items = recentSubset, key = { "recent_${it.id}" }) { Track ->
+                        TrackListItemFavsWrapper(
+                            Track = Track,
                             playerViewModel = playerViewModel,
                             onClick = {
-                                playerViewModel.showAndPlaySong(song, allSongs, "Library")
+                                playerViewModel.showAndPlayTrack(Track, allTracks, "Library")
                             },
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -202,7 +202,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ContinueListeningHeader(
-    song: String,
+    Track: String,
     author: String,
     onPlayPressed: () -> Unit
 ) {
@@ -228,7 +228,7 @@ fun ContinueListeningHeader(
             )
 
             Text(
-                text = "$song • $author",
+                text = "$Track Ã¢â‚¬Â¢ $author",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(start = 8.dp),
@@ -264,19 +264,19 @@ fun ContinueListeningHeader(
 }
 
 @Composable
-fun SongListItemFavs(
+fun TrackListItemFavs(
     modifier: Modifier = Modifier,
     cardCorners: Dp = 12.dp,
     title: String,
-    artist: String,
-    albumArtUrl: String?,
+    Author: String,
+    BookArtUrl: String?,
     isPlaying: Boolean,
-    isCurrentSong: Boolean,
+    isCurrentTrack: Boolean,
     onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    val containerColor = if (isCurrentSong) colors.primaryContainer.copy(alpha = 0.46f) else colors.surfaceContainer
-    val contentColor = if (isCurrentSong) colors.primary else colors.onSurface
+    val containerColor = if (isCurrentTrack) colors.primaryContainer.copy(alpha = 0.46f) else colors.surfaceContainer
+    val contentColor = if (isCurrentTrack) colors.primary else colors.onSurface
 
     Card(
         modifier = modifier
@@ -299,7 +299,7 @@ fun SongListItemFavs(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SmartImage(
-                    model = albumArtUrl,
+                    model = BookArtUrl,
                     contentDescription = "Cover",
                     contentScale = ContentScale.Crop,
                     shape = RoundedCornerShape(8.dp),
@@ -310,19 +310,19 @@ fun SongListItemFavs(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isCurrentSong) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = if (isCurrentTrack) FontWeight.Bold else FontWeight.Normal,
                         color = contentColor,
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = artist, style = MaterialTheme.typography.bodyMedium,
+                        text = Author, style = MaterialTheme.typography.bodyMedium,
                         color = contentColor.copy(alpha = 0.7f),
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 }
             }
             Spacer(Modifier.width(16.dp))
-            if (isCurrentSong) {
+            if (isCurrentTrack) {
                 PlayingEqIcon(
                     modifier = Modifier
                         .weight(0.1f)
@@ -338,22 +338,22 @@ fun SongListItemFavs(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun SongListItemFavsWrapper(
-    song: Song,
+fun TrackListItemFavsWrapper(
+    Track: Track,
     playerViewModel: PlayerViewModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
 
-    SongListItemFavs(
+    TrackListItemFavs(
         modifier = modifier,
         cardCorners = 0.dp,
-        title = song.title,
-        artist = song.displayArtist,
-        albumArtUrl = song.albumArtUriString,
+        title = Track.title,
+        Author = Track.displayAuthor,
+        BookArtUrl = Track.BookArtUriString,
         isPlaying = stablePlayerState.isPlaying,
-        isCurrentSong = song.id == stablePlayerState.currentSong?.id,
+        isCurrentTrack = Track.id == stablePlayerState.currentTrack?.id,
         onClick = onClick
     )
 }

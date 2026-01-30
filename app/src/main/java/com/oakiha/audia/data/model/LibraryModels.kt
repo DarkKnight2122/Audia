@@ -4,49 +4,49 @@ import android.net.Uri
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class Album(
-    val id: Long, // MediaStore.Audio.Albums._ID
+data class Book(
+    val id: Long, // MediaStore.Audio.Books._ID
     val title: String,
-    val artist: String,
+    val Author: String,
     val year: Int,
-    val albumArtUriString: String?,
-    val songCount: Int
+    val BookArtUriString: String?,
+    val TrackCount: Int
 ) {
     companion object {
-        fun empty() = Album(
+        fun empty() = Book(
             id = -1,
             title = "",
-            artist = "",
+            Author = "",
             year = 0,
-            albumArtUriString = null,
-            songCount = 0
+            BookArtUriString = null,
+            TrackCount = 0
         )
     }
 }
 
 @Immutable
-data class Artist(
-    val id: Long, // MediaStore.Audio.Artists._ID
+data class Author(
+    val id: Long, // MediaStore.Audio.Authors._ID
     val name: String,
-    val songCount: Int,
-    val imageUrl: String? = null // Deezer artist image URL
+    val TrackCount: Int,
+    val imageUrl: String? = null // Deezer Author image URL
 ) {
     companion object {
-        fun empty() = Artist(
+        fun empty() = Author(
             id = -1,
             name = "",
-            songCount = 0,
+            TrackCount = 0,
             imageUrl = null
         )
     }
 }
 
 /**
- * Represents a simplified artist reference for multi-artist support.
- * Used when displaying multiple artists for a song.
+ * Represents a simplified Author reference for multi-Author support.
+ * Used when displaying multiple Authors for a Track.
  */
 @Immutable
-data class ArtistRef(
+data class AuthorRef(
     val id: Long,
     val name: String,
     val isPrimary: Boolean = false

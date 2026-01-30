@@ -61,20 +61,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Playlist
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Booklist
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.SearchHistoryItem
 import com.oakiha.audia.data.model.SearchResultItem
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import android.util.Log
 import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.PlaylistPlay
+import androidx.compose.material.icons.rounded.BooklistPlay
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -91,13 +91,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
-import com.oakiha.audia.presentation.components.PlaylistBottomSheet
-import com.oakiha.audia.presentation.navigation.Screen // Required for Screen.GenreDetail.createRoute
-import com.oakiha.audia.presentation.screens.search.components.GenreCategoriesGrid
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.components.BooklistBottomSheet
+import com.oakiha.audia.presentation.navigation.Screen // Required for Screen.CategoryDetail.createRoute
+import com.oakiha.audia.presentation.screens.search.components.CategoryCategoriesGrid
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -111,7 +111,7 @@ import timber.log.Timber
 fun SearchScreen(
     paddingValues: PaddingValues,
     playerViewModel: PlayerViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel(),
     navController: NavHostController,
     onSearchBarActiveChange: (Boolean) -> Unit = {}
 ) {
@@ -119,15 +119,15 @@ fun SearchScreen(
     var active by remember { mutableStateOf(false) }
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
-    var showPlaylistBottomSheet by remember { mutableStateOf(false) }
+    var showBooklistBottomSheet by remember { mutableStateOf(false) }
     val uiState by playerViewModel.playerUiState.collectAsState()
     val currentFilter by remember { derivedStateOf { uiState.selectedSearchFilter } }
     val searchHistory = uiState.searchHistory
-    val genres by playerViewModel.genres.collectAsState()
+    val Categories by playerViewModel.Categories.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-    val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsState()
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    var selectedSongForInfo by remember { mutableStateOf<Song?>(null) }
+    val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState()
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) }
 
     // Perform search whenever searchQuery, active state, or filter changes
     LaunchedEffect(searchQuery, active, currentFilter) {
@@ -138,10 +138,10 @@ fun SearchScreen(
         }
     }
     val searchResults = uiState.searchResults
-    val handleSongMoreOptionsClick: (Song) -> Unit = { song ->
-        selectedSongForInfo = song
-        playerViewModel.selectSongForInfo(song)
-        showSongInfoBottomSheet = true
+    val handleTrackMoreOptionsClick: (Track) -> Unit = { Track ->
+        selectedTrackForInfo = Track
+        playerViewModel.selectTrackForInfo(Track)
+        showTrackInfoBottomSheet = true
     }
 
     val searchbarHorizontalPadding by animateDpAsState(
@@ -200,7 +200,7 @@ fun SearchScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // CORREGIDO: Agregamos un padding mínimo para evitar crashes
+            // CORREGIDO: Agregamos un padding mÃƒÂ­nimo para evitar crashes
             val safePadding = maxOf(0.dp, searchbarHorizontalPadding)
 
             Box(
@@ -291,10 +291,10 @@ fun SearchScreen(
                                 //verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 SearchFilterChip(SearchFilterType.ALL, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.SONGS, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.ALBUMS, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.ARTISTS, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.PLAYLISTS, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.Tracks, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.Books, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.Authors, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.Booklists, currentFilter, playerViewModel)
                             }
 
                             if (searchQuery.isBlank() && active && searchHistory.isNotEmpty()) {
@@ -332,9 +332,9 @@ fun SearchScreen(
                                     results = searchResults,
                                     playerViewModel = playerViewModel,
                                     onItemSelected = rememberedOnItemSelected,
-                                    currentPlayingSongId = stablePlayerState.currentSong?.id,
+                                    currentPlayingTrackId = stablePlayerState.currentTrack?.id,
                                     isPlaying = stablePlayerState.isPlaying,
-                                    onSongMoreOptionsClick = handleSongMoreOptionsClick,
+                                    onTrackMoreOptionsClick = handleTrackMoreOptionsClick,
                                     navController = navController
                                 )
                             } else if (searchQuery.isBlank() && active && searchHistory.isEmpty()) {
@@ -356,13 +356,13 @@ fun SearchScreen(
             if (!active) {
                 if (searchQuery.isBlank()) {
                     Box {
-                        GenreCategoriesGrid(
-                            genres = genres,
-                            onGenreClick = { genre ->
+                        CategoryCategoriesGrid(
+                            Categories = Categories,
+                            onCategoryClick = { Category ->
                                 Timber.tag("SearchScreen")
-                                    .d("Genre clicked: ${genre.name} (ID: ${genre.id})")
-                                val encodedGenreId = java.net.URLEncoder.encode(genre.id, "UTF-8")
-                                navController.navigate(Screen.GenreDetail.createRoute(encodedGenreId))
+                                    .d("Category clicked: ${Category.name} (ID: ${Category.id})")
+                                val encodedCategoryId = java.net.URLEncoder.encode(Category.id, "UTF-8")
+                                navController.navigate(Screen.CategoryDetail.createRoute(encodedCategoryId))
                             },
                             playerViewModel = playerViewModel,
                             modifier = Modifier.padding(top = 12.dp)
@@ -397,18 +397,18 @@ fun SearchScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             SearchFilterChip(SearchFilterType.ALL, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.SONGS, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.ALBUMS, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.ARTISTS, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.PLAYLISTS, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.Tracks, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.Books, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.Authors, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.Booklists, currentFilter, playerViewModel)
                         }
                         SearchResultsList(
                             results = searchResults,
                             playerViewModel = playerViewModel,
                             onItemSelected = { },
-                            currentPlayingSongId = stablePlayerState.currentSong?.id,
+                            currentPlayingTrackId = stablePlayerState.currentTrack?.id,
                             isPlaying = stablePlayerState.isPlaying,
-                            onSongMoreOptionsClick = handleSongMoreOptionsClick,
+                            onTrackMoreOptionsClick = handleTrackMoreOptionsClick,
                             navController = navController
                         )
                     }
@@ -417,75 +417,75 @@ fun SearchScreen(
         }
     }
 
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteSongIds) {
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteTrackIds) {
             derivedStateOf {
-                currentSong?.let { favoriteSongIds.contains(it.id) }
+                currentTrack?.let { favoriteTrackIds.contains(it.id) }
             }
         }.value ?: false
-        val removeFromListTrigger = remember(currentSong) {
+        val removeFromListTrigger = remember(currentTrack) {
             {
                 searchQuery = "$searchQuery "
             }
         }
 
-        if (currentSong != null) {
-            SongInfoBottomSheet(
-                song = currentSong,
+        if (currentTrack != null) {
+            TrackInfoBottomSheet(
+                Track = currentTrack,
                 isFavorite = isFavorite,
                 removeFromListTrigger = removeFromListTrigger,
                 onToggleFavorite = {
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong)
+                    playerViewModel.toggleFavoriteSpecificTrack(currentTrack)
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
-                onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                onDismiss = { showTrackInfoBottomSheet = false },
+                onPlayTrack = {
+                    playerViewModel.showAndPlayTrack(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
-                onAddToPlayList = {
-                    showPlaylistBottomSheet = true;
+                onAddToBooklist = {
+                    showBooklistBottomSheet = true;
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
-                onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                onNavigateToBook = {
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.BookId))
+                    showTrackInfoBottomSheet = false
                 },
-                onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                onNavigateToAuthor = {
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.AuthorId))
+                    showTrackInfoBottomSheet = false
                 },
-                onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(
-                        currentSong,
+                onEditTrack = { newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate ->
+                    playerViewModel.editTrackMetadata(
+                        currentTrack,
                         newTitle,
-                        newArtist,
-                        newAlbum,
-                        newGenre,
-                        newLyrics,
+                        newAuthor,
+                        newBook,
+                        newCategory,
+                        newTranscript,
                         newTrackNumber,
                         coverArtUpdate
                     )
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
             )
-            if (showPlaylistBottomSheet) {
-                val playlistUiState by playlistViewModel.uiState.collectAsState()
+            if (showBooklistBottomSheet) {
+                val BooklistUiState by BooklistViewModel.uiState.collectAsState()
 
-                PlaylistBottomSheet(
-                    playlistUiState = playlistUiState,
-                    song = currentSong,
-                    onDismiss = { showPlaylistBottomSheet = false },
+                BooklistBottomSheet(
+                    BooklistUiState = BooklistUiState,
+                    Track = currentTrack,
+                    onDismiss = { showBooklistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
                 )
@@ -632,9 +632,9 @@ fun SearchResultsList(
     results: List<SearchResultItem>,
     playerViewModel: PlayerViewModel,
     onItemSelected: () -> Unit,
-    currentPlayingSongId: String?,
+    currentPlayingTrackId: String?,
     isPlaying: Boolean,
-    onSongMoreOptionsClick: (Song) -> Unit,
+    onTrackMoreOptionsClick: (Track) -> Unit,
     navController: NavHostController
 ) {
     val localDensity = LocalDensity.current
@@ -654,18 +654,18 @@ fun SearchResultsList(
 
     val groupedResults = results.groupBy { item ->
         when (item) {
-            is SearchResultItem.SongItem -> SearchFilterType.SONGS
-            is SearchResultItem.AlbumItem -> SearchFilterType.ALBUMS
-            is SearchResultItem.ArtistItem -> SearchFilterType.ARTISTS
-            is SearchResultItem.PlaylistItem -> SearchFilterType.PLAYLISTS
+            is SearchResultItem.TrackItem -> SearchFilterType.Tracks
+            is SearchResultItem.BookItem -> SearchFilterType.Books
+            is SearchResultItem.AuthorItem -> SearchFilterType.Authors
+            is SearchResultItem.BooklistItem -> SearchFilterType.Booklists
         }
     }
 
     val sectionOrder = listOf(
-        SearchFilterType.SONGS,
-        SearchFilterType.ALBUMS,
-        SearchFilterType.ARTISTS,
-        SearchFilterType.PLAYLISTS
+        SearchFilterType.Tracks,
+        SearchFilterType.Books,
+        SearchFilterType.Authors,
+        SearchFilterType.Booklists
     )
 
     val imePadding = WindowInsets.ime.getBottom(localDensity).dp
@@ -685,10 +685,10 @@ fun SearchResultsList(
                 item(key = "header_${filterType.name}") {
                     SearchResultSectionHeader(
                         title = when (filterType) {
-                            SearchFilterType.SONGS -> "Songs"
-                            SearchFilterType.ALBUMS -> "Albums"
-                            SearchFilterType.ARTISTS -> "Artists"
-                            SearchFilterType.PLAYLISTS -> "Playlists"
+                            SearchFilterType.Tracks -> "Tracks"
+                            SearchFilterType.Books -> "Books"
+                            SearchFilterType.Authors -> "Authors"
+                            SearchFilterType.Booklists -> "Booklists"
                             else -> "Results"
                         }
                     )
@@ -699,111 +699,111 @@ fun SearchResultsList(
                     key = { index ->
                         val item = itemsForSection[index]
                         when (item) {
-                            is SearchResultItem.SongItem -> "song_${item.song.id}"
-                            is SearchResultItem.AlbumItem -> "album_${item.album.id}"
-                            is SearchResultItem.ArtistItem -> "artist_${item.artist.id}"
-                            is SearchResultItem.PlaylistItem -> "playlist_${item.playlist.id}_${index}"
+                            is SearchResultItem.TrackItem -> "Track_${item.Track.id}"
+                            is SearchResultItem.BookItem -> "Book_${item.Book.id}"
+                            is SearchResultItem.AuthorItem -> "Author_${item.Author.id}"
+                            is SearchResultItem.BooklistItem -> "Booklist_${item.Booklist.id}_${index}"
                         }
                     }
                 ) { index ->
                     val item = itemsForSection[index]
                     Box(modifier = Modifier.padding(bottom = 12.dp)) {
                         when (item) {
-                            is SearchResultItem.SongItem -> {
-                                val rememberedOnClick = remember(item.song, playerViewModel, onItemSelected) {
+                            is SearchResultItem.TrackItem -> {
+                                val rememberedOnClick = remember(item.Track, playerViewModel, onItemSelected) {
                                     {
-                                        playerViewModel.showAndPlaySong(item.song)
+                                        playerViewModel.showAndPlayTrack(item.Track)
                                         onItemSelected()
                                     }
                                 }
-                                EnhancedSongListItem(
-                                    song = item.song,
+                                EnhancedTrackListItem(
+                                    Track = item.Track,
                                     isPlaying = isPlaying,
-                                    isCurrentSong = currentPlayingSongId == item.song.id,
-                                    onMoreOptionsClick = onSongMoreOptionsClick,
+                                    isCurrentTrack = currentPlayingTrackId == item.Track.id,
+                                    onMoreOptionsClick = onTrackMoreOptionsClick,
                                     onClick = rememberedOnClick
                                 )
                             }
 
-                            is SearchResultItem.AlbumItem -> {
-                                val onPlayClick = remember(item.album, playerViewModel, onItemSelected) {
+                            is SearchResultItem.BookItem -> {
+                                val onPlayClick = remember(item.Book, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Album clicked: ${item.album.title}")
-                                        playerViewModel.playAlbum(item.album)
+                                            .d("Book clicked: ${item.Book.title}")
+                                        playerViewModel.playBook(item.Book)
                                         onItemSelected()
                                     }
                                 }
                                 val onOpenClick = remember (
-                                    item.album,
+                                    item.Book,
                                     playerViewModel, onItemSelected ) {
                                     {
-                                        navController.navigate(Screen.AlbumDetail.createRoute(item.album.id))
+                                        navController.navigate(Screen.BookDetail.createRoute(item.Book.id))
                                         onItemSelected()
                                     }
                                 }
-                                SearchResultAlbumItem(
-                                    album = item.album,
+                                SearchResultBookItem(
+                                    Book = item.Book,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
                             }
 
-                            is SearchResultItem.ArtistItem -> {
-                                val onPlayClick = remember(item.artist, playerViewModel, onItemSelected) {
+                            is SearchResultItem.AuthorItem -> {
+                                val onPlayClick = remember(item.Author, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Artist clicked: ${item.artist.name}")
-                                        playerViewModel.playArtist(item.artist)
+                                            .d("Author clicked: ${item.Author.name}")
+                                        playerViewModel.playAuthor(item.Author)
                                         onItemSelected()
                                     }
                                 }
                                 val onOpenClick = remember (
-                                    item.artist,
+                                    item.Author,
                                     playerViewModel, onItemSelected ) {
                                     {
-                                        navController.navigate(Screen.ArtistDetail.createRoute(item.artist.id))
+                                        navController.navigate(Screen.AuthorDetail.createRoute(item.Author.id))
                                         onItemSelected()
                                     }
                                 }
-                                SearchResultArtistItem(
-                                    artist = item.artist,
+                                SearchResultAuthorItem(
+                                    Author = item.Author,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
                             }
 
-                            is SearchResultItem.PlaylistItem -> {
-                                var songsInPlaylist by remember { mutableStateOf<List<Song>>(emptyList()) }
-                                var fetchSongs by remember { mutableStateOf(false) }
-                                LaunchedEffect(fetchSongs) {
-                                    songsInPlaylist = playerViewModel.getSongs( item.playlist.songIds)
+                            is SearchResultItem.BooklistItem -> {
+                                var TracksInBooklist by remember { mutableStateOf<List<Track>>(emptyList()) }
+                                var fetchTracks by remember { mutableStateOf(false) }
+                                LaunchedEffect(fetchTracks) {
+                                    TracksInBooklist = playerViewModel.getTracks( item.Booklist.TrackIds)
                                 }
-                                val onPlayClick = remember(item.playlist, playerViewModel, onItemSelected) {
+                                val onPlayClick = remember(item.Booklist, playerViewModel, onItemSelected) {
                                     {
-                                        fetchSongs = true
-                                        if (songsInPlaylist.isNotEmpty()) {
-                                            playerViewModel.playSongs(
-                                                songsInPlaylist,
-                                                songsInPlaylist.first(),
-                                                item.playlist.name
+                                        fetchTracks = true
+                                        if (TracksInBooklist.isNotEmpty()) {
+                                            playerViewModel.playTracks(
+                                                TracksInBooklist,
+                                                TracksInBooklist.first(),
+                                                item.Booklist.name
                                             )
                                             if (playerStableState.isShuffleEnabled) playerViewModel.toggleShuffle()
                                         } else
-                                            playerViewModel.sendToast("Empty playlist")
+                                            playerViewModel.sendToast("Empty Booklist")
                                         onItemSelected()
                                     }
                                 }
                                 val onOpenClick = remember (
-                                    item.playlist,
+                                    item.Booklist,
                                     playerViewModel, onItemSelected ) {
                                     {
-                                        navController.navigate(Screen.PlaylistDetail.createRoute(item.playlist.id))
+                                        navController.navigate(Screen.BooklistDetail.createRoute(item.Booklist.id))
                                         onItemSelected()
                                     }
                                 }
-                                SearchResultPlaylistItem(
-                                    playlist = item.playlist,
+                                SearchResultBooklistItem(
+                                    Booklist = item.Booklist,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
@@ -818,8 +818,8 @@ fun SearchResultsList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultAlbumItem(
-    album: Album,
+fun SearchResultBookItem(
+    Book: Book,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -851,8 +851,8 @@ fun SearchResultAlbumItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SmartImage(
-                model = album.albumArtUriString,
-                contentDescription = "Album Art: ${album.title}",
+                model = Book.BookArtUriString,
+                contentDescription = "Book Art: ${Book.title}",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(itemShape)
@@ -863,14 +863,14 @@ fun SearchResultAlbumItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = album.title,
+                    text = Book.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = album.artist,
+                    text = Book.Author,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -886,7 +886,7 @@ fun SearchResultAlbumItem(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Album", modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Book", modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -894,8 +894,8 @@ fun SearchResultAlbumItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultArtistItem(
-    artist: Artist,
+fun SearchResultAuthorItem(
+    Author: Author,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -927,8 +927,8 @@ fun SearchResultArtistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.rounded_artist_24),
-                contentDescription = "Artist",
+                painter = painterResource(id = R.drawable.rounded_Author_24),
+                contentDescription = "Author",
                 modifier = Modifier
                     .size(56.dp)
                     .background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
@@ -938,14 +938,14 @@ fun SearchResultArtistItem(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = artist.name,
+                    text = Author.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${artist.songCount} Songs",
+                    text = "${Author.TrackCount} Tracks",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -959,7 +959,7 @@ fun SearchResultArtistItem(
                     contentColor = MaterialTheme.colorScheme.onTertiary
                 )
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Artist", modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Author", modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -967,8 +967,8 @@ fun SearchResultArtistItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultPlaylistItem(
-    playlist: Playlist,
+fun SearchResultBooklistItem(
+    Booklist: Booklist,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -1000,8 +1000,8 @@ fun SearchResultPlaylistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Rounded.PlaylistPlay,
-                contentDescription = "Playlist",
+                imageVector = Icons.Rounded.BooklistPlay,
+                contentDescription = "Booklist",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(itemShape)
@@ -1012,7 +1012,7 @@ fun SearchResultPlaylistItem(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = playlist.name,
+                    text = Booklist.name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -1027,7 +1027,7 @@ fun SearchResultPlaylistItem(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Playlist", modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Booklist", modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -1037,14 +1037,14 @@ fun SearchResultPlaylistItem(
 @Composable
 fun SearchFilterChip(
     filterType: SearchFilterType,
-    currentFilter: SearchFilterType, // Este valor debería provenir del estado de tu PlayerViewModel
+    currentFilter: SearchFilterType, // Este valor deberÃƒÂ­a provenir del estado de tu PlayerViewModel
     playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
     val selected = filterType == currentFilter
 
     FilterChip(
-        selected = selected, // FilterChip tiene un parámetro 'selected'
+        selected = selected, // FilterChip tiene un parÃƒÂ¡metro 'selected'
         onClick = { playerViewModel.updateSearchFilter(filterType) },
         label = { Text(filterType.name.lowercase().replaceFirstChar { it.titlecase() }) },
         modifier = modifier,

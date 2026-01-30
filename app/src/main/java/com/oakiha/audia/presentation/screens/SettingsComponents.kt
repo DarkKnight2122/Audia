@@ -68,7 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.worker.SyncProgress
-import com.oakiha.audia.presentation.viewmodel.LyricsRefreshProgress
+import com.oakiha.audia.presentation.viewmodel.TranscriptRefreshProgress
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import androidx.compose.ui.res.vectorResource
 
@@ -468,7 +468,7 @@ fun RefreshLibraryItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                             text =
-                                    "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} songs",
+                                    "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} Tracks",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -476,7 +476,7 @@ fun RefreshLibraryItem(
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                            text = "Refreshing library…",
+                            text = "Refreshing libraryÃ¢â‚¬Â¦",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -487,9 +487,9 @@ fun RefreshLibraryItem(
 }
 
 @Composable
-fun RefreshLyricsItem(
+fun RefreshTranscriptItem(
         isRefreshing: Boolean,
-        progress: LyricsRefreshProgress,
+        progress: TranscriptRefreshProgress,
         onRefresh: () -> Unit
 ) {
     Surface(
@@ -506,7 +506,7 @@ fun RefreshLyricsItem(
                         contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                            painter = painterResource(id = R.drawable.rounded_lyrics_24),
+                            painter = painterResource(id = R.drawable.rounded_Transcript_24),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary
                     )
@@ -517,12 +517,12 @@ fun RefreshLyricsItem(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                            text = "Refresh Lyrics",
+                            text = "Refresh Transcript",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                            text = "Automatically fetch lyrics for all songs using lrclib.",
+                            text = "Automatically fetch Transcript for all Tracks using lrclib.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -538,7 +538,7 @@ fun RefreshLyricsItem(
                 ) {
                     Icon(
                             imageVector = Icons.Outlined.Sync,
-                            contentDescription = "Refresh lyrics",
+                            contentDescription = "Refresh Transcript",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -553,7 +553,7 @@ fun RefreshLyricsItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                         text =
-                                "Processing ${progress.currentCount} of ${progress.totalSongs} songs",
+                                "Processing ${progress.currentCount} of ${progress.totalTracks} Tracks",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

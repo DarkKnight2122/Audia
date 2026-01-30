@@ -6,16 +6,16 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface LyricsDao {
+interface TranscriptDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(lyrics: LyricsEntity)
+    suspend fun insert(Transcript: TranscriptEntity)
 
-    @Query("SELECT * FROM lyrics WHERE songId = :songId")
-    suspend fun getLyrics(songId: Long): LyricsEntity?
+    @Query("SELECT * FROM Transcript WHERE TrackId = :TrackId")
+    suspend fun getTranscript(TrackId: Long): TranscriptEntity?
 
-    @Query("DELETE FROM lyrics WHERE songId = :songId")
-    suspend fun deleteLyrics(songId: Long)
+    @Query("DELETE FROM Transcript WHERE TrackId = :TrackId")
+    suspend fun deleteTranscript(TrackId: Long)
 
-    @Query("DELETE FROM lyrics")
+    @Query("DELETE FROM Transcript")
     suspend fun deleteAll()
 }

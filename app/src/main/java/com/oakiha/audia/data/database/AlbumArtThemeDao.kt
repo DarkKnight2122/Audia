@@ -6,13 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface AlbumArtThemeDao {
+interface BookArtThemeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTheme(theme: AlbumArtThemeEntity)
+    suspend fun insertTheme(theme: BookArtThemeEntity)
 
-    @Query("SELECT * FROM album_art_themes WHERE albumArtUriString = :uriString")
-    suspend fun getThemeByUri(uriString: String): AlbumArtThemeEntity?
+    @Query("SELECT * FROM Book_art_themes WHERE BookArtUriString = :uriString")
+    suspend fun getThemeByUri(uriString: String): BookArtThemeEntity?
 
-    @Query("DELETE FROM album_art_themes WHERE albumArtUriString IN (:uriStrings)")
+    @Query("DELETE FROM Book_art_themes WHERE BookArtUriString IN (:uriStrings)")
     suspend fun deleteThemesByUris(uriStrings: List<String>)
 }

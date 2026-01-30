@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository // Importar MusicRepository
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.AudiobookRepository // Importar AudiobookRepository
 import com.oakiha.audia.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,62 +19,62 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class AlbumDetailUiState(
-    val album: Album? = null,
-    val songs: List<Song> = emptyList(),
+data class BookDetailUiState(
+    val Book: Book? = null,
+    val Tracks: List<Track> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
 @HiltViewModel
-class AlbumDetailViewModel @Inject constructor(
+class BookDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository,
+    private val AudiobookRepository: AudiobookRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AlbumDetailUiState())
-    val uiState: StateFlow<AlbumDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(BookDetailUiState())
+    val uiState: StateFlow<BookDetailUiState> = _uiState.asStateFlow()
 
     init {
-        val albumIdString: String? = savedStateHandle.get("albumId")
-        if (albumIdString != null) {
-            val albumId = albumIdString.toLongOrNull()
-            if (albumId != null) {
-                loadAlbumData(albumId)
+        val BookIdString: String? = savedStateHandle.get("BookId")
+        if (BookIdString != null) {
+            val BookId = BookIdString.toLongOrNull()
+            if (BookId != null) {
+                loadBookData(BookId)
             } else {
-                _uiState.update { it.copy(error = context.getString(R.string.invalid_album_id), isLoading = false) }
+                _uiState.update { it.copy(error = context.getString(R.string.invalid_Book_id), isLoading = false) }
             }
         } else {
-            _uiState.update { it.copy(error = context.getString(R.string.album_id_not_found), isLoading = false) }
+            _uiState.update { it.copy(error = context.getString(R.string.Book_id_not_found), isLoading = false) }
         }
     }
 
-    private fun loadAlbumData(id: Long) {
+    private fun loadBookData(id: Long) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val albumDetailsFlow = musicRepository.getAlbumById(id)
-                val albumSongsFlow = musicRepository.getSongsForAlbum(id)
+                val BookDetailsFlow = AudiobookRepository.getBookById(id)
+                val BookTracksFlow = AudiobookRepository.getTracksForBook(id)
 
-                combine(albumDetailsFlow, albumSongsFlow) { album, songs ->
-                    if (album != null) {
-                        AlbumDetailUiState(
-                            album = album,
-                            songs = songs.sortedBy { it.trackNumber },
+                combine(BookDetailsFlow, BookTracksFlow) { Book, Tracks ->
+                    if (Book != null) {
+                        BookDetailUiState(
+                            Book = Book,
+                            Tracks = Tracks.sortedBy { it.trackNumber },
                             isLoading = false
                         )
                     } else {
-                        AlbumDetailUiState(
-                            error = context.getString(R.string.album_not_found),
+                        BookDetailUiState(
+                            error = context.getString(R.string.Book_not_found),
                             isLoading = false
                         )
                     }
                 }
                     .catch { e ->
                         emit(
-                            AlbumDetailUiState(
-                                error = context.getString(R.string.error_loading_album, e.localizedMessage ?: ""),
+                            BookDetailUiState(
+                                error = context.getString(R.string.error_loading_Book, e.localizedMessage ?: ""),
                                 isLoading = false
                             )
                         )
@@ -86,7 +86,7 @@ class AlbumDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        error = context.getString(R.string.error_loading_album, e.localizedMessage ?: ""),
+                        error = context.getString(R.string.error_loading_Book, e.localizedMessage ?: ""),
                         isLoading = false
                     )
                 }
@@ -94,11 +94,11 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    fun update(songs: List<Song>) {
+    fun update(Tracks: List<Track>) {
         _uiState.update {
             it.copy(
                 isLoading = false,
-                songs = songs
+                Tracks = Tracks
             )
         }
     }

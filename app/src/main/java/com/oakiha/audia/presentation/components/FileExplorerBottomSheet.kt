@@ -436,7 +436,7 @@ private fun ExplorerLoadingState() {
         ContainedLoadingIndicator()
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Loading folders…",
+            text = "Loading foldersâ€¦",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -528,7 +528,7 @@ private fun FileExplorerItem(
             ) {
                 val displayCount = if (audioCount > 99) "99+" else audioCount.toString()
                 Text(
-                    text = if (audioCount == 1) "1 song" else "$displayCount songs",
+                    text = if (audioCount == 1) "1 Track" else "$displayCount Tracks",
                     style = MaterialTheme.typography.labelMedium,
                     color = badgeColor,
                     maxLines = 1,
@@ -580,7 +580,7 @@ private fun FileExplorerHeader(
     onNavigateTo: (File) -> Unit,
     navigationEnabled: Boolean
 ) {
-    // 1. Cambiamos ScrollState por LazyListState para manejar mejor los ítems y el scroll automático
+    // 1. Cambiamos ScrollState por LazyListState para manejar mejor los Ã­tems y el scroll automÃ¡tico
     val listState = rememberLazyListState()
 
     val breadcrumbs by remember(currentPath, rootDirectory) {
@@ -603,7 +603,7 @@ private fun FileExplorerHeader(
         }
     }
 
-    // 2. Lógica para detectar si hay contenido oculto a los lados
+    // 2. LÃ³gica para detectar si hay contenido oculto a los lados
     val showStartFade by remember { derivedStateOf { listState.canScrollBackward } }
     val showEndFade by remember { derivedStateOf { listState.canScrollForward } }
 
@@ -616,7 +616,7 @@ private fun FileExplorerHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Botón de "Atrás" (Back Arrow) - Se mantiene igual fuera del scroll
+            // BotÃ³n de "AtrÃ¡s" (Back Arrow) - Se mantiene igual fuera del scroll
             if (!isAtRoot && navigationEnabled) {
                 IconButton(
                     onClick = onNavigateUp,
@@ -640,13 +640,13 @@ private fun FileExplorerHeader(
                     }
                 }
 
-                // 4. Reemplazamos el Row + horizontalScroll por LazyRow con el efecto gráfico
+                // 4. Reemplazamos el Row + horizontalScroll por LazyRow con el efecto grÃ¡fico
                 LazyRow(
                     state = listState,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .weight(1f)
-                        // APLICACIÓN DEL EFECTO DE GRADIENTE
+                        // APLICACIÃ“N DEL EFECTO DE GRADIENTE
                         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                         .drawWithContent {
                             drawContent()
@@ -675,7 +675,7 @@ private fun FileExplorerHeader(
                             }
                         }
                 ) {
-                    // Spacer inicial para que el primer ítem no quede pegado al borde o debajo del fade
+                    // Spacer inicial para que el primer Ã­tem no quede pegado al borde o debajo del fade
                     item { Spacer(modifier = Modifier.width(4.dp)) }
 
                     items(breadcrumbs.size) { index ->
@@ -688,7 +688,7 @@ private fun FileExplorerHeader(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            // Diseño del Chip (Mantenemos tu estilo visual original)
+                            // DiseÃ±o del Chip (Mantenemos tu estilo visual original)
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
@@ -743,7 +743,7 @@ private fun FileExplorerHeader(
                         }
                     }
 
-                    // Spacer final para dar aire al último elemento
+                    // Spacer final para dar aire al Ãºltimo elemento
                     item { Spacer(modifier = Modifier.width(12.dp)) }
                 }
             }

@@ -11,24 +11,24 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.oakiha.audia.AudioBookApp
-import com.oakiha.audia.data.database.AlbumArtThemeDao
+import com.oakiha.audia.data.database.BookArtThemeDao
 import com.oakiha.audia.data.database.EngagementDao
 import com.oakiha.audia.data.database.FavoritesDao
-import com.oakiha.audia.data.database.LyricsDao
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.TranscriptDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.database.AudioBookDatabase
 import com.oakiha.audia.data.database.SearchHistoryDao
 import com.oakiha.audia.data.database.TransitionDao
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.preferences.dataStore
-import com.oakiha.audia.data.media.SongMetadataEditor
+import com.oakiha.audia.data.media.TrackMetadataEditor
 import com.oakiha.audia.data.network.deezer.DeezerApiService
-import com.oakiha.audia.data.network.lyrics.LrcLibApiService
-import com.oakiha.audia.data.repository.ArtistImageRepository
-import com.oakiha.audia.data.repository.LyricsRepository
-import com.oakiha.audia.data.repository.LyricsRepositoryImpl
-import com.oakiha.audia.data.repository.MusicRepository
-import com.oakiha.audia.data.repository.MusicRepositoryImpl
+import com.oakiha.audia.data.network.Transcript.LrcLibApiService
+import com.oakiha.audia.data.repository.AuthorImageRepository
+import com.oakiha.audia.data.repository.TranscriptRepository
+import com.oakiha.audia.data.repository.TranscriptRepositoryImpl
+import com.oakiha.audia.data.repository.AudiobookRepository
+import com.oakiha.audia.data.repository.AudiobookRepositoryImpl
 import com.oakiha.audia.data.repository.TransitionRepository
 import com.oakiha.audia.data.repository.TransitionRepositoryImpl
 import dagger.Module
@@ -94,20 +94,20 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAlbumArtThemeDao(database: AudioBookDatabase): AlbumArtThemeDao {
-        return database.albumArtThemeDao()
+    fun provideBookArtThemeDao(database: AudioBookDatabase): BookArtThemeDao {
+        return database.BookArtThemeDao()
     }
 
     @Singleton
     @Provides
-    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÉTODO
+    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÃƒâ€°TODO
         return database.searchHistoryDao()
     }
 
     @Singleton
     @Provides
-    fun provideMusicDao(database: AudioBookDatabase): MusicDao { // Proveer MusicDao
-        return database.musicDao()
+    fun provideAudiobookDao(database: AudioBookDatabase): AudiobookDao { // Proveer AudiobookDao
+        return database.AudiobookDao()
     }
 
     @Singleton
@@ -130,8 +130,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideLyricsDao(database: AudioBookDatabase): LyricsDao {
-        return database.lyricsDao()
+    fun provideTranscriptDao(database: AudioBookDatabase): TranscriptDao {
+        return database.TranscriptDao()
     }
 
     @Provides
@@ -159,29 +159,29 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLyricsRepository(
+    fun provideTranscriptRepository(
         @ApplicationContext context: Context,
         lrcLibApiService: LrcLibApiService,
-        musicDao: MusicDao,
-        lyricsDao: LyricsDao
-    ): LyricsRepository {
-        return LyricsRepositoryImpl(
+        AudiobookDao: AudiobookDao,
+        TranscriptDao: TranscriptDao
+    ): TranscriptRepository {
+        return TranscriptRepositoryImpl(
             context = context,
             lrcLibApiService = lrcLibApiService,
-            //musicDao = musicDao,
-            lyricsDao = lyricsDao
+            //AudiobookDao = AudiobookDao,
+            TranscriptDao = TranscriptDao
         )
     }
 
     @Provides
     @Singleton
-    fun provideSongRepository(
+    fun provideTrackRepository(
         @ApplicationContext context: Context,
         mediaStoreObserver: com.oakiha.audia.data.observer.MediaStoreObserver,
         favoritesDao: FavoritesDao,
         userPreferencesRepository: UserPreferencesRepository
-    ): com.oakiha.audia.data.repository.SongRepository {
-        return com.oakiha.audia.data.repository.MediaStoreSongRepository(
+    ): com.oakiha.audia.data.repository.TrackRepository {
+        return com.oakiha.audia.data.repository.MediaStoreTrackRepository(
             context = context,
             mediaStoreObserver = mediaStoreObserver,
             favoritesDao = favoritesDao,
@@ -191,22 +191,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMusicRepository(
+    fun provideAudiobookRepository(
         @ApplicationContext context: Context,
         userPreferencesRepository: UserPreferencesRepository,
         searchHistoryDao: SearchHistoryDao,
-        musicDao: MusicDao,
-        lyricsRepository: LyricsRepository,
-        songRepository: com.oakiha.audia.data.repository.SongRepository,
+        AudiobookDao: AudiobookDao,
+        TranscriptRepository: TranscriptRepository,
+        TrackRepository: com.oakiha.audia.data.repository.TrackRepository,
         favoritesDao: FavoritesDao
-    ): MusicRepository {
-        return MusicRepositoryImpl(
+    ): AudiobookRepository {
+        return AudiobookRepositoryImpl(
             context = context,
             userPreferencesRepository = userPreferencesRepository,
             searchHistoryDao = searchHistoryDao,
-            musicDao = musicDao,
-            lyricsRepository = lyricsRepository,
-            songRepository = songRepository,
+            AudiobookDao = AudiobookDao,
+            TranscriptRepository = TranscriptRepository,
+            TrackRepository = TrackRepository,
             favoritesDao = favoritesDao
         )
     }
@@ -221,8 +221,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSongMetadataEditor(@ApplicationContext context: Context, musicDao: MusicDao): SongMetadataEditor {
-        return SongMetadataEditor(context, musicDao)
+    fun provideTrackMetadataEditor(@ApplicationContext context: Context, AudiobookDao: AudiobookDao): TrackMetadataEditor {
+        return TrackMetadataEditor(context, AudiobookDao)
     }
 
     /**
@@ -286,7 +286,7 @@ object AppModule {
     }
 
     /**
-     * Provee una instancia de OkHttpClient con timeouts para búsquedas de lyrics.
+     * Provee una instancia de OkHttpClient con timeouts para bÃƒÂºsquedas de Transcript.
      * Includes DNS resolver, modern TLS, connection pool, and retry logic.
      */
     @Provides
@@ -389,14 +389,14 @@ object AppModule {
     }
 
     /**
-     * Provee el repositorio de imágenes de artistas.
+     * Provee el repositorio de imÃƒÂ¡genes de Authoras.
      */
     @Provides
     @Singleton
-    fun provideArtistImageRepository(
+    fun provideAuthorImageRepository(
         deezerApiService: DeezerApiService,
-        musicDao: MusicDao
-    ): ArtistImageRepository {
-        return ArtistImageRepository(deezerApiService, musicDao)
+        AudiobookDao: AudiobookDao
+    ): AuthorImageRepository {
+        return AuthorImageRepository(deezerApiService, AudiobookDao)
     }
 }

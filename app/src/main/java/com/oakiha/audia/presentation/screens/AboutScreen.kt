@@ -226,7 +226,7 @@ fun AboutScreen(
 
     var showBrickBreaker by remember { mutableStateOf(false) }
     val stablePlayerState by viewModel.stablePlayerState.collectAsState()
-    val currentSong = stablePlayerState.currentSong
+    val currentTrack = stablePlayerState.currentTrack
 
     Box(
         modifier = Modifier
@@ -355,8 +355,8 @@ fun AboutScreen(
         if (showBrickBreaker) {
             BackHandler { showBrickBreaker = false }
             BrickBreakerOverlay(
-                isMiniPlayerVisible = currentSong != null,
-                onPlayRandom = { viewModel.playRandomSong() },
+                isMiniPlayerVisible = currentTrack != null,
+                onPlayRandom = { viewModel.playRandomTrack() },
                 onClose = { showBrickBreaker = false }
             )
         }
@@ -498,7 +498,7 @@ private fun ContributorAvatar(
                     modifier = Modifier.fillMaxSize(),
                     shape = CircleShape,
                     contentScale = ContentScale.Crop,
-                    placeholderResId = iconRes ?: R.drawable.ic_music_placeholder,
+                    placeholderResId = iconRes ?: R.drawable.ic_Audiobook_placeholder,
                     errorResId = R.drawable.rounded_broken_image_24,
                     targetSize = Size(96, 96),
                     onState = { state ->

@@ -14,7 +14,7 @@ fun Color.toHexString(): String {
 /**
  * Attempts to fix incorrectly encoded metadata strings that frequently appear when
  * tags are saved using Windows-1252/ISO-8859-1 but are later read as UTF-8. This results
- * in characters such as "Ã", "â" or replacement symbols appearing instead of expected
+ * in characters such as "Ãƒ", "Ã¢" or replacement symbols appearing instead of expected
  * punctuation. The function re-encodes the text when those patterns are detected and
  * removes stray control characters while keeping the original text when no adjustment
  * is necessary.
@@ -24,7 +24,7 @@ fun String?.normalizeMetadataText(): String? {
     val trimmed = this.trim()
     if (trimmed.isEmpty()) return trimmed
 
-    val suspiciousPatterns = listOf("Ã", "â", "�", "ð", "Ÿ")
+    val suspiciousPatterns = listOf("Ãƒ", "Ã¢", "ï¿½", "Ã°", "Å¸")
     val needsFix = suspiciousPatterns.any { trimmed.contains(it) }
 
     val reencoded = if (needsFix) {
@@ -45,9 +45,9 @@ fun String?.normalizeMetadataTextOrEmpty(): String {
 }
 
 /**
- * Escape sequence for delimiters in artist names.
+ * Escape sequence for delimiters in Author names.
  * Use double backslash (\\) before a delimiter to prevent splitting at that position.
- * Example: "AC\\\\DC" with delimiter "/" won't split, but "Artist1/Artist2" will.
+ * Example: "AC\\\\DC" with delimiter "/" won't split, but "Author1/Author2" will.
  */
 private const val ESCAPE_SEQUENCE = "\\\\"
 
@@ -57,19 +57,19 @@ private const val ESCAPE_SEQUENCE = "\\\\"
 private const val ESCAPE_PLACEHOLDER = "\u0000ESCAPED\u0000"
 
 /**
- * Splits an artist string by the given delimiters, respecting escaped delimiters.
+ * Splits an Author string by the given delimiters, respecting escaped delimiters.
  * 
  * @param delimiters List of delimiter strings to split by (e.g., ["/", ";", ","])
- * @return List of individual artist names, trimmed and with escaped delimiters restored.
+ * @return List of individual Author names, trimmed and with escaped delimiters restored.
  *         Returns a single-element list with the original string if no splitting occurs.
  *
  * Examples:
- * - "Artist1/Artist2".splitArtistsByDelimiters(listOf("/")) -> ["Artist1", "Artist2"]
- * - "AC\\DC".splitArtistsByDelimiters(listOf("/")) -> ["AC/DC"] (escaped)
- * - "A/B;C".splitArtistsByDelimiters(listOf("/", ";")) -> ["A", "B", "C"]
- * - "  Artist  ".splitArtistsByDelimiters(listOf("/")) -> ["Artist"] (trimmed)
+ * - "Author1/Author2".splitAuthorsByDelimiters(listOf("/")) -> ["Author1", "Author2"]
+ * - "AC\\DC".splitAuthorsByDelimiters(listOf("/")) -> ["AC/DC"] (escaped)
+ * - "A/B;C".splitAuthorsByDelimiters(listOf("/", ";")) -> ["A", "B", "C"]
+ * - "  Author  ".splitAuthorsByDelimiters(listOf("/")) -> ["Author"] (trimmed)
  */
-fun String.splitArtistsByDelimiters(delimiters: List<String>): List<String> {
+fun String.splitAuthorsByDelimiters(delimiters: List<String>): List<String> {
     if (delimiters.isEmpty() || this.isBlank()) {
         return listOf(this.trim()).filter { it.isNotEmpty() }
     }
@@ -112,11 +112,11 @@ fun String.splitArtistsByDelimiters(delimiters: List<String>): List<String> {
 }
 
 /**
- * Joins a list of artist names into a display string.
+ * Joins a list of Author names into a display string.
  * 
- * @param separator The separator to use between artist names (default: ", ")
- * @return A formatted string with all artist names joined.
+ * @param separator The separator to use between Author names (default: ", ")
+ * @return A formatted string with all Author names joined.
  */
-fun List<String>.joinArtistsForDisplay(separator: String = ", "): String {
+fun List<String>.joinAuthorsForDisplay(separator: String = ", "): String {
     return this.joinToString(separator)
 }

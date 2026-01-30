@@ -5,54 +5,54 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.ArtistRef
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.AuthorRef
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.utils.normalizeMetadataText
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "songs",
+    tableName = "Tracks",
     indices = [
         Index(value = ["title"], unique = false),
-        Index(value = ["album_id"], unique = false),
-        Index(value = ["artist_id"], unique = false),
-        Index(value = ["artist_name"], unique = false), // Nuevo índice para búsquedas por nombre de artista
-        Index(value = ["genre"], unique = false),
-        Index(value = ["parent_directory_path"], unique = false) // Índice para filtrado por directorio
+        Index(value = ["Book_id"], unique = false),
+        Index(value = ["Author_id"], unique = false),
+        Index(value = ["Author_name"], unique = false), // Nuevo ÃƒÂ­ndice para bÃƒÂºsquedas por nombre de Authora
+        Index(value = ["Category"], unique = false),
+        Index(value = ["parent_directory_path"], unique = false) // ÃƒÂndice para filtrado por directorio
     ],
     foreignKeys = [
         ForeignKey(
-            entity = AlbumEntity::class,
+            entity = BookEntity::class,
             parentColumns = ["id"],
-            childColumns = ["album_id"],
-            onDelete = ForeignKey.CASCADE // Si un álbum se borra, sus canciones también
+            childColumns = ["Book_id"],
+            onDelete = ForeignKey.CASCADE // Si un ÃƒÂ¡lbum se borra, sus canciones tambiÃƒÂ©n
         ),
         ForeignKey(
-            entity = ArtistEntity::class,
+            entity = AuthorEntity::class,
             parentColumns = ["id"],
-            childColumns = ["artist_id"],
-            onDelete = ForeignKey.SET_NULL // Si un artista se borra, el artist_id de la canción se pone a null
-                                          // o podrías elegir CASCADE si las canciones no deben existir sin artista.
-                                          // SET_NULL es más flexible si las canciones pueden ser de "Artista Desconocido".
+            childColumns = ["Author_id"],
+            onDelete = ForeignKey.SET_NULL // Si un Authora se borra, el Author_id de la canciÃƒÂ³n se pone a null
+                                          // o podrÃƒÂ­as elegir CASCADE si las canciones no deben existir sin Authora.
+                                          // SET_NULL es mÃƒÂ¡s flexible si las canciones pueden ser de "Authora Desconocido".
         )
     ]
 )
-data class SongEntity(
+data class TrackEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "artist_name") val artistName: String, // Display string (combined or primary)
-    @ColumnInfo(name = "artist_id") val artistId: Long, // Primary artist ID for backward compatibility
-    @ColumnInfo(name = "album_artist") val albumArtist: String? = null, // Album artist from metadata
-    @ColumnInfo(name = "album_name") val albumName: String,
-    @ColumnInfo(name = "album_id") val albumId: Long, // index = true eliminado
+    @ColumnInfo(name = "Author_name") val AuthorName: String, // Display string (combined or primary)
+    @ColumnInfo(name = "Author_id") val AuthorId: Long, // Primary Author ID for backward compatibility
+    @ColumnInfo(name = "Book_Author") val BookAuthor: String? = null, // Book Author from metadata
+    @ColumnInfo(name = "Book_name") val BookName: String,
+    @ColumnInfo(name = "Book_id") val BookId: Long, // index = true eliminado
     @ColumnInfo(name = "content_uri_string") val contentUriString: String,
-    @ColumnInfo(name = "album_art_uri_string") val albumArtUriString: String?,
+    @ColumnInfo(name = "Book_art_uri_string") val BookArtUriString: String?,
     @ColumnInfo(name = "duration") val duration: Long,
-    @ColumnInfo(name = "genre") val genre: String?,
+    @ColumnInfo(name = "Category") val Category: String?,
     @ColumnInfo(name = "file_path") val filePath: String, // Added filePath
     @ColumnInfo(name = "parent_directory_path") val parentDirectoryPath: String, // Added for directory filtering
     @ColumnInfo(name = "is_favorite", defaultValue = "0") val isFavorite: Boolean = false,
-    @ColumnInfo(name = "lyrics", defaultValue = "null") val lyrics: String? = null,
+    @ColumnInfo(name = "Transcript", defaultValue = "null") val Transcript: String? = null,
     @ColumnInfo(name = "track_number", defaultValue = "0") val trackNumber: Int = 0,
     @ColumnInfo(name = "year", defaultValue = "0") val year: Int = 0,
     @ColumnInfo(name = "date_added", defaultValue = "0") val dateAdded: Long = System.currentTimeMillis(),
@@ -61,22 +61,22 @@ data class SongEntity(
     @ColumnInfo(name = "sample_rate") val sampleRate: Int? = null // Hz
 )
 
-fun SongEntity.toSong(): Song {
-    return Song(
+fun TrackEntity.toTrack(): Track {
+    return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        artistId = this.artistId,
-        artists = emptyList(), // Will be populated from junction table when needed
-        album = this.albumName.normalizeMetadataTextOrEmpty(),
-        albumId = this.albumId,
-        albumArtist = this.albumArtist?.normalizeMetadataText(),
+        Author = this.AuthorName.normalizeMetadataTextOrEmpty(),
+        AuthorId = this.AuthorId,
+        Authors = emptyList(), // Will be populated from junction table when needed
+        Book = this.BookName.normalizeMetadataTextOrEmpty(),
+        BookId = this.BookId,
+        BookAuthor = this.BookAuthor?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        BookArtUriString = this.BookArtUriString,
         duration = this.duration,
-        genre = this.genre.normalizeMetadataText(),
-        lyrics = this.lyrics?.normalizeMetadataText(),
+        Category = this.Category.normalizeMetadataText(),
+        Transcript = this.Transcript?.normalizeMetadataText(),
         isFavorite = this.isFavorite,
         trackNumber = this.trackNumber,
         dateAdded = this.dateAdded,
@@ -88,34 +88,34 @@ fun SongEntity.toSong(): Song {
 }
 
 /**
- * Converts a SongEntity to Song with artists from the junction table.
+ * Converts a TrackEntity to Track with Authors from the junction table.
  */
-fun SongEntity.toSongWithArtistRefs(artists: List<ArtistEntity>, crossRefs: List<SongArtistCrossRef>): Song {
-    val crossRefByArtistId = crossRefs.associateBy { it.artistId }
-    val artistRefs = artists.map { artist ->
-        val crossRef = crossRefByArtistId[artist.id]
-        ArtistRef(
-            id = artist.id,
-            name = artist.name.normalizeMetadataTextOrEmpty(),
+fun TrackEntity.toTrackWithAuthorRefs(Authors: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Track {
+    val crossRefByAuthorId = crossRefs.associateBy { it.AuthorId }
+    val AuthorRefs = Authors.map { Author ->
+        val crossRef = crossRefByAuthorId[Author.id]
+        AuthorRef(
+            id = Author.id,
+            name = Author.name.normalizeMetadataTextOrEmpty(),
             isPrimary = crossRef?.isPrimary ?: false
         )
     }.sortedByDescending { it.isPrimary }
     
-    return Song(
+    return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        artistId = this.artistId,
-        artists = artistRefs,
-        album = this.albumName.normalizeMetadataTextOrEmpty(),
-        albumId = this.albumId,
-        albumArtist = this.albumArtist?.normalizeMetadataText(),
+        Author = this.AuthorName.normalizeMetadataTextOrEmpty(),
+        AuthorId = this.AuthorId,
+        Authors = AuthorRefs,
+        Book = this.BookName.normalizeMetadataTextOrEmpty(),
+        BookId = this.BookId,
+        BookAuthor = this.BookAuthor?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        BookArtUriString = this.BookArtUriString,
         duration = this.duration,
-        genre = this.genre.normalizeMetadataText(),
-        lyrics = this.lyrics?.normalizeMetadataText(),
+        Category = this.Category.normalizeMetadataText(),
+        Transcript = this.Transcript?.normalizeMetadataText(),
         isFavorite = this.isFavorite,
         trackNumber = this.trackNumber,
         dateAdded = this.dateAdded,
@@ -126,27 +126,27 @@ fun SongEntity.toSongWithArtistRefs(artists: List<ArtistEntity>, crossRefs: List
     )
 }
 
-fun List<SongEntity>.toSongs(): List<Song> {
-    return this.map { it.toSong() }
+fun List<TrackEntity>.toTracks(): List<Track> {
+    return this.map { it.toTrack() }
 }
 
-// El modelo Song usa id como String, pero la entidad lo necesita como Long (de MediaStore)
-// El modelo Song no tiene filePath, así que no se puede mapear desde ahí directamente.
-// filePath y parentDirectoryPath se poblarán desde MediaStore en el SyncWorker.
-fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: String): SongEntity {
-    return SongEntity(
-        id = this.id.toLong(), // Asumiendo que el ID del modelo Song puede convertirse a Long
+// El modelo Track usa id como String, pero la entidad lo necesita como Long (de MediaStore)
+// El modelo Track no tiene filePath, asÃƒÂ­ que no se puede mapear desde ahÃƒÂ­ directamente.
+// filePath y parentDirectoryPath se poblarÃƒÂ¡n desde MediaStore en el SyncWorker.
+fun Track.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: String): TrackEntity {
+    return TrackEntity(
+        id = this.id.toLong(), // Asumiendo que el ID del modelo Track puede convertirse a Long
         title = this.title,
-        artistName = this.artist,
-        artistId = this.artistId,
-        albumArtist = this.albumArtist,
-        albumName = this.album,
-        albumId = this.albumId,
+        AuthorName = this.Author,
+        AuthorId = this.AuthorId,
+        BookAuthor = this.BookAuthor,
+        BookName = this.Book,
+        BookId = this.BookId,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        BookArtUriString = this.BookArtUriString,
         duration = this.duration,
-        genre = this.genre,
-        lyrics = this.lyrics,
+        Category = this.Category,
+        Transcript = this.Transcript,
         filePath = filePathFromMediaStore,
         parentDirectoryPath = parentDirFromMediaStore,
         dateAdded = this.dateAdded,
@@ -157,22 +157,22 @@ fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Strin
     )
 }
 
-// Sobrecarga o alternativa si los paths no están disponibles o no son necesarios al convertir de Modelo a Entidad
+// Sobrecarga o alternativa si los paths no estÃƒÂ¡n disponibles o no son necesarios al convertir de Modelo a Entidad
 // (menos probable que se use si la entidad siempre requiere los paths)
-fun Song.toEntityWithoutPaths(): SongEntity {
-    return SongEntity(
+fun Track.toEntityWithoutPaths(): TrackEntity {
+    return TrackEntity(
         id = this.id.toLong(),
         title = this.title,
-        artistName = this.artist,
-        artistId = this.artistId,
-        albumArtist = this.albumArtist,
-        albumName = this.album,
-        albumId = this.albumId,
+        AuthorName = this.Author,
+        AuthorId = this.AuthorId,
+        BookAuthor = this.BookAuthor,
+        BookName = this.Book,
+        BookId = this.BookId,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        BookArtUriString = this.BookArtUriString,
         duration = this.duration,
-        genre = this.genre,
-        lyrics = this.lyrics,
+        Category = this.Category,
+        Transcript = this.Transcript,
         filePath = "", // Default o manejar como no disponible
         parentDirectoryPath = "", // Default o manejar como no disponible
         dateAdded = this.dateAdded,

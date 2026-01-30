@@ -19,19 +19,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.filled.AudiobookNote
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.MicExternalOn
-import androidx.compose.material.icons.outlined.MusicVideo
+import androidx.compose.material.icons.outlined.AudiobookVideo
 import androidx.compose.material.icons.outlined.Piano
-import androidx.compose.material.icons.outlined.QueueMusic
+import androidx.compose.material.icons.outlined.QueueAudiobook
 import androidx.compose.material.icons.outlined.Speaker
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
-import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
+import androidx.compose.material.icons.automirrored.rounded.BooklistPlay
 import com.oakiha.audia.utils.getContrastColor
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -73,26 +73,26 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Booklist
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.subcomps.SineWaveLine
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.screens.PlayerSheetCollapsedCornerRadius
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistUiState
-import com.oakiha.audia.data.model.PlaylistShapeType
+import com.oakiha.audia.presentation.viewmodel.BooklistUiState
+import com.oakiha.audia.data.model.BooklistshapeType
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.MicExternalOn
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Piano
-import androidx.compose.material.icons.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.QueueAudiobook
 import androidx.compose.material.icons.rounded.Speaker
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
@@ -103,28 +103,28 @@ import kotlin.collections.set
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PlaylistContainer(
-    playlistUiState: PlaylistUiState,
+fun BooklistContainer(
+    BooklistUiState: BooklistUiState,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     bottomBarHeight: Dp,
-    currentSong: Song? = null,
+    currentTrack: Track? = null,
     navController: NavController?,
     playerViewModel: PlayerViewModel,
-    isAddingToPlaylist: Boolean = false,
-    selectedPlaylists: SnapshotStateMap<String, Boolean>? = null,
-    filteredPlaylists: List<Playlist> = playlistUiState.playlists
+    isAddingToBooklist: Boolean = false,
+    selectedBooklists: SnapshotStateMap<String, Boolean>? = null,
+    filteredBooklists: List<Booklist> = BooklistUiState.Booklists
 ) {
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (playlistUiState.isLoading && filteredPlaylists.isEmpty()) {
+        if (BooklistUiState.isLoading && filteredBooklists.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) { CircularProgressIndicator() }
         }
 
-        if (filteredPlaylists.isEmpty() && !playlistUiState.isLoading) {
+        if (filteredBooklists.isEmpty() && !BooklistUiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -149,55 +149,55 @@ fun PlaylistContainer(
                     )
                     Spacer(Modifier.height(16.dp))
                     Icon(
-                        Icons.AutoMirrored.Rounded.PlaylistPlay,
+                        Icons.AutoMirrored.Rounded.BooklistPlay,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "No playlist has been created.",
+                        "No Booklist has been created.",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Touch the 'New Playlist' button to start.",
+                        "Touch the 'New Booklist' button to start.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         } else {
-            if (isAddingToPlaylist) {
-                PlaylistItems(
-                    currentSong = currentSong,
+            if (isAddingToBooklist) {
+                BooklistItems(
+                    currentTrack = currentTrack,
                     bottomBarHeight = bottomBarHeight,
                     navController = navController,
                     playerViewModel = playerViewModel,
-                    isAddingToPlaylist = true,
-                    filteredPlaylists = filteredPlaylists,
-                    selectedPlaylists = selectedPlaylists
+                    isAddingToBooklist = true,
+                    filteredBooklists = filteredBooklists,
+                    selectedBooklists = selectedBooklists
                 )
             } else {
-                val playlistPullToRefreshState = rememberPullToRefreshState()
+                val BooklistPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
-                    state = playlistPullToRefreshState,
+                    state = BooklistPullToRefreshState,
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
                         PullToRefreshDefaults.LoadingIndicator(
-                            state = playlistPullToRefreshState,
+                            state = BooklistPullToRefreshState,
                             isRefreshing = isRefreshing,
                             modifier = Modifier.align(Alignment.TopCenter)
                         )
                     }
                 ) {
-                    PlaylistItems(
+                    BooklistItems(
                         bottomBarHeight = bottomBarHeight,
                         navController = navController,
                         playerViewModel = playerViewModel,
-                        filteredPlaylists = filteredPlaylists
+                        filteredBooklists = filteredBooklists
                     )
                 }
             }
@@ -222,22 +222,22 @@ fun PlaylistContainer(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun PlaylistItems(
+fun BooklistItems(
     bottomBarHeight: Dp,
     navController: NavController?,
-    currentSong: Song? = null,
+    currentTrack: Track? = null,
     playerViewModel: PlayerViewModel,
-    isAddingToPlaylist: Boolean = false,
-    filteredPlaylists: List<Playlist>,
-    selectedPlaylists: SnapshotStateMap<String, Boolean>? = null
+    isAddingToBooklist: Boolean = false,
+    filteredBooklists: List<Booklist>,
+    selectedBooklists: SnapshotStateMap<String, Boolean>? = null
 ) {
     val listState = rememberLazyListState()
 
-    androidx.compose.runtime.LaunchedEffect(filteredPlaylists) {
+    androidx.compose.runtime.LaunchedEffect(filteredBooklists) {
         val firstVisible = listState.layoutInfo.visibleItemsInfo.firstOrNull()
         if (firstVisible != null) {
             val key = firstVisible.key
-            val targetIndex = filteredPlaylists.indexOfFirst { it.id == key }
+            val targetIndex = filteredBooklists.indexOfFirst { it.id == key }
             if (targetIndex >= 0) {
                 listState.scrollToItem(targetIndex, firstVisible.offset)
             }
@@ -260,22 +260,22 @@ fun PlaylistItems(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
     ) {
-        items(filteredPlaylists, key = { it.id }) { playlist ->
-            val rememberedOnClick = remember(playlist.id) {
+        items(filteredBooklists, key = { it.id }) { Booklist ->
+            val rememberedOnClick = remember(Booklist.id) {
                 {
-                    if (isAddingToPlaylist && currentSong != null && selectedPlaylists != null) {
-                        val currentSelection = selectedPlaylists[playlist.id] ?: false
-                        selectedPlaylists[playlist.id] = !currentSelection
+                    if (isAddingToBooklist && currentTrack != null && selectedBooklists != null) {
+                        val currentSelection = selectedBooklists[Booklist.id] ?: false
+                        selectedBooklists[Booklist.id] = !currentSelection
                     } else
-                        navController?.navigate(Screen.PlaylistDetail.createRoute(playlist.id))
+                        navController?.navigate(Screen.BooklistDetail.createRoute(Booklist.id))
                 }
             }
-            PlaylistItem(
-                playlist = playlist,
+            BooklistItem(
+                Booklist = Booklist,
                 playerViewModel = playerViewModel,
                 onClick = { rememberedOnClick() },
-                isAddingToPlaylist = isAddingToPlaylist,
-                selectedPlaylists = selectedPlaylists
+                isAddingToBooklist = isAddingToBooklist,
+                selectedBooklists = selectedBooklists
             )
         }
     }
@@ -283,33 +283,33 @@ fun PlaylistItems(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun PlaylistItem(
-    playlist: Playlist,
+fun BooklistItem(
+    Booklist: Booklist,
     playerViewModel: PlayerViewModel,
     onClick: () -> Unit,
-    isAddingToPlaylist: Boolean,
-    selectedPlaylists: SnapshotStateMap<String, Boolean>? = null
+    isAddingToBooklist: Boolean,
+    selectedBooklists: SnapshotStateMap<String, Boolean>? = null
 ) {
-    val allSongs by playerViewModel.allSongsFlow.collectAsState()
-    val playlistSongs = remember(playlist.songIds, allSongs) {
-        allSongs.filter { it.id in playlist.songIds }
+    val allTracks by playerViewModel.allTracksFlow.collectAsState()
+    val BooklistTracks = remember(Booklist.TrackIds, allTracks) {
+        allTracks.filter { it.id in Booklist.TrackIds }
     }
 
     // Shape Logic
-    val shape = remember(playlist.coverShapeType, playlist.coverShapeDetail1, playlist.coverShapeDetail2, playlist.coverShapeDetail3) {
-        when (playlist.coverShapeType) {
-            PlaylistShapeType.Circle.name -> CircleShape
-            PlaylistShapeType.SmoothRect.name -> {
+    val shape = remember(Booklist.coverShapeType, Booklist.coverShapeDetail1, Booklist.coverShapeDetail2, Booklist.coverShapeDetail3) {
+        when (Booklist.coverShapeType) {
+            BooklistshapeType.Circle.name -> CircleShape
+            BooklistshapeType.SmoothRect.name -> {
                  // Scale radius relative to a 200dp reference (used in Creator)
                  // Current box is 48.dp
                  val referenceSize = 200f
                  val currentSize = 48f 
                  val scale = currentSize / referenceSize
-                 val r = ((playlist.coverShapeDetail1 ?: 20f) * scale).dp
-                 val s = (playlist.coverShapeDetail2 ?: 60f).toInt()
+                 val r = ((Booklist.coverShapeDetail1 ?: 20f) * scale).dp
+                 val s = (Booklist.coverShapeDetail2 ?: 60f).toInt()
                  AbsoluteSmoothCornerShape(r, s, r, s, r, s, r, s)
             }
-            PlaylistShapeType.RotatedPill.name -> {
+            BooklistshapeType.RotatedPill.name -> {
                  // Narrow Pill Shape (Capsule)
                  androidx.compose.foundation.shape.GenericShape { size, _ ->
                      val w = size.width
@@ -319,10 +319,10 @@ fun PlaylistItem(
                      addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                  }
             }
-            PlaylistShapeType.Star.name -> RoundedStarShape(
-                 sides = (playlist.coverShapeDetail4 ?: 5f).toInt(),
-                 curve = (playlist.coverShapeDetail1 ?: 0.15f).toDouble(),
-                 rotation = playlist.coverShapeDetail2 ?: 0f
+            BooklistshapeType.Star.name -> RoundedStarShape(
+                 sides = (Booklist.coverShapeDetail4 ?: 5f).toInt(),
+                 curve = (Booklist.coverShapeDetail1 ?: 0.15f).toDouble(),
+                 rotation = Booklist.coverShapeDetail2 ?: 0f
             )
             else -> RoundedCornerShape(8.dp)
         }
@@ -336,17 +336,17 @@ fun PlaylistItem(
     // In Creator: `iconMod` counter-rotates. Image didn't have counter-rotation. 
     // Usually "Rotated Shape" implies the frame is rotated. Image handles itself. 
     // Let's keep existing rotation logic but apply the Narrow Pill Shape.
-    val shapeMod = if(playlist.coverShapeType == PlaylistShapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+    val shapeMod = if(Booklist.coverShapeType == BooklistshapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
     // Counter rotate content?
     // If I rotate the container 45deg, the image is tilted.
     // If I want upright image, I apply counter-rotation to the Image.
     // Let's check Creator behavior: It didn't counter-rotate image.
     // I will stick to Creator behavior for consistency, or fix it if it looks bad.
     // Providing a rotated pill frame usually implies distinct style.
-    val iconMod = if(playlist.coverShapeType == PlaylistShapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
+    val iconMod = if(Booklist.coverShapeType == BooklistshapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
     
-    val scaleMod = if(playlist.coverShapeType == PlaylistShapeType.Star.name) {
-          val s = playlist.coverShapeDetail3 ?: 1f
+    val scaleMod = if(Booklist.coverShapeType == BooklistshapeType.Star.name) {
+          val s = Booklist.coverShapeDetail3 ?: 1f
           Modifier.graphicsLayer(scaleX = s, scaleY = s) 
     } else Modifier
 
@@ -355,7 +355,7 @@ fun PlaylistItem(
         modifier = Modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isAddingToPlaylist) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = if (isAddingToBooklist) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
         Row(
@@ -363,30 +363,30 @@ fun PlaylistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.size(48.dp).then(scaleMod).then(shapeMod).clip(shape)) {
-               if (playlist.coverImageUri != null) {
+               if (Booklist.coverImageUri != null) {
                    AsyncImage(
-                       model = playlist.coverImageUri,
+                       model = Booklist.coverImageUri,
                        contentDescription = null,
                        modifier = Modifier.fillMaxSize(),
                        contentScale = ContentScale.Crop
                    )
-               } else if (playlist.coverColorArgb != null) {
+               } else if (Booklist.coverColorArgb != null) {
                    Box(
                        modifier = Modifier
                            .fillMaxSize()
-                           .background(Color(playlist.coverColorArgb)),
+                           .background(Color(Booklist.coverColorArgb)),
                        contentAlignment = Alignment.Center
                    ) {
                        Icon(
-                            imageVector = getIconByName(playlist.coverIconName) ?: Icons.Filled.MusicNote,
+                            imageVector = getIconByName(Booklist.coverIconName) ?: Icons.Filled.AudiobookNote,
                             contentDescription = null,
-                            tint = getContrastColor(Color(playlist.coverColorArgb)),
+                            tint = getContrastColor(Color(Booklist.coverColorArgb)),
                             modifier = Modifier.size(24.dp).then(iconMod)
                        )
                    }
                } else {
-                    PlaylistArtCollage(
-                        songs = playlistSongs,
+                    BooklistArtCollage(
+                        Tracks = BooklistTracks,
                         modifier = Modifier.fillMaxSize()
                     )
                }
@@ -400,14 +400,14 @@ fun PlaylistItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = playlist.name,
+                        text = Booklist.name,
                         style = MaterialTheme.typography.titleMedium.copy(fontFamily = GoogleSansRounded),
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
                     )
-                    if (playlist.isAiGenerated) {
+                    if (Booklist.isAiGenerated) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             painter = painterResource(R.drawable.gemini_ai),
@@ -418,16 +418,16 @@ fun PlaylistItem(
                     }
                 }
                 Text(
-                    text = "${playlist.songIds.size} Songs",
+                    text = "${Booklist.TrackIds.size} Tracks",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            if (isAddingToPlaylist && selectedPlaylists != null) {
+            if (isAddingToBooklist && selectedBooklists != null) {
                 Checkbox(
-                    checked = selectedPlaylists[playlist.id] ?: false,
-                    onCheckedChange = { isChecked -> selectedPlaylists[playlist.id] = isChecked }
+                    checked = selectedBooklists[Booklist.id] ?: false,
+                    onCheckedChange = { isChecked -> selectedBooklists[Booklist.id] = isChecked }
                 )
             }
         }
@@ -437,25 +437,25 @@ fun PlaylistItem(
 
 private fun getIconByName(name: String?): ImageVector? {
     return when (name) {
-        "MusicNote" -> Icons.Rounded.MusicNote
+        "AudiobookNote" -> Icons.Rounded.AudiobookNote
         "Headphones" -> Icons.Rounded.Headphones
-        "Album" -> Icons.Rounded.Album
+        "Book" -> Icons.Rounded.Book
         "Mic" -> Icons.Rounded.MicExternalOn
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite
         "Piano" -> Icons.Rounded.Piano
-        "Queue" -> Icons.Rounded.QueueMusic
-        else -> Icons.Rounded.MusicNote
+        "Queue" -> Icons.Rounded.QueueAudiobook
+        else -> Icons.Rounded.AudiobookNote
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreatePlaylistDialogRedesigned(
+fun CreateBooklistDialogRedesigned(
     onDismiss: () -> Unit,
     onCreate: (String) -> Unit,
     onGenerateClick: () -> Unit
 ) {
-    var playlistName by remember { mutableStateOf("") }
+    var BooklistName by remember { mutableStateOf("") }
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -472,7 +472,7 @@ fun CreatePlaylistDialogRedesigned(
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "New playlist",
+                    text = "New Booklist",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     fontFamily = GoogleSansRounded,
@@ -480,10 +480,10 @@ fun CreatePlaylistDialogRedesigned(
                 )
 
                 OutlinedTextField(
-                    value = playlistName,
-                    onValueChange = { playlistName = it },
-                    label = { Text("Playlist Name") },
-                    placeholder = { Text("My playlist") },
+                    value = BooklistName,
+                    onValueChange = { BooklistName = it },
+                    label = { Text("Booklist Name") },
+                    placeholder = { Text("My Booklist") },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -514,7 +514,7 @@ fun CreatePlaylistDialogRedesigned(
                         contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.generate_playlist_ai),
+                            painter = painterResource(R.drawable.generate_Booklist_ai),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
@@ -536,8 +536,8 @@ fun CreatePlaylistDialogRedesigned(
                         }
 
                         Button(
-                            onClick = { onCreate(playlistName) },
-                            enabled = playlistName.isNotEmpty(),
+                            onClick = { onCreate(BooklistName) },
+                            enabled = BooklistName.isNotEmpty(),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,

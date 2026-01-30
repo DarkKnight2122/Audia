@@ -7,10 +7,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.ArtistImageRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.AuthorImageRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,79 +22,79 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ArtistDetailUiState(
-    val artist: Artist? = null,
-    val songs: List<Song> = emptyList(),
-    val albumSections: List<ArtistAlbumSection> = emptyList(),
+data class AuthorDetailUiState(
+    val Author: Author? = null,
+    val Tracks: List<Track> = emptyList(),
+    val Booksections: List<AuthorBooksection> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
 @Immutable
-data class ArtistAlbumSection(
-    val albumId: Long,
+data class AuthorBooksection(
+    val BookId: Long,
     val title: String,
     val year: Int?,
-    val albumArtUriString: String?,
-    val songs: List<Song>
+    val BookArtUriString: String?,
+    val Tracks: List<Track>
 )
 
 @HiltViewModel
-class ArtistDetailViewModel @Inject constructor(
+class AuthorDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository,
-    private val artistImageRepository: ArtistImageRepository,
+    private val AudiobookRepository: AudiobookRepository,
+    private val AuthorImageRepository: AuthorImageRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ArtistDetailUiState())
-    val uiState: StateFlow<ArtistDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AuthorDetailUiState())
+    val uiState: StateFlow<AuthorDetailUiState> = _uiState.asStateFlow()
 
     init {
-        val artistIdString: String? = savedStateHandle.get("artistId")
-        if (artistIdString != null) {
-            val artistId = artistIdString.toLongOrNull()
-            if (artistId != null) {
-                loadArtistData(artistId)
+        val AuthorIdString: String? = savedStateHandle.get("AuthorId")
+        if (AuthorIdString != null) {
+            val AuthorId = AuthorIdString.toLongOrNull()
+            if (AuthorId != null) {
+                loadAuthorData(AuthorId)
             } else {
-                _uiState.update { it.copy(error = context.getString(R.string.invalid_artist_id), isLoading = false) }
+                _uiState.update { it.copy(error = context.getString(R.string.invalid_Author_id), isLoading = false) }
             }
         } else {
-            _uiState.update { it.copy(error = context.getString(R.string.artist_id_not_found), isLoading = false) }
+            _uiState.update { it.copy(error = context.getString(R.string.Author_id_not_found), isLoading = false) }
         }
     }
 
-    private fun loadArtistData(id: Long) {
+    private fun loadAuthorData(id: Long) {
         viewModelScope.launch {
-            Log.d("ArtistDebug", "loadArtistData: id=$id")
+            Log.d("AuthorDebug", "loadAuthorData: id=$id")
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val artistDetailsFlow = musicRepository.getArtistById(id)
-                val artistSongsFlow = musicRepository.getSongsForArtist(id)
+                val AuthorDetailsFlow = AudiobookRepository.getAuthorById(id)
+                val AuthorTracksFlow = AudiobookRepository.getTracksForAuthor(id)
 
-                combine(artistDetailsFlow, artistSongsFlow) { artist, songs ->
-                    Log.d("ArtistDebug", "loadArtistData: id=$id found=${artist != null} songs=${songs.size}")
-                    if (artist != null) {
-                        val albumSections = buildAlbumSections(songs)
-                        val orderedSongs = albumSections.flatMap { it.songs }
-                        ArtistDetailUiState(
-                            artist = artist,
-                            songs = orderedSongs,
-                            albumSections = albumSections,
+                combine(AuthorDetailsFlow, AuthorTracksFlow) { Author, Tracks ->
+                    Log.d("AuthorDebug", "loadAuthorData: id=$id found=${Author != null} Tracks=${Tracks.size}")
+                    if (Author != null) {
+                        val Booksections = buildBooksections(Tracks)
+                        val orderedTracks = Booksections.flatMap { it.Tracks }
+                        AuthorDetailUiState(
+                            Author = Author,
+                            Tracks = orderedTracks,
+                            Booksections = Booksections,
                             isLoading = false
                         )
                     } else {
-                        ArtistDetailUiState(
-                            error = context.getString(R.string.could_not_find_artist),
+                        AuthorDetailUiState(
+                            error = context.getString(R.string.could_not_find_Author),
                             isLoading = false
                         )
                     }
                 }
                     .catch { e ->
                         emit(
-                            ArtistDetailUiState(
+                            AuthorDetailUiState(
                                 error = context.getString(
-                                    R.string.error_loading_artist,
+                                    R.string.error_loading_Author,
                                     e.localizedMessage ?: ""
                                 ), isLoading = false
                             )
@@ -103,19 +103,19 @@ class ArtistDetailViewModel @Inject constructor(
                     .collect { newState ->
                         _uiState.value = newState
                         
-                        // Fetch artist image from Deezer if not already cached
-                        newState.artist?.let { artist ->
-                            if (artist.imageUrl.isNullOrEmpty()) {
+                        // Fetch Author image from Deezer if not already cached
+                        newState.Author?.let { Author ->
+                            if (Author.imageUrl.isNullOrEmpty()) {
                                 launch {
                                     try {
-                                        val imageUrl = artistImageRepository.getArtistImageUrl(artist.name, artist.id)
+                                        val imageUrl = AuthorImageRepository.getAuthorImageUrl(Author.name, Author.id)
                                         if (!imageUrl.isNullOrEmpty()) {
                                             _uiState.update { state ->
-                                                state.copy(artist = state.artist?.copy(imageUrl = imageUrl))
+                                                state.copy(Author = state.Author?.copy(imageUrl = imageUrl))
                                             }
                                         }
                                     } catch (e: Exception) {
-                                        Log.w("ArtistDebug", "Failed to fetch artist image: ${e.message}")
+                                        Log.w("AuthorDebug", "Failed to fetch Author image: ${e.message}")
                                     }
                                 }
                             }
@@ -125,55 +125,55 @@ class ArtistDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        error = context.getString(R.string.error_loading_artist, e.localizedMessage ?: ""),
+                        error = context.getString(R.string.error_loading_Author, e.localizedMessage ?: ""),
                         isLoading = false
                     )
                 }
             }
         }
     }
-    fun removeSongFromAlbumSection(songId: String) {
+    fun removeTrackFromBooksection(TrackId: String) {
         _uiState.update { currentState ->
-            val updatedAlbumSections = currentState.albumSections.map { section ->
-                // Remove the song from this section if it exists
-                val updatedSongs = section.songs.filterNot { it.id == songId }
-                // Return updated section only if it still has songs, otherwise filter out empty sections
-                section.copy(songs = updatedSongs)
-            }.filter { it.songs.isNotEmpty() } // Remove empty album sections
+            val updatedBooksections = currentState.Booksections.map { section ->
+                // Remove the Track from this section if it exists
+                val updatedTracks = section.Tracks.filterNot { it.id == TrackId }
+                // Return updated section only if it still has Tracks, otherwise filter out empty sections
+                section.copy(Tracks = updatedTracks)
+            }.filter { it.Tracks.isNotEmpty() } // Remove empty Book sections
 
             currentState.copy(
-                albumSections = updatedAlbumSections,
-                songs = currentState.songs.filterNot { it.id == songId } // Also update the main songs list
+                Booksections = updatedBooksections,
+                Tracks = currentState.Tracks.filterNot { it.id == TrackId } // Also update the main Tracks list
             )
         }
     }
 }
 
-private val songDisplayComparator = compareBy<Song> {
+private val TrackDisplayComparator = compareBy<Track> {
     if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE
 }.thenBy { it.title.lowercase() }
 
-private fun buildAlbumSections(songs: List<Song>): List<ArtistAlbumSection> {
-    if (songs.isEmpty()) return emptyList()
+private fun buildBooksections(Tracks: List<Track>): List<AuthorBooksection> {
+    if (Tracks.isEmpty()) return emptyList()
 
-    val sections = songs
-        .groupBy { it.albumId to it.album }
-        .map { (key, albumSongs) ->
-            val sortedSongs = albumSongs.sortedWith(songDisplayComparator)
-            val albumYear = albumSongs.mapNotNull { song -> song.year.takeIf { it > 0 } }.maxOrNull()
-            val albumArtUri = albumSongs.firstNotNullOfOrNull { it.albumArtUriString }
-            ArtistAlbumSection(
-                albumId = key.first,
-                title = (key.second.takeIf { it.isNotBlank() } ?: "Unknown Album"),
-                year = albumYear,
-                albumArtUriString = albumArtUri,
-                songs = sortedSongs
+    val sections = Tracks
+        .groupBy { it.BookId to it.Book }
+        .map { (key, BookTracks) ->
+            val sortedTracks = BookTracks.sortedWith(TrackDisplayComparator)
+            val BookYear = BookTracks.mapNotNull { Track -> Track.year.takeIf { it > 0 } }.maxOrNull()
+            val BookArtUri = BookTracks.firstNotNullOfOrNull { it.BookArtUriString }
+            AuthorBooksection(
+                BookId = key.first,
+                title = (key.second.takeIf { it.isNotBlank() } ?: "Unknown Book"),
+                year = BookYear,
+                BookArtUriString = BookArtUri,
+                Tracks = sortedTracks
             )
         }
 
     val (withYear, withoutYear) = sections.partition { it.year != null }
     val withYearSorted = withYear.sortedWith(
-        compareByDescending<ArtistAlbumSection> { it.year ?: Int.MIN_VALUE }
+        compareByDescending<AuthorBooksection> { it.year ?: Int.MIN_VALUE }
             .thenBy { it.title.lowercase() }
     )
     val withoutYearSorted = withoutYear.sortedBy { it.title.lowercase() }

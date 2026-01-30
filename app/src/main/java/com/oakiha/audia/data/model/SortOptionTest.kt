@@ -4,17 +4,17 @@ package com.oakiha.audia.data.model
 //
 //    @Test
 //    fun fromStorageKey_ignoresNullEntriesInAllowedCollection() {
-//        val allowedWithNull = listOf<SortOption?>(null, SortOption.AlbumTitleAZ)
+//        val allowedWithNull = listOf<SortOption?>(null, SortOption.BookTitleAZ)
 //
 //        @Suppress("UNCHECKED_CAST")
 //        val unsafeAllowed = allowedWithNull as Collection<SortOption>
 //
 //        val resolved = SortOption.fromStorageKey(
-//            SortOption.AlbumTitleAZ.storageKey,
+//            SortOption.BookTitleAZ.storageKey,
 //            unsafeAllowed,
-//            SortOption.AlbumTitleZA
+//            SortOption.BookTitleZA
 //        )
 //
-//        assertThat(resolved).isEqualTo(SortOption.AlbumTitleAZ)
+//        assertThat(resolved).isEqualTo(SortOption.BookTitleAZ)
 //    }
 //}

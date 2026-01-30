@@ -37,7 +37,7 @@ import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenreGradientTopBar(
+fun CategoryGradientTopBar(
     title: String,
     startColor: Color,
     endColor: Color,
@@ -150,7 +150,7 @@ fun HomeGradientTopBar(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "β",
+                            text = "Î²",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Black
                         )

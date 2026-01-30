@@ -1,53 +1,53 @@
 package com.oakiha.audia.data.repository
 
-import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Transcript
+import com.oakiha.audia.data.model.TranscriptSourcePreference
+import com.oakiha.audia.data.model.Track
 
-interface LyricsRepository {
+interface TranscriptRepository {
     /**
-     * Get lyrics for a song with source preference support.
+     * Get Transcript for a Track with source preference support.
      * 
-     * @param song The song to get lyrics for
+     * @param Track The Track to get Transcript for
      * @param sourcePreference The preferred order of sources to try (API, Embedded, Local)
      * @param forceRefresh If true, bypasses in-memory cache
-     * @return Lyrics object or null if not found
+     * @return Transcript object or null if not found
      */
-    suspend fun getLyrics(
-        song: Song,
-        sourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
+    suspend fun getTranscript(
+        Track: Track,
+        sourcePreference: TranscriptSourcePreference = TranscriptSourcePreference.EMBEDDED_FIRST,
         forceRefresh: Boolean = false
-    ): Lyrics?
+    ): Transcript?
     
     /**
-     * Fetch lyrics from remote API and save to database.
+     * Fetch Transcript from remote API and save to database.
      */
-    suspend fun fetchFromRemote(song: Song): Result<Pair<Lyrics, String>>
+    suspend fun fetchFromRemote(Track: Track): Result<Pair<Transcript, String>>
     
     /**
-     * Search for lyrics on remote API and return multiple results.
+     * Search for Transcript on remote API and return multiple results.
      */
-    suspend fun searchRemote(song: Song): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemote(Track: Track): Result<Pair<String, List<TranscriptSearchResult>>>
   
     /**
-     * Search for lyrics on remote API using query title and artist, and return multiple results.
+     * Search for Transcript on remote API using query title and Author, and return multiple results.
      */
-    suspend fun searchRemoteByQuery(title: String, artist: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemoteByQuery(title: String, Author: String? = null): Result<Pair<String, List<TranscriptSearchResult>>>
     
     /**
-     * Update lyrics for a song in the database.
+     * Update Transcript for a Track in the database.
      */
-    suspend fun updateLyrics(songId: Long, lyricsContent: String)
+    suspend fun updateTranscript(TrackId: Long, TranscriptContent: String)
     
     /**
-     * Reset lyrics for a song (remove from database and cache).
+     * Reset Transcript for a Track (remove from database and cache).
      */
-    suspend fun resetLyrics(songId: Long)
+    suspend fun resetTranscript(TrackId: Long)
     
     /**
-     * Reset all lyrics (clear database and cache).
+     * Reset all Transcript (clear database and cache).
      */
-    suspend fun resetAllLyrics()
+    suspend fun resetAllTranscript()
     
     /**
      * Clear in-memory cache only.
@@ -55,14 +55,14 @@ interface LyricsRepository {
     fun clearCache()
 
     /**
-     * Scans local .lrc files for the provided songs and updates the database if found.
+     * Scans local .lrc files for the provided Tracks and updates the database if found.
      * 
-     * @param songs List of songs to scan for
+     * @param Tracks List of Tracks to scan for
      * @param onProgress Callback for progress updates (current, total)
-     * @return Number of songs updated
+     * @return Number of Tracks updated
      */
     suspend fun scanAndAssignLocalLrcFiles(
-        songs: List<Song>,
+        Tracks: List<Track>,
         onProgress: suspend (current: Int, total: Int) -> Unit
     ): Int
 }

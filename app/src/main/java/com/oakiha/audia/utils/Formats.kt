@@ -1,6 +1,6 @@
 package com.oakiha.audia.utils
 
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import java.util.concurrent.TimeUnit
 
 fun formatDuration(milliseconds: Long): String {
@@ -10,8 +10,8 @@ fun formatDuration(milliseconds: Long): String {
     return String.format("%02d:%02d", minutes, seconds)
 }
 
-fun formatTotalDuration(songs: List<Song>): String {
-    val totalMillis = songs.sumOf { it.duration }
+fun formatTotalDuration(Tracks: List<Track>): String {
+    val totalMillis = Tracks.sumOf { it.duration }
     val hours = TimeUnit.MILLISECONDS.toHours(totalMillis)
     val minutes = TimeUnit.MILLISECONDS.toMinutes(totalMillis) % 60
     return if (hours > 0) {

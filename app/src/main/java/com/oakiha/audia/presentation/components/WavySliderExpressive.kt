@@ -81,7 +81,7 @@ fun WavySliderExpressive(
     val interactionSource = remember { MutableInteractionSource() }
     // We can use interactionSource if we want, but we are doing manual gesture detection.
     // However, for the Thumb Morph animation, we need to know if we are interacting.
-    // The previous WavyMusicSlider used interactionSource logic or isDragging state.
+    // The previous WavyAudiobookSlider used interactionSource logic or isDragging state.
     // Here we have isDragging. Let's use that for simple logic.
     
     val thumbInteractionFraction by animateFloatAsState(
@@ -93,7 +93,7 @@ fun WavySliderExpressive(
     val displayValue = if (isDragging) dragValue else normalizedValue
     
     val animatedAmplitude by animateFloatAsState(
-        targetValue = if (isPlaying && !isDragging) 1f else 0f, // Flatten when interacting, like WavyMusicSlider
+        targetValue = if (isPlaying && !isDragging) 1f else 0f, // Flatten when interacting, like WavyAudiobookSlider
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "amplitude"
     )
@@ -144,12 +144,12 @@ fun WavySliderExpressive(
         // We can't use 'lerp' with Dp easily outside of density context without explicit conversion.
         // We'll calculate Px values for standard thumb vs line.
         // Thumb width: radius*2 -> radius*2 (circle) OR trackHeight*1.2 (pill width?)
-        // WavyMusicSlider logic:
+        // WavyAudiobookSlider logic:
         // width: lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, fraction)
         // height: lerp(thumbRadiusPx * 2f, thumbLineHeightPx, fraction)
         // trackHeightPx here is 'strokeWidthPx'.
         
-        // Wait, WavyMusicSlider's thumb becomes THINNER (width) and TALLER (height)?
+        // Wait, WavyAudiobookSlider's thumb becomes THINNER (width) and TALLER (height)?
         // width: thumbRadius*2 (16dp) -> strokeWidth*1.2 (4.8dp)
         // height: thumbRadius*2 (16dp) -> thumbLineHeight (24dp)
         
@@ -180,7 +180,7 @@ fun WavySliderExpressive(
             val thumbY = size.height / 2
             
             // Interpolate dimensions
-            // WavyMusicSlider logic:
+            // WavyAudiobookSlider logic:
             // val thumbCurrentWidthPx = lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, thumbInteractionFraction)
             // val thumbCurrentHeightPx = lerp(thumbRadiusPx * 2f, thumbLineHeightPxInternal, thumbInteractionFraction)
 

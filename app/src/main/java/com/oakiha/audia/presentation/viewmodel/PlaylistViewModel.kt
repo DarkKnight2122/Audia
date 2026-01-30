@@ -4,12 +4,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Booklist
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.model.SortOption
-import com.oakiha.audia.data.playlist.M3uManager
+import com.oakiha.audia.data.Booklist.M3uManager
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,178 +35,178 @@ import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
 
-data class PlaylistUiState(
-    val playlists: List<Playlist> = emptyList(),
-    val currentPlaylistSongs: List<Song> = emptyList(),
-    val currentPlaylistDetails: Playlist? = null,
+data class BooklistUiState(
+    val Booklists: List<Booklist> = emptyList(),
+    val currentBooklistTracks: List<Track> = emptyList(),
+    val currentBooklistDetails: Booklist? = null,
     val isLoading: Boolean = false,
-    val playlistNotFound: Boolean = false,
+    val BooklistNotFound: Boolean = false,
 
-    // Para el diálogo/pantalla de selección de canciones
-    val songSelectionPage: Int = 1, // Nuevo: para rastrear la página actual de selección
-    val songSelectionForPlaylist: List<Song> = emptyList(),
-    val isLoadingSongSelection: Boolean = false,
-    val canLoadMoreSongsForSelection: Boolean = true, // Nuevo: para saber si hay más canciones para cargar
+    // Para el diÃƒÂ¡logo/pantalla de selecciÃƒÂ³n de canciones
+    val TrackselectionPage: Int = 1, // Nuevo: para rastrear la pÃƒÂ¡gina actual de selecciÃƒÂ³n
+    val TrackselectionForBooklist: List<Track> = emptyList(),
+    val isLoadingTrackselection: Boolean = false,
+    val canLoadMoreTracksForSelection: Boolean = true, // Nuevo: para saber si hay mÃƒÂ¡s canciones para cargar
 
     //Sort option
-    val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
-    val currentPlaylistSongsSortOption: SortOption = SortOption.SongTitleAZ,
-    val playlistSongsOrderMode: PlaylistSongsOrderMode = PlaylistSongsOrderMode.Sorted(SortOption.SongTitleAZ),
-    val playlistOrderModes: Map<String, PlaylistSongsOrderMode> = emptyMap()
+    val currentBooklistsortOption: SortOption = SortOption.BooklistNameAZ,
+    val currentBooklistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
+    val BooklistTracksOrderMode: BooklistTracksOrderMode = BooklistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val BooklistOrderModes: Map<String, BooklistTracksOrderMode> = emptyMap()
 )
 
-sealed class PlaylistSongsOrderMode {
-    object Manual : PlaylistSongsOrderMode()
-    data class Sorted(val option: SortOption) : PlaylistSongsOrderMode()
+sealed class BooklistTracksOrderMode {
+    object Manual : BooklistTracksOrderMode()
+    data class Sorted(val option: SortOption) : BooklistTracksOrderMode()
 }
 
 @HiltViewModel
-class PlaylistViewModel @Inject constructor(
+class BooklistViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val musicRepository: MusicRepository,
+    private val AudiobookRepository: AudiobookRepository,
     private val m3uManager: M3uManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PlaylistUiState())
-    val uiState: StateFlow<PlaylistUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(BooklistUiState())
+    val uiState: StateFlow<BooklistUiState> = _uiState.asStateFlow()
 
-    private val _playlistCreationEvent = MutableSharedFlow<Boolean>()
-    val playlistCreationEvent: SharedFlow<Boolean> = _playlistCreationEvent.asSharedFlow()
+    private val _BooklistCreationEvent = MutableSharedFlow<Boolean>()
+    val BooklistCreationEvent: SharedFlow<Boolean> = _BooklistCreationEvent.asSharedFlow()
 
     companion object {
-        private const val SONG_SELECTION_PAGE_SIZE =
+        private const val Track_SELECTION_PAGE_SIZE =
             100 // Cargar 100 canciones a la vez para el selector
-        const val FOLDER_PLAYLIST_PREFIX = "folder_playlist:"
+        const val FOLDER_Booklist_PREFIX = "folder_Booklist:"
         private const val MANUAL_ORDER_MODE = "manual"
     }
 
-    // Helper function to resolve stored playlist sort keys
-    private fun resolvePlaylistSortOption(optionKey: String?): SortOption {
+    // Helper function to resolve stored Booklist sort keys
+    private fun resolveBooklistsortOption(optionKey: String?): SortOption {
         return SortOption.fromStorageKey(
             optionKey,
-            SortOption.PLAYLISTS,
-            SortOption.PlaylistNameAZ
+            SortOption.Booklists,
+            SortOption.BooklistNameAZ
         )
     }
 
     init {
-        loadPlaylistsAndInitialSortOption()
-        loadMoreSongsForSelection(isInitialLoad = true)
-        observePlaylistOrderModes()
+        loadBooklistsAndInitialSortOption()
+        loadMoreTracksForSelection(isInitialLoad = true)
+        observeBooklistOrderModes()
     }
 
-    private fun observePlaylistOrderModes() {
+    private fun observeBooklistOrderModes() {
         viewModelScope.launch {
-            userPreferencesRepository.playlistSongOrderModesFlow.collect { storedModes ->
+            userPreferencesRepository.BooklistTrackOrderModesFlow.collect { storedModes ->
                 val resolvedModes = storedModes.mapValues { (_, value) ->
                     decodeOrderMode(value)
                 }
-                _uiState.update { it.copy(playlistOrderModes = resolvedModes) }
+                _uiState.update { it.copy(BooklistOrderModes = resolvedModes) }
             }
         }
     }
 
-    private fun loadPlaylistsAndInitialSortOption() {
+    private fun loadBooklistsAndInitialSortOption() {
         viewModelScope.launch {
             // First, get the initial sort option
-            val initialSortOptionName = userPreferencesRepository.playlistsSortOptionFlow.first()
-            val initialSortOption = resolvePlaylistSortOption(initialSortOptionName)
-            _uiState.update { it.copy(currentPlaylistSortOption = initialSortOption) }
+            val initialSortOptionName = userPreferencesRepository.BooklistsSortOptionFlow.first()
+            val initialSortOption = resolveBooklistsortOption(initialSortOptionName)
+            _uiState.update { it.copy(currentBooklistsortOption = initialSortOption) }
 
-            // Then, collect playlists and apply the sort option
-            userPreferencesRepository.userPlaylistsFlow.collect { playlists ->
+            // Then, collect Booklists and apply the sort option
+            userPreferencesRepository.userBooklistsFlow.collect { Booklists ->
                 val currentSortOption =
-                    _uiState.value.currentPlaylistSortOption // Use the most up-to-date sort option
-                val sortedPlaylists = when (currentSortOption) {
-                    SortOption.PlaylistNameAZ -> playlists.sortedBy { it.name.lowercase() }
-                    SortOption.PlaylistNameZA -> playlists.sortedByDescending { it.name.lowercase() }
-                    SortOption.PlaylistDateCreated -> playlists.sortedByDescending { it.lastModified }
-                    else -> playlists.sortedBy { it.name.lowercase() } // Default to NameAZ
+                    _uiState.value.currentBooklistsortOption // Use the most up-to-date sort option
+                val sortedBooklists = when (currentSortOption) {
+                    SortOption.BooklistNameAZ -> Booklists.sortedBy { it.name.lowercase() }
+                    SortOption.BooklistNameZA -> Booklists.sortedByDescending { it.name.lowercase() }
+                    SortOption.BooklistDateCreated -> Booklists.sortedByDescending { it.lastModified }
+                    else -> Booklists.sortedBy { it.name.lowercase() } // Default to NameAZ
                 }
-                _uiState.update { it.copy(playlists = sortedPlaylists) }
+                _uiState.update { it.copy(Booklists = sortedBooklists) }
             }
         }
         // Collect subsequent changes to sort option from preferences
         viewModelScope.launch {
-            userPreferencesRepository.playlistsSortOptionFlow.collect { optionName ->
-                val newSortOption = resolvePlaylistSortOption(optionName)
-                if (_uiState.value.currentPlaylistSortOption != newSortOption) {
+            userPreferencesRepository.BooklistsSortOptionFlow.collect { optionName ->
+                val newSortOption = resolveBooklistsortOption(optionName)
+                if (_uiState.value.currentBooklistsortOption != newSortOption) {
                     // If the option from preferences is different, re-sort the current list
-                    sortPlaylists(newSortOption)
+                    sortBooklists(newSortOption)
                 }
             }
         }
     }
 
-    // Nueva función para cargar canciones para el selector de forma paginada
-    fun loadMoreSongsForSelection(isInitialLoad: Boolean = false) {
+    // Nueva funciÃƒÂ³n para cargar canciones para el selector de forma paginada
+    fun loadMoreTracksForSelection(isInitialLoad: Boolean = false) {
         val currentState = _uiState.value
-        if (currentState.isLoadingSongSelection && !isInitialLoad) {
-            Log.d("PlaylistVM", "loadMoreSongsForSelection: Already loading. Skipping.")
+        if (currentState.isLoadingTrackselection && !isInitialLoad) {
+            Log.d("BooklistVM", "loadMoreTracksForSelection: Already loading. Skipping.")
             return
         }
-        if (!currentState.canLoadMoreSongsForSelection && !isInitialLoad) {
-            Log.d("PlaylistVM", "loadMoreSongsForSelection: Cannot load more. Skipping.")
+        if (!currentState.canLoadMoreTracksForSelection && !isInitialLoad) {
+            Log.d("BooklistVM", "loadMoreTracksForSelection: Cannot load more. Skipping.")
             return
         }
 
         viewModelScope.launch {
-            val initialPageForLoad = if (isInitialLoad) 1 else _uiState.value.songSelectionPage
+            val initialPageForLoad = if (isInitialLoad) 1 else _uiState.value.TrackselectionPage
 
             _uiState.update {
                 it.copy(
-                    isLoadingSongSelection = true,
-                    songSelectionPage = initialPageForLoad // Establecer la página correcta antes de la llamada
+                    isLoadingTrackselection = true,
+                    TrackselectionPage = initialPageForLoad // Establecer la pÃƒÂ¡gina correcta antes de la llamada
                 )
             }
 
-            // Usar el songSelectionPage del estado que acabamos de actualizar para la llamada al repo
-            val pageToLoad = _uiState.value.songSelectionPage // Esta ahora es la página correcta
+            // Usar el TrackselectionPage del estado que acabamos de actualizar para la llamada al repo
+            val pageToLoad = _uiState.value.TrackselectionPage // Esta ahora es la pÃƒÂ¡gina correcta
 
             Log.d(
-                "PlaylistVM",
-                "Loading songs for selection. Page: $pageToLoad, PageSize: $SONG_SELECTION_PAGE_SIZE"
+                "BooklistVM",
+                "Loading Tracks for selection. Page: $pageToLoad, PageSize: $Track_SELECTION_PAGE_SIZE"
             )
 
             try {
                 // Colectar la lista de canciones del Flow en un hilo de IO
-                val actualNewSongsList: List<Song> =
+                val actualNewTracksList: List<Track> =
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        musicRepository.getAudioFiles().first()
+                        AudiobookRepository.getAudioFiles().first()
                     }
-                Log.d("PlaylistVM", "Loaded ${actualNewSongsList.size} songs for selection.")
+                Log.d("BooklistVM", "Loaded ${actualNewTracksList.size} Tracks for selection.")
 
-                // La actualización del UI se hace en el hilo principal (contexto por defecto de viewModelScope.launch)
+                // La actualizaciÃƒÂ³n del UI se hace en el hilo principal (contexto por defecto de viewModelScope.launch)
                 _uiState.update { currentStateAfterLoad ->
-                    val updatedSongSelectionList = if (isInitialLoad) {
-                        actualNewSongsList
+                    val updatedTrackselectionList = if (isInitialLoad) {
+                        actualNewTracksList
                     } else {
-                        // Evitar duplicados si por alguna razón se recarga la misma página
-                        val currentSongIds =
-                            currentStateAfterLoad.songSelectionForPlaylist.map { it.id }.toSet()
-                        val uniqueNewSongs =
-                            actualNewSongsList.filterNot { currentSongIds.contains(it.id) }
-                        currentStateAfterLoad.songSelectionForPlaylist + uniqueNewSongs
+                        // Evitar duplicados si por alguna razÃƒÂ³n se recarga la misma pÃƒÂ¡gina
+                        val currentTrackIds =
+                            currentStateAfterLoad.TrackselectionForBooklist.map { it.id }.toSet()
+                        val uniqueNewTracks =
+                            actualNewTracksList.filterNot { currentTrackIds.contains(it.id) }
+                        currentStateAfterLoad.TrackselectionForBooklist + uniqueNewTracks
                     }
 
                     currentStateAfterLoad.copy(
-                        songSelectionForPlaylist = updatedSongSelectionList,
-                        isLoadingSongSelection = false,
-                        canLoadMoreSongsForSelection = actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE,
-                        // Incrementar la página solo si se cargaron canciones y se espera que haya más
-                        songSelectionPage = if (actualNewSongsList.isNotEmpty() && actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE) {
-                            currentStateAfterLoad.songSelectionPage + 1
+                        TrackselectionForBooklist = updatedTrackselectionList,
+                        isLoadingTrackselection = false,
+                        canLoadMoreTracksForSelection = actualNewTracksList.size == Track_SELECTION_PAGE_SIZE,
+                        // Incrementar la pÃƒÂ¡gina solo si se cargaron canciones y se espera que haya mÃƒÂ¡s
+                        TrackselectionPage = if (actualNewTracksList.isNotEmpty() && actualNewTracksList.size == Track_SELECTION_PAGE_SIZE) {
+                            currentStateAfterLoad.TrackselectionPage + 1
                         } else {
-                            currentStateAfterLoad.songSelectionPage // No incrementar si no hay más o si la carga fue parcial
+                            currentStateAfterLoad.TrackselectionPage // No incrementar si no hay mÃƒÂ¡s o si la carga fue parcial
                         }
                     )
                 }
             } catch (e: Exception) {
-                Log.e("PlaylistVM", "Error loading songs for selection. Page: $pageToLoad", e)
+                Log.e("BooklistVM", "Error loading Tracks for selection. Page: $pageToLoad", e)
                 _uiState.update {
                     it.copy(
-                        isLoadingSongSelection = false
+                        isLoadingTrackselection = false
                     )
                 }
             }
@@ -214,116 +214,116 @@ class PlaylistViewModel @Inject constructor(
     }
 
 
-    fun loadPlaylistDetails(playlistId: String) {
+    fun loadBooklistDetails(BooklistId: String) {
         viewModelScope.launch {
-            val shouldKeepExisting = _uiState.value.currentPlaylistDetails?.id == playlistId
+            val shouldKeepExisting = _uiState.value.currentBooklistDetails?.id == BooklistId
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    playlistNotFound = false,
-                    currentPlaylistDetails = if (shouldKeepExisting) it.currentPlaylistDetails else null,
-                    currentPlaylistSongs = if (shouldKeepExisting) it.currentPlaylistSongs else emptyList()
+                    BooklistNotFound = false,
+                    currentBooklistDetails = if (shouldKeepExisting) it.currentBooklistDetails else null,
+                    currentBooklistTracks = if (shouldKeepExisting) it.currentBooklistTracks else emptyList()
                 )
             } // Resetear detalles y canciones
             try {
-                if (isFolderPlaylistId(playlistId)) {
-                    val folderPath = Uri.decode(playlistId.removePrefix(FOLDER_PLAYLIST_PREFIX))
-                    val folders = musicRepository.getMusicFolders().first()
+                if (isFolderBooklistId(BooklistId)) {
+                    val folderPath = Uri.decode(BooklistId.removePrefix(FOLDER_Booklist_PREFIX))
+                    val folders = AudiobookRepository.getAudiobookFolders().first()
                     val folder = findFolder(folderPath, folders)
 
                     if (folder != null) {
-                        val songsList = folder.collectAllSongs()
-                        val pseudoPlaylist = Playlist(
-                            id = playlistId,
+                        val TracksList = folder.collectAllTracks()
+                        val pseudoBooklist = Booklist(
+                            id = BooklistId,
                             name = folder.name,
-                            songIds = songsList.map { it.id }
+                            TrackIds = TracksList.map { it.id }
                         )
 
                         _uiState.update {
                             it.copy(
-                                currentPlaylistDetails = pseudoPlaylist,
-                                currentPlaylistSongs = applySortToSongs(songsList, it.currentPlaylistSongsSortOption),
-                                playlistSongsOrderMode = PlaylistSongsOrderMode.Sorted(it.currentPlaylistSongsSortOption),
+                                currentBooklistDetails = pseudoBooklist,
+                                currentBooklistTracks = applySortToTracks(TracksList, it.currentBooklistTracksSortOption),
+                                BooklistTracksOrderMode = BooklistTracksOrderMode.Sorted(it.currentBooklistTracksSortOption),
                                 isLoading = false,
-                                playlistNotFound = false
+                                BooklistNotFound = false
                             )
                         }
                     } else {
-                        Log.w("PlaylistVM", "Folder playlist with path $folderPath not found.")
+                        Log.w("BooklistVM", "Folder Booklist with path $folderPath not found.")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                playlistNotFound = true,
-                                currentPlaylistDetails = null,
-                                currentPlaylistSongs = emptyList()
+                                BooklistNotFound = true,
+                                currentBooklistDetails = null,
+                                currentBooklistTracks = emptyList()
                             )
                         }
                     }
                 } else {
-                    // Obtener la playlist de las preferencias del usuario
-                        val playlist = userPreferencesRepository.userPlaylistsFlow.first()
-                            .find { it.id == playlistId }
+                    // Obtener la Booklist de las preferencias del usuario
+                        val Booklist = userPreferencesRepository.userBooklistsFlow.first()
+                            .find { it.id == BooklistId }
 
-                    if (playlist != null) {
-                        val orderMode = _uiState.value.playlistOrderModes[playlistId]
-                            ?: PlaylistSongsOrderMode.Manual
+                    if (Booklist != null) {
+                        val orderMode = _uiState.value.BooklistOrderModes[BooklistId]
+                            ?: BooklistTracksOrderMode.Manual
 
                         // Colectar la lista de canciones del Flow devuelto por el repositorio en un hilo de IO
-                        val songsList: List<Song> = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            musicRepository.getSongsByIds(playlist.songIds).first()
+                        val TracksList: List<Track> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            AudiobookRepository.getTracksByIds(Booklist.TrackIds).first()
                         }
 
-                        val orderedSongs = when (orderMode) {
-                            is PlaylistSongsOrderMode.Sorted -> applySortToSongs(songsList, orderMode.option)
-                            PlaylistSongsOrderMode.Manual -> songsList
+                        val orderedTracks = when (orderMode) {
+                            is BooklistTracksOrderMode.Sorted -> applySortToTracks(TracksList, orderMode.option)
+                            BooklistTracksOrderMode.Manual -> TracksList
                         }
 
-                        // La actualización del UI se hace en el hilo principal
+                        // La actualizaciÃƒÂ³n del UI se hace en el hilo principal
                         _uiState.update {
                             it.copy(
-                                currentPlaylistDetails = playlist,
-                                currentPlaylistSongs = orderedSongs,
-                                currentPlaylistSongsSortOption = (orderMode as? PlaylistSongsOrderMode.Sorted)?.option
-                                    ?: it.currentPlaylistSongsSortOption,
-                                playlistSongsOrderMode = orderMode,
-                                playlistOrderModes = it.playlistOrderModes + (playlistId to orderMode),
+                                currentBooklistDetails = Booklist,
+                                currentBooklistTracks = orderedTracks,
+                                currentBooklistTracksSortOption = (orderMode as? BooklistTracksOrderMode.Sorted)?.option
+                                    ?: it.currentBooklistTracksSortOption,
+                                BooklistTracksOrderMode = orderMode,
+                                BooklistOrderModes = it.BooklistOrderModes + (BooklistId to orderMode),
                                 isLoading = false,
-                                playlistNotFound = false
+                                BooklistNotFound = false
                             )
                         }
                     } else {
-                        Log.w("PlaylistVM", "Playlist with id $playlistId not found.")
+                        Log.w("BooklistVM", "Booklist with id $BooklistId not found.")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                playlistNotFound = true,
-                                currentPlaylistDetails = null,
-                                currentPlaylistSongs = emptyList()
+                                BooklistNotFound = true,
+                                currentBooklistDetails = null,
+                                currentBooklistTracks = emptyList()
                             )
                         } // Mantener isLoading en false
-                        // Opcional: podrías establecer un error o un estado específico de "no encontrado"
+                        // Opcional: podrÃƒÂ­as establecer un error o un estado especÃƒÂ­fico de "no encontrado"
                     }
                 }
             } catch (e: Exception) {
-                Log.e("PlaylistVM", "Error loading playlist details for id $playlistId", e)
+                Log.e("BooklistVM", "Error loading Booklist details for id $BooklistId", e)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        playlistNotFound = true,
-                        currentPlaylistDetails = null,
-                        currentPlaylistSongs = emptyList()
+                        BooklistNotFound = true,
+                        currentBooklistDetails = null,
+                        currentBooklistTracks = emptyList()
                     )
                 }
             }
         }
     }
 
-    fun createPlaylist(
+    fun createBooklist(
         name: String,
         coverImageUri: String? = null,
         coverColor: Int? = null,
         coverIcon: String? = null,
-        songIds: List<String> = emptyList(), // Added songIds parameter
+        TrackIds: List<String> = emptyList(), // Added TrackIds parameter
         cropScale: Float = 1f,
         cropPanX: Float = 0f,
         cropPanY: Float = 0f,
@@ -339,7 +339,7 @@ class PlaylistViewModel @Inject constructor(
             var savedCoverPath: String? = null
             
             if (coverImageUri != null) {
-                // Generate a unique ID for the image file since we don't have the playlist ID yet
+                // Generate a unique ID for the image file since we don't have the Booklist ID yet
                 val imageId = UUID.randomUUID().toString()
                 savedCoverPath = saveCoverImageToInternalStorage(
                     Uri.parse(coverImageUri), 
@@ -350,9 +350,9 @@ class PlaylistViewModel @Inject constructor(
                 )
             }
 
-            userPreferencesRepository.createPlaylist(
+            userPreferencesRepository.createBooklist(
                 name = name,
-                songIds = songIds, // Use passed songIds
+                TrackIds = TrackIds, // Use passed TrackIds
                 isAiGenerated = isAiGenerated,
                 isQueueGenerated = isQueueGenerated,
                 coverImageUri = savedCoverPath,
@@ -364,7 +364,7 @@ class PlaylistViewModel @Inject constructor(
                 coverShapeDetail3 = coverShapeDetail3,
                 coverShapeDetail4 = coverShapeDetail4
             )
-            _playlistCreationEvent.emit(true)
+            _BooklistCreationEvent.emit(true)
         }
     }
 
@@ -438,7 +438,7 @@ class PlaylistViewModel @Inject constructor(
                 canvas.drawBitmap(originalBitmap, matrix, null)
                 
                 // Save
-                val fileName = "playlist_cover_$uniqueId.jpg"
+                val fileName = "Booklist_cover_$uniqueId.jpg"
                 val file = File(context.filesDir, fileName)
                 FileOutputStream(file).use { out ->
                     targetBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
@@ -457,50 +457,50 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    fun deletePlaylist(playlistId: String) {
-        if (isFolderPlaylistId(playlistId)) return
+    fun deleteBooklist(BooklistId: String) {
+        if (isFolderBooklistId(BooklistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.deletePlaylist(playlistId)
+            userPreferencesRepository.deleteBooklist(BooklistId)
         }
     }
 
     fun importM3u(uri: Uri) {
         viewModelScope.launch {
             try {
-                val (name, songIds) = m3uManager.parseM3u(uri)
-                if (songIds.isNotEmpty()) {
-                    userPreferencesRepository.createPlaylist(name, songIds)
+                val (name, TrackIds) = m3uManager.parseM3u(uri)
+                if (TrackIds.isNotEmpty()) {
+                    userPreferencesRepository.createBooklist(name, TrackIds)
                 }
             } catch (e: Exception) {
-                Log.e("PlaylistViewModel", "Error importing M3U", e)
+                Log.e("BooklistViewModel", "Error importing M3U", e)
             }
         }
     }
 
-    fun exportM3u(playlist: Playlist, uri: Uri, context: android.content.Context) {
+    fun exportM3u(Booklist: Booklist, uri: Uri, context: android.content.Context) {
         viewModelScope.launch {
             try {
-                val songs = musicRepository.getSongsByIds(playlist.songIds).first()
-                val m3uContent = m3uManager.generateM3u(playlist, songs)
+                val Tracks = AudiobookRepository.getTracksByIds(Booklist.TrackIds).first()
+                val m3uContent = m3uManager.generateM3u(Booklist, Tracks)
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     OutputStreamWriter(outputStream).use { writer ->
                         writer.write(m3uContent)
                     }
                 }
             } catch (e: Exception) {
-                Log.e("PlaylistViewModel", "Error exporting M3U", e)
+                Log.e("BooklistViewModel", "Error exporting M3U", e)
             }
         }
     }
 
-    fun renamePlaylist(playlistId: String, newName: String) {
-        if (isFolderPlaylistId(playlistId)) return
+    fun renameBooklist(BooklistId: String, newName: String) {
+        if (isFolderBooklistId(BooklistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.renamePlaylist(playlistId, newName)
-            if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
+            userPreferencesRepository.renameBooklist(BooklistId, newName)
+            if (_uiState.value.currentBooklistDetails?.id == BooklistId) {
                 _uiState.update {
                     it.copy(
-                        currentPlaylistDetails = it.currentPlaylistDetails?.copy(
+                        currentBooklistDetails = it.currentBooklistDetails?.copy(
                             name = newName
                         )
                     )
@@ -509,8 +509,8 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    fun updatePlaylistParameters(
-        playlistId: String,
+    fun updateBooklistParameters(
+        BooklistId: String,
         name: String,
         coverImageUri: String?,
         coverColor: Int?,
@@ -524,12 +524,12 @@ class PlaylistViewModel @Inject constructor(
         coverShapeDetail3: Float?,
         coverShapeDetail4: Float?
     ) {
-        if (isFolderPlaylistId(playlistId)) return
-        val currentPlaylist = _uiState.value.currentPlaylistDetails ?: return
-        if (currentPlaylist.id != playlistId) return
+        if (isFolderBooklistId(BooklistId)) return
+        val currentBooklist = _uiState.value.currentBooklistDetails ?: return
+        if (currentBooklist.id != BooklistId) return
 
         viewModelScope.launch {
-            var savedCoverPath: String? = currentPlaylist.coverImageUri
+            var savedCoverPath: String? = currentBooklist.coverImageUri
 
             // If a new URI is provided and it's different from the existing one (and not null)
             // Or if we need to re-save because crop params changed?
@@ -538,9 +538,9 @@ class PlaylistViewModel @Inject constructor(
             // The UI will pass the Uri string. If it's a local file path, it's likely already saved.
             // But if the user selected a new image, it will be a content content:// uri.
 
-            if (coverImageUri != null && coverImageUri != currentPlaylist.coverImageUri) {
+            if (coverImageUri != null && coverImageUri != currentBooklist.coverImageUri) {
                  // Check if it is a content URI or a file path that is NOT the existing saved path
-                 if (coverImageUri.startsWith("content://") || (coverImageUri.startsWith("/") && coverImageUri != currentPlaylist.coverImageUri)) {
+                 if (coverImageUri.startsWith("content://") || (coverImageUri.startsWith("/") && coverImageUri != currentBooklist.coverImageUri)) {
                      val imageId = UUID.randomUUID().toString()
                      val newPath = saveCoverImageToInternalStorage(
                          Uri.parse(coverImageUri),
@@ -557,7 +557,7 @@ class PlaylistViewModel @Inject constructor(
                 // If passed null, it might mean remove cover? Or just no change?
                 // For this implementation let's assume if the user cleared it, the UI passes null.
                 // But we need to distinguish "no change" vs "remove".
-                // In CreatePlaylist we have "selectedImageUri".
+                // In CreateBooklist we have "selectedImageUri".
                 // Let's assume the UI sends the desired final state.
                 // NOTE: If the user didn't change the image, the UI might send the existing coverImageUri (which is a file path).
                 // Or if they removed it, they send null.
@@ -573,12 +573,12 @@ class PlaylistViewModel @Inject constructor(
             // If the UI passes the EXISTING file path, implies NO CHANGE to image.
             // If the UI passes a NEW content URI, implies NEW IMAGE (and we use crop params).
             // If the UI passes NULL, implies REMOVE IMAGE.
-            if (coverImageUri == currentPlaylist.coverImageUri) {
-                savedCoverPath = currentPlaylist.coverImageUri
+            if (coverImageUri == currentBooklist.coverImageUri) {
+                savedCoverPath = currentBooklist.coverImageUri
             }
 
 
-            val updatedPlaylist = currentPlaylist.copy(
+            val updatedBooklist = currentBooklist.copy(
                 name = name,
                 coverImageUri = savedCoverPath,
                 coverColorArgb = coverColor,
@@ -592,71 +592,71 @@ class PlaylistViewModel @Inject constructor(
 
             // Optimistic update
             _uiState.update {
-                it.copy(currentPlaylistDetails = updatedPlaylist)
+                it.copy(currentBooklistDetails = updatedBooklist)
             }
 
-            userPreferencesRepository.updatePlaylist(updatedPlaylist)
+            userPreferencesRepository.updateBooklist(updatedBooklist)
         }
     }
 
-    fun addSongsToPlaylist(playlistId: String, songIdsToAdd: List<String>) {
-        if (isFolderPlaylistId(playlistId)) return
+    fun addTracksToBooklist(BooklistId: String, TrackIdsToAdd: List<String>) {
+        if (isFolderBooklistId(BooklistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.addSongsToPlaylist(playlistId, songIdsToAdd)
-            if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
-                loadPlaylistDetails(playlistId)
+            userPreferencesRepository.addTracksToBooklist(BooklistId, TrackIdsToAdd)
+            if (_uiState.value.currentBooklistDetails?.id == BooklistId) {
+                loadBooklistDetails(BooklistId)
             }
         }
     }
 
     /**
-     * @param playlistIds Ids of playlists to add the song to
+     * @param BooklistIds Ids of Booklists to add the Track to
      * */
-    fun addOrRemoveSongFromPlaylists(
-        songId: String,
-        playlistIds: List<String>,
-        currentPlaylistId: String?
+    fun addOrRemoveTrackFromBooklists(
+        TrackId: String,
+        BooklistIds: List<String>,
+        currentBooklistId: String?
     ) {
         viewModelScope.launch {
-            val removedFromPlaylists =
-                userPreferencesRepository.addOrRemoveSongFromPlaylists(songId, playlistIds)
-            if (currentPlaylistId != null && removedFromPlaylists.contains (currentPlaylistId)) {
-                removeSongFromPlaylist(currentPlaylistId, songId)
+            val removedFromBooklists =
+                userPreferencesRepository.addOrRemoveTrackFromBooklists(TrackId, BooklistIds)
+            if (currentBooklistId != null && removedFromBooklists.contains (currentBooklistId)) {
+                removeTrackFromBooklist(currentBooklistId, TrackId)
             }
         }
     }
 
-    fun removeSongFromPlaylist(playlistId: String, songIdToRemove: String) {
-        if (isFolderPlaylistId(playlistId)) return
+    fun removeTrackFromBooklist(BooklistId: String, TrackIdToRemove: String) {
+        if (isFolderBooklistId(BooklistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.removeSongFromPlaylist(playlistId, songIdToRemove)
-            if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
+            userPreferencesRepository.removeTrackFromBooklist(BooklistId, TrackIdToRemove)
+            if (_uiState.value.currentBooklistDetails?.id == BooklistId) {
                 _uiState.update {
-                    it.copy(currentPlaylistSongs = it.currentPlaylistSongs.filterNot { s -> s.id == songIdToRemove })
+                    it.copy(currentBooklistTracks = it.currentBooklistTracks.filterNot { s -> s.id == TrackIdToRemove })
                 }
             }
         }
     }
 
-    fun reorderSongsInPlaylist(playlistId: String, fromIndex: Int, toIndex: Int) {
-        if (isFolderPlaylistId(playlistId)) return
+    fun reorderTracksInBooklist(BooklistId: String, fromIndex: Int, toIndex: Int) {
+        if (isFolderBooklistId(BooklistId)) return
         viewModelScope.launch {
-            val currentSongs = _uiState.value.currentPlaylistSongs.toMutableList()
-            if (fromIndex in currentSongs.indices && toIndex in currentSongs.indices) {
-                val item = currentSongs.removeAt(fromIndex)
-                currentSongs.add(toIndex, item)
-                val newSongOrderIds = currentSongs.map { it.id }
-                userPreferencesRepository.reorderSongsInPlaylist(playlistId, newSongOrderIds)
-                userPreferencesRepository.setPlaylistSongOrderMode(
-                    playlistId,
+            val currentTracks = _uiState.value.currentBooklistTracks.toMutableList()
+            if (fromIndex in currentTracks.indices && toIndex in currentTracks.indices) {
+                val item = currentTracks.removeAt(fromIndex)
+                currentTracks.add(toIndex, item)
+                val newTrackOrderIds = currentTracks.map { it.id }
+                userPreferencesRepository.reorderTracksInBooklist(BooklistId, newTrackOrderIds)
+                userPreferencesRepository.setBooklistTrackOrderMode(
+                    BooklistId,
                     MANUAL_ORDER_MODE
                 )
                 _uiState.update {
-                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
+                    val updatedModes = it.BooklistOrderModes + (BooklistId to BooklistTracksOrderMode.Manual)
                     it.copy(
-                        currentPlaylistSongs = currentSongs,
-                        playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
-                        playlistOrderModes = updatedModes
+                        currentBooklistTracks = currentTracks,
+                        BooklistTracksOrderMode = BooklistTracksOrderMode.Manual,
+                        BooklistOrderModes = updatedModes
                     )
                 }
             }
@@ -664,72 +664,72 @@ class PlaylistViewModel @Inject constructor(
     }
 
     //Sort funs
-    fun sortPlaylists(sortOption: SortOption) {
-        _uiState.update { it.copy(currentPlaylistSortOption = sortOption) }
+    fun sortBooklists(sortOption: SortOption) {
+        _uiState.update { it.copy(currentBooklistsortOption = sortOption) }
 
-        val currentPlaylists = _uiState.value.playlists
-        val sortedPlaylists = when (sortOption) {
-            SortOption.PlaylistNameAZ -> currentPlaylists.sortedBy { it.name.lowercase() }
-            SortOption.PlaylistNameZA -> currentPlaylists.sortedByDescending { it.name.lowercase() }
-            SortOption.PlaylistDateCreated -> currentPlaylists.sortedByDescending { it.lastModified }
-            else -> currentPlaylists
+        val currentBooklists = _uiState.value.Booklists
+        val sortedBooklists = when (sortOption) {
+            SortOption.BooklistNameAZ -> currentBooklists.sortedBy { it.name.lowercase() }
+            SortOption.BooklistNameZA -> currentBooklists.sortedByDescending { it.name.lowercase() }
+            SortOption.BooklistDateCreated -> currentBooklists.sortedByDescending { it.lastModified }
+            else -> currentBooklists
         }.toList()
 
-        _uiState.update { it.copy(playlists = sortedPlaylists) }
+        _uiState.update { it.copy(Booklists = sortedBooklists) }
 
         viewModelScope.launch {
-            userPreferencesRepository.setPlaylistsSortOption(sortOption.storageKey)
+            userPreferencesRepository.setBooklistsSortOption(sortOption.storageKey)
         }
     }
 
-    fun sortPlaylistSongs(sortOption: SortOption) {
-        val playlistId = _uiState.value.currentPlaylistDetails?.id
+    fun sortBooklistTracks(sortOption: SortOption) {
+        val BooklistId = _uiState.value.currentBooklistDetails?.id
         
-        // If SongDefaultOrder is selected, reload the playlist to get original order
-        if (sortOption == SortOption.SongDefaultOrder) {
-            if (playlistId != null) {
+        // If TrackDefaultOrder is selected, reload the Booklist to get original order
+        if (sortOption == SortOption.TrackDefaultOrder) {
+            if (BooklistId != null) {
                 viewModelScope.launch {
                     // Set order mode to Manual (which preserves original order)
-                    userPreferencesRepository.setPlaylistSongOrderMode(
-                        playlistId,
+                    userPreferencesRepository.setBooklistTrackOrderMode(
+                        BooklistId,
                         MANUAL_ORDER_MODE
                     )
-                    // Reload the playlist to get original song order
-                    loadPlaylistDetails(playlistId)
+                    // Reload the Booklist to get original Track order
+                    loadBooklistDetails(BooklistId)
                 }
             }
             return
         }
 
-        val currentSongs = _uiState.value.currentPlaylistSongs
-        val sortedSongs = when (sortOption) {
-            SortOption.SongTitleAZ -> currentSongs.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> currentSongs.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> currentSongs.sortedBy { it.artist.lowercase() }
-            SortOption.SongAlbum -> currentSongs.sortedBy { it.album.lowercase() }
-            SortOption.SongDuration -> currentSongs.sortedBy { it.duration }
-            SortOption.SongDateAdded -> currentSongs.sortedByDescending { it.dateAdded }
-            else -> currentSongs
+        val currentTracks = _uiState.value.currentBooklistTracks
+        val sortedTracks = when (sortOption) {
+            SortOption.TrackTitleAZ -> currentTracks.sortedBy { it.title.lowercase() }
+            SortOption.TrackTitleZA -> currentTracks.sortedByDescending { it.title.lowercase() }
+            SortOption.TrackAuthor -> currentTracks.sortedBy { it.Author.lowercase() }
+            SortOption.TrackBook -> currentTracks.sortedBy { it.Book.lowercase() }
+            SortOption.TrackDuration -> currentTracks.sortedBy { it.duration }
+            SortOption.TrackDateAdded -> currentTracks.sortedByDescending { it.dateAdded }
+            else -> currentTracks
         }
 
         _uiState.update {
-            val updatedModes = if (playlistId != null) {
-                it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Sorted(sortOption))
+            val updatedModes = if (BooklistId != null) {
+                it.BooklistOrderModes + (BooklistId to BooklistTracksOrderMode.Sorted(sortOption))
             } else {
-                it.playlistOrderModes
+                it.BooklistOrderModes
             }
             it.copy(
-                currentPlaylistSongs = sortedSongs,
-                currentPlaylistSongsSortOption = sortOption,
-                playlistSongsOrderMode = PlaylistSongsOrderMode.Sorted(sortOption),
-                playlistOrderModes = updatedModes
+                currentBooklistTracks = sortedTracks,
+                currentBooklistTracksSortOption = sortOption,
+                BooklistTracksOrderMode = BooklistTracksOrderMode.Sorted(sortOption),
+                BooklistOrderModes = updatedModes
             )
         }
 
-        if (playlistId != null) {
+        if (BooklistId != null) {
             viewModelScope.launch {
-                userPreferencesRepository.setPlaylistSongOrderMode(
-                    playlistId,
+                userPreferencesRepository.setBooklistTrackOrderMode(
+                    BooklistId,
                     sortOption.storageKey
                 )
             }
@@ -739,14 +739,14 @@ class PlaylistViewModel @Inject constructor(
         // For now, we keep it in memory as per request focus.
     }
 
-    private fun isFolderPlaylistId(playlistId: String): Boolean =
-        playlistId.startsWith(FOLDER_PLAYLIST_PREFIX)
+    private fun isFolderBooklistId(BooklistId: String): Boolean =
+        BooklistId.startsWith(FOLDER_Booklist_PREFIX)
 
     private fun findFolder(
         targetPath: String,
-        folders: List<com.oakiha.audia.data.model.MusicFolder>
-    ): com.oakiha.audia.data.model.MusicFolder? {
-        val queue: ArrayDeque<com.oakiha.audia.data.model.MusicFolder> = ArrayDeque(folders)
+        folders: List<com.oakiha.audia.data.model.AudiobookFolder>
+    ): com.oakiha.audia.data.model.AudiobookFolder? {
+        val queue: ArrayDeque<com.oakiha.audia.data.model.AudiobookFolder> = ArrayDeque(folders)
         while (queue.isNotEmpty()) {
             val folder = queue.removeFirst()
             if (folder.path == targetPath) {
@@ -757,28 +757,28 @@ class PlaylistViewModel @Inject constructor(
         return null
     }
 
-    private fun com.oakiha.audia.data.model.MusicFolder.collectAllSongs(): List<Song> {
-        return songs + subFolders.flatMap { it.collectAllSongs() }
+    private fun com.oakiha.audia.data.model.AudiobookFolder.collectAllTracks(): List<Track> {
+        return Tracks + subFolders.flatMap { it.collectAllTracks() }
     }
 
-    private fun applySortToSongs(songs: List<Song>, sortOption: SortOption): List<Song> {
+    private fun applySortToTracks(Tracks: List<Track>, sortOption: SortOption): List<Track> {
         return when (sortOption) {
-            SortOption.SongTitleAZ -> songs.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> songs.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> songs.sortedBy { it.artist.lowercase() }
-            SortOption.SongAlbum -> songs.sortedBy { it.album.lowercase() }
-            SortOption.SongDuration -> songs.sortedBy { it.duration }
-            SortOption.SongDateAdded -> songs.sortedByDescending { it.dateAdded }
-            else -> songs
+            SortOption.TrackTitleAZ -> Tracks.sortedBy { it.title.lowercase() }
+            SortOption.TrackTitleZA -> Tracks.sortedByDescending { it.title.lowercase() }
+            SortOption.TrackAuthor -> Tracks.sortedBy { it.Author.lowercase() }
+            SortOption.TrackBook -> Tracks.sortedBy { it.Book.lowercase() }
+            SortOption.TrackDuration -> Tracks.sortedBy { it.duration }
+            SortOption.TrackDateAdded -> Tracks.sortedByDescending { it.dateAdded }
+            else -> Tracks
         }
     }
 
-    private fun decodeOrderMode(value: String): PlaylistSongsOrderMode {
+    private fun decodeOrderMode(value: String): BooklistTracksOrderMode {
         return if (value == MANUAL_ORDER_MODE) {
-            PlaylistSongsOrderMode.Manual
+            BooklistTracksOrderMode.Manual
         } else {
-            val option = SortOption.fromStorageKey(value, SortOption.SONGS, SortOption.SongTitleAZ)
-            PlaylistSongsOrderMode.Sorted(option)
+            val option = SortOption.fromStorageKey(value, SortOption.Tracks, SortOption.TrackTitleAZ)
+            BooklistTracksOrderMode.Sorted(option)
         }
     }
 }

@@ -12,560 +12,560 @@ import com.oakiha.audia.utils.AudioMeta
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MusicDao {
+interface AudiobookDao {
 
     // --- Insert Operations ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSongs(songs: List<SongEntity>)
+    suspend fun insertTracks(Tracks: List<TrackEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAlbums(albums: List<AlbumEntity>)
+    suspend fun insertBooks(Books: List<BookEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertArtists(artists: List<ArtistEntity>)
+    suspend fun insertAuthors(Authors: List<AuthorEntity>)
 
     @Transaction
-    suspend fun insertMusicData(songs: List<SongEntity>, albums: List<AlbumEntity>, artists: List<ArtistEntity>) {
-        insertArtists(artists)
-        insertAlbums(albums)
-        insertSongs(songs)
+    suspend fun insertAudiobookData(Tracks: List<TrackEntity>, Books: List<BookEntity>, Authors: List<AuthorEntity>) {
+        insertAuthors(Authors)
+        insertBooks(Books)
+        insertTracks(Tracks)
     }
 
     @Transaction
-    suspend fun clearAllMusicData() {
-        clearAllSongs()
-        clearAllAlbums()
-        clearAllArtists()
+    suspend fun clearAllAudiobookData() {
+        clearAllTracks()
+        clearAllBooks()
+        clearAllAuthors()
     }
 
     // --- Clear Operations ---
-    @Query("DELETE FROM songs")
-    suspend fun clearAllSongs()
+    @Query("DELETE FROM Tracks")
+    suspend fun clearAllTracks()
 
-    @Query("DELETE FROM albums")
-    suspend fun clearAllAlbums()
+    @Query("DELETE FROM Books")
+    suspend fun clearAllBooks()
 
-    @Query("DELETE FROM artists")
-    suspend fun clearAllArtists()
+    @Query("DELETE FROM Authors")
+    suspend fun clearAllAuthors()
 
     // --- Incremental Sync Operations ---
-    @Query("SELECT id FROM songs")
-    suspend fun getAllSongIds(): List<Long>
+    @Query("SELECT id FROM Tracks")
+    suspend fun getAllTrackIds(): List<Long>
 
-    @Query("DELETE FROM songs WHERE id IN (:songIds)")
-    suspend fun deleteSongsByIds(songIds: List<Long>)
+    @Query("DELETE FROM Tracks WHERE id IN (:TrackIds)")
+    suspend fun deleteTracksByIds(TrackIds: List<Long>)
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE song_id IN (:songIds)")
-    suspend fun deleteCrossRefsBySongIds(songIds: List<Long>)
+    @Query("DELETE FROM Track_Author_cross_ref WHERE Track_id IN (:TrackIds)")
+    suspend fun deleteCrossRefsByTrackIds(TrackIds: List<Long>)
 
     /**
-     * Incrementally sync music data: upsert new/modified songs and remove deleted ones.
+     * Incrementally sync Audiobook data: upsert new/modified Tracks and remove deleted ones.
      * More efficient than clear-and-replace for large libraries with few changes.
      */
     @Transaction
-    suspend fun incrementalSyncMusicData(
-        songs: List<SongEntity>,
-        albums: List<AlbumEntity>,
-        artists: List<ArtistEntity>,
-        crossRefs: List<SongArtistCrossRef>,
-        deletedSongIds: List<Long>
+    suspend fun incrementalSyncAudiobookData(
+        Tracks: List<TrackEntity>,
+        Books: List<BookEntity>,
+        Authors: List<AuthorEntity>,
+        crossRefs: List<TrackAuthorCrossRef>,
+        deletedTrackIds: List<Long>
     ) {
-        // Delete removed songs and their cross-refs
-        if (deletedSongIds.isNotEmpty()) {
-            deletedSongIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-                deleteCrossRefsBySongIds(chunk)
-                deleteSongsByIds(chunk)
+        // Delete removed Tracks and their cross-refs
+        if (deletedTrackIds.isNotEmpty()) {
+            deletedTrackIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
+                deleteCrossRefsByTrackIds(chunk)
+                deleteTracksByIds(chunk)
             }
         }
         
-        // Upsert artists, albums, and songs (REPLACE strategy handles updates)
-        insertArtists(artists)
-        insertAlbums(albums)
+        // Upsert Authors, Books, and Tracks (REPLACE strategy handles updates)
+        insertAuthors(Authors)
+        insertBooks(Books)
         
-        // Insert songs in chunks to allow concurrent reads
-        songs.chunked(SONG_BATCH_SIZE).forEach { chunk ->
-            insertSongs(chunk)
+        // Insert Tracks in chunks to allow concurrent reads
+        Tracks.chunked(Track_BATCH_SIZE).forEach { chunk ->
+            insertTracks(chunk)
         }
         
-        // Delete old cross-refs for updated songs and insert new ones
-        val updatedSongIds = songs.map { it.id }
-        updatedSongIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-            deleteCrossRefsBySongIds(chunk)
+        // Delete old cross-refs for updated Tracks and insert new ones
+        val updatedTrackIds = Tracks.map { it.id }
+        updatedTrackIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
+            deleteCrossRefsByTrackIds(chunk)
         }
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-            insertSongArtistCrossRefs(chunk)
+            insertTrackAuthorCrossRefs(chunk)
         }
         
-        // Clean up orphaned albums and artists
-        deleteOrphanedAlbums()
-        deleteOrphanedArtists()
+        // Clean up orphaned Books and Authors
+        deleteOrphanedBooks()
+        deleteOrphanedAuthors()
     }
 
-    // --- Song Queries ---
-    // Updated getSongs to potentially filter by parent_directory_path
+    // --- Track Queries ---
+    // Updated getTracks to potentially filter by parent_directory_path
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
         ORDER BY title ASC
     """)
-    fun getSongs(
+    fun getTracks(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE id = :songId")
-    fun getSongById(songId: Long): Flow<SongEntity?>
+    @Query("SELECT * FROM Tracks WHERE id = :TrackId")
+    fun getTrackById(TrackId: Long): Flow<TrackEntity?>
 
-    @Query("SELECT * FROM songs WHERE file_path = :path LIMIT 1")
-    suspend fun getSongByPath(path: String): SongEntity?
+    @Query("SELECT * FROM Tracks WHERE file_path = :path LIMIT 1")
+    suspend fun getTrackByPath(path: String): TrackEntity?
 
-    //@Query("SELECT * FROM songs WHERE id IN (:songIds)")
+    //@Query("SELECT * FROM Tracks WHERE id IN (:TrackIds)")
     @Query("""
-        SELECT * FROM songs
-        WHERE id IN (:songIds)
+        SELECT * FROM Tracks
+        WHERE id IN (:TrackIds)
         AND (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
     """)
-    fun getSongsByIds(
-        songIds: List<Long>,
+    fun getTracksByIds(
+        TrackIds: List<Long>,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY title ASC")
-    fun getSongsByAlbumId(albumId: Long): Flow<List<SongEntity>>
+    @Query("SELECT * FROM Tracks WHERE Book_id = :BookId ORDER BY title ASC")
+    fun getTracksByBookId(BookId: Long): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getSongsByArtistId(artistId: Long): Flow<List<SongEntity>>
+    @Query("SELECT * FROM Tracks WHERE Author_id = :AuthorId ORDER BY title ASC")
+    fun getTracksByAuthorId(AuthorId: Long): Flow<List<TrackEntity>>
 
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
-        AND (title LIKE '%' || :query || '%' OR artist_name LIKE '%' || :query || '%')
+        AND (title LIKE '%' || :query || '%' OR Author_name LIKE '%' || :query || '%')
         ORDER BY title ASC
     """)
-    fun searchSongs(
+    fun searchTracks(
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
-    @Query("SELECT COUNT(*) FROM songs")
-    fun getSongCount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM Tracks")
+    fun getTrackCount(): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM songs")
-    suspend fun getSongCountOnce(): Int
+    @Query("SELECT COUNT(*) FROM Tracks")
+    suspend fun getTrackCountOnce(): Int
 
     /**
-     * Returns random songs for efficient shuffle without loading all songs into memory.
+     * Returns random Tracks for efficient shuffle without loading all Tracks into memory.
      * Uses SQLite RANDOM() for true randomness.
      */
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
         ORDER BY RANDOM()
         LIMIT :limit
     """)
-    suspend fun getRandomSongs(
+    suspend fun getRandomTracks(
         limit: Int,
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
-    ): List<SongEntity>
+    ): List<TrackEntity>
 
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
     """)
-    fun getAllSongs(
+    fun getAllTracks(
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
     
     // --- Paginated Queries for Large Libraries ---
     /**
-     * Returns a PagingSource for songs, enabling efficient pagination for large libraries.
+     * Returns a PagingSource for Tracks, enabling efficient pagination for large libraries.
      * Room auto-generates the PagingSource implementation.
      */
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
         ORDER BY title ASC
     """)
-    fun getSongsPaginated(
+    fun getTracksPaginated(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): PagingSource<Int, SongEntity>
+    ): PagingSource<Int, TrackEntity>
 
-    // --- Album Queries ---
+    // --- Book Queries ---
     @Query("""
-        SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        ORDER BY albums.title ASC
+        SELECT DISTINCT Books.* FROM Books
+        INNER JOIN Tracks ON Books.id = Tracks.Book_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        ORDER BY Books.title ASC
     """)
-    fun getAlbums(
+    fun getBooks(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<AlbumEntity>>
+    ): Flow<List<BookEntity>>
 
-    @Query("SELECT * FROM albums WHERE id = :albumId")
-    fun getAlbumById(albumId: Long): Flow<AlbumEntity?>
+    @Query("SELECT * FROM Books WHERE id = :BookId")
+    fun getBookById(BookId: Long): Flow<BookEntity?>
 
-    @Query("SELECT * FROM albums WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
-    fun searchAlbums(query: String): Flow<List<AlbumEntity>>
+    @Query("SELECT * FROM Books WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
+    fun searchBooks(query: String): Flow<List<BookEntity>>
 
-    @Query("SELECT COUNT(*) FROM albums")
-    fun getAlbumCount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM Books")
+    fun getBookCount(): Flow<Int>
 
-    // Version of getAlbums that returns a List for one-shot reads
+    // Version of getBooks that returns a List for one-shot reads
     @Query("""
-        SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        ORDER BY albums.title ASC
+        SELECT DISTINCT Books.* FROM Books
+        INNER JOIN Tracks ON Books.id = Tracks.Book_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        ORDER BY Books.title ASC
     """)
-    suspend fun getAllAlbumsList(
+    suspend fun getAllBooksList(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): List<AlbumEntity>
+    ): List<BookEntity>
 
-    @Query("SELECT * FROM albums WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getAlbumsByArtistId(artistId: Long): Flow<List<AlbumEntity>>
+    @Query("SELECT * FROM Books WHERE Author_id = :AuthorId ORDER BY title ASC")
+    fun getBooksByAuthorId(AuthorId: Long): Flow<List<BookEntity>>
 
     @Query("""
-        SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        AND (albums.title LIKE '%' || :query || '%' OR albums.artist_name LIKE '%' || :query || '%')
-        ORDER BY albums.title ASC
+        SELECT DISTINCT Books.* FROM Books
+        INNER JOIN Tracks ON Books.id = Tracks.Book_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        AND (Books.title LIKE '%' || :query || '%' OR Books.Author_name LIKE '%' || :query || '%')
+        ORDER BY Books.title ASC
     """)
-    fun searchAlbums(
+    fun searchBooks(
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<AlbumEntity>>
+    ): Flow<List<BookEntity>>
 
-    // --- Artist Queries ---
+    // --- Author Queries ---
     @Query("""
-        SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        ORDER BY artists.name ASC
+        SELECT DISTINCT Authors.* FROM Authors
+        INNER JOIN Tracks ON Authors.id = Tracks.Author_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        ORDER BY Authors.name ASC
     """)
-    fun getArtists(
+    fun getAuthors(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
     /**
-     * Unfiltered list of all artists (including those only reachable via cross-refs).
+     * Unfiltered list of all Authors (including those only reachable via cross-refs).
      */
-    @Query("SELECT * FROM artists ORDER BY name ASC")
-    fun getAllArtistsRaw(): Flow<List<ArtistEntity>>
+    @Query("SELECT * FROM Authors ORDER BY name ASC")
+    fun getAllAuthorsRaw(): Flow<List<AuthorEntity>>
 
-    @Query("SELECT * FROM artists WHERE id = :artistId")
-    fun getArtistById(artistId: Long): Flow<ArtistEntity?>
+    @Query("SELECT * FROM Authors WHERE id = :AuthorId")
+    fun getAuthorById(AuthorId: Long): Flow<AuthorEntity?>
 
-    @Query("SELECT * FROM artists WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
-    fun searchArtists(query: String): Flow<List<ArtistEntity>>
+    @Query("SELECT * FROM Authors WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    fun searchAuthors(query: String): Flow<List<AuthorEntity>>
 
-    @Query("SELECT COUNT(*) FROM artists")
-    fun getArtistCount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM Authors")
+    fun getAuthorCount(): Flow<Int>
 
-    // Version of getArtists that returns a List for one-shot reads
+    // Version of getAuthors that returns a List for one-shot reads
     @Query("""
-        SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        ORDER BY artists.name ASC
+        SELECT DISTINCT Authors.* FROM Authors
+        INNER JOIN Tracks ON Authors.id = Tracks.Author_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        ORDER BY Authors.name ASC
     """)
-    suspend fun getAllArtistsList(
+    suspend fun getAllAuthorsList(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): List<ArtistEntity>
+    ): List<AuthorEntity>
 
     /**
-     * Unfiltered list of all artists (one-shot).
+     * Unfiltered list of all Authors (one-shot).
      */
-    @Query("SELECT * FROM artists ORDER BY name ASC")
-    suspend fun getAllArtistsListRaw(): List<ArtistEntity>
+    @Query("SELECT * FROM Authors ORDER BY name ASC")
+    suspend fun getAllAuthorsListRaw(): List<AuthorEntity>
 
     @Query("""
-        SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        AND artists.name LIKE '%' || :query || '%'
-        ORDER BY artists.name ASC
+        SELECT DISTINCT Authors.* FROM Authors
+        INNER JOIN Tracks ON Authors.id = Tracks.Author_id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        AND Authors.name LIKE '%' || :query || '%'
+        ORDER BY Authors.name ASC
     """)
-    fun searchArtists(
+    fun searchAuthors(
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
-    // --- Artist Image Operations ---
-    @Query("SELECT image_url FROM artists WHERE id = :artistId")
-    suspend fun getArtistImageUrl(artistId: Long): String?
+    // --- Author Image Operations ---
+    @Query("SELECT image_url FROM Authors WHERE id = :AuthorId")
+    suspend fun getAuthorImageUrl(AuthorId: Long): String?
 
-    @Query("UPDATE artists SET image_url = :imageUrl WHERE id = :artistId")
-    suspend fun updateArtistImageUrl(artistId: Long, imageUrl: String)
+    @Query("UPDATE Authors SET image_url = :imageUrl WHERE id = :AuthorId")
+    suspend fun updateAuthorImageUrl(AuthorId: Long, imageUrl: String)
 
-    @Query("SELECT id FROM artists WHERE name = :name LIMIT 1")
-    suspend fun getArtistIdByName(name: String): Long?
+    @Query("SELECT id FROM Authors WHERE name = :name LIMIT 1")
+    suspend fun getAuthorIdByName(name: String): Long?
 
-    @Query("SELECT MAX(id) FROM artists")
-    suspend fun getMaxArtistId(): Long?
+    @Query("SELECT MAX(id) FROM Authors")
+    suspend fun getMaxAuthorId(): Long?
 
-    // --- Genre Queries ---
-    // Example: Get all songs for a specific genre
+    // --- Category Queries ---
+    // Example: Get all Tracks for a specific Category
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
-        AND genre LIKE :genreName
+        AND Category LIKE :CategoryName
         ORDER BY title ASC
     """)
-    fun getSongsByGenre(
-        genreName: String,
+    fun getTracksByCategory(
+        CategoryName: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     @Query("""
-        SELECT * FROM songs
+        SELECT * FROM Tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
-        AND (genre IS NULL OR genre = '')
+        AND (Category IS NULL OR Category = '')
         ORDER BY title ASC
     """)
-    fun getSongsWithNullGenre(
+    fun getTracksWithNullCategory(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
-    // Example: Get all unique genre names
-    @Query("SELECT DISTINCT genre FROM songs WHERE genre IS NOT NULL AND genre != '' ORDER BY genre ASC")
-    fun getUniqueGenres(): Flow<List<String>>
+    // Example: Get all unique Category names
+    @Query("SELECT DISTINCT Category FROM Tracks WHERE Category IS NOT NULL AND Category != '' ORDER BY Category ASC")
+    fun getUniqueCategories(): Flow<List<String>>
 
     // --- Combined Queries (Potentially useful for more complex scenarios) ---
-    // E.g., Get all album art URIs from songs (could be useful for theme preloading from SSoT)
-    @Query("SELECT DISTINCT album_art_uri_string FROM songs WHERE album_art_uri_string IS NOT NULL")
-    fun getAllUniqueAlbumArtUrisFromSongs(): Flow<List<String>>
+    // E.g., Get all Book art URIs from Tracks (could be useful for theme preloading from SSoT)
+    @Query("SELECT DISTINCT Book_art_uri_string FROM Tracks WHERE Book_art_uri_string IS NOT NULL")
+    fun getAllUniqueBookArtUrisFromTracks(): Flow<List<String>>
 
-    @Query("DELETE FROM albums WHERE id NOT IN (SELECT DISTINCT album_id FROM songs)")
-    suspend fun deleteOrphanedAlbums()
+    @Query("DELETE FROM Books WHERE id NOT IN (SELECT DISTINCT Book_id FROM Tracks)")
+    suspend fun deleteOrphanedBooks()
 
-    @Query("DELETE FROM artists WHERE id NOT IN (SELECT DISTINCT artist_id FROM songs)")
-    suspend fun deleteOrphanedArtists()
+    @Query("DELETE FROM Authors WHERE id NOT IN (SELECT DISTINCT Author_id FROM Tracks)")
+    suspend fun deleteOrphanedAuthors()
 
     // --- Favorite Operations ---
-    @Query("UPDATE songs SET is_favorite = :isFavorite WHERE id = :songId")
-    suspend fun setFavoriteStatus(songId: Long, isFavorite: Boolean)
+    @Query("UPDATE Tracks SET is_favorite = :isFavorite WHERE id = :TrackId")
+    suspend fun setFavoriteStatus(TrackId: Long, isFavorite: Boolean)
 
-    @Query("SELECT is_favorite FROM songs WHERE id = :songId")
-    suspend fun getFavoriteStatus(songId: Long): Boolean?
+    @Query("SELECT is_favorite FROM Tracks WHERE id = :TrackId")
+    suspend fun getFavoriteStatus(TrackId: Long): Boolean?
 
     // Transaction to toggle favorite status
     @Transaction
-    suspend fun toggleFavoriteStatus(songId: Long): Boolean {
-        val currentStatus = getFavoriteStatus(songId) ?: false // Default to false if not found (should not happen for existing song)
+    suspend fun toggleFavoriteStatus(TrackId: Long): Boolean {
+        val currentStatus = getFavoriteStatus(TrackId) ?: false // Default to false if not found (should not happen for existing Track)
         val newStatus = !currentStatus
-        setFavoriteStatus(songId, newStatus)
+        setFavoriteStatus(TrackId, newStatus)
         return newStatus
     }
 
-    @Query("UPDATE songs SET title = :title, artist_name = :artist, album_name = :album, genre = :genre, lyrics = :lyrics, track_number = :trackNumber WHERE id = :songId")
-    suspend fun updateSongMetadata(
-        songId: Long,
+    @Query("UPDATE Tracks SET title = :title, Author_name = :Author, Book_name = :Book, Category = :Category, Transcript = :Transcript, track_number = :trackNumber WHERE id = :TrackId")
+    suspend fun updateTrackMetadata(
+        TrackId: Long,
         title: String,
-        artist: String,
-        album: String,
-        genre: String?,
-        lyrics: String?,
+        Author: String,
+        Book: String,
+        Category: String?,
+        Transcript: String?,
         trackNumber: Int
     )
 
-    @Query("UPDATE songs SET album_art_uri_string = :albumArtUri WHERE id = :songId")
-    suspend fun updateSongAlbumArt(songId: Long, albumArtUri: String?)
+    @Query("UPDATE Tracks SET Book_art_uri_string = :BookArtUri WHERE id = :TrackId")
+    suspend fun updateTrackBookArt(TrackId: Long, BookArtUri: String?)
 
-    @Query("UPDATE songs SET lyrics = :lyrics WHERE id = :songId")
-    suspend fun updateLyrics(songId: Long, lyrics: String)
+    @Query("UPDATE Tracks SET Transcript = :Transcript WHERE id = :TrackId")
+    suspend fun updateTranscript(TrackId: Long, Transcript: String)
 
-    @Query("UPDATE songs SET lyrics = NULL WHERE id = :songId")
-    suspend fun resetLyrics(songId: Long)
+    @Query("UPDATE Tracks SET Transcript = NULL WHERE id = :TrackId")
+    suspend fun resetTranscript(TrackId: Long)
 
-    @Query("UPDATE songs SET lyrics = NULL")
-    suspend fun resetAllLyrics()
+    @Query("UPDATE Tracks SET Transcript = NULL")
+    suspend fun resetAllTranscript()
 
-    @Query("SELECT * FROM songs")
-    suspend fun getAllSongsList(): List<SongEntity>
+    @Query("SELECT * FROM Tracks")
+    suspend fun getAllTracksList(): List<TrackEntity>
 
-    @Query("SELECT album_art_uri_string FROM songs WHERE id=:id")
-    suspend fun getAlbumArtUriById(id: Long) : String?
+    @Query("SELECT Book_art_uri_string FROM Tracks WHERE id=:id")
+    suspend fun getBookArtUriById(id: Long) : String?
 
-    @Query("DELETE FROM songs WHERE id=:id")
+    @Query("DELETE FROM Tracks WHERE id=:id")
     suspend fun deleteById(id: Long)
 
     @Query("""
     SELECT mime_type AS mimeType,
            bitrate,
            sample_rate AS sampleRate
-    FROM songs
+    FROM Tracks
     WHERE id = :id
     """)
     suspend fun getAudioMetadataById(id: Long): AudioMeta?
 
-    // ===== Song-Artist Cross Reference (Junction Table) Operations =====
+    // ===== Track-Author Cross Reference (Junction Table) Operations =====
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertSongArtistCrossRefs(crossRefs: List<SongArtistCrossRef>)
+    suspend fun insertTrackAuthorCrossRefs(crossRefs: List<TrackAuthorCrossRef>)
 
-    @Query("SELECT * FROM song_artist_cross_ref")
-    fun getAllSongArtistCrossRefs(): Flow<List<SongArtistCrossRef>>
+    @Query("SELECT * FROM Track_Author_cross_ref")
+    fun getAllTrackAuthorCrossRefs(): Flow<List<TrackAuthorCrossRef>>
 
-    @Query("SELECT * FROM song_artist_cross_ref")
-    suspend fun getAllSongArtistCrossRefsList(): List<SongArtistCrossRef>
+    @Query("SELECT * FROM Track_Author_cross_ref")
+    suspend fun getAllTrackAuthorCrossRefsList(): List<TrackAuthorCrossRef>
 
-    @Query("DELETE FROM song_artist_cross_ref")
-    suspend fun clearAllSongArtistCrossRefs()
+    @Query("DELETE FROM Track_Author_cross_ref")
+    suspend fun clearAllTrackAuthorCrossRefs()
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE song_id = :songId")
-    suspend fun deleteCrossRefsForSong(songId: Long)
+    @Query("DELETE FROM Track_Author_cross_ref WHERE Track_id = :TrackId")
+    suspend fun deleteCrossRefsForTrack(TrackId: Long)
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE artist_id = :artistId")
-    suspend fun deleteCrossRefsForArtist(artistId: Long)
+    @Query("DELETE FROM Track_Author_cross_ref WHERE Author_id = :AuthorId")
+    suspend fun deleteCrossRefsForAuthor(AuthorId: Long)
 
     /**
-     * Get all artists for a specific song using the junction table.
+     * Get all Authors for a specific Track using the junction table.
      */
     @Query("""
-        SELECT artists.* FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId
-        ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
+        SELECT Authors.* FROM Authors
+        INNER JOIN Track_Author_cross_ref ON Authors.id = Track_Author_cross_ref.Author_id
+        WHERE Track_Author_cross_ref.Track_id = :TrackId
+        ORDER BY Track_Author_cross_ref.is_primary DESC, Authors.name ASC
     """)
-    fun getArtistsForSong(songId: Long): Flow<List<ArtistEntity>>
+    fun getAuthorsForTrack(TrackId: Long): Flow<List<AuthorEntity>>
 
     /**
-     * Get all artists for a specific song (one-shot).
+     * Get all Authors for a specific Track (one-shot).
      */
     @Query("""
-        SELECT artists.* FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId
-        ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
+        SELECT Authors.* FROM Authors
+        INNER JOIN Track_Author_cross_ref ON Authors.id = Track_Author_cross_ref.Author_id
+        WHERE Track_Author_cross_ref.Track_id = :TrackId
+        ORDER BY Track_Author_cross_ref.is_primary DESC, Authors.name ASC
     """)
-    suspend fun getArtistsForSongList(songId: Long): List<ArtistEntity>
+    suspend fun getAuthorsForTrackList(TrackId: Long): List<AuthorEntity>
 
     /**
-     * Get all songs for a specific artist using the junction table.
+     * Get all Tracks for a specific Author using the junction table.
      */
     @Query("""
-        SELECT songs.* FROM songs
-        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :artistId
-        ORDER BY songs.title ASC
+        Select books.* FROM Tracks
+        INNER JOIN Track_Author_cross_ref ON Tracks.id = Track_Author_cross_ref.Track_id
+        WHERE Track_Author_cross_ref.Author_id = :AuthorId
+        ORDER BY Tracks.title ASC
     """)
-    fun getSongsForArtist(artistId: Long): Flow<List<SongEntity>>
+    fun getTracksForAuthor(AuthorId: Long): Flow<List<TrackEntity>>
 
     /**
-     * Get all songs for a specific artist (one-shot).
+     * Get all Tracks for a specific Author (one-shot).
      */
     @Query("""
-        SELECT songs.* FROM songs
-        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :artistId
-        ORDER BY songs.title ASC
+        Select books.* FROM Tracks
+        INNER JOIN Track_Author_cross_ref ON Tracks.id = Track_Author_cross_ref.Track_id
+        WHERE Track_Author_cross_ref.Author_id = :AuthorId
+        ORDER BY Tracks.title ASC
     """)
-    suspend fun getSongsForArtistList(artistId: Long): List<SongEntity>
+    suspend fun getTracksForAuthorList(AuthorId: Long): List<TrackEntity>
 
     /**
-     * Get the cross-references for a specific song.
+     * Get the cross-references for a specific Track.
      */
-    @Query("SELECT * FROM song_artist_cross_ref WHERE song_id = :songId")
-    suspend fun getCrossRefsForSong(songId: Long): List<SongArtistCrossRef>
+    @Query("SELECT * FROM Track_Author_cross_ref WHERE Track_id = :TrackId")
+    suspend fun getCrossRefsForTrack(TrackId: Long): List<TrackAuthorCrossRef>
 
     /**
-     * Get the primary artist for a song.
+     * Get the primary Author for a Track.
      */
     @Query("""
-        SELECT artists.id AS artist_id, artists.name FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId AND song_artist_cross_ref.is_primary = 1
+        SELECT Authors.id AS Author_id, Authors.name FROM Authors
+        INNER JOIN Track_Author_cross_ref ON Authors.id = Track_Author_cross_ref.Author_id
+        WHERE Track_Author_cross_ref.Track_id = :TrackId AND Track_Author_cross_ref.is_primary = 1
         LIMIT 1
     """)
-    suspend fun getPrimaryArtistForSong(songId: Long): PrimaryArtistInfo?
+    suspend fun getPrimaryAuthorForTrack(TrackId: Long): PrimaryAuthorInfo?
 
     /**
-     * Get song count for an artist from the junction table.
+     * Get Track count for an Author from the junction table.
      */
-    @Query("SELECT COUNT(*) FROM song_artist_cross_ref WHERE artist_id = :artistId")
-    suspend fun getSongCountForArtist(artistId: Long): Int
+    @Query("SELECT COUNT(*) FROM Track_Author_cross_ref WHERE Author_id = :AuthorId")
+    suspend fun getTrackCountForAuthor(AuthorId: Long): Int
 
     /**
-     * Get all artists with their song counts computed from the junction table.
-     */
-    @Query("""
-        SELECT artists.id, artists.name, artists.image_url,
-               (SELECT COUNT(*) FROM song_artist_cross_ref WHERE song_artist_cross_ref.artist_id = artists.id) AS track_count
-        FROM artists
-        ORDER BY artists.name ASC
-    """)
-    fun getArtistsWithSongCounts(): Flow<List<ArtistEntity>>
-
-    /**
-     * Get all artists with song counts, filtered by allowed directories.
+     * Get all Authors with their Track counts computed from the junction table.
      */
     @Query("""
-        SELECT DISTINCT artists.id, artists.name, artists.image_url,
-               (SELECT COUNT(*) FROM song_artist_cross_ref 
-                INNER JOIN songs ON song_artist_cross_ref.song_id = songs.id
-                WHERE song_artist_cross_ref.artist_id = artists.id
-                AND (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))) AS track_count
-        FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        INNER JOIN songs ON song_artist_cross_ref.song_id = songs.id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        ORDER BY artists.name ASC
+        SELECT Authors.id, Authors.name, Authors.image_url,
+               (SELECT COUNT(*) FROM Track_Author_cross_ref WHERE Track_Author_cross_ref.Author_id = Authors.id) AS track_count
+        FROM Authors
+        ORDER BY Authors.name ASC
     """)
-    fun getArtistsWithSongCountsFiltered(
+    fun getAuthorsWithTrackCounts(): Flow<List<AuthorEntity>>
+
+    /**
+     * Get all Authors with Track counts, filtered by allowed directories.
+     */
+    @Query("""
+        SELECT DISTINCT Authors.id, Authors.name, Authors.image_url,
+               (SELECT COUNT(*) FROM Track_Author_cross_ref 
+                INNER JOIN Tracks ON Track_Author_cross_ref.Track_id = Tracks.id
+                WHERE Track_Author_cross_ref.Author_id = Authors.id
+                AND (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))) AS track_count
+        FROM Authors
+        INNER JOIN Track_Author_cross_ref ON Authors.id = Track_Author_cross_ref.Author_id
+        INNER JOIN Tracks ON Track_Author_cross_ref.Track_id = Tracks.id
+        WHERE (:applyDirectoryFilter = 0 OR Tracks.parent_directory_path IN (:allowedParentDirs))
+        ORDER BY Authors.name ASC
+    """)
+    fun getAuthorsWithTrackCountsFiltered(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
     /**
-     * Clear all music data including cross-references.
+     * Clear all Audiobook data including cross-references.
      */
     @Transaction
-    suspend fun clearAllMusicDataWithCrossRefs() {
-        clearAllSongArtistCrossRefs()
-        clearAllSongs()
-        clearAllAlbums()
-        clearAllArtists()
+    suspend fun clearAllAudiobookDataWithCrossRefs() {
+        clearAllTrackAuthorCrossRefs()
+        clearAllTracks()
+        clearAllBooks()
+        clearAllAuthors()
     }
 
     /**
-     * Insert music data with cross-references in a single transaction.
+     * Insert Audiobook data with cross-references in a single transaction.
      * Uses chunked inserts for cross-refs to avoid SQLite variable limits.
      */
     @Transaction
-    suspend fun insertMusicDataWithCrossRefs(
-        songs: List<SongEntity>,
-        albums: List<AlbumEntity>,
-        artists: List<ArtistEntity>,
-        crossRefs: List<SongArtistCrossRef>
+    suspend fun insertAudiobookDataWithCrossRefs(
+        Tracks: List<TrackEntity>,
+        Books: List<BookEntity>,
+        Authors: List<AuthorEntity>,
+        crossRefs: List<TrackAuthorCrossRef>
     ) {
-        insertArtists(artists)
-        insertAlbums(albums)
-        insertSongs(songs)
+        insertAuthors(Authors)
+        insertBooks(Books)
+        insertTracks(Tracks)
         // Insert cross-refs in chunks to avoid SQLite variable limit.
-        // Each SongArtistCrossRef has 3 fields, so batch size is calculated accordingly.
+        // Each TrackAuthorCrossRef has 3 fields, so batch size is calculated accordingly.
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-            insertSongArtistCrossRefs(chunk)
+            insertTrackAuthorCrossRefs(chunk)
         }
     }
 
     companion object {
         /**
          * SQLite has a limit on the number of variables per statement (default 999, higher in newer versions).
-         * Each SongArtistCrossRef insert uses 3 variables (songId, artistId, isPrimary).
+         * Each TrackAuthorCrossRef insert uses 3 variables (TrackId, AuthorId, isPrimary).
          * The batch size is calculated so that batchSize * 3 <= SQLITE_MAX_VARIABLE_NUMBER.
          */
         private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more
@@ -573,9 +573,9 @@ interface MusicDao {
         val CROSS_REF_BATCH_SIZE: Int = SQLITE_MAX_VARIABLE_NUMBER / CROSS_REF_FIELDS_PER_OBJECT
         
         /**
-         * Batch size for song inserts during incremental sync.
+         * Batch size for Track inserts during incremental sync.
          * Allows database reads to interleave with writes for better UX.
          */
-        const val SONG_BATCH_SIZE = 500
+        const val Track_BATCH_SIZE = 500
     }
 }

@@ -1,8 +1,8 @@
 package com.oakiha.audia.presentation.components
 
 import android.widget.Toast
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.model.Lyrics
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.model.Transcript
 import com.oakiha.audia.R
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -91,11 +91,11 @@ import androidx.compose.ui.unit.sp
 
 import com.oakiha.audia.data.model.SyncedLine
 import com.oakiha.audia.data.model.SyncedWord
-import com.oakiha.audia.data.repository.LyricsSearchResult
+import com.oakiha.audia.data.repository.TranscriptSearchResult
 import com.oakiha.audia.presentation.screens.TabAnimation
-import com.oakiha.audia.presentation.components.subcomps.FetchLyricsDialog
+import com.oakiha.audia.presentation.components.subcomps.FetchTranscriptDialog
 import com.oakiha.audia.presentation.components.subcomps.PlayerSeekBar
-import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
+import com.oakiha.audia.presentation.viewmodel.TranscriptSearchUiState
 import com.oakiha.audia.presentation.viewmodel.PlayerUiState
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
 import com.oakiha.audia.ui.theme.GoogleSansRounded
@@ -105,7 +105,7 @@ import com.oakiha.audia.presentation.components.snapping.ExperimentalSnapperApi
 import com.oakiha.audia.presentation.components.snapping.SnapperLayoutInfo
 import com.oakiha.audia.presentation.components.snapping.rememberLazyListSnapperLayoutInfo
 import com.oakiha.audia.presentation.components.snapping.rememberSnapperFlingBehavior
-import com.oakiha.audia.utils.LyricsUtils
+import com.oakiha.audia.utils.TranscriptUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -123,19 +123,19 @@ import com.oakiha.audia.presentation.components.subcomps.PlayingEqIcon
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LyricsSheet(
+fun TranscriptSheet(
     stablePlayerStateFlow: StateFlow<StablePlayerState>,
     playerUiStateFlow: StateFlow<PlayerUiState>,
-    lyricsSearchUiState: LyricsSearchUiState,
-    resetLyricsForCurrentSong: () -> Unit,
-    onSearchLyrics: (Boolean) -> Unit,
-    onPickResult: (LyricsSearchResult) -> Unit,
+    TranscriptSearchUiState: TranscriptSearchUiState,
+    resetTranscriptForCurrentTrack: () -> Unit,
+    onSearchTranscript: (Boolean) -> Unit,
+    onPickResult: (TranscriptSearchResult) -> Unit,
     onManualSearch: (String, String?) -> Unit,
-    onImportLyrics: () -> Unit,
-    onDismissLyricsSearch: () -> Unit,
-    lyricsSyncOffset: Int,
-    onLyricsSyncOffsetChange: (Int) -> Unit,
-    lyricsTextStyle: TextStyle,
+    onImportTranscript: () -> Unit,
+    onDismissTranscriptSearch: () -> Unit,
+    TranscriptSyncOffset: Int,
+    onTranscriptSyncOffsetChange: (Int) -> Unit,
+    TranscriptTextStyle: TextStyle,
     backgroundColor: Color,
     onBackgroundColor: Color,
     containerColor: Color,
@@ -149,8 +149,8 @@ fun LyricsSheet(
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrev: () -> Unit,
-    immersiveLyricsEnabled: Boolean,
-    immersiveLyricsTimeout: Long,
+    immersiveTranscriptEnabled: Boolean,
+    immersiveTranscriptTimeout: Long,
     isImmersiveTemporarilyDisabled: Boolean,
     onSetImmersiveTemporarilyDisabled: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -162,25 +162,25 @@ fun LyricsSheet(
     BackHandler { onBackClick() }
     val stablePlayerState by stablePlayerStateFlow.collectAsState()
 
-    val isLoadingLyrics by remember { derivedStateOf { stablePlayerState.isLoadingLyrics } }
-    val lyrics by remember { derivedStateOf { stablePlayerState.lyrics } }
+    val isLoadingTranscript by remember { derivedStateOf { stablePlayerState.isLoadingTranscript } }
+    val Transcript by remember { derivedStateOf { stablePlayerState.Transcript } }
     val isPlaying by remember { derivedStateOf { stablePlayerState.isPlaying } }
-    val currentSong by remember { derivedStateOf { stablePlayerState.currentSong } }
+    val currentTrack by remember { derivedStateOf { stablePlayerState.currentTrack } }
 
     val context = LocalContext.current
 
-    var showFetchLyricsDialog by remember { mutableStateOf(false) }
+    var showFetchTranscriptDialog by remember { mutableStateOf(false) }
     // Flag to prevent dialog from showing briefly after reset
     var wasResetTriggered by remember { mutableStateOf(false) }
-    // Save lyrics dialog state
-    var showSaveLyricsDialog by remember { mutableStateOf(false) }
+    // Save Transcript dialog state
+    var showSaveTranscriptDialog by remember { mutableStateOf(false) }
     var showSyncControls by remember { mutableStateOf(false) }
 
-    var showSyncedLyrics by remember(lyrics) {
+    var showSyncedTranscript by remember(Transcript) {
         mutableStateOf(
             when {
-                lyrics?.synced != null -> true
-                lyrics?.plain != null -> false
+                Transcript?.synced != null -> true
+                Transcript?.plain != null -> false
                 else -> null
             }
         )
@@ -202,9 +202,9 @@ fun LyricsSheet(
 
     // Auto-hide controls logic
     // Auto-hide controls logic
-    LaunchedEffect(immersiveLyricsEnabled, lastInteractionTime, showSyncedLyrics, isImmersiveTemporarilyDisabled) {
-        if (immersiveLyricsEnabled && showSyncedLyrics == true && !isImmersiveTemporarilyDisabled) {
-            delay(immersiveLyricsTimeout)
+    LaunchedEffect(immersiveTranscriptEnabled, lastInteractionTime, showSyncedTranscript, isImmersiveTemporarilyDisabled) {
+        if (immersiveTranscriptEnabled && showSyncedTranscript == true && !isImmersiveTemporarilyDisabled) {
+            delay(immersiveTranscriptTimeout)
             immersiveMode = true
         } else {
             immersiveMode = false
@@ -218,9 +218,9 @@ fun LyricsSheet(
         label = "fontScale"
     )
     
-    val scaledTextStyle = lyricsTextStyle.copy(
-        fontSize = lyricsTextStyle.fontSize * fontScale,
-        lineHeight = lyricsTextStyle.lineHeight * fontScale
+    val scaledTextStyle = TranscriptTextStyle.copy(
+        fontSize = TranscriptTextStyle.fontSize * fontScale,
+        lineHeight = TranscriptTextStyle.lineHeight * fontScale
     )
 
     fun resetImmersiveTimer() {
@@ -228,86 +228,86 @@ fun LyricsSheet(
         immersiveMode = false
     }
 
-    LaunchedEffect(currentSong, lyrics, isLoadingLyrics) {
-        if (currentSong != null && lyrics == null && !isLoadingLyrics) {
+    LaunchedEffect(currentTrack, Transcript, isLoadingTranscript) {
+        if (currentTrack != null && Transcript == null && !isLoadingTranscript) {
             // Only show dialog if reset was not just triggered
             if (!wasResetTriggered) {
-                showFetchLyricsDialog = true
+                showFetchTranscriptDialog = true
             }
-        } else if (lyrics != null || isLoadingLyrics) {
-            showFetchLyricsDialog = false
-            wasResetTriggered = false // Reset the flag when lyrics are loaded
+        } else if (Transcript != null || isLoadingTranscript) {
+            showFetchTranscriptDialog = false
+            wasResetTriggered = false // Reset the flag when Transcript are loaded
         }
     }
 
-    if (showFetchLyricsDialog) {
-        FetchLyricsDialog(
-            uiState = lyricsSearchUiState,
-            currentSong = currentSong,
-            onConfirm = onSearchLyrics,
+    if (showFetchTranscriptDialog) {
+        FetchTranscriptDialog(
+            uiState = TranscriptSearchUiState,
+            currentTrack = currentTrack,
+            onConfirm = onSearchTranscript,
             onPickResult = onPickResult,
             onManualSearch = onManualSearch,
             onDismiss = {
-                showFetchLyricsDialog = false
-                onDismissLyricsSearch()
-                if (lyrics == null && !isLoadingLyrics) {
+                showFetchTranscriptDialog = false
+                onDismissTranscriptSearch()
+                if (Transcript == null && !isLoadingTranscript) {
                     onBackClick()
                 }
             },
-            onImport = onImportLyrics
+            onImport = onImportTranscript
         )
     }
 
-    // Save Lyrics Dialog
-    if (showSaveLyricsDialog && lyrics != null && currentSong != null) {
-        val hasSynced = !lyrics?.synced.isNullOrEmpty()
-        val hasPlain = !lyrics?.plain.isNullOrEmpty()
+    // Save Transcript Dialog
+    if (showSaveTranscriptDialog && Transcript != null && currentTrack != null) {
+        val hasSynced = !Transcript?.synced.isNullOrEmpty()
+        val hasPlain = !Transcript?.plain.isNullOrEmpty()
         
         AlertDialog(
-            onDismissRequest = { showSaveLyricsDialog = false },
-            title = { Text(stringResource(R.string.save_lyrics_dialog_title)) },
+            onDismissRequest = { showSaveTranscriptDialog = false },
+            title = { Text(stringResource(R.string.save_Transcript_dialog_title)) },
             text = {
                 Column {
-                    Text(stringResource(R.string.save_lyrics_dialog_message))
+                    Text(stringResource(R.string.save_Transcript_dialog_message))
                     Spacer(modifier = Modifier.height(16.dp))
                     if (hasSynced) {
                         FilledTonalButton(
                             onClick = {
-                                showSaveLyricsDialog = false
-                                saveLyricsToFile(
+                                showSaveTranscriptDialog = false
+                                saveTranscriptToFile(
                                     context = context,
-                                    song = currentSong!!,
-                                    lyrics = lyrics!!,
+                                    Track = currentTrack!!,
+                                    Transcript = Transcript!!,
                                     preferSynced = true
                                 )
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(stringResource(R.string.save_synced_lyrics))
+                            Text(stringResource(R.string.save_synced_Transcript))
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     if (hasPlain) {
                         OutlinedButton(
                             onClick = {
-                                showSaveLyricsDialog = false
-                                saveLyricsToFile(
+                                showSaveTranscriptDialog = false
+                                saveTranscriptToFile(
                                     context = context,
-                                    song = currentSong!!,
-                                    lyrics = lyrics!!,
+                                    Track = currentTrack!!,
+                                    Transcript = Transcript!!,
                                     preferSynced = false
                                 )
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(stringResource(R.string.save_plain_lyrics))
+                            Text(stringResource(R.string.save_plain_Transcript))
                         }
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showSaveLyricsDialog = false }) {
+                TextButton(onClick = { showSaveTranscriptDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -388,17 +388,17 @@ fun LyricsSheet(
             val syncedListState = rememberLazyListState()
             val staticListState = rememberLazyListState()
             val playerUiState by playerUiStateFlow.collectAsState()
-            // Apply lyrics sync offset to the position flow
-            val positionFlow = remember(playerUiStateFlow, lyricsSyncOffset) {
-                playerUiStateFlow.map { (it.currentPosition + lyricsSyncOffset).coerceAtLeast(0L) }
+            // Apply Transcript sync offset to the position flow
+            val positionFlow = remember(playerUiStateFlow, TranscriptSyncOffset) {
+                playerUiStateFlow.map { (it.currentPosition + TranscriptSyncOffset).coerceAtLeast(0L) }
             }
 
-            LaunchedEffect(lyrics) {
+            LaunchedEffect(Transcript) {
                 syncedListState.scrollToItem(0)
                 staticListState.scrollToItem(0)
             }
 
-            // Lyrics Content (Weight 1)
+            // Transcript Content (Weight 1)
             Box(
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -407,7 +407,7 @@ fun LyricsSheet(
             ) {
                 // Track Info Header (Fixed at top)
                 AnimatedContent(
-                    targetState = currentSong,
+                    targetState = currentTrack,
                     transitionSpec = {
                         (fadeIn(animationSpec = tween(300)) + 
                          scaleIn(initialScale = 0.9f, animationSpec = tween(300)))
@@ -419,9 +419,9 @@ fun LyricsSheet(
                         // .fillMaxWidth() removed to allow wrapping
                         .wrapContentWidth(),
                     label = "headerAnimation"
-                ) { song ->
-                    LyricsTrackInfo(
-                        song = song,
+                ) { Track ->
+                    TranscriptTrackInfo(
+                        Track = Track,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(
@@ -444,7 +444,7 @@ fun LyricsSheet(
                     )
                 }
 
-                when (showSyncedLyrics) {
+                when (showSyncedTranscript) {
                     null -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -456,10 +456,10 @@ fun LyricsSheet(
                                         .fillParentMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    if (isLoadingLyrics) {
+                                    if (isLoadingTranscript) {
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             Text(
-                                                text = context.resources.getString(R.string.loading_lyrics),
+                                                text = context.resources.getString(R.string.loading_Transcript),
                                                 style = MaterialTheme.typography.titleMedium
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
@@ -476,8 +476,8 @@ fun LyricsSheet(
                     }
 
                     true -> {
-                        lyrics?.synced?.let { synced ->
-                            SyncedLyricsList(
+                        Transcript?.synced?.let { synced ->
+                            SyncedTranscriptList(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(horizontal = 24.dp),
@@ -495,10 +495,10 @@ fun LyricsSheet(
                                 highlightOffsetDp = highlightOffsetDp,
                                 autoscrollAnimationSpec = autoscrollAnimationSpec,
                                 footer = {
-                                    if (lyrics?.areFromRemote == true) {
+                                    if (Transcript?.areFromRemote == true) {
                                         item(key = "provider_text") {
                                             ProviderText(
-                                                providerText = context.resources.getString(R.string.lyrics_provided_by),
+                                                providerText = context.resources.getString(R.string.Transcript_provided_by),
                                                 uri = context.resources.getString(R.string.lrclib_uri),
                                                 textAlign = TextAlign.Center,
                                                 accentColor = accentColor,
@@ -514,7 +514,7 @@ fun LyricsSheet(
                     }
 
                     false -> {
-                        lyrics?.plain?.let { plain ->
+                        Transcript?.plain?.let { plain ->
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 state = staticListState,
@@ -529,9 +529,9 @@ fun LyricsSheet(
                                     items = plain,
                                     key = { index, line -> "$index-$line" }
                                 ) { _, line ->
-                                    PlainLyricsLine(
+                                    PlainTranscriptLine(
                                         line = line,
-                                        style = lyricsTextStyle,
+                                        style = TranscriptTextStyle,
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
@@ -580,24 +580,24 @@ fun LyricsSheet(
                         .background(containerColor)
                         .padding(bottom = paddingValues.calculateBottomPadding() + 10.dp, end = 16.dp, start = 16.dp)
                 ) {
-                // Sync Offset Controls (Visible only if synced lyrics are shown AND enabled via some toggle, 
+                // Sync Offset Controls (Visible only if synced Transcript are shown AND enabled via some toggle, 
                 // but user didn't specify a toggle for this in the new toolbar, just "encolumnada". 
                 // "no debemos perder acceos a las opciones actuales".
-                // I'll show them if showSyncedLyrics is true. Or maybe I should add a toggle in the toolbar?
+                // I'll show them if showSyncedTranscript is true. Or maybe I should add a toggle in the toolbar?
                 // The prompt ends with "el Slider lo vas a cambiar por el WavySliderExpressive...".
                 // I will keep the offsets here.
                 
                 AnimatedVisibility(
-                    visible = showSyncedLyrics == true && lyrics?.synced != null && showSyncControls,
+                    visible = showSyncedTranscript == true && Transcript?.synced != null && showSyncControls,
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut()
                 ) {
-                    LyricsSyncControls(
+                    TranscriptSyncControls(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
-                        offsetMillis = lyricsSyncOffset,
-                        onOffsetChange = onLyricsSyncOffsetChange,
+                        offsetMillis = TranscriptSyncOffset,
+                        onOffsetChange = onTranscriptSyncOffsetChange,
                         backgroundColor = backgroundColor,
                         accentColor = accentColor,
                         onAccentColor = onAccentColor,
@@ -668,15 +668,15 @@ fun LyricsSheet(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Floating Toolbar
-                LyricsFloatingToolbar(
+                TranscriptFloatingToolbar(
                     modifier = Modifier.padding(horizontal = 0.dp),
-                    showSyncedLyrics = showSyncedLyrics,
-                    onShowSyncedLyricsChange = { showSyncedLyrics = it },
-                    lyrics = lyrics,
-                    onSaveLyricsAsLrc = { showSaveLyricsDialog = true },
-                    onResetImportedLyrics = {
+                    showSyncedTranscript = showSyncedTranscript,
+                    onShowSyncedTranscriptChange = { showSyncedTranscript = it },
+                    Transcript = Transcript,
+                    onSaveTranscriptAsLrc = { showSaveTranscriptDialog = true },
+                    onResetImportedTranscript = {
                         wasResetTriggered = true
-                        resetLyricsForCurrentSong()
+                        resetTranscriptForCurrentTrack()
                     },
                     onNavigateBack = {
                         onBackClick()
@@ -766,7 +766,7 @@ fun LyricsSheet(
 
 @OptIn(ExperimentalSnapperApi::class)
 @Composable
-fun SyncedLyricsList(
+fun SyncedTranscriptList(
     lines: List<SyncedLine>,
     listState: LazyListState,
     positionFlow: Flow<Long>,
@@ -968,7 +968,7 @@ fun LyricWordSpan(
 }
 
 @Composable
-fun PlainLyricsLine(
+fun PlainTranscriptLine(
     line: String,
     style: TextStyle,
     modifier: Modifier = Modifier
@@ -985,7 +985,7 @@ fun PlainLyricsLine(
 private val LeadingTagRegex = Regex("^v\\d+:\\s*", RegexOption.IGNORE_CASE)
 
 internal fun sanitizeLyricLineText(raw: String): String =
-    LyricsUtils.stripLrcTimestamps(raw).replace(LeadingTagRegex, "").trimStart()
+    TranscriptUtils.stripLrcTimestamps(raw).replace(LeadingTagRegex, "").trimStart()
 
 internal fun sanitizeSyncedWords(words: List<SyncedWord>): List<SyncedWord> =
     words.mapIndexedNotNull { index, word ->
@@ -1062,43 +1062,43 @@ internal suspend fun animateToSnapIndex(
 }
 
 /**
- * Saves lyrics to a .lrc file in the same directory as the song.
+ * Saves Transcript to a .lrc file in the same directory as the Track.
  * @param context The Android context.
- * @param song The song whose lyrics are being saved.
- * @param lyrics The lyrics to save.
- * @param preferSynced Whether to prefer synced lyrics over plain.
+ * @param Track The Track whose Transcript are being saved.
+ * @param Transcript The Transcript to save.
+ * @param preferSynced Whether to prefer synced Transcript over plain.
  */
-private fun saveLyricsToFile(
+private fun saveTranscriptToFile(
     context: android.content.Context,
-    song: Song,
-    lyrics: Lyrics,
+    Track: Track,
+    Transcript: Transcript,
     preferSynced: Boolean
 ) {
     try {
-        val songFile = File(song.path)
-        val songDir = songFile.parentFile
+        val TrackFile = File(Track.path)
+        val TrackDir = TrackFile.parentFile
         
-        if (songDir == null || !songDir.exists()) {
+        if (TrackDir == null || !TrackDir.exists()) {
             Toast.makeText(
                 context,
-                context.getString(R.string.lyrics_save_failed),
+                context.getString(R.string.Transcript_save_failed),
                 Toast.LENGTH_SHORT
             ).show()
             return
         }
         
-        // Create .lrc filename based on song filename
-        val songNameWithoutExtension = songFile.nameWithoutExtension
-        val lrcFileName = "$songNameWithoutExtension.lrc"
-        val lrcFile = File(songDir, lrcFileName)
+        // Create .lrc filename based on Track filename
+        val TrackNameWithoutExtension = TrackFile.nameWithoutExtension
+        val lrcFileName = "$TrackNameWithoutExtension.lrc"
+        val lrcFile = File(TrackDir, lrcFileName)
         
-        // Convert lyrics to LRC format
-        val lrcContent = LyricsUtils.toLrcString(lyrics, preferSynced)
+        // Convert Transcript to LRC format
+        val lrcContent = TranscriptUtils.toLrcString(Transcript, preferSynced)
         
         if (lrcContent.isEmpty()) {
             Toast.makeText(
                 context,
-                context.getString(R.string.no_lyrics_to_save),
+                context.getString(R.string.no_Transcript_to_save),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -1109,30 +1109,30 @@ private fun saveLyricsToFile(
         
         Toast.makeText(
             context,
-            context.getString(R.string.lyrics_saved_successfully),
+            context.getString(R.string.Transcript_saved_successfully),
             Toast.LENGTH_SHORT
         ).show()
     } catch (e: Exception) {
         e.printStackTrace()
         Toast.makeText(
             context,
-            context.getString(R.string.lyrics_save_failed),
+            context.getString(R.string.Transcript_save_failed),
             Toast.LENGTH_SHORT
         ).show()
     }
 }
 
 @Composable
-private fun LyricsTrackInfo(
-    song: Song?,
+private fun TranscriptTrackInfo(
+    Track: Track?,
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     contentColor: Color
 ) {
-    if (song == null) return
+    if (Track == null) return
 
-    val albumShape = CircleShape
-//    val albumShape = AbsoluteSmoothCornerShape(
+    val Bookshape = CircleShape
+//    val Bookshape = AbsoluteSmoothCornerShape(
 //        cornerRadiusTR = 10.dp,
 //        smoothnessAsPercentTL = 60,
 //        cornerRadiusTL = 10.dp,
@@ -1160,13 +1160,13 @@ private fun LyricsTrackInfo(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SmartImage(
-            model = song.albumArtUriString ?: R.drawable.rounded_album_24,
-            shape = albumShape,
+            model = Track.BookArtUriString ?: R.drawable.rounded_Book_24,
+            shape = Bookshape,
             contentDescription = "Cover Art",
             modifier = Modifier
                 .size(66.dp)
                 .padding(6.dp)
-                .clip(albumShape),
+                .clip(Bookshape),
             contentScale = ContentScale.Crop
         )
 
@@ -1178,7 +1178,7 @@ private fun LyricsTrackInfo(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = song.title,
+                text = Track.title,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = contentColor,
@@ -1188,7 +1188,7 @@ private fun LyricsTrackInfo(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = song.displayArtist,
+                text = Track.displayAuthor,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = contentColor.copy(alpha = 0.7f),
                     //textGeometricTransform = TextGeometricTransform(scaleX = (0.9f)),

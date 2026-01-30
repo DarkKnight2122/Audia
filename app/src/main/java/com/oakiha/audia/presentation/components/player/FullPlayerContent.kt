@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.components.player
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
-import com.oakiha.audia.data.model.Lyrics
+import com.oakiha.audia.data.model.Transcript
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -102,21 +102,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.preferences.AlbumArtQuality
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
-import com.oakiha.audia.presentation.components.AlbumCarouselSection
+import com.oakiha.audia.presentation.components.BookCarouselSection
 import com.oakiha.audia.presentation.components.AutoScrollingTextOnDemand
 import com.oakiha.audia.presentation.components.LocalMaterialTheme
-import com.oakiha.audia.presentation.components.LyricsSheet
-import com.oakiha.audia.presentation.components.WavyMusicSlider
+import com.oakiha.audia.presentation.components.TranscriptSheet
+import com.oakiha.audia.presentation.components.WavyAudiobookSlider
 import com.oakiha.audia.presentation.components.scoped.DeferAt
-import com.oakiha.audia.presentation.components.scoped.PrefetchAlbumNeighborsImg
+import com.oakiha.audia.presentation.components.scoped.PrefetchBookNeighborsImg
 import com.oakiha.audia.presentation.components.scoped.rememberSmoothProgress
-import com.oakiha.audia.presentation.components.subcomps.FetchLyricsDialog
-import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
+import com.oakiha.audia.presentation.components.subcomps.FetchTranscriptDialog
+import com.oakiha.audia.presentation.viewmodel.TranscriptSearchUiState
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.ui.theme.GoogleSansRounded
@@ -141,8 +141,8 @@ import com.oakiha.audia.presentation.components.ToggleSegmentButton
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FullPlayerContent(
-    currentSong: Song?,
-    currentPlaybackQueue: ImmutableList<Song>,
+    currentTrack: Track?,
+    currentPlaybackQueue: ImmutableList<Track>,
     currentQueueSourceName: String,
     isShuffleEnabled: Boolean,
     repeatMode: Int,
@@ -150,7 +150,7 @@ fun FullPlayerContent(
     currentSheetState: PlayerSheetState,
     carouselStyle: String,
     loadingTweaks: FullPlayerLoadingTweaks,
-    playerViewModel: PlayerViewModel, // For stable state like totalDuration and lyrics
+    playerViewModel: PlayerViewModel, // For stable state like totalDuration and Transcript
     // State Providers
     currentPositionProvider: () -> Long,
     isPlayingProvider: () -> Boolean,
@@ -158,7 +158,7 @@ fun FullPlayerContent(
     repeatModeProvider: () -> Int,
     isShuffleEnabledProvider: () -> Boolean,
     totalDurationProvider: () -> Long,
-    lyricsProvider: () -> Lyrics? = { null }, 
+    TranscriptProvider: () -> Transcript? = { null }, 
     // State
     isCastConnecting: Boolean = false,
     // Event Handlers
@@ -176,29 +176,29 @@ fun FullPlayerContent(
     onRepeatToggle: () -> Unit,
     onFavoriteToggle: () -> Unit
 ) {
-    var retainedSong by remember { mutableStateOf(currentSong) }
-    LaunchedEffect(currentSong?.id) {
-        if (currentSong != null) {
-            retainedSong = currentSong
+    var retainedTrack by remember { mutableStateOf(currentTrack) }
+    LaunchedEffect(currentTrack?.id) {
+        if (currentTrack != null) {
+            retainedTrack = currentTrack
         }
     }
 
-    val song = currentSong ?: retainedSong ?: return // Keep the player visible while transitioning
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    var showLyricsSheet by remember { mutableStateOf(false) }
-    var showArtistPicker by rememberSaveable { mutableStateOf(false) }
+    val Track = currentTrack ?: retainedTrack ?: return // Keep the player visible while transitioning
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    var showTranscriptSheet by remember { mutableStateOf(false) }
+    var showAuthorPicker by rememberSaveable { mutableStateOf(false) }
     
     // REMOVED: val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     
-    val lyricsSearchUiState by playerViewModel.lyricsSearchUiState.collectAsState()
-    val currentSongArtists by playerViewModel.currentSongArtists.collectAsState()
-    val lyricsSyncOffset by playerViewModel.currentSongLyricsSyncOffset.collectAsState()
-    val albumArtQuality by playerViewModel.albumArtQuality.collectAsState()
-    val immersiveLyricsEnabled by playerViewModel.immersiveLyricsEnabled.collectAsState()
-    val immersiveLyricsTimeout by playerViewModel.immersiveLyricsTimeout.collectAsState()
+    val TranscriptSearchUiState by playerViewModel.TranscriptSearchUiState.collectAsState()
+    val currentTrackAuthors by playerViewModel.currentTrackAuthors.collectAsState()
+    val TranscriptSyncOffset by playerViewModel.currentTrackTranscriptSyncOffset.collectAsState()
+    val BookArtQuality by playerViewModel.BookArtQuality.collectAsState()
+    val immersiveTranscriptEnabled by playerViewModel.immersiveTranscriptEnabled.collectAsState()
+    val immersiveTranscriptTimeout by playerViewModel.immersiveTranscriptTimeout.collectAsState()
     val isImmersiveTemporarilyDisabled by playerViewModel.isImmersiveTemporarilyDisabled.collectAsState()
 
-    var showFetchLyricsDialog by remember { mutableStateOf(false) }
+    var showFetchTranscriptDialog by remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
 
     val context = LocalContext.current
@@ -208,14 +208,14 @@ fun FullPlayerContent(
             uri?.let {
                 try {
                     context.contentResolver.openInputStream(it)?.use { inputStream ->
-                        val lyricsContent = inputStream.bufferedReader().use { reader -> reader.readText() }
-                        currentSong?.id?.toLong()?.let { songId ->
-                            playerViewModel.importLyricsFromFile(songId, lyricsContent)
+                        val TranscriptContent = inputStream.bufferedReader().use { reader -> reader.readText() }
+                        currentTrack?.id?.toLong()?.let { TrackId ->
+                            playerViewModel.importTranscriptFromFile(TrackId, TranscriptContent)
                         }
                     }
-                    showFetchLyricsDialog = false
+                    showFetchTranscriptDialog = false
                 } catch (e: Exception) {
-                    Timber.e(e, "Error reading imported lyrics file")
+                    Timber.e(e, "Error reading imported Transcript file")
                     playerViewModel.sendToast("Error reading file.")
                 }
             }
@@ -242,36 +242,36 @@ fun FullPlayerContent(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 
-    // Lógica para el botón de Lyrics en el reproductor expandido
-    val onLyricsClick = {
-        val lyrics = lyricsProvider()
-        if (lyrics?.synced.isNullOrEmpty() && lyrics?.plain.isNullOrEmpty()) {
-            // Si no hay letra, mostramos el diálogo para buscar
-            showFetchLyricsDialog = true
+    // LÃƒÂ³gica para el botÃƒÂ³n de Transcript en el reproductor expandido
+    val onTranscriptClick = {
+        val Transcript = TranscriptProvider()
+        if (Transcript?.synced.isNullOrEmpty() && Transcript?.plain.isNullOrEmpty()) {
+            // Si no hay letra, mostramos el diÃƒÂ¡logo para buscar
+            showFetchTranscriptDialog = true
         } else {
             // Si hay letra, mostramos el sheet directamente
-            showLyricsSheet = true
+            showTranscriptSheet = true
         }
     }
 
-    if (showFetchLyricsDialog) {
-        FetchLyricsDialog(
-            uiState = lyricsSearchUiState,
-            currentSong = song, // Use 'song' which is derived from args/retained
+    if (showFetchTranscriptDialog) {
+        FetchTranscriptDialog(
+            uiState = TranscriptSearchUiState,
+            currentTrack = Track, // Use 'Track' which is derived from args/retained
             onConfirm = { forcePick ->
-                // El usuario confirma, iniciamos la búsqueda
-                playerViewModel.fetchLyricsForCurrentSong(forcePick)
+                // El usuario confirma, iniciamos la bÃƒÂºsqueda
+                playerViewModel.fetchTranscriptForCurrentTrack(forcePick)
             },
             onPickResult = { result ->
-                playerViewModel.acceptLyricsSearchResultForCurrentSong(result)
+                playerViewModel.acceptTranscriptSearchResultForCurrentTrack(result)
             },
-            onManualSearch = { title, artist ->
-                playerViewModel.searchLyricsManually(title, artist)
+            onManualSearch = { title, Author ->
+                playerViewModel.searchTranscriptManually(title, Author)
             },
             onDismiss = {
-                // El usuario cancela o cierra el diálogo
-                showFetchLyricsDialog = false
-                playerViewModel.resetLyricsSearchState()
+                // El usuario cancela o cierra el diÃƒÂ¡logo
+                showFetchTranscriptDialog = false
+                playerViewModel.resetTranscriptSearchState()
             },
             onImport = {
                 filePickerLauncher.launch("*/*")
@@ -279,17 +279,17 @@ fun FullPlayerContent(
         )
     }
 
-    // Observador para reaccionar al resultado de la búsqueda de letras
-    LaunchedEffect(lyricsSearchUiState) {
-        when (val state = lyricsSearchUiState) {
-            is LyricsSearchUiState.Success -> {
-                if (showFetchLyricsDialog) {
-                    showFetchLyricsDialog = false
-                    showLyricsSheet = true
-                    playerViewModel.resetLyricsSearchState()
+    // Observador para reaccionar al resultado de la bÃƒÂºsqueda de letras
+    LaunchedEffect(TranscriptSearchUiState) {
+        when (val state = TranscriptSearchUiState) {
+            is TranscriptSearchUiState.Success -> {
+                if (showFetchTranscriptDialog) {
+                    showFetchTranscriptDialog = false
+                    showTranscriptSheet = true
+                    playerViewModel.resetTranscriptSearchState()
                 }
             }
-            is LyricsSearchUiState.Error -> {
+            is TranscriptSearchUiState.Error -> {
             }
             else -> Unit
         }
@@ -302,8 +302,8 @@ fun FullPlayerContent(
 
     @SuppressLint("UnusedBoxWithConstraintsScope")
     @Composable
-    fun AlbumCoverSection(modifier: Modifier = Modifier) {
-        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayAlbumCarousel
+    fun BookCoverSection(modifier: Modifier = Modifier) {
+        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayBookCarousel
 
         BoxWithConstraints(
             modifier = modifier
@@ -328,26 +328,26 @@ fun FullPlayerContent(
                     if (loadingTweaks.transparentPlaceholders) {
                         Box(Modifier.height(carouselHeight).fillMaxWidth())
                     } else {
-                        AlbumPlaceholder(height = carouselHeight, placeholderColor, placeholderOnColor)
+                        BookPlaceholder(height = carouselHeight, placeholderColor, placeholderOnColor)
                     }
                 }
             ) {
-                 AlbumCarouselSection(
-                    currentSong = song,
+                 BookCarouselSection(
+                    currentTrack = Track,
                     queue = currentPlaybackQueue,
                     expansionFraction = 1f, // Static layout
-                    onSongSelected = { newSong ->
-                        if (newSong.id != song.id) {
-                            playerViewModel.showAndPlaySong(
-                                song = newSong,
-                                contextSongs = currentPlaybackQueue,
+                    onTrackselected = { newTrack ->
+                        if (newTrack.id != Track.id) {
+                            playerViewModel.showAndPlayTrack(
+                                Track = newTrack,
+                                contextTracks = currentPlaybackQueue,
                                 queueName = currentQueueSourceName
                             )
                         }
                     },
                     carouselStyle = carouselStyle,
                     modifier = Modifier.height(carouselHeight),
-                    albumArtQuality = albumArtQuality
+                    BookArtQuality = BookArtQuality
                 )
             }
         }
@@ -428,8 +428,8 @@ fun FullPlayerContent(
     }
 
     @Composable
-    fun SongMetadataSection() {
-        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delaySongMetadata
+    fun TrackMetadataSection() {
+        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayTrackMetadata
 
         DelayedContent(
             shouldDelay = shouldDelay,
@@ -446,27 +446,27 @@ fun FullPlayerContent(
                 }
             }
         ) {
-            SongMetadataDisplaySection(
+            TrackMetadataDisplaySection(
                 modifier = Modifier
                     .padding(start = 0.dp),
-                onClickLyrics = onLyricsClick,
-                song = song,
-                currentSongArtists = currentSongArtists,
+                onClickTranscript = onTranscriptClick,
+                Track = Track,
+                currentTrackAuthors = currentTrackAuthors,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = LocalMaterialTheme.current.onPrimaryContainer,
-                artistTextColor = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.8f),
+                AuthorTextColor = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.8f),
                 playerViewModel = playerViewModel,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer,
                 showQueueButton = isLandscape,
                 onClickQueue = {
-                    showSongInfoBottomSheet = true
+                    showTrackInfoBottomSheet = true
                     onShowQueueClicked()
                 },
-                onClickArtist = {
-                    if (currentSongArtists.size > 1) {
-                        showArtistPicker = true
+                onClickAuthor = {
+                    if (currentTrackAuthors.size > 1) {
+                        showAuthorPicker = true
                     } else {
-                        playerViewModel.triggerArtistNavigationFromPlayer(song.artistId)
+                        playerViewModel.triggerAuthorNavigationFromPlayer(Track.AuthorId)
                     }
                 }
             )
@@ -486,14 +486,14 @@ fun FullPlayerContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            // Removed PrefetchAlbumNeighborsImg DeferAt wrapper - implicitly prefetching if composed?
+            // Removed PrefetchBookNeighborsImg DeferAt wrapper - implicitly prefetching if composed?
             // Actually Prefetch likely needs to be kept but maybe without DeferAt if it's lightweight
             // For now, let's keep it simple.
 
-            AlbumCoverSection()
+            BookCoverSection()
 
             Box(Modifier.align(Alignment.Start)) {
-                SongMetadataSection()
+                TrackMetadataSection()
             }
 
             PlayerProgressSection()
@@ -514,7 +514,7 @@ fun FullPlayerContent(
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AlbumCoverSection(
+            BookCoverSection(
                 Modifier
                     .fillMaxHeight()
                     .weight(1f)
@@ -531,7 +531,7 @@ fun FullPlayerContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                SongMetadataSection()
+                TrackMetadataSection()
 
                 PlayerProgressSection()
 
@@ -616,13 +616,13 @@ fun FullPlayerContent(
                     navigationIcon = {
                         Box(
                             modifier = Modifier
-                                // Ancho total = 14dp de padding + 42dp del botón
+                                // Ancho total = 14dp de padding + 42dp del botÃƒÂ³n
                                 .width(56.dp)
                                 .height(42.dp),
-                            // 2. Alinea el contenido (el botón) al final (derecha) y centrado verticalmente
+                            // 2. Alinea el contenido (el botÃƒÂ³n) al final (derecha) y centrado verticalmente
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            // 3. Tu botón circular original, sin cambios
+                            // 3. Tu botÃƒÂ³n circular original, sin cambios
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -726,7 +726,7 @@ fun FullPlayerContent(
                                             Spacer(Modifier.width(8.dp))
                                             AnimatedContent(
                                                 targetState = when {
-                                                    isCastConnecting -> "Connecting…"
+                                                    isCastConnecting -> "ConnectingÃ¢â‚¬Â¦"
                                                     isRemotePlaybackActive && selectedRouteName != null -> selectedRouteName ?: ""
                                                     else -> ""
                                                 },
@@ -785,14 +785,14 @@ fun FullPlayerContent(
                                     )
                                     .background(LocalMaterialTheme.current.onPrimary)
                                     .clickable {
-                                        showSongInfoBottomSheet = true
+                                        showTrackInfoBottomSheet = true
                                         onShowQueueClicked()
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.rounded_queue_music_24),
-                                    contentDescription = "Song options",
+                                    painter = painterResource(R.drawable.rounded_queue_Audiobook_24),
+                                    contentDescription = "Track options",
                                     tint = LocalMaterialTheme.current.primary
                                 )
                             }
@@ -809,33 +809,33 @@ fun FullPlayerContent(
         }
     }
     AnimatedVisibility(
-        visible = showLyricsSheet,
+        visible = showTranscriptSheet,
         enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut()
     ) {
-        // We can create a temporary StablePlayerState for LyricsSheet if needed, or update LyricsSheet to take Granular args.
-        // For now, let's keep LyricsSheet collecting stablePlayerState internally IF it must, OR better:
+        // We can create a temporary StablePlayerState for TranscriptSheet if needed, or update TranscriptSheet to take Granular args.
+        // For now, let's keep TranscriptSheet collecting stablePlayerState internally IF it must, OR better:
         // Pass the subset we have.
-        // LyricsSheet signature: stablePlayerStateFlow: StateFlow<StablePlayerState>
-        // We can't change that easily without refactoring LyricsSheet too.
-        // For now, pass the flow but LyricsSheet is only visible when sheet is open.
-        // Ideally we should refactor LyricsSheet too, but let's stick to FullPlayerContent optimizations first.
-        LyricsSheet(
+        // TranscriptSheet signature: stablePlayerStateFlow: StateFlow<StablePlayerState>
+        // We can't change that easily without refactoring TranscriptSheet too.
+        // For now, pass the flow but TranscriptSheet is only visible when sheet is open.
+        // Ideally we should refactor TranscriptSheet too, but let's stick to FullPlayerContent optimizations first.
+        TranscriptSheet(
             stablePlayerStateFlow = playerViewModel.stablePlayerState,
             playerUiStateFlow = playerViewModel.playerUiState,
-            lyricsSearchUiState = lyricsSearchUiState,
-            resetLyricsForCurrentSong = {
-                showLyricsSheet = false
-                playerViewModel.resetLyricsForCurrentSong()
+            TranscriptSearchUiState = TranscriptSearchUiState,
+            resetTranscriptForCurrentTrack = {
+                showTranscriptSheet = false
+                playerViewModel.resetTranscriptForCurrentTrack()
             },
-            onSearchLyrics = { forcePick -> playerViewModel.fetchLyricsForCurrentSong(forcePick) },
-            onPickResult = { playerViewModel.acceptLyricsSearchResultForCurrentSong(it) },
-            onManualSearch = { title, artist -> playerViewModel.searchLyricsManually(title, artist) },
-            onImportLyrics = { filePickerLauncher.launch("*/*") },
-            onDismissLyricsSearch = { playerViewModel.resetLyricsSearchState() },
-            lyricsSyncOffset = lyricsSyncOffset,
-            onLyricsSyncOffsetChange = { currentSong?.id?.let { songId -> playerViewModel.setLyricsSyncOffset(songId, it) } },
-            lyricsTextStyle = MaterialTheme.typography.titleLarge,
+            onSearchTranscript = { forcePick -> playerViewModel.fetchTranscriptForCurrentTrack(forcePick) },
+            onPickResult = { playerViewModel.acceptTranscriptSearchResultForCurrentTrack(it) },
+            onManualSearch = { title, Author -> playerViewModel.searchTranscriptManually(title, Author) },
+            onImportTranscript = { filePickerLauncher.launch("*/*") },
+            onDismissTranscriptSearch = { playerViewModel.resetTranscriptSearchState() },
+            TranscriptSyncOffset = TranscriptSyncOffset,
+            onTranscriptSyncOffsetChange = { currentTrack?.id?.let { TrackId -> playerViewModel.setTranscriptSyncOffset(TrackId, it) } },
+            TranscriptTextStyle = MaterialTheme.typography.titleLarge,
             backgroundColor = LocalMaterialTheme.current.background,
             onBackgroundColor = LocalMaterialTheme.current.onBackground,
             containerColor = LocalMaterialTheme.current.primaryContainer,
@@ -844,25 +844,25 @@ fun FullPlayerContent(
             onAccentColor = LocalMaterialTheme.current.onPrimary,
             tertiaryColor = LocalMaterialTheme.current.tertiary,
             onTertiaryColor = LocalMaterialTheme.current.onTertiary,
-            onBackClick = { showLyricsSheet = false },
+            onBackClick = { showTranscriptSheet = false },
             onSeekTo = { playerViewModel.seekTo(it) },
             onPlayPause = {
                 playerViewModel.playPause()
             },
             onNext = onNext,
             onPrev = onPrevious,
-            immersiveLyricsEnabled = immersiveLyricsEnabled,
-            immersiveLyricsTimeout = immersiveLyricsTimeout,
+            immersiveTranscriptEnabled = immersiveTranscriptEnabled,
+            immersiveTranscriptTimeout = immersiveTranscriptTimeout,
             isImmersiveTemporarilyDisabled = isImmersiveTemporarilyDisabled,
             onSetImmersiveTemporarilyDisabled = { playerViewModel.setImmersiveTemporarilyDisabled(it) }
         )
     }
 
-    val artistPickerSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    if (showArtistPicker && currentSongArtists.isNotEmpty()) {
+    val AuthorPickerSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (showAuthorPicker && currentTrackAuthors.isNotEmpty()) {
         ModalBottomSheet(
-            onDismissRequest = { showArtistPicker = false },
-            sheetState = artistPickerSheetState
+            onDismissRequest = { showAuthorPicker = false },
+            sheetState = AuthorPickerSheetState
         ) {
             Column(
                 modifier = Modifier
@@ -871,25 +871,25 @@ fun FullPlayerContent(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.artist_picker_title), // short label; keep UI minimal
+                    text = stringResource(R.string.Author_picker_title), // short label; keep UI minimal
                     style = MaterialTheme.typography.titleMedium,
                     color = LocalMaterialTheme.current.onPrimaryContainer,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                currentSongArtists.forEachIndexed { index, artistItem ->
+                currentTrackAuthors.forEachIndexed { index, AuthorItem ->
                     Text(
-                        text = artistItem.name,
+                        text = AuthorItem.name,
                         style = MaterialTheme.typography.bodyLarge,
                         color = LocalMaterialTheme.current.onPrimaryContainer,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 10.dp)
                             .clickable {
-                                playerViewModel.triggerArtistNavigationFromPlayer(artistItem.id)
-                                showArtistPicker = false
+                                playerViewModel.triggerAuthorNavigationFromPlayer(AuthorItem.id)
+                                showAuthorPicker = false
                             }
                     )
-                    if (index != currentSongArtists.lastIndex) {
+                    if (index != currentTrackAuthors.lastIndex) {
                         HorizontalDivider(color = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.08f))
                     }
                 }
@@ -902,18 +902,18 @@ fun FullPlayerContent(
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SongMetadataDisplaySection(
-    song: Song?,
-    currentSongArtists: List<Artist>,
+private fun TrackMetadataDisplaySection(
+    Track: Track?,
+    currentTrackAuthors: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,
-    artistTextColor: Color,
+    AuthorTextColor: Color,
     gradientEdgeColor: Color,
     playerViewModel: PlayerViewModel,
-    onClickLyrics: () -> Unit,
+    onClickTranscript: () -> Unit,
     showQueueButton: Boolean,
     onClickQueue: () -> Unit,
-    onClickArtist: () -> Unit,
+    onClickAuthor: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -923,18 +923,18 @@ private fun SongMetadataDisplaySection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        song?.let { currentSong ->
-            PlayerSongInfo(
-                title = currentSong.title,
-                artist = currentSong.displayArtist,
-                artistId = currentSong.artistId,
-                artists = currentSongArtists,
+        Track?.let { currentTrack ->
+            PlayerTrackInfo(
+                title = currentTrack.title,
+                Author = currentTrack.displayAuthor,
+                AuthorId = currentTrack.AuthorId,
+                Authors = currentTrackAuthors,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = textColor,
-                artistTextColor = artistTextColor,
+                AuthorTextColor = AuthorTextColor,
                 gradientEdgeColor = gradientEdgeColor,
                 playerViewModel = playerViewModel,
-                onClickArtist = onClickArtist,
+                onClickAuthor = onClickAuthor,
                 modifier = Modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically)
@@ -958,12 +958,12 @@ private fun SongMetadataDisplaySection(
                             )
                         )
                         .background(LocalMaterialTheme.current.onPrimary)
-                        .clickable { onClickLyrics() },
+                        .clickable { onClickTranscript() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.rounded_lyrics_24),
-                        contentDescription = "Lyrics",
+                        painter = painterResource(R.drawable.rounded_Transcript_24),
+                        contentDescription = "Transcript",
                         tint = LocalMaterialTheme.current.primary
                     )
                 }
@@ -983,14 +983,14 @@ private fun SongMetadataDisplaySection(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.rounded_queue_music_24),
+                        painter = painterResource(R.drawable.rounded_queue_Audiobook_24),
                         contentDescription = "Queue",
                         tint = LocalMaterialTheme.current.primary
                     )
                 }
             }
         } else {
-            // Portrait Mode: Just the Lyrics button (Queue is in TopBar)
+            // Portrait Mode: Just the Transcript button (Queue is in TopBar)
             FilledIconButton(
                 modifier = Modifier
                     .size(width = 48.dp, height = 48.dp),
@@ -998,11 +998,11 @@ private fun SongMetadataDisplaySection(
                     containerColor = LocalMaterialTheme.current.onPrimary,
                     contentColor = LocalMaterialTheme.current.primary
                 ),
-                onClick = onClickLyrics,
+                onClick = onClickTranscript,
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.rounded_lyrics_24),
-                    contentDescription = "Lyrics"
+                    painter = painterResource(R.drawable.rounded_Transcript_24),
+                    contentDescription = "Transcript"
                 )
             }
         }
@@ -1308,30 +1308,30 @@ private fun DelayedContent(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-private fun PlayerSongInfo(
+private fun PlayerTrackInfo(
     title: String,
-    artist: String,
-    artistId: Long,
-    artists: List<Artist>,
+    Author: String,
+    AuthorId: Long,
+    Authors: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,
-    artistTextColor: Color,
+    AuthorTextColor: Color,
     gradientEdgeColor: Color,
     playerViewModel: PlayerViewModel,
-    onClickArtist: () -> Unit,
+    onClickAuthor: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var isNavigatingToArtist by remember { mutableStateOf(false) }
+    var isNavigatingToAuthor by remember { mutableStateOf(false) }
     val titleStyle = MaterialTheme.typography.headlineSmall.copy(
         fontWeight = FontWeight.Bold,
         fontFamily = GoogleSansRounded,
         color = textColor
     )
 
-    val artistStyle = MaterialTheme.typography.titleMedium.copy(
+    val Authorstyle = MaterialTheme.typography.titleMedium.copy(
         letterSpacing = 0.sp,
-        color = artistTextColor
+        color = AuthorTextColor
     )
 
     Column(
@@ -1361,8 +1361,8 @@ private fun PlayerSongInfo(
         Spacer(modifier = Modifier.height(4.dp))
 
         AutoScrollingTextOnDemand(
-            text = artist,
-            style = artistStyle,
+            text = Author,
+            style = Authorstyle,
             gradientEdgeColor = gradientEdgeColor,
             expansionFractionProvider = expansionFractionProvider,
             modifier = Modifier
@@ -1371,24 +1371,24 @@ private fun PlayerSongInfo(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = {
-                    if (isNavigatingToArtist) return@combinedClickable
+                    if (isNavigatingToAuthor) return@combinedClickable
                     coroutineScope.launch {
-                        isNavigatingToArtist = true
+                        isNavigatingToAuthor = true
                         try {
-                            onClickArtist()
+                            onClickAuthor()
                         } finally {
-                            isNavigatingToArtist = false
+                            isNavigatingToAuthor = false
                         }
                     }
                 },
                 onLongClick = {
-                    if (isNavigatingToArtist) return@combinedClickable
+                    if (isNavigatingToAuthor) return@combinedClickable
                     coroutineScope.launch {
-                        isNavigatingToArtist = true
+                        isNavigatingToAuthor = true
                         try {
-                            playerViewModel.triggerArtistNavigationFromPlayer(artistId)
+                            playerViewModel.triggerAuthorNavigationFromPlayer(AuthorId)
                         } finally {
-                            isNavigatingToArtist = false
+                            isNavigatingToAuthor = false
                         }
                     }
                 }
@@ -1412,7 +1412,7 @@ private fun PlaceholderBox(
 }
 
 @Composable
-private fun AlbumPlaceholder(height: Dp, color: Color, onColor: Color) {
+private fun BookPlaceholder(height: Dp, color: Color, onColor: Color) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -1459,7 +1459,7 @@ private fun MetadataPlaceholder(expansionFraction: Float, color: Color, onColor:
             )
             PlaceholderBox(
                 modifier = Modifier
-                    .fillMaxWidth(0.4f) // Simulate artist length
+                    .fillMaxWidth(0.4f) // Simulate Author length
                     .height(16.dp),
                 cornerRadius = 4.dp,
                 color = onColor

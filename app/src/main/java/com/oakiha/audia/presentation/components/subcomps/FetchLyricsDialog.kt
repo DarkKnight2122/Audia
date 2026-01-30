@@ -29,7 +29,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.DoneOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.Button
@@ -66,23 +66,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.LyricsSearchResult
-import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.TranscriptSearchResult
+import com.oakiha.audia.presentation.viewmodel.TranscriptSearchUiState
 import com.oakiha.audia.utils.ProviderText
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 
 @Composable
-fun FetchLyricsDialog(
-    uiState: LyricsSearchUiState,
-    currentSong: Song?,
+fun FetchTranscriptDialog(
+    uiState: TranscriptSearchUiState,
+    currentTrack: Track?,
     onConfirm: (Boolean) -> Unit,
-    onPickResult: (LyricsSearchResult) -> Unit,
+    onPickResult: (TranscriptSearchResult) -> Unit,
     onManualSearch: (String, String?) -> Unit,
     onDismiss: () -> Unit,
     onImport: () -> Unit
 ) {
-    if (uiState is LyricsSearchUiState.Success) return
+    if (uiState is TranscriptSearchUiState.Success) return
 
     var forcePickResults by rememberSaveable { mutableStateOf(false) }
 
@@ -103,9 +103,9 @@ fun FetchLyricsDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (uiState) {
-                    LyricsSearchUiState.Idle -> {
+                    TranscriptSearchUiState.Idle -> {
                         IdleContent(
-                            currentSong = currentSong,
+                            currentTrack = currentTrack,
                             forcePickResults = forcePickResults,
                             onToggleForcePickResults = { forcePickResults = it },
                             onSearch = { onConfirm(forcePickResults) },
@@ -113,28 +113,28 @@ fun FetchLyricsDialog(
                             onCancel = onDismiss
                         )
                     }
-                    LyricsSearchUiState.Loading -> {
+                    TranscriptSearchUiState.Loading -> {
                         LoadingContent()
                     }
-                    is LyricsSearchUiState.PickResult -> {
+                    is TranscriptSearchUiState.PickResult -> {
                         PickResultContent(
                             results = uiState.results,
                             onPickResult = onPickResult,
-                            onCancel = onDismiss // Usamos botón cancelar en lugar de X
+                            onCancel = onDismiss // Usamos botÃƒÂ³n cancelar en lugar de X
                         )
                     }
-                    is LyricsSearchUiState.NotFound -> {
+                    is TranscriptSearchUiState.NotFound -> {
                         NotFoundContent(
                             message = uiState.message,
-                            initialTitle = currentSong?.title.orEmpty(),
-                            initialArtist = currentSong?.displayArtist,
-                            onManualSearch = { title, artist ->
-                                onManualSearch(title, artist)
+                            initialTitle = currentTrack?.title.orEmpty(),
+                            initialAuthor = currentTrack?.displayAuthor,
+                            onManualSearch = { title, Author ->
+                                onManualSearch(title, Author)
                             },
                             onCancel = onDismiss
                         )
                     }
-                    is LyricsSearchUiState.Error -> {
+                    is TranscriptSearchUiState.Error -> {
                         ErrorContent(
                             message = uiState.message,
                             onDismiss = onDismiss
@@ -153,7 +153,7 @@ fun FetchLyricsDialog(
 
 @Composable
 private fun IdleContent(
-    currentSong: Song?,
+    currentTrack: Track?,
     forcePickResults: Boolean,
     onToggleForcePickResults: (Boolean) -> Unit,
     onSearch: () -> Unit,
@@ -174,7 +174,7 @@ private fun IdleContent(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = Icons.Rounded.MusicNote,
+            imageVector = Icons.Rounded.AudiobookNote,
             contentDescription = null,
             modifier = Modifier.size(40.dp),
             tint = MaterialTheme.colorScheme.onSecondaryContainer
@@ -183,10 +183,10 @@ private fun IdleContent(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    // Título y Canción
-    if (currentSong != null) {
+    // TÃƒÂ­tulo y CanciÃƒÂ³n
+    if (currentTrack != null) {
         Text(
-            text = currentSong.title,
+            text = currentTrack.title,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -194,14 +194,14 @@ private fun IdleContent(
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = currentSong.displayArtist,
+            text = currentTrack.displayAuthor,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
     } else {
         Text(
-            text = stringResource(R.string.lyrics_not_found),
+            text = stringResource(R.string.Transcript_not_found),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
@@ -210,7 +210,7 @@ private fun IdleContent(
     Spacer(modifier = Modifier.height(12.dp))
 
     Text(
-        text = stringResource(R.string.search_lyrics_online_prompt),
+        text = stringResource(R.string.search_Transcript_online_prompt),
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -234,12 +234,12 @@ private fun IdleContent(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.fetch_lyrics_show_options_title),
+                    text = stringResource(R.string.fetch_Transcript_show_options_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
-                    text = stringResource(R.string.fetch_lyrics_show_options_subtitle),
+                    text = stringResource(R.string.fetch_Transcript_show_options_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.75f)
                 )
@@ -257,7 +257,7 @@ private fun IdleContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Botones de Acción (Vertical para mejor touch target)
+    // Botones de AcciÃƒÂ³n (Vertical para mejor touch target)
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
@@ -286,7 +286,7 @@ private fun IdleContent(
             Text(stringResource(R.string.import_file))
         }
 
-        // Botón Cancelar (Reemplaza a la X)
+        // BotÃƒÂ³n Cancelar (Reemplaza a la X)
         TextButton(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -310,7 +310,7 @@ private fun LoadingContent() {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.searching_lyrics),
+            text = stringResource(R.string.searching_Transcript),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -319,8 +319,8 @@ private fun LoadingContent() {
 
 @Composable
 private fun PickResultContent(
-    results: List<LyricsSearchResult>,
-    onPickResult: (LyricsSearchResult) -> Unit,
+    results: List<TranscriptSearchResult>,
+    onPickResult: (TranscriptSearchResult) -> Unit,
     onCancel: () -> Unit
 ) {
     Text(
@@ -334,7 +334,7 @@ private fun PickResultContent(
 
     // Lista Scrollable Optimizada
     LazyColumn(
-        modifier = Modifier.heightIn(max = 350.dp), // Altura máxima dinámica
+        modifier = Modifier.heightIn(max = 350.dp), // Altura mÃƒÂ¡xima dinÃƒÂ¡mica
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 8.dp)
     ) {
@@ -344,7 +344,7 @@ private fun PickResultContent(
 
         item {
             ProviderText(
-                providerText = stringResource(R.string.lyrics_provided_by),
+                providerText = stringResource(R.string.Transcript_provided_by),
                 uri = stringResource(R.string.lrclib_uri),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp)
@@ -354,7 +354,7 @@ private fun PickResultContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Botón Cancelar al final de la lista
+    // BotÃƒÂ³n Cancelar al final de la lista
     TextButton(
         onClick = onCancel,
         modifier = Modifier.fillMaxWidth(),
@@ -366,10 +366,10 @@ private fun PickResultContent(
 
 @Composable
 private fun ResultItemCard(
-    result: LyricsSearchResult,
+    result: TranscriptSearchResult,
     onClick: () -> Unit
 ) {
-    val hasSyncedLyrics = !result.record.syncedLyrics.isNullOrEmpty()
+    val hasSyncedTranscript = !result.record.syncedTranscript.isNullOrEmpty()
     
     Surface(
         onClick = onClick,
@@ -387,16 +387,16 @@ private fun ResultItemCard(
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(
-                        if (hasSyncedLyrics) MaterialTheme.colorScheme.primaryContainer
+                        if (hasSyncedTranscript) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.MusicNote,
+                    imageVector = Icons.Rounded.AudiobookNote,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = if (hasSyncedLyrics) MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = if (hasSyncedTranscript) MaterialTheme.colorScheme.onPrimaryContainer
                            else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -417,7 +417,7 @@ private fun ResultItemCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (hasSyncedLyrics) {
+                    if (hasSyncedTranscript) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
                             color = MaterialTheme.colorScheme.primary,
@@ -433,7 +433,7 @@ private fun ResultItemCard(
                     }
                 }
                 Text(
-                    text = "${result.record.artistName} • ${result.record.albumName}",
+                    text = "${result.record.AuthorName} Ã¢â‚¬Â¢ ${result.record.BookName}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -447,20 +447,20 @@ private fun ResultItemCard(
 @Composable
 fun NotFoundContent(
     initialTitle: String,
-    initialArtist: String?,
+    initialAuthor: String?,
     message: String,
     onManualSearch: (String, String?) -> Unit,
     onCancel: () -> Unit
 ) {
-    val normalizedArtist = rememberSaveable(initialArtist) {
-        initialArtist
+    val normalizedAuthor = rememberSaveable(initialAuthor) {
+        initialAuthor
             ?.takeIf { it.isNotBlank() }
             ?.takeUnless { it.equals("<unknown>", ignoreCase = true) }
             .orEmpty()
     }
 
     var title by rememberSaveable { mutableStateOf(initialTitle) }
-    var artist by rememberSaveable { mutableStateOf(normalizedArtist) }
+    var Author by rememberSaveable { mutableStateOf(normalizedAuthor) }
 
     Box(
         modifier = Modifier
@@ -480,7 +480,7 @@ fun NotFoundContent(
     Spacer(Modifier.height(16.dp))
 
     Text(
-        text = stringResource(R.string.lyrics_not_found),
+        text = stringResource(R.string.Transcript_not_found),
         style = MaterialTheme.typography.headlineSmall
     )
 
@@ -515,19 +515,19 @@ fun NotFoundContent(
 
     Spacer(Modifier.height(8.dp))
 
-    // Artist input
+    // Author input
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "Artist (optional)",
+            text = "Author (optional)",
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge
         )
         OutlinedTextField(
-            value = artist,
-            onValueChange = { artist = it },
-            placeholder = { Text("Artist (optional)") },
+            value = Author,
+            onValueChange = { Author = it },
+            placeholder = { Text("Author (optional)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -539,7 +539,7 @@ fun NotFoundContent(
         onClick = {
             onManualSearch(
                 title,
-                artist.takeIf { it.isNotBlank() }
+                Author.takeIf { it.isNotBlank() }
             )
         },
         enabled = title.isNotBlank(),
@@ -614,19 +614,19 @@ private fun ErrorContent(
 }
 
 ///**
-// * Diálogo que gestiona la búsqueda de letras para una canción.
-// * Muestra diferentes contenidos según el estado de la búsqueda.
+// * DiÃƒÂ¡logo que gestiona la bÃƒÂºsqueda de letras para una canciÃƒÂ³n.
+// * Muestra diferentes contenidos segÃƒÂºn el estado de la bÃƒÂºsqueda.
 // */
 //@Composable
-//fun FetchLyricsDialog(
-//    uiState: LyricsSearchUiState,
-//    currentSong: Song?,
+//fun FetchTranscriptDialog(
+//    uiState: TranscriptSearchUiState,
+//    currentTrack: Track?,
 //    onConfirm: () -> Unit,
-//    onPickResult: (LyricsSearchResult) -> Unit,
+//    onPickResult: (TranscriptSearchResult) -> Unit,
 //    onDismiss: () -> Unit,
 //    onImport: () -> Unit
 //) {
-//    if (uiState is LyricsSearchUiState.Success) {
+//    if (uiState is TranscriptSearchUiState.Success) {
 //        // Do nothing and don't show the dialog if the state is success
 //        return
 //    }
@@ -639,21 +639,21 @@ private fun ErrorContent(
 //        ) {
 //            Box {
 //                when (uiState) {
-//                    LyricsSearchUiState.Idle -> {
+//                    TranscriptSearchUiState.Idle -> {
 //                        Column(
 //                            modifier = Modifier.padding(24.dp),
 //                            horizontalAlignment = Alignment.CenterHorizontally
 //                        ) {
-//                            DialogHeader(currentSong = currentSong)
+//                            DialogHeader(currentTrack = currentTrack)
 //                            Spacer(modifier = Modifier.height(8.dp))
 //                            Text(
-//                                text = stringResource(R.string.lyrics_not_found),
+//                                text = stringResource(R.string.Transcript_not_found),
 //                                style = MaterialTheme.typography.headlineSmall,
 //                                textAlign = TextAlign.Center
 //                            )
 //                            Spacer(modifier = Modifier.height(16.dp))
 //                            Text(
-//                                text = stringResource(R.string.search_lyrics_online_prompt),
+//                                text = stringResource(R.string.search_Transcript_online_prompt),
 //                                style = MaterialTheme.typography.bodyMedium,
 //                                textAlign = TextAlign.Center,
 //                                color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -682,7 +682,7 @@ private fun ErrorContent(
 //                            }
 //                        }
 //                    }
-//                    LyricsSearchUiState.Loading -> {
+//                    TranscriptSearchUiState.Loading -> {
 //                        Column(
 //                            modifier = Modifier
 //                                .padding(horizontal = 24.dp, vertical = 48.dp)
@@ -693,18 +693,18 @@ private fun ErrorContent(
 //                            CircularProgressIndicator()
 //                            Spacer(modifier = Modifier.height(16.dp))
 //                            Text(
-//                                text = stringResource(R.string.searching_lyrics),
+//                                text = stringResource(R.string.searching_Transcript),
 //                                style = MaterialTheme.typography.bodyMedium,
 //                                color = MaterialTheme.colorScheme.onSurfaceVariant
 //                            )
 //                        }
 //                    }
-//                    is LyricsSearchUiState.PickResult -> {
+//                    is TranscriptSearchUiState.PickResult -> {
 //                        Column(
 //                            modifier = Modifier.padding(24.dp),
 //                            horizontalAlignment = Alignment.CenterHorizontally
 //                        ) {
-//                            DialogHeader(currentSong = currentSong)
+//                            DialogHeader(currentTrack = currentTrack)
 //                            Spacer(modifier = Modifier.height(16.dp))
 //                            ResultContextChip(query = uiState.query)
 //                            Spacer(modifier = Modifier.height(10.dp))
@@ -743,7 +743,7 @@ private fun ErrorContent(
 //                                            )
 //                                            Spacer(modifier = Modifier.height(4.dp))
 //                                            Text(
-//                                                text = "${result.record.artistName} - ${result.record.albumName}",
+//                                                text = "${result.record.AuthorName} - ${result.record.BookName}",
 //                                                style = MaterialTheme.typography.bodyMedium,
 //                                                color = MaterialTheme.colorScheme.onSurfaceVariant
 //                                            )
@@ -753,7 +753,7 @@ private fun ErrorContent(
 //                            }
 //
 //                            ProviderText(
-//                                providerText = stringResource(R.string.lyrics_provided_by),
+//                                providerText = stringResource(R.string.Transcript_provided_by),
 //                                uri = stringResource(R.string.lrclib_uri),
 //                                textAlign = TextAlign.Center,
 //                                modifier = Modifier
@@ -762,7 +762,7 @@ private fun ErrorContent(
 //                            )
 //                        }
 //                    }
-//                    is LyricsSearchUiState.Error -> {
+//                    is TranscriptSearchUiState.Error -> {
 //                        Column(
 //                            modifier = Modifier.padding(24.dp),
 //                            horizontalAlignment = Alignment.CenterHorizontally
@@ -805,15 +805,15 @@ private fun ErrorContent(
 //                            }
 //                        }
 //                    }
-//                    is LyricsSearchUiState.Success -> {
+//                    is TranscriptSearchUiState.Success -> {
 //                        // Handled outside, this case should not render the dialog
 //                    }
 //                }
 //
 //                // Close button for Idle, PickResult and Error states
-//                if (uiState is LyricsSearchUiState.Idle
-//                    || uiState is LyricsSearchUiState.PickResult
-//                    || uiState is LyricsSearchUiState.Error) {
+//                if (uiState is TranscriptSearchUiState.Idle
+//                    || uiState is TranscriptSearchUiState.PickResult
+//                    || uiState is TranscriptSearchUiState.Error) {
 //                     IconButton(
 //                         onClick = onDismiss,
 //                         modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
@@ -830,10 +830,10 @@ private fun ErrorContent(
 //}
 //
 //@Composable
-//private fun DialogHeader(currentSong: Song?) {
-//    val title = currentSong?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_song_title)
-//    val artist = currentSong?.displayArtist.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
-//    val album = currentSong?.album.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
+//private fun DialogHeader(currentTrack: Track?) {
+//    val title = currentTrack?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_Track_title)
+//    val Author = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_Author)
+//    val Book = currentTrack?.Book.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_Book)
 //
 //    Row(
 //        modifier = Modifier
@@ -850,7 +850,7 @@ private fun ErrorContent(
 //            contentAlignment = Alignment.Center
 //        ) {
 //            Icon(
-//                imageVector = Icons.Rounded.MusicNote,
+//                imageVector = Icons.Rounded.AudiobookNote,
 //                contentDescription = null,
 //                modifier = Modifier.size(24.dp),
 //                tint = MaterialTheme.colorScheme.onSecondaryContainer
@@ -867,13 +867,13 @@ private fun ErrorContent(
 //            )
 //            Spacer(modifier = Modifier.height(2.dp))
 //            Text(
-//                text = artist,
+//                text = Author,
 //                style = MaterialTheme.typography.bodyMedium,
 //                color = MaterialTheme.colorScheme.onSurfaceVariant
 //            )
 //            Spacer(modifier = Modifier.height(2.dp))
 //            Text(
-//                text = album,
+//                text = Book,
 //                style = MaterialTheme.typography.bodySmall,
 //                color = MaterialTheme.colorScheme.onSurfaceVariant
 //            )

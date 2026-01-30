@@ -5,18 +5,18 @@ import retrofit2.http.Query
 
 /**
  * Retrofit interface for Deezer API.
- * Used primarily for fetching artist artwork.
+ * Used primarily for fetching Author artwork.
  */
 interface DeezerApiService {
 
     /**
-     * Search for an artist by name.
-     * @param query Artist name to search for
+     * Search for an Author by name.
+     * @param query Author name to search for
      * @param limit Maximum number of results to return
-     * @return Search response containing list of matching artists
+     * @return Search response containing list of matching Authors
      */
-    @GET("search/artist")
-    suspend fun searchArtist(
+    @GET("search/Author")
+    suspend fun searchAuthor(
         @Query("q") query: String,
         @Query("limit") limit: Int = 1
     ): DeezerSearchResponse

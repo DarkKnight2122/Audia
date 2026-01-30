@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Genre
+import com.oakiha.audia.data.model.Category
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.SmartImage
@@ -56,18 +56,18 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 @OptIn(UnstableApi::class)
 @Composable
-fun GenreCategoriesGrid(
-    genres: List<Genre>,
-    onGenreClick: (Genre) -> Unit,
+fun CategoryCategoriesGrid(
+    Categories: List<Category>,
+    onCategoryClick: (Category) -> Unit,
     playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
-    if (genres.isEmpty()) {
+    if (Categories.isEmpty()) {
         Box(
             modifier = modifier.fillMaxSize().padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("No genres available.", style = MaterialTheme.typography.bodyLarge)
+            Text("No Categories available.", style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -98,32 +98,32 @@ fun GenreCategoriesGrid(
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
-                text = "Browse by genre",
+                text = "Browse by Category",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .padding(start = 6.dp, top = 6.dp, bottom = 6.dp)
             )
         }
-        items(genres, key = { it.id }) { genre ->
-            // CORREGIDO: Obtener las URIs de manera más robusta
-            GenreCard(
-                genre = genre,
-                onClick = { onGenreClick(genre) }
+        items(Categories, key = { it.id }) { Category ->
+            // CORREGIDO: Obtener las URIs de manera mÃ¡s robusta
+            CategoryCard(
+                Category = Category,
+                onClick = { onCategoryClick(Category) }
             )
         }
     }
 }
 
 @Composable
-private fun GenreCard(
-    genre: Genre,
+private fun CategoryCard(
+    Category: Category,
     onClick: () -> Unit
 ) {
-    val backgroundColor = remember(genre) {
-        Color(android.graphics.Color.parseColor(genre.lightColorHex ?: "#7D5260")) // Fallback color
+    val backgroundColor = remember(Category) {
+        Color(android.graphics.Color.parseColor(Category.lightColorHex ?: "#7D5260")) // Fallback color
     }
-    val onBackgroundColor = remember(genre) {
-        Color(android.graphics.Color.parseColor(genre.onLightColorHex ?: "#FFFFFF")) // Fallback color
+    val onBackgroundColor = remember(Category) {
+        Color(android.graphics.Color.parseColor(Category.onLightColorHex ?: "#FFFFFF")) // Fallback color
     }
 
     Card(
@@ -159,7 +159,7 @@ private fun GenreCard(
                 .clip(RoundedCornerShape(24.dp))
                 .background(backgroundColor)
         ) {
-            // Imagen del género en esquina inferior derecha
+            // Imagen del gÃ©nero en esquina inferior derecha
             Box(
                 modifier = Modifier
                     .size(108.dp)
@@ -167,8 +167,8 @@ private fun GenreCard(
                     .offset(x = 20.dp, y = 20.dp)
             ) {
                 SmartImage(
-                    model = getGenreImageResource(genre.id), // Use genre.id for image resource
-                    contentDescription = "Genre illustration",
+                    model = getCategoryImageResource(Category.id), // Use Category.id for image resource
+                    contentDescription = "Category illustration",
                     modifier = Modifier
                         .fillMaxSize()
                         .alpha(0.55f),
@@ -177,9 +177,9 @@ private fun GenreCard(
                 )
             }
 
-            // Nombre del género en esquina superior izquierda
+            // Nombre del gÃ©nero en esquina superior izquierda
             Text(
-                text = genre.name,
+                text = Category.name,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -195,8 +195,8 @@ private fun GenreCard(
 
 
 
-private fun getGenreImageResource(genreId: String): Any {
-    return when (genreId.lowercase()) {
+private fun getCategoryImageResource(CategoryId: String): Any {
+    return when (CategoryId.lowercase()) {
         "rock" -> R.drawable.rock
         "pop" -> R.drawable.pop_mic
         "jazz" -> R.drawable.sax
@@ -218,7 +218,7 @@ private fun getGenreImageResource(genreId: String): Any {
         "salsa" -> R.drawable.conga
         "bachata" -> R.drawable.bongos
         "merengue" -> R.drawable.drum
-        "unknown" -> R.drawable.rounded_question_mark_24 // Add icon for unknown genre
-        else -> R.drawable.genre_default
+        "unknown" -> R.drawable.rounded_question_mark_24 // Add icon for unknown Category
+        else -> R.drawable.Category_default
     }
 }

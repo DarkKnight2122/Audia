@@ -4,50 +4,50 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.Album
+import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "albums",
+    tableName = "Books",
     indices = [
         Index(value = ["title"], unique = false),
-        Index(value = ["artist_id"], unique = false), // Para buscar álbumes por artista
-        Index(value = ["artist_name"], unique = false) // Nuevo índice para búsquedas por nombre de artista del álbum
+        Index(value = ["Author_id"], unique = false), // Para buscar Ã¡lbumes por Authora
+        Index(value = ["Author_name"], unique = false) // Nuevo Ã­ndice para bÃºsquedas por nombre de Authora del Ã¡lbum
     ]
 )
-data class AlbumEntity(
+data class BookEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "artist_name") val artistName: String, // Nombre del artista del álbum
-    @ColumnInfo(name = "artist_id") val artistId: Long, // ID del artista principal del álbum (si aplica)
-    @ColumnInfo(name = "album_art_uri_string") val albumArtUriString: String?,
-    @ColumnInfo(name = "song_count") val songCount: Int,
+    @ColumnInfo(name = "Author_name") val AuthorName: String, // Nombre del Authora del Ã¡lbum
+    @ColumnInfo(name = "Author_id") val AuthorId: Long, // ID del Authora principal del Ã¡lbum (si aplica)
+    @ColumnInfo(name = "Book_art_uri_string") val BookArtUriString: String?,
+    @ColumnInfo(name = "Track_count") val TrackCount: Int,
     @ColumnInfo(name = "year") val year: Int
 )
 
-fun AlbumEntity.toAlbum(): Album {
-    return Album(
+fun BookEntity.toBook(): Book {
+    return Book(
         id = this.id,
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        albumArtUriString = this.albumArtUriString, // El modelo Album usa albumArtUrl
-        songCount = this.songCount,
+        Author = this.AuthorName.normalizeMetadataTextOrEmpty(),
+        BookArtUriString = this.BookArtUriString, // El modelo Book usa BookArtUrl
+        TrackCount = this.TrackCount,
         year = this.year
     )
 }
 
-fun List<AlbumEntity>.toAlbums(): List<Album> {
-    return this.map { it.toAlbum() }
+fun List<BookEntity>.toBooks(): List<Book> {
+    return this.map { it.toBook() }
 }
 
-fun Album.toEntity(artistIdForAlbum: Long): AlbumEntity { // Necesitamos pasar el artistId si el modelo Album no lo tiene directamente
-    return AlbumEntity(
+fun Book.toEntity(AuthorIdForBook: Long): BookEntity { // Necesitamos pasar el AuthorId si el modelo Book no lo tiene directamente
+    return BookEntity(
         id = this.id,
         title = this.title,
-        artistName = this.artist,
-        artistId = artistIdForAlbum, // Asignar el ID del artista
-        albumArtUriString = this.albumArtUriString,
-        songCount = this.songCount,
+        AuthorName = this.Author,
+        AuthorId = AuthorIdForBook, // Asignar el ID del Authora
+        BookArtUriString = this.BookArtUriString,
+        TrackCount = this.TrackCount,
         year = this.year
     )
 }

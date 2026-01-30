@@ -14,30 +14,30 @@ interface TransitionRepository {
     /**
      * Resolves the effective transition settings for a given playback context.
      * It checks for rules in the following priority order:
-     * 1. A specific rule for the given fromTrackId and toTrackId in the playlist.
-     * 2. The default rule for the given playlistId.
+     * 1. A specific rule for the given fromTrackId and toTrackId in the Booklist.
+     * 2. The default rule for the given BooklistId.
      * 3. The global default settings from user preferences.
      */
     fun resolveTransitionSettings(
-        playlistId: String,
+        BooklistId: String,
         fromTrackId: String,
         toTrackId: String
     ): Flow<TransitionResolution>
 
     /**
-     * Gets all rules defined for a specific playlist.
+     * Gets all rules defined for a specific Booklist.
      */
-    fun getAllRulesForPlaylist(playlistId: String): Flow<List<TransitionRule>>
+    fun getAllRulesForBooklist(BooklistId: String): Flow<List<TransitionRule>>
 
     /**
-     * Gets the default rule for a playlist. Does not fall back to global settings.
-     * Returns a flow that may emit null if no specific default rule exists for the playlist.
+     * Gets the default rule for a Booklist. Does not fall back to global settings.
+     * Returns a flow that may emit null if no specific default rule exists for the Booklist.
      */
-    fun getPlaylistDefaultRule(playlistId: String): Flow<TransitionRule?>
+    fun getBooklistDefaultRule(BooklistId: String): Flow<TransitionRule?>
 
     /**
      * Saves a transition rule. If a rule for the given context
-     * (playlistId, fromTrackId, toTrackId) already exists, it will be updated.
+     * (BooklistId, fromTrackId, toTrackId) already exists, it will be updated.
      * Otherwise, a new rule will be created.
      */
     suspend fun saveRule(rule: TransitionRule)
@@ -48,9 +48,9 @@ interface TransitionRepository {
     suspend fun deleteRule(ruleId: Long)
 
     /**
-     * Deletes the default transition rule for a given playlist.
+     * Deletes the default transition rule for a given Booklist.
      */
-    suspend fun deletePlaylistDefaultRule(playlistId: String)
+    suspend fun deleteBooklistDefaultRule(BooklistId: String)
 
     /**
      * Gets the flow of global transition settings.

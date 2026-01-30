@@ -63,20 +63,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.presentation.components.AiPlaylistSheet
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.presentation.components.AiBooklistsheet
 import com.oakiha.audia.presentation.components.DailyMixMenu
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
-import com.oakiha.audia.presentation.components.PlaylistBottomSheet
+import com.oakiha.audia.presentation.components.BooklistBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.components.threeShapeSwitch
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.MainViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import com.oakiha.audia.utils.formatDuration
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
@@ -88,29 +88,29 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun DailyMixScreen(
     mainViewModel: MainViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel(),
     playerViewModel: PlayerViewModel,
     navController: NavController,
 ) {
     Trace.beginSection("DailyMixScreen.Composition")
-    val dailyMixSongs: ImmutableList<Song> by playerViewModel.dailyMixSongs.collectAsState()
-    val currentSongId by remember { playerViewModel.stablePlayerState.map { it.currentSong?.id }.distinctUntilChanged() }.collectAsState(initial = null)
+    val dailyMixTracks: ImmutableList<Track> by playerViewModel.dailyMixTracks.collectAsState()
+    val currentTrackId by remember { playerViewModel.stablePlayerState.map { it.currentTrack?.id }.distinctUntilChanged() }.collectAsState(initial = null)
     val isPlaying by remember { playerViewModel.stablePlayerState.map { it.isPlaying }.distinctUntilChanged() }.collectAsState(initial = false)
     val isShuffleEnabled by remember { playerViewModel.stablePlayerState.map { it.isShuffleEnabled }.distinctUntilChanged() }.collectAsState(initial = false)
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
-    var showPlaylistBottomSheet by remember { mutableStateOf(false) }
+    var showBooklistBottomSheet by remember { mutableStateOf(false) }
     val playerSheetState by playerViewModel.sheetState.collectAsState() // This is a simple enum, less critical but fine
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-    val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsState()
+    val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState()
 
-    val showAiSheet by playerViewModel.showAiPlaylistSheet.collectAsState()
-    val isGeneratingAiPlaylist by playerViewModel.isGeneratingAiPlaylist.collectAsState()
+    val showAiSheet by playerViewModel.showAiBooklistsheet.collectAsState()
+    val isGeneratingAiBooklist by playerViewModel.isGeneratingAiBooklist.collectAsState()
     val aiError by playerViewModel.aiError.collectAsState()
     val lazyListState = rememberLazyListState()
 
-    var showSongInfoSheet by remember { mutableStateOf(false) }
-    var selectedSongForInfo by remember { mutableStateOf<Song?>(null) }
+    var showTrackInfoSheet by remember { mutableStateOf(false) }
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) }
     var showDailyMixMenu by remember { mutableStateOf(false) }
 
     if (showDailyMixMenu) {
@@ -120,17 +120,17 @@ fun DailyMixScreen(
                 playerViewModel.regenerateDailyMixWithPrompt(prompt)
                 showDailyMixMenu = false
             },
-            isLoading = isGeneratingAiPlaylist
+            isLoading = isGeneratingAiBooklist
         )
     }
 
     if (showAiSheet) {
-        AiPlaylistSheet(
-            onDismiss = { playerViewModel.dismissAiPlaylistSheet() },
+        AiBooklistsheet(
+            onDismiss = { playerViewModel.dismissAiBooklistsheet() },
             onGenerateClick = { prompt, minLength, maxLength ->
-                playerViewModel.generateAiPlaylist(prompt, minLength, maxLength, saveAsPlaylist = false)
+                playerViewModel.generateAiBooklist(prompt, minLength, maxLength, saveAsBooklist = false)
             },
-            isGenerating = isGeneratingAiPlaylist,
+            isGenerating = isGeneratingAiBooklist,
             error = aiError
         )
     }
@@ -152,59 +152,59 @@ fun DailyMixScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    if (showSongInfoSheet && selectedSongForInfo != null) {
-        val song = selectedSongForInfo!!
-        val removeFromListTrigger = remember(dailyMixSongs) {
+    if (showTrackInfoSheet && selectedTrackForInfo != null) {
+        val Track = selectedTrackForInfo!!
+        val removeFromListTrigger = remember(dailyMixTracks) {
             {
-                playerViewModel.removeFromDailyMix(song.id)
+                playerViewModel.removeFromDailyMix(Track.id)
             }
         }
-        SongInfoBottomSheet(
-            song = song,
-            isFavorite = favoriteSongIds.contains(song.id),
-            onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(song) },
-            onDismiss = { showSongInfoSheet = false },
-            onPlaySong = {
-                playerViewModel.showAndPlaySong(song, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false)
-                showSongInfoSheet = false
+        TrackInfoBottomSheet(
+            Track = Track,
+            isFavorite = favoriteTrackIds.contains(Track.id),
+            onToggleFavorite = { playerViewModel.toggleFavoriteSpecificTrack(Track) },
+            onDismiss = { showTrackInfoSheet = false },
+            onPlayTrack = {
+                playerViewModel.showAndPlayTrack(Track, dailyMixTracks, "Daily Mix", isVoluntaryPlay = false)
+                showTrackInfoSheet = false
             },
             onAddToQueue = {
-                playerViewModel.addSongToQueue(song)
-                showSongInfoSheet = false
+                playerViewModel.addTrackToQueue(Track)
+                showTrackInfoSheet = false
             },
             onAddNextToQueue = {
-                playerViewModel.addSongNextToQueue(song)
-                showSongInfoSheet = false
+                playerViewModel.addTrackNextToQueue(Track)
+                showTrackInfoSheet = false
             },
-            onAddToPlayList = {
-                    showPlaylistBottomSheet = true;
+            onAddToBooklist = {
+                    showBooklistBottomSheet = true;
             },
             onDeleteFromDevice = playerViewModel::deleteFromDevice,
-            onNavigateToAlbum = {
+            onNavigateToBook = {
                 // Assuming Screen object has a method to create a route
-                navController.navigate(Screen.AlbumDetail.createRoute(song.albumId))
-                showSongInfoSheet = false
+                navController.navigate(Screen.BookDetail.createRoute(Track.BookId))
+                showTrackInfoSheet = false
             },
-            onNavigateToArtist = {
-                // TODO: Implement navigation to artist screen. Might require finding artist by name.
-                showSongInfoSheet = false
+            onNavigateToAuthor = {
+                // TODO: Implement navigation to Author screen. Might require finding Author by name.
+                showTrackInfoSheet = false
             },
-            onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                playerViewModel.editSongMetadata(song, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
+            onEditTrack = { newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate ->
+                playerViewModel.editTrackMetadata(Track, newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate)
             },
             generateAiMetadata = { fields ->
-                playerViewModel.generateAiMetadata(song, fields)
+                playerViewModel.generateAiMetadata(Track, fields)
             },
             removeFromListTrigger = removeFromListTrigger
         )
 
-        if (showPlaylistBottomSheet) {
-            val playlistUiState by playlistViewModel.uiState.collectAsState()
+        if (showBooklistBottomSheet) {
+            val BooklistUiState by BooklistViewModel.uiState.collectAsState()
 
-            PlaylistBottomSheet(
-                playlistUiState = playlistUiState,
-                song = song,
-                onDismiss = { showPlaylistBottomSheet = false },
+            BooklistBottomSheet(
+                BooklistUiState = BooklistUiState,
+                Track = Track,
+                onDismiss = { showBooklistBottomSheet = false },
                 bottomBarHeight = bottomBarHeightDp,
                 playerViewModel = playerViewModel,
             )
@@ -217,7 +217,7 @@ fun DailyMixScreen(
             .fillMaxSize()
             .background(backgroundBrush)
     ) {
-        if (dailyMixSongs.isEmpty()) {
+        if (dailyMixTracks.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -233,9 +233,9 @@ fun DailyMixScreen(
             ) {
                 item(key = "daily_mix_header") {
                     ExpressiveDailyMixHeader(
-                        songs = dailyMixSongs,
+                        Tracks = dailyMixTracks,
                         scrollState = lazyListState,
-                        onShowMenu = { playerViewModel.showAiPlaylistSheet() }
+                        onShowMenu = { playerViewModel.showAiBooklistsheet() }
                     )
                 }
 
@@ -249,15 +249,15 @@ fun DailyMixScreen(
                     ) {
                         Button(
                             onClick = {
-                                if (dailyMixSongs.isNotEmpty()) {
-                                    playerViewModel.playSongs(dailyMixSongs, dailyMixSongs.first(), "Daily Mix")
+                                if (dailyMixTracks.isNotEmpty()) {
+                                    playerViewModel.playTracks(dailyMixTracks, dailyMixTracks.first(), "Daily Mix")
                                     if (isShuffleEnabled) playerViewModel.toggleShuffle() // Desactivar shuffle si estaba activo
                                 }
                             },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(76.dp),
-                            enabled = dailyMixSongs.isNotEmpty(),
+                            enabled = dailyMixTracks.isNotEmpty(),
                             shape = RoundedCornerShape(
                                 topStart = 60.dp,
                                 topEnd = 14.dp,
@@ -272,9 +272,9 @@ fun DailyMixScreen(
                         }
                         FilledTonalButton(
                             onClick = {
-                                if (dailyMixSongs.isNotEmpty()) {
-                                    playerViewModel.playSongsShuffled(
-                                        songsToPlay = dailyMixSongs,
+                                if (dailyMixTracks.isNotEmpty()) {
+                                    playerViewModel.playTracksShuffled(
+                                        TracksToPlay = dailyMixTracks,
                                         queueName = "Daily Mix"
                                     )
                                 }
@@ -282,7 +282,7 @@ fun DailyMixScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(76.dp),
-                            enabled = dailyMixSongs.isNotEmpty(),
+                            enabled = dailyMixTracks.isNotEmpty(),
                             shape = RoundedCornerShape(
                                 topStart = 14.dp,
                                 topEnd = 60.dp,
@@ -298,17 +298,17 @@ fun DailyMixScreen(
                     }
                 }
 
-                items(dailyMixSongs, key = { it.id }) { song ->
-                    EnhancedSongListItem(
+                items(dailyMixTracks, key = { it.id }) { Track ->
+                    EnhancedTrackListItem(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        song = song,
-                        isCurrentSong = stablePlayerState.currentSong?.id == song.id,
-                        isPlaying = currentSongId == song.id && isPlaying,
-                        onClick = { playerViewModel.showAndPlaySong(song, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false) },
+                        Track = Track,
+                        isCurrentTrack = stablePlayerState.currentTrack?.id == Track.id,
+                        isPlaying = currentTrackId == Track.id && isPlaying,
+                        onClick = { playerViewModel.showAndPlayTrack(Track, dailyMixTracks, "Daily Mix", isVoluntaryPlay = false) },
                         onMoreOptionsClick = {
-                            selectedSongForInfo = it
-                            showSongInfoSheet = true
+                            selectedTrackForInfo = it
+                            showTrackInfoSheet = true
                         }
                     )
                 }
@@ -376,13 +376,13 @@ fun DailyMixScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ExpressiveDailyMixHeader(
-    songs: List<Song>,
+    Tracks: List<Track>,
     scrollState: LazyListState,
     onShowMenu: () -> Unit
 ) {
     Trace.beginSection("ExpressiveDailyMixHeader.Composition")
-    val albumArts = remember(songs) { songs.map { it.albumArtUriString }.distinct().take(3) }
-    val totalDuration = remember(songs) { songs.sumOf { it.duration } }
+    val BookArts = remember(Tracks) { Tracks.map { it.BookArtUriString }.distinct().take(3) }
+    val totalDuration = remember(Tracks) { Tracks.sumOf { it.duration } }
 
     val parallaxOffset by remember { derivedStateOf { if (scrollState.firstVisibleItemIndex == 0) scrollState.firstVisibleItemScrollOffset * 0.5f else 0f } }
 
@@ -406,7 +406,7 @@ private fun ExpressiveDailyMixHeader(
                 horizontalArrangement = Arrangement.spacedBy((-80).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                albumArts.forEachIndexed { index, artUrl ->
+                BookArts.forEachIndexed { index, artUrl ->
                     val size = when (index) {
                         0 -> 180.dp
                         1 -> 220.dp
@@ -421,9 +421,9 @@ private fun ExpressiveDailyMixHeader(
                     }
                     val shape = threeShapeSwitch(index, thirdShapeCornerRadius = 30.dp)
 
-                    // --- INICIO DE LA CORRECCIÓN ---
+                    // --- INICIO DE LA CORRECCIÃƒâ€œN ---
                     if (index == 2) {
-                        // Para la 3ra imagen, usamos Modifier.layout para controlar la medición y el posicionamiento.
+                        // Para la 3ra imagen, usamos Modifier.layout para controlar la mediciÃƒÂ³n y el posicionamiento.
                         Box(
                             modifier = Modifier.layout { measurable, constraints ->
                                 // 1. Medimos el contenido (la imagen) para que sea un cuadrado perfecto de `size` x `size`,
@@ -432,8 +432,8 @@ private fun ExpressiveDailyMixHeader(
                                     Constraints.fixed(width = size.roundToPx(), height = size.roundToPx())
                                 )
 
-                                // 2. Le decimos al Row que nuestro layout ocupará el ancho que él nos dio (`constraints.maxWidth`),
-                                // de esta forma no empujamos a los otros elementos. La altura será la de nuestro cuadrado.
+                                // 2. Le decimos al Row que nuestro layout ocuparÃƒÂ¡ el ancho que ÃƒÂ©l nos dio (`constraints.maxWidth`),
+                                // de esta forma no empujamos a los otros elementos. La altura serÃƒÂ¡ la de nuestro cuadrado.
                                 layout(constraints.maxWidth, placeable.height) {
                                     // 3. Colocamos nuestro contenido cuadrado (`placeable`) dentro del espacio asignado.
                                     // Lo centramos horizontalmente para que se desborde por ambos lados si es necesario.
@@ -449,15 +449,15 @@ private fun ExpressiveDailyMixHeader(
                                     .clip(shape)
                             ) {
                                 SmartImage(
-                                    model = artUrl ?: R.drawable.rounded_album_24,
+                                    model = artUrl ?: R.drawable.rounded_Book_24,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize() // Llena el tamaño cuadrado que le dimos.
+                                    modifier = Modifier.fillMaxSize() // Llena el tamaÃƒÂ±o cuadrado que le dimos.
                                 )
                             }
                         }
                     } else {
-                        // Lógica original para las otras dos imágenes
+                        // LÃƒÂ³gica original para las otras dos imÃƒÂ¡genes
                         Box(
                             modifier = Modifier
                                 .size(size)
@@ -465,14 +465,14 @@ private fun ExpressiveDailyMixHeader(
                                 .clip(shape)
                         ) {
                             SmartImage(
-                                model = artUrl ?: R.drawable.rounded_album_24,
+                                model = artUrl ?: R.drawable.rounded_Book_24,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
-                    // --- FIN DE LA CORRECCIÓN ---
+                    // --- FIN DE LA CORRECCIÃƒâ€œN ---
                 }
             }
         }
@@ -513,7 +513,7 @@ private fun ExpressiveDailyMixHeader(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${songs.size} Songs • ${formatDuration(totalDuration)}",
+                    text = "${Tracks.size} Tracks Ã¢â‚¬Â¢ ${formatDuration(totalDuration)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )

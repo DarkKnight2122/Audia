@@ -185,7 +185,7 @@ fun LibrarySortBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Playlist View",
+                            text = "Booklist View",
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(start = 6.dp, end = 8.dp),

@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Lyrics
+import androidx.compose.material.icons.rounded.Transcript
 import androidx.compose.material.icons.rounded.TextFormat
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Lyrics
+import com.oakiha.audia.data.model.Transcript
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +47,14 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LyricsFloatingToolbar(
+fun TranscriptFloatingToolbar(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit,
-    showSyncedLyrics: Boolean?,
-    onShowSyncedLyricsChange: (Boolean) -> Unit,
-    lyrics: Lyrics?,
-    onSaveLyricsAsLrc: () -> Unit,
-    onResetImportedLyrics: () -> Unit,
+    showSyncedTranscript: Boolean?,
+    onShowSyncedTranscriptChange: (Boolean) -> Unit,
+    Transcript: Transcript?,
+    onSaveTranscriptAsLrc: () -> Unit,
+    onResetImportedTranscript: () -> Unit,
     isSyncControlsVisible: Boolean,
     onToggleSyncControls: () -> Unit,
     backgroundColor: Color,
@@ -64,7 +64,7 @@ fun LyricsFloatingToolbar(
     isImmersiveTemporarilyDisabled: Boolean = false,
     onSetImmersiveTemporarilyDisabled: ((Boolean) -> Unit)? = null
 ) {
-    if (showSyncedLyrics == null) return
+    if (showSyncedTranscript == null) return
 
     Row(
         modifier = modifier
@@ -97,25 +97,25 @@ fun LyricsFloatingToolbar(
         ) {
             ToggleSegmentButton(
                 modifier = Modifier.weight(1f).height(50.dp),
-                active = showSyncedLyrics,
+                active = showSyncedTranscript,
                 activeColor = accentColor,
                 inactiveColor = backgroundColor,
                 activeContentColor = onAccentColor,
                 inactiveContentColor = onBackgroundColor,
                 activeCornerRadius = 50.dp,
-                onClick = { onShowSyncedLyricsChange(true) },
+                onClick = { onShowSyncedTranscriptChange(true) },
                 text = "Synced"
             )
 
             ToggleSegmentButton(
                 modifier = Modifier.weight(1f).height(50.dp),
-                active = !showSyncedLyrics,
+                active = !showSyncedTranscript,
                 activeColor = accentColor,
                 inactiveColor = backgroundColor,
                 activeContentColor = onAccentColor,
                 inactiveContentColor = onBackgroundColor,
                 activeCornerRadius = 50.dp,
-                onClick = { onShowSyncedLyricsChange(false) },
+                onClick = { onShowSyncedTranscriptChange(false) },
                 text = "Static"
             )
         }
@@ -132,7 +132,7 @@ fun LyricsFloatingToolbar(
         ) {
             Icon(
                 imageVector = Icons.Filled.MoreVert,
-                contentDescription = "Lyrics options",
+                contentDescription = "Transcript options",
                 tint = onBackgroundColor
             )
             DropdownMenu(
@@ -150,7 +150,7 @@ fun LyricsFloatingToolbar(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                // Save lyrics as .lrc option
+                // Save Transcript as .lrc option
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
@@ -158,14 +158,14 @@ fun LyricsFloatingToolbar(
                             contentDescription = null
                         )
                     },
-                    text = { Text(text = stringResource(R.string.save_lyrics_dialog_title).substringBefore("?")) }, // quick hack, verify strings
-                    enabled = lyrics != null,
+                    text = { Text(text = stringResource(R.string.save_Transcript_dialog_title).substringBefore("?")) }, // quick hack, verify strings
+                    enabled = Transcript != null,
                     onClick = {
                         expanded = false
-                        onSaveLyricsAsLrc()
+                        onSaveTranscriptAsLrc()
                     }
                 )
-                // Reset imported lyrics option
+                // Reset imported Transcript option
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
@@ -173,15 +173,15 @@ fun LyricsFloatingToolbar(
                             contentDescription = null
                         )
                     },
-                    text = { Text(text = stringResource(R.string.reset_imported_lyrics)) },
+                    text = { Text(text = stringResource(R.string.reset_imported_Transcript)) },
                     onClick = {
                         expanded = false
-                        onResetImportedLyrics()
+                        onResetImportedTranscript()
                     }
                 )
 
                 // Sync Controls Toggle
-                if (showSyncedLyrics) {
+                if (showSyncedTranscript) {
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(

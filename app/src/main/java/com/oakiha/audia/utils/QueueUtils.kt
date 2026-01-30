@@ -1,6 +1,6 @@
 package com.oakiha.audia.utils
 
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlin.random.Random
 
 object QueueUtils {
@@ -49,10 +49,10 @@ object QueueUtils {
     }
 
     fun buildAnchoredShuffleQueue(
-        currentQueue: List<Song>,
+        currentQueue: List<Track>,
         anchorIndex: Int,
         random: Random = Random.Default
-    ): List<Song> {
+    ): List<Track> {
         if (currentQueue.size <= 1) return currentQueue.toList()
         val order = generateShuffleOrder(currentQueue.size, anchorIndex, random)
         return List(order.size) { idx -> currentQueue[order[idx]] }

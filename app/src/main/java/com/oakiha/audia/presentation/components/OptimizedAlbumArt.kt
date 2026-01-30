@@ -29,7 +29,7 @@ import com.oakiha.audia.R
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun OptimizedAlbumArt(
+fun OptimizedBookArt(
     uri: Any?,
     title: String,
     modifier: Modifier = Modifier,
@@ -37,7 +37,7 @@ fun OptimizedAlbumArt(
 ) {
     val context = LocalContext.current
 
-    if (renderDirectAlbumArt(
+    if (renderDirectBookArt(
             model = uri,
             title = title,
             modifier = modifier
@@ -54,14 +54,14 @@ fun OptimizedAlbumArt(
             else -> ImageRequest.Builder(context)
                 .data(uri)
                 .crossfade(350) // Use Coil's native crossfade
-                .placeholder(R.drawable.ic_music_placeholder)
-                .error(R.drawable.ic_music_placeholder)
+                .placeholder(R.drawable.ic_Audiobook_placeholder)
+                .error(R.drawable.ic_Audiobook_placeholder)
                 .size(targetSize)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
         },
-        contentDescription = "Album art of $title",
+        contentDescription = "Book art of $title",
         modifier = modifier,
         contentScale = ContentScale.Crop,
         loading = {
@@ -85,7 +85,7 @@ private fun PlaceholderContent(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_music_placeholder),
+            painter = painterResource(R.drawable.ic_Audiobook_placeholder),
             contentDescription = "$title placeholder",
             contentScale = ContentScale.Fit,
             modifier = Modifier.size(96.dp),
@@ -97,17 +97,17 @@ private fun PlaceholderContent(title: String) {
 }
 
 @Composable
-private fun renderDirectAlbumArt(
+private fun renderDirectBookArt(
     model: Any?,
     title: String,
     modifier: Modifier
 ): Boolean {
     return when (model) {
-        is ImageRequest -> renderDirectAlbumArt(model.data, title, modifier)
+        is ImageRequest -> renderDirectBookArt(model.data, title, modifier)
         is ImageVector -> {
             Image(
                 imageVector = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -116,7 +116,7 @@ private fun renderDirectAlbumArt(
         is Painter -> {
             Image(
                 painter = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -125,7 +125,7 @@ private fun renderDirectAlbumArt(
         is ImageBitmap -> {
             Image(
                 bitmap = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -134,7 +134,7 @@ private fun renderDirectAlbumArt(
         is Bitmap -> {
             Image(
                 bitmap = model.asImageBitmap(),
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -147,7 +147,7 @@ private fun renderDirectAlbumArt(
 
 
 //@Composable
-//fun OptimizedAlbumArt(
+//fun OptimizedBookArt(
 //    uri: String?,
 //    title: String,
 //    expansionFraction: Float,
@@ -160,17 +160,17 @@ private fun renderDirectAlbumArt(
 //        model = ImageRequest.Builder(context)
 //            .data(uri)
 //            .crossfade(false)
-//            .placeholder(R.drawable.ic_music_placeholder)
+//            .placeholder(R.drawable.ic_Audiobook_placeholder)
 //            .error(R.drawable.rounded_broken_image_24)
-//            .size(targetSize) // Usar el parámetro targetSize
+//            .size(targetSize) // Usar el parÃƒÂ¡metro targetSize
 //            .memoryCachePolicy(CachePolicy.ENABLED)
 //            .diskCachePolicy(CachePolicy.ENABLED)
 //            .build(),
 //        onState = { state ->
-//            Timber.tag("OptimizedAlbumArt")
+//            Timber.tag("OptimizedBookArt")
 //                .d("Painter State (Size: $targetSize): $state for URI: $uri")
 //            if (state is AsyncImagePainter.State.Error) {
-//                Timber.tag("OptimizedAlbumArt")
+//                Timber.tag("OptimizedBookArt")
 //                    .e(state.result.throwable, "Coil Error State for URI: $uri")
 //            }
 //        }
@@ -190,13 +190,13 @@ private fun renderDirectAlbumArt(
 //        targetState = painter.state,
 //        modifier = imageContainerModifier,
 //        animationSpec = tween(durationMillis = 350),
-//        label = "AlbumArtCrossfade"
+//        label = "BookArtCrossfade"
 //    ) { currentState ->
 //        when (currentState) {
 //            is AsyncImagePainter.State.Loading,
 //            is AsyncImagePainter.State.Empty -> { // Show static placeholder for Loading and Empty states
 //                Image(
-//                    painter = painterResource(id = R.drawable.ic_music_placeholder),
+//                    painter = painterResource(id = R.drawable.ic_Audiobook_placeholder),
 //                    contentDescription = "$title placeholder", // Adjusted content description
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize(),
@@ -204,11 +204,11 @@ private fun renderDirectAlbumArt(
 //                )
 //            }
 //            is AsyncImagePainter.State.Error -> {
-//                Timber.tag("OptimizedAlbumArt")
+//                Timber.tag("OptimizedBookArt")
 //                    .e(currentState.result.throwable, "Displaying error placeholder for URI: $uri")
 //                Image(
 //                    painter = painterResource(id = R.drawable.rounded_broken_image_24),
-//                    contentDescription = "Error loading album art for $title",
+//                    contentDescription = "Error loading Book art for $title",
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize()
 //                )
@@ -216,7 +216,7 @@ private fun renderDirectAlbumArt(
 //            is AsyncImagePainter.State.Success -> {
 //                Image(
 //                    painter = currentState.painter,
-//                    contentDescription = "Album art of $title",
+//                    contentDescription = "Book art of $title",
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize()
 //                )

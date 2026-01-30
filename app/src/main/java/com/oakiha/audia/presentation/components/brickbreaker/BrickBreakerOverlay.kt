@@ -695,7 +695,7 @@ fun BrickBreakerOverlay(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Play Random Music",
+                            text = "Play Random Audiobook",
                             style = MaterialTheme.typography.labelLarge,
                             color = colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold

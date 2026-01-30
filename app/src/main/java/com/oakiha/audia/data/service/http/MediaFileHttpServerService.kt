@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.IBinder
 import androidx.core.net.toUri
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.AndroidEntryPoint
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -31,7 +31,7 @@ import timber.log.Timber
 class MediaFileHttpServerService : Service() {
 
     @Inject
-    lateinit var musicRepository: MusicRepository
+    lateinit var AudiobookRepository: AudiobookRepository
 
     private var server: NettyApplicationEngine? = null
     private val serviceJob = SupervisorJob()
@@ -115,21 +115,21 @@ class MediaFileHttpServerService : Service() {
 
                     server = embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
                         routing {
-                            get("/song/{songId}") {
-                                val songId = call.parameters["songId"]
-                                if (songId == null) {
-                                    call.respond(HttpStatusCode.BadRequest, "Song ID is missing")
+                            get("/Track/{TrackId}") {
+                                val TrackId = call.parameters["TrackId"]
+                                if (TrackId == null) {
+                                    call.respond(HttpStatusCode.BadRequest, "Track ID is missing")
                                     return@get
                                 }
 
-                                val song = musicRepository.getSong(songId).firstOrNull()
-                                if (song == null) {
-                                    call.respond(HttpStatusCode.NotFound, "Song not found")
+                                val Track = AudiobookRepository.getTrack(TrackId).firstOrNull()
+                                if (Track == null) {
+                                    call.respond(HttpStatusCode.NotFound, "Track not found")
                                     return@get
                                 }
 
                                 try {
-                                    val uri = song.contentUriString.toUri()
+                                    val uri = Track.contentUriString.toUri()
                                     // Use 'use' to ensure the FileDescriptor is closed
                                     contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
                                         val fileSize = pfd.statSize
@@ -200,26 +200,26 @@ class MediaFileHttpServerService : Service() {
                                     call.respond(HttpStatusCode.InternalServerError, "Error serving file: ${e.message}")
                                 }
                             }
-                            get("/art/{songId}") {
-                                val songId = call.parameters["songId"]
-                                if (songId == null) {
-                                    call.respond(HttpStatusCode.BadRequest, "Song ID is missing")
+                            get("/art/{TrackId}") {
+                                val TrackId = call.parameters["TrackId"]
+                                if (TrackId == null) {
+                                    call.respond(HttpStatusCode.BadRequest, "Track ID is missing")
                                     return@get
                                 }
 
-                                val song = musicRepository.getSong(songId).firstOrNull()
-                                if (song?.albumArtUriString == null) {
-                                    call.respond(HttpStatusCode.NotFound, "Album art not found")
+                                val Track = AudiobookRepository.getTrack(TrackId).firstOrNull()
+                                if (Track?.BookArtUriString == null) {
+                                    call.respond(HttpStatusCode.NotFound, "Book art not found")
                                     return@get
                                 }
 
-                                val artUri = song.albumArtUriString.toUri()
+                                val artUri = Track.BookArtUriString.toUri()
                                 contentResolver.openInputStream(artUri)?.use { inputStream ->
                                     val bytes = withContext(Dispatchers.IO) {
                                         inputStream.readBytes()
                                     }
                                     call.respondBytes(bytes, ContentType.Image.JPEG)
-                                } ?: call.respond(HttpStatusCode.InternalServerError, "Could not open album art file")
+                                } ?: call.respond(HttpStatusCode.InternalServerError, "Could not open Book art file")
                             }
                         }
                     }.start(wait = false)

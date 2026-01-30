@@ -9,79 +9,79 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 /**
- * Junction table for many-to-many relationship between songs and artists.
- * Enables multi-artist support where a song can have multiple artists
- * and an artist can have multiple songs.
+ * Junction table for many-to-many relationship between books and Authors.
+ * Enables multi-Author support where a Track can have multiple Authors
+ * and an Author can have multiple Tracks.
  */
 @Entity(
-    tableName = "song_artist_cross_ref",
-    primaryKeys = ["song_id", "artist_id"],
+    tableName = "Track_Author_cross_ref",
+    primaryKeys = ["Track_id", "Author_id"],
     indices = [
-        Index(value = ["song_id"]),
-        Index(value = ["artist_id"]),
+        Index(value = ["Track_id"]),
+        Index(value = ["Author_id"]),
         Index(value = ["is_primary"])
     ],
     foreignKeys = [
         ForeignKey(
-            entity = SongEntity::class,
+            entity = TrackEntity::class,
             parentColumns = ["id"],
-            childColumns = ["song_id"],
+            childColumns = ["Track_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
-            entity = ArtistEntity::class,
+            entity = AuthorEntity::class,
             parentColumns = ["id"],
-            childColumns = ["artist_id"],
+            childColumns = ["Author_id"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class SongArtistCrossRef(
-    @ColumnInfo(name = "song_id") val songId: Long,
-    @ColumnInfo(name = "artist_id") val artistId: Long,
+data class TrackAuthorCrossRef(
+    @ColumnInfo(name = "Track_id") val TrackId: Long,
+    @ColumnInfo(name = "Author_id") val AuthorId: Long,
     @ColumnInfo(name = "is_primary", defaultValue = "0") val isPrimary: Boolean = false
 )
 
 /**
- * Data class representing a song with all its associated artists.
- * Used for queries that need to retrieve a song along with its artists.
+ * Data class representing a Track with all its associated Authors.
+ * Used for queries that need to retrieve a Track along with its Authors.
  */
-data class SongWithArtists(
-    @Embedded val song: SongEntity,
+data class TrackWithAuthors(
+    @Embedded val Track: TrackEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = SongArtistCrossRef::class,
-            parentColumn = "song_id",
-            entityColumn = "artist_id"
+            value = TrackAuthorCrossRef::class,
+            parentColumn = "Track_id",
+            entityColumn = "Author_id"
         )
     )
-    val artists: List<ArtistEntity>
+    val Authors: List<AuthorEntity>
 )
 
 /**
- * Data class representing an artist with all their songs.
- * Used for queries that need to retrieve an artist along with their songs.
+ * Data class representing an Author with all their Tracks.
+ * Used for queries that need to retrieve an Author along with their Tracks.
  */
-data class ArtistWithSongs(
-    @Embedded val artist: ArtistEntity,
+data class AuthorWithTracks(
+    @Embedded val Author: AuthorEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = SongArtistCrossRef::class,
-            parentColumn = "artist_id",
-            entityColumn = "song_id"
+            value = TrackAuthorCrossRef::class,
+            parentColumn = "Author_id",
+            entityColumn = "Track_id"
         )
     )
-    val songs: List<SongEntity>
+    val Tracks: List<TrackEntity>
 )
 
 /**
- * Data class for retrieving the primary artist of a song efficiently.
+ * Data class for retrieving the primary Author of a Track efficiently.
  */
-data class PrimaryArtistInfo(
-    @ColumnInfo(name = "artist_id") val artistId: Long,
-    @ColumnInfo(name = "name") val artistName: String
+data class PrimaryAuthorInfo(
+    @ColumnInfo(name = "Author_id") val AuthorId: Long,
+    @ColumnInfo(name = "name") val AuthorName: String
 )

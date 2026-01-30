@@ -4,38 +4,38 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "artists",
-    indices = [Index(value = ["name"], unique = false)] // Índice en el nombre para búsquedas rápidas
+    tableName = "Authors",
+    indices = [Index(value = ["name"], unique = false)] // Ãndice en el nombre para bÃºsquedas rÃ¡pidas
 )
-data class ArtistEntity(
+data class AuthorEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "track_count") val trackCount: Int,
     @ColumnInfo(name = "image_url") val imageUrl: String? = null
 )
 
-fun ArtistEntity.toArtist(): Artist {
-    return Artist(
+fun AuthorEntity.toAuthor(): Author {
+    return Author(
         id = this.id,
         name = this.name.normalizeMetadataTextOrEmpty(),
-        songCount = this.trackCount, // El modelo Artist usa songCount, MediaStore usa NUMBER_OF_TRACKS
+        TrackCount = this.trackCount, // El modelo Author usa TrackCount, MediaStore usa NUMBER_OF_TRACKS
         imageUrl = this.imageUrl
     )
 }
 
-fun List<ArtistEntity>.toArtists(): List<Artist> {
-    return this.map { it.toArtist() }
+fun List<AuthorEntity>.toAuthors(): List<Author> {
+    return this.map { it.toAuthor() }
 }
 
-fun Artist.toEntity(): ArtistEntity {
-    return ArtistEntity(
+fun Author.toEntity(): AuthorEntity {
+    return AuthorEntity(
         id = this.id,
         name = this.name,
-        trackCount = this.songCount,
+        trackCount = this.TrackCount,
         imageUrl = this.imageUrl
     )
 }

@@ -1,13 +1,13 @@
 package com.oakiha.audia.presentation.viewmodel
 
-import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.repository.LyricsSearchResult
+import com.oakiha.audia.data.model.Transcript
+import com.oakiha.audia.data.repository.TranscriptSearchResult
 
-sealed interface LyricsSearchUiState {
-    object Idle : LyricsSearchUiState
-    object Loading : LyricsSearchUiState
-    data class PickResult(val query: String, val results: List<LyricsSearchResult>) : LyricsSearchUiState
-    data class Success(val lyrics: Lyrics) : LyricsSearchUiState
-    data class NotFound(val message: String, val allowManualSearch: Boolean = true) : LyricsSearchUiState
-    data class Error(val message: String, val query: String? = null) : LyricsSearchUiState
+sealed interface TranscriptSearchUiState {
+    object Idle : TranscriptSearchUiState
+    object Loading : TranscriptSearchUiState
+    data class PickResult(val query: String, val results: List<TranscriptSearchResult>) : TranscriptSearchUiState
+    data class Success(val Transcript: Transcript) : TranscriptSearchUiState
+    data class NotFound(val message: String, val allowManualSearch: Boolean = true) : TranscriptSearchUiState
+    data class Error(val message: String, val query: String? = null) : TranscriptSearchUiState
 }

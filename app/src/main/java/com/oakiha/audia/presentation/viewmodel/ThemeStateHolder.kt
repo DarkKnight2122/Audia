@@ -30,8 +30,8 @@ class ThemeStateHolder @Inject constructor(
 
     private var scope: CoroutineScope? = null
 
-    private val _currentAlbumArtColorSchemePair = MutableStateFlow<ColorSchemePair?>(null)
-    val currentAlbumArtColorSchemePair: StateFlow<ColorSchemePair?> = _currentAlbumArtColorSchemePair.asStateFlow()
+    private val _currentBookArtColorSchemePair = MutableStateFlow<ColorSchemePair?>(null)
+    val currentBookArtColorSchemePair: StateFlow<ColorSchemePair?> = _currentBookArtColorSchemePair.asStateFlow()
 
     private val _lavaLampColors = MutableStateFlow<ImmutableList<Color>>(persistentListOf())
     val lavaLampColors: StateFlow<ImmutableList<Color>> = _lavaLampColors.asStateFlow()
@@ -39,10 +39,10 @@ class ThemeStateHolder @Inject constructor(
     private val playerThemePreference = userPreferencesRepository.playerThemePreferenceFlow
 
     val activePlayerColorSchemePair: StateFlow<ColorSchemePair?> = combine(
-        playerThemePreference, _currentAlbumArtColorSchemePair
-    ) { playerPref, albumScheme ->
+        playerThemePreference, _currentBookArtColorSchemePair
+    ) { playerPref, Bookscheme ->
         when (playerPref) {
-            com.oakiha.audia.data.preferences.ThemePreference.ALBUM_ART -> albumScheme
+            com.oakiha.audia.data.preferences.ThemePreference.Book_ART -> Bookscheme
             // DYNAMIC and DEFAULT fall back to null (system theme)
             else -> null
         }
@@ -63,31 +63,31 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    private var currentAlbumArtUri: String? = null
+    private var currentBookArtUri: String? = null
 
-    suspend fun extractAndGenerateColorScheme(albumArtUriAsUri: Uri?, currentSongUriString: String?, isPreload: Boolean = false) {
+    suspend fun extractAndGenerateColorScheme(BookArtUriAsUri: Uri?, currentTrackUriString: String?, isPreload: Boolean = false) {
         Trace.beginSection("ThemeStateHolder.extractAndGenerateColorScheme")
         try {
-            if (albumArtUriAsUri == null) {
-                if (!isPreload && currentSongUriString == null) {
-                    _currentAlbumArtColorSchemePair.value = null
-                    currentAlbumArtUri = null
+            if (BookArtUriAsUri == null) {
+                if (!isPreload && currentTrackUriString == null) {
+                    _currentBookArtColorSchemePair.value = null
+                    currentBookArtUri = null
                 }
                 return
             }
 
-            val uriString = albumArtUriAsUri.toString()
+            val uriString = BookArtUriAsUri.toString()
             // Use the optimized ColorSchemeProcessor with LRU cache
             val schemePair = colorSchemeProcessor.getOrGenerateColorScheme(uriString)
 
-            if (!isPreload && currentSongUriString == uriString) {
-                _currentAlbumArtColorSchemePair.value = schemePair
-                currentAlbumArtUri = uriString
+            if (!isPreload && currentTrackUriString == uriString) {
+                _currentBookArtColorSchemePair.value = schemePair
+                currentBookArtUri = uriString
             }
         } catch (e: Exception) {
-            if (!isPreload && albumArtUriAsUri != null && currentSongUriString == albumArtUriAsUri.toString()) {
-                _currentAlbumArtColorSchemePair.value = null
-                currentAlbumArtUri = null
+            if (!isPreload && BookArtUriAsUri != null && currentTrackUriString == BookArtUriAsUri.toString()) {
+                _currentBookArtColorSchemePair.value = null
+                currentBookArtUri = null
             }
         } finally {
             Trace.endSection()
@@ -101,8 +101,8 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    // LRU Cache for individual album schemes
-    private val individualAlbumColorSchemes = object : LinkedHashMap<String, MutableStateFlow<ColorSchemePair?>>(
+    // LRU Cache for individual Book schemes
+    private val individualBookColorSchemes = object : LinkedHashMap<String, MutableStateFlow<ColorSchemePair?>>(
         32, 0.75f, true
     ) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, MutableStateFlow<ColorSchemePair?>>?): Boolean {
@@ -110,12 +110,12 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    fun getAlbumColorSchemeFlow(uriString: String): StateFlow<ColorSchemePair?> {
-        val existingFlow = individualAlbumColorSchemes[uriString]
+    fun getBookColorSchemeFlow(uriString: String): StateFlow<ColorSchemePair?> {
+        val existingFlow = individualBookColorSchemes[uriString]
         if (existingFlow != null) return existingFlow.asStateFlow()
 
         val newFlow = MutableStateFlow<ColorSchemePair?>(null)
-        individualAlbumColorSchemes[uriString] = newFlow
+        individualBookColorSchemes[uriString] = newFlow
 
         // Trigger generation asynchronously
         scope?.launch(Dispatchers.IO) {
@@ -136,23 +136,23 @@ class ThemeStateHolder @Inject constructor(
 
     suspend fun forceRegenerateColorScheme(uriString: String) {
          android.util.Log.d("ThemeStateHolder", "forceRegenerateColorScheme called for: $uriString")
-         android.util.Log.d("ThemeStateHolder", "Current tracked global URI: $currentAlbumArtUri")
+         android.util.Log.d("ThemeStateHolder", "Current tracked global URI: $currentBookArtUri")
          
          colorSchemeProcessor.invalidateScheme(uriString)
          
          val newScheme = colorSchemeProcessor.getOrGenerateColorScheme(uriString, forceRefresh = true)
 
          // Iterate if there is an active flow for this URI and update it
-         val activeFlow = individualAlbumColorSchemes[uriString]
+         val activeFlow = individualBookColorSchemes[uriString]
          if (activeFlow != null) {
              activeFlow.value = newScheme
          }
          
-         // Also update the main current album art scheme if it matches the one we are tracking
+         // Also update the main current Book art scheme if it matches the one we are tracking
          // We use equality check. If they are the same string object or equal content.
-         if (currentAlbumArtUri == uriString) {
+         if (currentBookArtUri == uriString) {
              android.util.Log.d("ThemeStateHolder", "Updating global color scheme flow directly.")
-             _currentAlbumArtColorSchemePair.value = newScheme
+             _currentBookArtColorSchemePair.value = newScheme
          } else {
              android.util.Log.d("ThemeStateHolder", "Global URI did not match. Skipping global update.")
          }

@@ -75,7 +75,7 @@ import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.presentation.components.ExpressiveTopBarContent
-import com.oakiha.audia.presentation.viewmodel.ArtistSettingsViewModel
+import com.oakiha.audia.presentation.viewmodel.AuthorsettingsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -83,7 +83,7 @@ import kotlin.math.roundToInt
 @Composable
 fun DelimiterConfigScreen(
     navController: NavController,
-    viewModel: ArtistSettingsViewModel = hiltViewModel()
+    viewModel: AuthorsettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -195,12 +195,12 @@ fun DelimiterConfigScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
-                            uiState.artistDelimiters.forEach { delimiter ->
+                            uiState.AuthorDelimiters.forEach { delimiter ->
                                 DelimiterChip(
                                     delimiter = delimiter,
-                                    canRemove = uiState.artistDelimiters.size > 1,
+                                    canRemove = uiState.AuthorDelimiters.size > 1,
                                     onRemove = {
-                                        if (uiState.artistDelimiters.size > 1) {
+                                        if (uiState.AuthorDelimiters.size > 1) {
                                             viewModel.removeDelimiter(delimiter)
                                         } else {
                                             Toast.makeText(
@@ -340,7 +340,7 @@ fun DelimiterConfigScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = UserPreferencesRepository.DEFAULT_ARTIST_DELIMITERS.joinToString("  •  ") { "\"$it\"" },
+                            text = UserPreferencesRepository.DEFAULT_Author_DELIMITERS.joinToString("  â€¢  ") { "\"$it\"" },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

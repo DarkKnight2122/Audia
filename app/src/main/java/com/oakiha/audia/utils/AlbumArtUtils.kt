@@ -5,37 +5,37 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 
-object AlbumArtUtils {
+object BookArtUtils {
 
     /**
-     * Main function to get album art - tries multiple methods
+     * Main function to get Book art - tries multiple methods
      */
-    fun getAlbumArtUri(
+    fun getBookArtUri(
         appContext: Context,
-        musicDao: MusicDao,
+        AudiobookDao: AudiobookDao,
         path: String,
-        albumId: Long,
-        songId: Long,
+        BookId: Long,
+        TrackId: Long,
         deepScan: Boolean
     ): String? {
         // Method 1: Try MediaStore (even though it often fails)
-//        getMediaStoreAlbumArtUri(appContext, albumId)?.let { return it.toString() }
+//        getMediaStoreBookArtUri(appContext, BookId)?.let { return it.toString() }
 
         // Method 2: Try embedded art from file
-        getEmbeddedAlbumArtUri(appContext, path, songId, deepScan)?.let { return it.toString() }
+        getEmbeddedBookArtUri(appContext, path, TrackId, deepScan)?.let { return it.toString() }
         // Method 3: try from db
-//        musicDao.getAlbumArtUriById(songId)?.let {
+//        AudiobookDao.getBookArtUriById(TrackId)?.let {
 //            return it
 //        }
-        // Method 4: Try external album art files in directory
-//        getExternalAlbumArtUri(path)?.let { return it.toString() }
+        // Method 4: Try external Book art files in directory
+//        getExternalBookArtUri(path)?.let { return it.toString() }
 
         return null
     }
@@ -43,10 +43,10 @@ object AlbumArtUtils {
     /**
      * Enhanced embedded art extraction with better error handling
      */
-    fun getEmbeddedAlbumArtUri(
+    fun getEmbeddedBookArtUri(
         appContext: Context,
         filePath: String,
-        songId: Long,
+        TrackId: Long,
         deepScan: Boolean
     ): Uri? {
         if (!File(filePath).exists() || !File(filePath).canRead()) {
@@ -55,7 +55,7 @@ object AlbumArtUtils {
         if (!deepScan) {
 
             // 1. Check if art is already cached
-            val cachedFile = File(appContext.cacheDir, "song_art_${songId}.jpg")
+            val cachedFile = File(appContext.cacheDir, "Track_art_${TrackId}.jpg")
             if (cachedFile.exists()) {
                 // Touch file for LRU tracking
                 cachedFile.setLastModified(System.currentTimeMillis())
@@ -72,7 +72,7 @@ object AlbumArtUtils {
         }
 
         // 2. Check if marked as "no art" to skip extraction
-        val noArtFile = File(appContext.cacheDir, "song_art_${songId}_no.jpg")
+        val noArtFile = File(appContext.cacheDir, "Track_art_${TrackId}_no.jpg")
         if (noArtFile.exists()) {
             if (deepScan)
                 noArtFile.delete()
@@ -97,7 +97,7 @@ object AlbumArtUtils {
 
             val bytes = retriever.embeddedPicture
             if (bytes != null) {
-                saveAlbumArtToCache(appContext, bytes, songId)
+                saveBookArtToCache(appContext, bytes, TrackId)
             } else {
                 // Mark "no art" to avoid trying again
                 noArtFile.createNewFile()
@@ -107,22 +107,22 @@ object AlbumArtUtils {
     }
 
     /**
-     * Look for external album art files in the same directory
+     * Look for external Book art files in the same directory
      */
-    fun getExternalAlbumArtUri(filePath: String): Uri? {
+    fun getExternalBookArtUri(filePath: String): Uri? {
         return try {
             val audioFile = File(filePath)
             val parentDir = audioFile.parent ?: return null
 
-            // Extended list of common album art file names
+            // Extended list of common Book art file names
             val commonNames = listOf(
                 "cover.jpg", "cover.png", "cover.jpeg",
                 "folder.jpg", "folder.png", "folder.jpeg",
-                "album.jpg", "album.png", "album.jpeg",
-                "albumart.jpg", "albumart.png", "albumart.jpeg",
+                "Book.jpg", "Book.png", "Book.jpeg",
+                "Bookart.jpg", "Bookart.png", "Bookart.jpeg",
                 "artwork.jpg", "artwork.png", "artwork.jpeg",
                 "front.jpg", "front.png", "front.jpeg",
-                ".folder.jpg", ".albumart.jpg",
+                ".folder.jpg", ".Bookart.jpg",
                 "thumb.jpg", "thumbnail.jpg",
                 "scan.jpg", "scanned.jpg"
             )
@@ -138,11 +138,11 @@ object AlbumArtUtils {
                     }
                 }
 
-                // Then, check any image files that might be album art
+                // Then, check any image files that might be Book art
                 val imageFiles = dir.listFiles { file ->
                     file.isFile && (
                             file.name.contains("cover", ignoreCase = true) ||
-                                    file.name.contains("album", ignoreCase = true) ||
+                                    file.name.contains("Book", ignoreCase = true) ||
                                     file.name.contains("folder", ignoreCase = true) ||
                                     file.name.contains("art", ignoreCase = true) ||
                                     file.name.contains("front", ignoreCase = true)
@@ -163,12 +163,12 @@ object AlbumArtUtils {
     /**
      * Try MediaStore as last resort
      */
-    fun getMediaStoreAlbumArtUri(appContext: Context, albumId: Long): Uri? {
-        if (albumId <= 0) return null
+    fun getMediaStoreBookArtUri(appContext: Context, BookId: Long): Uri? {
+        if (BookId <= 0) return null
 
         val potentialUri = ContentUris.withAppendedId(
-            "content://media/external/audio/albumart".toUri(),
-            albumId
+            "content://media/external/audio/Bookart".toUri(),
+            BookId
         )
 
         return try {
@@ -183,8 +183,8 @@ object AlbumArtUtils {
     /**
      * Save embedded art to cache with unique naming
      */
-    fun saveAlbumArtToCache(appContext: Context, bytes: ByteArray, songId: Long): Uri {
-        val file = File(appContext.cacheDir, "song_art_${songId}.jpg")
+    fun saveBookArtToCache(appContext: Context, bytes: ByteArray, TrackId: Long): Uri {
+        val file = File(appContext.cacheDir, "Track_art_${TrackId}.jpg")
 
         file.outputStream().use { outputStream ->
             outputStream.write(bytes)
@@ -192,7 +192,7 @@ object AlbumArtUtils {
         
         // Trigger async cache cleanup if needed
         CoroutineScope(Dispatchers.IO).launch {
-            AlbumArtCacheManager.cleanCacheIfNeeded(appContext)
+            BookArtCacheManager.cleanCacheIfNeeded(appContext)
         }
 
         return try {

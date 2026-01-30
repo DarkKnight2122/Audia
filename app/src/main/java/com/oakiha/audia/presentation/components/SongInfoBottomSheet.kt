@@ -17,19 +17,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.QueueMusic
-import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
-import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.automirrored.filled.QueueAudiobook
+import androidx.compose.material.icons.automirrored.rounded.BooklistAdd
+import androidx.compose.material.icons.automirrored.rounded.QueueAudiobook
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.QueueMusic
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.filled.QueueAudiobook
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Schedule
@@ -55,35 +55,35 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.subcomps.AutoSizingTextToFill
 import com.oakiha.audia.utils.formatDuration
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.core.net.toUri
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.ai.SongMetadata
+import com.oakiha.audia.data.ai.TrackMetadata
 import com.oakiha.audia.data.media.CoverArtUpdate
 import com.oakiha.audia.ui.theme.MontserratFamily
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SongInfoBottomSheet(
-    song: Song,
+fun TrackInfoBottomSheet(
+    Track: Track,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onDismiss: () -> Unit,
-    onPlaySong: () -> Unit,
+    onPlayTrack: () -> Unit,
     onAddToQueue: () -> Unit,
     onAddNextToQueue: () -> Unit,
-    onAddToPlayList: () -> Unit,
-    onDeleteFromDevice: (activity: Activity, song: Song, onResult: (Boolean) -> Unit) -> Unit,
-    onNavigateToAlbum: () -> Unit,
-    onNavigateToArtist: () -> Unit,
-    onEditSong: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<SongMetadata>,
+    onAddToBooklist: () -> Unit,
+    onDeleteFromDevice: (activity: Activity, Track: Track, onResult: (Boolean) -> Unit) -> Unit,
+    onNavigateToBook: () -> Unit,
+    onNavigateToAuthor: () -> Unit,
+    onEditTrack: (title: String, Author: String, Book: String, Category: String, Transcript: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    generateAiMetadata: suspend (List<String>) -> Result<TrackMetadata>,
     removeFromListTrigger: () -> Unit
 ) {
     val context = LocalContext.current
@@ -96,7 +96,7 @@ fun SongInfoBottomSheet(
         smoothnessAsPercentTL = 60, cornerRadiusTL = 20.dp, smoothnessAsPercentBL = 60,
         cornerRadiusBL = 20.dp, smoothnessAsPercentTR = 60
     )
-    val albumArtShape = AbsoluteSmoothCornerShape(
+    val BookArtShape = AbsoluteSmoothCornerShape(
         cornerRadiusTR = evenCornerRadiusElems, smoothnessAsPercentBR = 60, cornerRadiusBR = evenCornerRadiusElems,
         smoothnessAsPercentTL = 60, cornerRadiusTL = evenCornerRadiusElems, smoothnessAsPercentBL = 60,
         cornerRadiusBL = evenCornerRadiusElems, smoothnessAsPercentTR = 60
@@ -149,7 +149,7 @@ fun SongInfoBottomSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                // Fila para la carátula del álbum y el título
+                // Fila para la carÃƒÂ¡tula del ÃƒÂ¡lbum y el tÃƒÂ­tulo
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -158,9 +158,9 @@ fun SongInfoBottomSheet(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmartImage(
-                        model = song.albumArtUriString,
-                        contentDescription = "Album Art",
-                        shape = albumArtShape,
+                        model = Track.BookArtUriString,
+                        contentDescription = "Book Art",
+                        shape = BookArtShape,
                         modifier = Modifier.size(80.dp),
                         contentScale = ContentScale.Crop
                     )
@@ -174,7 +174,7 @@ fun SongInfoBottomSheet(
                             modifier = Modifier.padding(end = 4.dp),
                             //fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Light,
-                            text = song.title
+                            text = Track.title
                         )
                     }
                     FilledTonalIconButton(
@@ -190,14 +190,14 @@ fun SongInfoBottomSheet(
                         Icon(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             imageVector = Icons.Rounded.Edit,
-                            contentDescription = "Edit song metadata"
+                            contentDescription = "Edit Track metadata"
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Fila de botones de acción con altura intrínseca
+                // Fila de botones de acciÃƒÂ³n con altura intrÃƒÂ­nseca
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -209,11 +209,11 @@ fun SongInfoBottomSheet(
                         modifier = Modifier
                             .weight(0.5f)
                             .fillMaxHeight(), // Rellena a la altura de la Row
-                        onClick = onPlaySong,
+                        onClick = onPlayTrack,
                         elevation = FloatingActionButtonDefaults.elevation(0.dp),
                         shape = playButtonShape, // Usa tu forma personalizada
                         icon = {
-                            Icon(Icons.Rounded.PlayArrow, contentDescription = "Play song")
+                            Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Track")
                         },
                         text = {
                             Text(
@@ -223,7 +223,7 @@ fun SongInfoBottomSheet(
                         }
                     )
 
-                    // Botón de Favorito Modificado con animación y altura
+                    // BotÃƒÂ³n de Favorito Modificado con animaciÃƒÂ³n y altura
                     FilledIconButton(
                         modifier = Modifier
                             .weight(0.25f)
@@ -242,7 +242,7 @@ fun SongInfoBottomSheet(
                         )
                     }
 
-                    // Botón de Compartir Modificado con altura
+                    // BotÃƒÂ³n de Compartir Modificado con altura
                     FilledTonalIconButton(
                         modifier = Modifier
                             .weight(0.25f)
@@ -251,22 +251,22 @@ fun SongInfoBottomSheet(
                             try {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "audio/*" // Tipo MIME para archivos de audio
-                                    putExtra(Intent.EXTRA_STREAM, song.contentUriString.toUri())
+                                    putExtra(Intent.EXTRA_STREAM, Track.contentUriString.toUri())
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necesario para URIs de contenido
                                 }
                                 // Inicia el chooser para que el usuario elija la app para compartir
-                                context.startActivity(Intent.createChooser(shareIntent, "Share Song File Via"))
+                                context.startActivity(Intent.createChooser(shareIntent, "Share Track File Via"))
                             } catch (e: Exception) {
-                                // Manejar el caso donde la URI es inválida o no hay app para compartir
-                                Toast.makeText(context, "Could not share song: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                // Manejar el caso donde la URI es invÃƒÂ¡lida o no hay app para compartir
+                                Toast.makeText(context, "Could not share Track: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
                         },
-                        shape = CircleShape // Mantenemos CircleShape para el botón de compartir
+                        shape = CircleShape // Mantenemos CircleShape para el botÃƒÂ³n de compartir
                     ) {
                         Icon(
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
                             imageVector = Icons.Rounded.Share,
-                            contentDescription = "Share song file"
+                            contentDescription = "Share Track file"
                         )
                     }
                 }
@@ -281,12 +281,12 @@ fun SongInfoBottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Botón de Añadir al Final de la Cola
+                    // BotÃƒÂ³n de AÃƒÂ±adir al Final de la Cola
                     FilledTonalButton(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.4f)
-                            .heightIn(min = 66.dp), // Altura mínima recomendada para botones
+                            .heightIn(min = 66.dp), // Altura mÃƒÂ­nima recomendada para botones
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -295,13 +295,13 @@ fun SongInfoBottomSheet(
                         onClick = onAddToQueue
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.QueueMusic,
+                            Icons.AutoMirrored.Rounded.QueueAudiobook,
                             contentDescription = "Add to Queue icon"
                         )
                         Spacer(Modifier.width(14.dp))
                         Text("Add to Queue")
                     }
-                    // Botón de Añadir Next en la Cola
+                    // BotÃƒÂ³n de AÃƒÂ±adir Next en la Cola
                     FilledTonalButton(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -315,7 +315,7 @@ fun SongInfoBottomSheet(
                         onClick = onAddNextToQueue
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.QueueMusic,
+                            Icons.AutoMirrored.Filled.QueueAudiobook,
                             contentDescription = "Add next in queue icon"
                         )
                         Spacer(Modifier.width(14.dp))
@@ -329,20 +329,20 @@ fun SongInfoBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         //.weight(0.5f)
-                        .heightIn(min = 66.dp), // Altura mínima recomendada para botones
+                        .heightIn(min = 66.dp), // Altura mÃƒÂ­nima recomendada para botones
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
                     shape = CircleShape, // O considera RoundedCornerShape(16.dp)
-                    onClick = onAddToPlayList
+                    onClick = onAddToBooklist
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Rounded.PlaylistAdd,
-                        contentDescription = "Add to Playlist icon"
+                        Icons.AutoMirrored.Rounded.BooklistAdd,
+                        contentDescription = "Add to Booklist icon"
                     )
                     Spacer(Modifier.width(14.dp))
-                    Text("Add to a Playlist")
+                    Text("Add to a Booklist")
                 }
             }
 
@@ -359,7 +359,7 @@ fun SongInfoBottomSheet(
                 shape = CircleShape,
                 onClick = {
                     (context as? Activity)?.let { activity ->
-                        onDeleteFromDevice(activity, song) { result ->
+                        onDeleteFromDevice(activity, Track) { result ->
                             if (result) {
                                 removeFromListTrigger()
                                 onDismiss()
@@ -378,48 +378,48 @@ fun SongInfoBottomSheet(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Sección de Detalles
+                // SecciÃƒÂ³n de Detalles
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     ListItem(
                         modifier = Modifier.clip(shape = listItemShape),
                         headlineContent = { Text("Duration") },
-                        supportingContent = { Text(formatDuration(song.duration)) },
+                        supportingContent = { Text(formatDuration(Track.duration)) },
                         leadingContent = { Icon(Icons.Rounded.Schedule, contentDescription = "Duration icon") }
                     )
 
-                    if (!song.genre.isNullOrEmpty()) {
+                    if (!Track.Category.isNullOrEmpty()) {
                         ListItem(
                             modifier = Modifier.clip(shape = listItemShape),
-                            headlineContent = { Text("Genre") },
-                            supportingContent = { Text(song.genre) }, // Safe call si es nullOrEmpty
-                            leadingContent = { Icon(Icons.Rounded.MusicNote, contentDescription = "Genre icon") }
+                            headlineContent = { Text("Category") },
+                            supportingContent = { Text(Track.Category) }, // Safe call si es nullOrEmpty
+                            leadingContent = { Icon(Icons.Rounded.AudiobookNote, contentDescription = "Category icon") }
                         )
                     }
 
                     ListItem(
                         modifier = Modifier
                             .clip(shape = listItemShape)
-                            .clickable(onClick = onNavigateToAlbum),
-                        headlineContent = { Text("Album") },
-                        supportingContent = { Text(song.album) },
-                        leadingContent = { Icon(Icons.Rounded.Album, contentDescription = "Album icon") }
+                            .clickable(onClick = onNavigateToBook),
+                        headlineContent = { Text("Book") },
+                        supportingContent = { Text(Track.Book) },
+                        leadingContent = { Icon(Icons.Rounded.Book, contentDescription = "Book icon") }
                     )
 
                     ListItem(
                         modifier = Modifier
                             .clip(shape = listItemShape)
-                            .clickable(onClick = onNavigateToArtist),
-                        headlineContent = { Text("Artist") },
-                        supportingContent = { Text(song.displayArtist) },
-                        leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Artist icon") }
+                            .clickable(onClick = onNavigateToAuthor),
+                        headlineContent = { Text("Author") },
+                        supportingContent = { Text(Track.displayAuthor) },
+                        leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Author icon") }
                     )
                     ListItem(
                         modifier = Modifier
                             .clip(shape = listItemShape),
                         headlineContent = { Text("Path") },
-                        supportingContent = { Text(song.path) },
+                        supportingContent = { Text(Track.path) },
                         leadingContent = { Icon(Icons.Rounded.AudioFile, contentDescription = "File icon") }
                     )
                 }
@@ -461,12 +461,12 @@ fun SongInfoBottomSheet(
         }
     }
 
-    EditSongSheet(
+    EditTracksheet(
         visible = showEditSheet,
-        song = song,
+        Track = Track,
         onDismiss = { showEditSheet = false },
-        onSave = { title, artist, album, genre, lyrics, trackNumber, coverArt ->
-            onEditSong(title, artist, album, genre, lyrics, trackNumber, coverArt)
+        onSave = { title, Author, Book, Category, Transcript, trackNumber, coverArt ->
+            onEditTrack(title, Author, Book, Category, Transcript, trackNumber, coverArt)
             showEditSheet = false
         },
         generateAiMetadata = generateAiMetadata

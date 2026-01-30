@@ -87,7 +87,7 @@ private fun DrawerContent(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Music Player",
+                text = "Audiobook Player",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

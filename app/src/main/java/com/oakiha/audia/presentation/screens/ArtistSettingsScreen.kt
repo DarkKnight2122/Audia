@@ -41,10 +41,10 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.LibraryMusic
+import androidx.compose.material.icons.rounded.LibraryAudiobook
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -88,15 +88,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.presentation.components.ExpressiveTopBarContent
-import com.oakiha.audia.presentation.viewmodel.ArtistSettingsViewModel
+import com.oakiha.audia.presentation.viewmodel.AuthorsettingsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ArtistSettingsScreen(
+fun AuthorsettingsScreen(
     navController: NavController,
-    viewModel: ArtistSettingsViewModel = hiltViewModel()
+    viewModel: AuthorsettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current
@@ -184,10 +184,10 @@ fun ArtistSettingsScreen(
                 }
             }
 
-            // Multi-Artist Parsing Section
+            // Multi-Author Parsing Section
             item {
                 SettingsSection(
-                    title = "Multi-Artist Parsing",
+                    title = "Multi-Author Parsing",
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Person,
@@ -200,7 +200,7 @@ fun ArtistSettingsScreen(
                         // Configure Delimiters
                         SettingsItem(
                             title = "Configure Delimiters",
-                            subtitle = "Current: ${uiState.artistDelimiters.joinToString(", ")}",
+                            subtitle = "Current: ${uiState.AuthorDelimiters.joinToString(", ")}",
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
@@ -229,7 +229,7 @@ fun ArtistSettingsScreen(
                     title = "Library Organization",
                     icon = {
                         Icon(
-                            imageVector = Icons.Rounded.LibraryMusic,
+                            imageVector = Icons.Rounded.LibraryAudiobook,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -237,13 +237,13 @@ fun ArtistSettingsScreen(
                 ) {
                     Column(modifier = Modifier.clip(shape = RoundedCornerShape(24.dp))) {
                         SwitchSettingItem(
-                            title = "Group by Album Artist",
-                            subtitle = "Show collaboration albums under main artist",
-                            checked = uiState.groupByAlbumArtist,
-                            onCheckedChange = { viewModel.setGroupByAlbumArtist(it) },
+                            title = "Group by Book Author",
+                            subtitle = "Show collaboration Books under main Author",
+                            checked = uiState.groupByBookAuthor,
+                            onCheckedChange = { viewModel.setGroupByBookAuthor(it) },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Rounded.Album,
+                                    imageVector = Icons.Rounded.Book,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.secondary
                                 )
@@ -256,8 +256,8 @@ fun ArtistSettingsScreen(
             // Info Card
             item {
                 InfoCard(
-                    title = "About Multi-Artist Parsing",
-                    content = "AudioBookPlayer automatically splits artist tags containing multiple artists. This is useful for songs downloaded with yt-dlp or other tools that use delimiters like '/' to separate artists.\n\nBackslash (\\) can be used to escape delimiters."
+                    title = "About Multi-Author Parsing",
+                    content = "AudioBookPlayer automatically splits Author tags containing multiple Authors. This is useful for Tracks downloaded with yt-dlp or other tools that use delimiters like '/' to separate Authors.\n\nBackslash (\\) can be used to escape delimiters."
                 )
             }
 
@@ -265,7 +265,7 @@ fun ArtistSettingsScreen(
             item {
                 ExamplesCard(
                     examples = listOf(
-                        "\"Artist1/Artist2\"" to "Artist1, Artist2",
+                        "\"Author1/Author2\"" to "Author1, Author2",
                         "\"A + B + C\"" to "A, B, C",
                         "\"AC\\DC\"" to "AC/DC (escaped)"
                     )
@@ -276,13 +276,13 @@ fun ArtistSettingsScreen(
             collapseFraction = collapseFraction,
             headerHeight = currentTopBarHeightDp,
             onBackPressed = { navController.popBackStack() },
-            title = "Artists"
+            title = "Authors"
         )
     }
 }
 
 @Composable
-private fun ArtistSettingsTopBar(
+private fun AuthorsettingsTopBar(
     collapseFraction: Float,
     headerHeight: Dp,
     onBackPressed: () -> Unit,
@@ -357,7 +357,7 @@ private fun RescanRequiredBanner(
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
                 Text(
-                    text = "Artist settings have changed. Rescan your library to apply.",
+                    text = "Author settings have changed. Rescan your library to apply.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
                 )
@@ -479,7 +479,7 @@ private fun ExamplesCard(
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
                     Text(
-                        text = "♪",
+                        text = "Ã¢â„¢Âª",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(end = 8.dp)
@@ -491,7 +491,7 @@ private fun ExamplesCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = " → ",
+                        text = " Ã¢â€ â€™ ",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

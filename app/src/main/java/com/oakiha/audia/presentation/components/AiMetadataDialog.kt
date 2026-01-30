@@ -8,20 +8,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 
 @Composable
 fun AiMetadataDialog(
-    song: Song,
+    Track: Track,
     onDismiss: () -> Unit,
     onGenerate: (List<String>) -> Unit
 ) {
     val missingFields = remember {
         val fields = mutableListOf<String>()
-        if (song.title.isBlank()) fields.add("Title")
-        if (song.displayArtist.isBlank()) fields.add("Artist")
-        if (song.album.isBlank()) fields.add("Album")
-        if (song.genre.isNullOrBlank()) fields.add("Genre")
+        if (Track.title.isBlank()) fields.add("Title")
+        if (Track.displayAuthor.isBlank()) fields.add("Author")
+        if (Track.Book.isBlank()) fields.add("Book")
+        if (Track.Category.isNullOrBlank()) fields.add("Category")
         fields
     }
 

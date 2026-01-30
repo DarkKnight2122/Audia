@@ -54,8 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.presentation.components.OptimizedAlbumArt
-import com.oakiha.audia.presentation.components.WavyMusicSlider
+import com.oakiha.audia.presentation.components.OptimizedBookArt
+import com.oakiha.audia.presentation.components.WavyAudiobookSlider
 import com.oakiha.audia.presentation.components.player.AnimatedPlaybackControls
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.utils.formatDuration
@@ -74,10 +74,10 @@ fun ExternalPlayerOverlay(
     val remotePosition by playerViewModel.remotePosition.collectAsState()
     val isRemotePlaybackActive by playerViewModel.isRemotePlaybackActive.collectAsState()
     val navBarCornerRadius by playerViewModel.navBarCornerRadius.collectAsState()
-    val currentSong = stablePlayerState.currentSong
+    val currentTrack = stablePlayerState.currentTrack
 
     var sheetVisible by remember { mutableStateOf(true) }
-    var awaitingSong by remember { mutableStateOf(true) }
+    var awaitingTrack by remember { mutableStateOf(true) }
 
     val sheetShape = remember(navBarCornerRadius) {
         val radiusDp = navBarCornerRadius.dp
@@ -100,11 +100,11 @@ fun ExternalPlayerOverlay(
         )
     }
 
-    LaunchedEffect(currentSong) {
-        if (currentSong != null) {
-            awaitingSong = false
+    LaunchedEffect(currentTrack) {
+        if (currentTrack != null) {
+            awaitingTrack = false
             sheetVisible = true
-        } else if (!awaitingSong) {
+        } else if (!awaitingTrack) {
             sheetVisible = false
             onDismiss()
         }
@@ -149,7 +149,7 @@ fun ExternalPlayerOverlay(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                if (currentSong == null) {
+                if (currentTrack == null) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,7 +164,7 @@ fun ExternalPlayerOverlay(
                     val position = rawPosition.coerceIn(0L, totalDuration)
                     val progressFraction = if (totalDuration > 0) position.toFloat() / totalDuration else 0f
 
-                    var sliderPosition by remember(currentSong.id) { mutableStateOf(progressFraction) }
+                    var sliderPosition by remember(currentTrack.id) { mutableStateOf(progressFraction) }
                     var isUserScrubbing by remember { mutableStateOf(false) }
 
                     LaunchedEffect(progressFraction) {
@@ -216,9 +216,9 @@ fun ExternalPlayerOverlay(
                                 shape = RoundedCornerShape(18.dp),
                                 tonalElevation = 4.dp
                             ) {
-                                OptimizedAlbumArt(
-                                    uri = currentSong.albumArtUriString,
-                                    title = currentSong.title,
+                                OptimizedBookArt(
+                                    uri = currentTrack.BookArtUriString,
+                                    title = currentTrack.title,
                                     modifier = Modifier
                                         .size(96.dp)
                                         .clip(RoundedCornerShape(18.dp))
@@ -229,7 +229,7 @@ fun ExternalPlayerOverlay(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSong.title,
+                                    text = currentTrack.title,
                                     style = MaterialTheme.typography.headlineSmall.copy(
                                         fontSize = 22.sp,
                                         fontWeight = FontWeight.SemiBold
@@ -239,7 +239,7 @@ fun ExternalPlayerOverlay(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = currentSong.displayArtist,
+                                    text = currentTrack.displayAuthor,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -247,7 +247,7 @@ fun ExternalPlayerOverlay(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = currentSong.album,
+                                    text = currentTrack.Book,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -258,7 +258,7 @@ fun ExternalPlayerOverlay(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        WavyMusicSlider(
+                        WavyAudiobookSlider(
                             value = sliderPosition,
                             onValueChange = { newValue ->
                                 isUserScrubbing = true
@@ -299,9 +299,9 @@ fun ExternalPlayerOverlay(
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp),
                             isPlayingProvider = { stablePlayerState.isPlaying },
-                            onPrevious = playerViewModel::previousSong,
+                            onPrevious = playerViewModel::previousTrack,
                             onPlayPause = playerViewModel::playPause,
-                            onNext = playerViewModel::nextSong,
+                            onNext = playerViewModel::nextTrack,
                             height = 76.dp,
                             pressAnimationSpec = controlAnimationSpec,
                             colorOtherButtons = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),

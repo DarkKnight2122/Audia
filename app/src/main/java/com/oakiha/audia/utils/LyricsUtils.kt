@@ -33,7 +33,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.oakiha.audia.data.model.Lyrics
+import com.oakiha.audia.data.model.Transcript
 import com.oakiha.audia.data.model.SyncedLine
 import com.oakiha.audia.data.model.SyncedWord
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +43,7 @@ import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.sin
 
-object LyricsUtils {
+object TranscriptUtils {
 
     private val LRC_LINE_REGEX = Pattern.compile("^\\[(\\d{2}):(\\d{2})\\.(\\d{2,3})](.*)$")
     private val LRC_WORD_REGEX = Pattern.compile("<(\\d{2}):(\\d{2})\\.(\\d{2,3})>([^<]*)")
@@ -53,19 +53,19 @@ object LyricsUtils {
 
     /**
      * Parsea un String que contiene una letra en formato LRC o texto plano.
-     * @param lyricsText El texto de la letra a procesar.
-     * @return Un objeto Lyrics con las listas 'plain' o 'synced' pobladas.
+     * @param TranscriptText El texto de la letra a procesar.
+     * @return Un objeto Transcript con las listas 'plain' o 'synced' pobladas.
      */
-    fun parseLyrics(lyricsText: String?): Lyrics {
-        if (lyricsText.isNullOrEmpty()) {
-            return Lyrics(plain = emptyList(), synced = emptyList())
+    fun parseTranscript(TranscriptText: String?): Transcript {
+        if (TranscriptText.isNullOrEmpty()) {
+            return Transcript(plain = emptyList(), synced = emptyList())
         }
 
         val syncedLines = mutableListOf<SyncedLine>()
         val plainLines = mutableListOf<String>()
         var isSynced = false
 
-        lyricsText.lines().forEach { rawLine ->
+        TranscriptText.lines().forEach { rawLine ->
             val line = sanitizeLrcLine(rawLine)
             if (line.isEmpty()) return@forEach
 
@@ -114,20 +114,20 @@ object LyricsUtils {
                     syncedLines.add(SyncedLine(lineTimestamp.toInt(), text))
                 }
             } else {
-                // línea SIN timestamp
+                // lÃ­nea SIN timestamp
                 val stripped = stripLrcTimestamps(stripFormatCharacters(line))
-                // Si ya detectamos que el archivo tiene sincronización y ya existe
-                // al menos una SyncedLine, tratamos esta línea como continuación
+                // Si ya detectamos que el archivo tiene sincronizaciÃ³n y ya existe
+                // al menos una SyncedLine, tratamos esta lÃ­nea como continuaciÃ³n
                 // de la Previous
                 if (isSynced && syncedLines.isNotEmpty()) {
                     val last = syncedLines.removeAt(syncedLines.lastIndex)
-                    // Mantenemos el texto previo y añadimos la nueva línea con un salto de línea.
+                    // Mantenemos el texto previo y aÃ±adimos la nueva lÃ­nea con un salto de lÃ­nea.
                     val mergedLineText = if (last.line.isEmpty()) {
                         stripped
                     } else {
                         last.line + "\n" + stripped
                     }
-                    // Conservamos la lista de palabras sincronizadas si existía.
+                    // Conservamos la lista de palabras sincronizadas si existÃ­a.
                     val merged = if (last.words?.isNotEmpty() == true) {
                         SyncedLine(last.time, mergedLineText, last.words)
                     } else {
@@ -136,7 +136,7 @@ object LyricsUtils {
 
                     syncedLines.add(merged)
                 } else {
-                    // Si no hay sincronización en el archivo, es texto plano
+                    // Si no hay sincronizaciÃ³n en el archivo, es texto plano
                     plainLines.add(stripped)
                 }
             }
@@ -145,9 +145,9 @@ object LyricsUtils {
         return if (isSynced && syncedLines.isNotEmpty()) {
             val sortedSyncedLines = syncedLines.sortedBy { it.time }
             val plainVersion = sortedSyncedLines.map { it.line }
-            Lyrics(synced = sortedSyncedLines, plain = plainVersion)
+            Transcript(synced = sortedSyncedLines, plain = plainVersion)
         } else {
-            Lyrics(plain = plainLines)
+            Transcript(plain = plainLines)
         }
     }
 
@@ -158,7 +158,7 @@ object LyricsUtils {
     }
 
     /**
-     * Converts synced lyrics to LRC format string.
+     * Converts synced Transcript to LRC format string.
      * Each line is formatted as [mm:ss.xx]text
      * @param syncedLines The list of synced lines to convert.
      * @return A string in LRC format.
@@ -174,7 +174,7 @@ object LyricsUtils {
     }
 
     /**
-     * Converts plain lyrics (list of lines) to a plain text string.
+     * Converts plain Transcript (list of lines) to a plain text string.
      * @param plainLines The list of plain text lines.
      * @return A string with each line separated by newline.
      */
@@ -183,19 +183,19 @@ object LyricsUtils {
     }
 
     /**
-     * Converts Lyrics object to LRC or plain text format based on available data.
-     * Prefers synced lyrics if available.
-     * @param lyrics The Lyrics object to convert.
-     * @param preferSynced Whether to prefer synced lyrics over plain. Default true.
-     * @return A string representation of the lyrics.
+     * Converts Transcript object to LRC or plain text format based on available data.
+     * Prefers synced Transcript if available.
+     * @param Transcript The Transcript object to convert.
+     * @param preferSynced Whether to prefer synced Transcript over plain. Default true.
+     * @return A string representation of the Transcript.
      */
-    fun toLrcString(lyrics: Lyrics, preferSynced: Boolean = true): String {
-        return if (preferSynced && !lyrics.synced.isNullOrEmpty()) {
-            syncedToLrcString(lyrics.synced)
-        } else if (!lyrics.plain.isNullOrEmpty()) {
-            plainToString(lyrics.plain)
-        } else if (!lyrics.synced.isNullOrEmpty()) {
-            syncedToLrcString(lyrics.synced)
+    fun toLrcString(Transcript: Transcript, preferSynced: Boolean = true): String {
+        return if (preferSynced && !Transcript.synced.isNullOrEmpty()) {
+            syncedToLrcString(Transcript.synced)
+        } else if (!Transcript.plain.isNullOrEmpty()) {
+            plainToString(Transcript.plain)
+        } else if (!Transcript.synced.isNullOrEmpty()) {
+            syncedToLrcString(Transcript.synced)
         } else {
             ""
         }
@@ -273,10 +273,10 @@ fun ProviderText(
 }
 
 /**
- * Un composable que muestra una línea de burbujas animadas que se transforman
- * en notas musicales cuando suben y vuelven a ser círculos cuando bajan.
+ * Un composable que muestra una lÃ­nea de burbujas animadas que se transforman
+ * en notas Audiobookales cuando suben y vuelven a ser cÃ­rculos cuando bajan.
  *
- * @param positionFlow Un flujo que emite la posición de reproducción actual.
+ * @param positionFlow Un flujo que emite la posiciÃ³n de reproducciÃ³n actual.
  * @param time El tiempo de inicio para que estas burbujas sean visibles.
  * @param color El color base para las burbujas y las notas.
  * @param nextTime El tiempo final para que estas burbujas sean visibles.
@@ -294,7 +294,7 @@ fun BubblesLine(
     val isCurrent = position in time until nextTime
     val transition = rememberInfiniteTransition(label = "bubbles_transition")
 
-    // Animación ralentizada para apreciar mejor el efecto.
+    // AnimaciÃ³n ralentizada para apreciar mejor el efecto.
     val animatedValue by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -311,7 +311,7 @@ fun BubblesLine(
 
     if (show) {
         val density = LocalDensity.current
-        // Círculos más pequeños para acentuar la animación de escala.
+        // CÃ­rculos mÃ¡s pequeÃ±os para acentuar la animaciÃ³n de escala.
         val bubbleRadius = remember(density) { with(density) { 4.dp.toPx() } }
 
         val (morphableCircle, morphableNote) = remember(bubbleRadius) {
@@ -336,10 +336,10 @@ fun BubblesLine(
                     else -> 0f
                 }.toFloat().coerceIn(0f, 1f)
 
-                // La animación de escalado ahora es más pronunciada.
+                // La animaciÃ³n de escalado ahora es mÃ¡s pronunciada.
                 val scale = lerpFloat(1.0f, 1.4f, morphProgress)
 
-                // Se calcula un desplazamiento horizontal dinámico que se activa con el morphing.
+                // Se calcula un desplazamiento horizontal dinÃ¡mico que se activa con el morphing.
                 val xOffsetCorrection = lerpFloat(0f, bubbleRadius * 1.8f, morphProgress)
 
                 val morphedPath = lerpPath(
@@ -348,13 +348,13 @@ fun BubblesLine(
                     fraction = morphProgress
                 ).toPath()
 
-                // Se posiciona el contenedor de la animación en su columna.
+                // Se posiciona el contenedor de la animaciÃ³n en su columna.
                 translate(left = (size.width / (bubbleCount + 1)) * (i + 1)) {
-                    // Se aplica el desplazamiento vertical (onda) y la corrección horizontal.
+                    // Se aplica el desplazamiento vertical (onda) y la correcciÃ³n horizontal.
                     val drawOffset = Offset(x = xOffsetCorrection, y = size.height / 2 + yOffset)
 
                     translate(left = drawOffset.x, top = drawOffset.y) {
-                        // Se aplica la transformación de escala antes de dibujar.
+                        // Se aplica la transformaciÃ³n de escala antes de dibujar.
                         scale(scale = scale, pivot = Offset.Zero) {
                             drawPath(
                                 path = morphedPath,
@@ -368,7 +368,7 @@ fun BubblesLine(
     }
 }
 
-// --- Lógica de Path Morphing ---
+// --- LÃ³gica de Path Morphing ---
 
 private fun lerpPath(start: List<PathNode>, stop: List<PathNode>, fraction: Float): List<PathNode> {
     return start.mapIndexed { index, startNode ->
@@ -438,7 +438,7 @@ private fun createVectorNotePathNodes(targetSize: Float): MutableList<PathNode> 
     val finalWidth = bounds.width * groupScale * scale
     val finalHeight = bounds.height * groupScale * scale
 
-    // Se centra el path en su origen (0,0) sin correcciones estáticas.
+    // Se centra el path en su origen (0,0) sin correcciones estÃ¡ticas.
     matrix.translate(x = -finalWidth / 2f, y = -finalHeight / 2f)
 
     return parser.toNodes().toAbsolute().transform(matrix).toCurvesOnly()
@@ -457,7 +457,7 @@ private fun createCirclePathNodes(radius: Float): MutableList<PathNode> {
     )
 }
 
-// --- Funciones de Extensión para PathNode ---
+// --- Funciones de ExtensiÃ³n para PathNode ---
 
 private fun List<PathNode>.toAbsolute(): MutableList<PathNode> {
     val absoluteNodes = mutableListOf<PathNode>()

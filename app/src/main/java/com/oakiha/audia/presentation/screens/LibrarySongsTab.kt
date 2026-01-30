@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
@@ -45,13 +45,13 @@ import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LibrarySongsTab(
-    songs: ImmutableList<Song>,
+fun LibraryTracksTab(
+    Tracks: ImmutableList<Track>,
     isLoading: Boolean,
     stablePlayerState: StablePlayerState,
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
-    onMoreOptionsClick: (Song) -> Unit,
+    onMoreOptionsClick: (Track) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
@@ -60,7 +60,7 @@ fun LibrarySongsTab(
 
     // Handle different loading states
     when {
-        isLoading && songs.isEmpty() -> {
+        isLoading && Tracks.isEmpty() -> {
             // Initial loading - show skeleton placeholders
             LazyColumn(
                 modifier = Modifier
@@ -79,18 +79,18 @@ fun LibrarySongsTab(
                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
             ) {
                 items(12) { // Show 12 skeleton items
-                    EnhancedSongListItem(
-                        song = Song.emptySong(),
+                    EnhancedTrackListItem(
+                        Track = Track.emptyTrack(),
                         isPlaying = false,
                         isLoading = true,
-                        isCurrentSong = false,
+                        isCurrentTrack = false,
                         onMoreOptionsClick = {},
                         onClick = {}
                     )
                 }
             }
         }
-        !isLoading && songs.isEmpty() -> {
+        !isLoading && Tracks.isEmpty() -> {
             // Empty state
             Box(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -98,15 +98,15 @@ fun LibrarySongsTab(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        painter = painterResource(id = R.drawable.rounded_music_off_24),
-                        contentDescription = "No songs found",
+                        painter = painterResource(id = R.drawable.rounded_Audiobook_off_24),
+                        contentDescription = "No Tracks found",
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text("No songs found in your library.", style = MaterialTheme.typography.titleMedium)
+                    Text("No Tracks found in your library.", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Try rescanning your library in settings if you have music on your device.",
+                        "Try rescanning your library in settings if you have Audiobook on your device.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -115,7 +115,7 @@ fun LibrarySongsTab(
             }
         }
         else -> {
-            // Songs loaded
+            // Tracks loaded
             Box(modifier = Modifier.fillMaxSize()) {
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -145,33 +145,33 @@ fun LibrarySongsTab(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
                     ) {
-                        item(key = "songs_top_spacer") { Spacer(Modifier.height(0.dp)) }
+                        item(key = "Tracks_top_spacer") { Spacer(Modifier.height(0.dp)) }
 
                         items(
-                            items = songs,
-                            key = { "song_${it.id}" },
-                            contentType = { "song" }
-                        ) { song ->
-                            val isPlayingThisSong = song.id == stablePlayerState.currentSong?.id && stablePlayerState.isPlaying
+                            items = Tracks,
+                            key = { "Track_${it.id}" },
+                            contentType = { "Track" }
+                        ) { Track ->
+                            val isPlayingThisTrack = Track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                             
-                            val rememberedOnMoreOptionsClick: (Song) -> Unit = remember(onMoreOptionsClick) {
-                                { songFromListItem -> onMoreOptionsClick(songFromListItem) }
+                            val rememberedOnMoreOptionsClick: (Track) -> Unit = remember(onMoreOptionsClick) {
+                                { TrackFromListItem -> onMoreOptionsClick(TrackFromListItem) }
                             }
-                            val rememberedOnClick: () -> Unit = remember(song) {
+                            val rememberedOnClick: () -> Unit = remember(Track) {
                                 { 
-                                  // Play using showAndPlaySong but passing the SORTED list as queue
-                                  // Important: We should pass 'songs' as the queue context
-                                  // But showAndPlaySong might expect paginated logic in VM?
-                                  // PlayerViewModel logic: showAndPlaySong(song, queue, name).
-                                  // Usually calls playSongs(queue, song). If we pass 'songs', it plays in sorted order!
-                                  playerViewModel.showAndPlaySong(song, songs, "Library") 
+                                  // Play using showAndPlayTrack but passing the SORTED list as queue
+                                  // Important: We should pass 'Tracks' as the queue context
+                                  // But showAndPlayTrack might expect paginated logic in VM?
+                                  // PlayerViewModel logic: showAndPlayTrack(Track, queue, name).
+                                  // Usually calls playTracks(queue, Track). If we pass 'Tracks', it plays in sorted order!
+                                  playerViewModel.showAndPlayTrack(Track, Tracks, "Library") 
                                 }
                             }
 
-                            EnhancedSongListItem(
-                                song = song,
-                                isPlaying = isPlayingThisSong,
-                                isCurrentSong = stablePlayerState.currentSong?.id == song.id,
+                            EnhancedTrackListItem(
+                                Track = Track,
+                                isPlaying = isPlayingThisTrack,
+                                isCurrentTrack = stablePlayerState.currentTrack?.id == Track.id,
                                 isLoading = false,
                                 onMoreOptionsClick = rememberedOnMoreOptionsClick,
                                 onClick = rememberedOnClick

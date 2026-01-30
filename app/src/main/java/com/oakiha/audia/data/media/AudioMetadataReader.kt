@@ -10,10 +10,10 @@ import java.io.FileOutputStream
 
 data class AudioMetadata(
     val title: String?,
-    val artist: String?,
-    val albumArtist: String?,
-    val album: String?,
-    val genre: String?,
+    val Author: String?,
+    val BookAuthor: String?,
+    val Book: String?,
+    val Category: String?,
     val durationMs: Long?,
     val trackNumber: Int?,
     val year: Int?,
@@ -60,12 +60,12 @@ object AudioMetadataReader {
                 val propertyMap = metadata?.propertyMap ?: emptyMap()
 
                 val title = propertyMap["TITLE"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val artist = propertyMap["ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val albumArtist = propertyMap["ALBUMARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                    ?: propertyMap["ALBUM ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val Author = propertyMap["Author"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val BookAuthor = propertyMap["BookAuthor"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                    ?: propertyMap["Book Author"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["BAND"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val album = propertyMap["ALBUM"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val genre = propertyMap["GENRE"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val Book = propertyMap["Book"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val Category = propertyMap["Category"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val trackString = propertyMap["TRACKNUMBER"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["TRACK"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val trackNumber = trackString?.substringBefore('/')?.toIntOrNull()
@@ -85,10 +85,10 @@ object AudioMetadataReader {
 
                 AudioMetadata(
                     title = title,
-                    artist = artist,
-                    albumArtist = albumArtist,
-                    album = album,
-                    genre = genre,
+                    Author = Author,
+                    BookAuthor = BookAuthor,
+                    Book = Book,
+                    Category = Category,
                     durationMs = durationMs,
                     trackNumber = trackNumber,
                     year = year,

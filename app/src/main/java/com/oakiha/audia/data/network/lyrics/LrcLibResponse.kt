@@ -1,17 +1,17 @@
-package com.oakiha.audia.data.network.lyrics
+package com.oakiha.audia.data.network.Transcript
 
 import com.google.gson.annotations.SerializedName
 
 /**
  * Representa la respuesta de la API de LRCLIB.
- * Contiene la letra de la canción, tanto en formato simple como sincronizado.
+ * Contiene la letra de la canciÃƒÂ³n, tanto en formato simple como sincronizado.
  */
 data class LrcLibResponse(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
-    @SerializedName("artistName") val artistName: String,
-    @SerializedName("albumName") val albumName: String,
+    @SerializedName("AuthorName") val AuthorName: String,
+    @SerializedName("BookName") val BookName: String,
     @SerializedName("duration") val duration: Double,
-    @SerializedName("plainLyrics") val plainLyrics: String?,
-    @SerializedName("syncedLyrics") val syncedLyrics: String?
+    @SerializedName("plainTranscript") val plainTranscript: String?,
+    @SerializedName("syncedTranscript") val syncedTranscript: String?
 )

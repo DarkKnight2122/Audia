@@ -24,9 +24,9 @@ class AudioBookApp : Application(), ImageLoaderFactory, Configuration.Provider {
     @Inject
     lateinit var imageLoader: dagger.Lazy<ImageLoader>
 
-    // AÑADE EL COMPANION OBJECT
+    // AÃ‘ADE EL COMPANION OBJECT
     companion object {
-        const val NOTIFICATION_CHANNEL_ID = "AudioBookPlayer_music_channel"
+        const val NOTIFICATION_CHANNEL_ID = "AudioBookPlayer_Audiobook_channel"
     }
 
     override fun onCreate() {
@@ -57,7 +57,7 @@ class AudioBookApp : Application(), ImageLoaderFactory, Configuration.Provider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "AudioBookPlayer Music Playback",
+                "AudioBookPlayer Audiobook Playback",
                 NotificationManager.IMPORTANCE_LOW
             )
             val notificationManager = getSystemService(NotificationManager::class.java)
@@ -69,7 +69,7 @@ class AudioBookApp : Application(), ImageLoaderFactory, Configuration.Provider {
         return imageLoader.get()
     }
 
-    // 3. Sobrescribe el método para proveer la configuración de WorkManager
+    // 3. Sobrescribe el mÃ©todo para proveer la configuraciÃ³n de WorkManager
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)

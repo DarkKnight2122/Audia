@@ -62,7 +62,7 @@ import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -196,7 +196,7 @@ fun SetupScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == directorySelectionPageIndex) {
-            setupViewModel.loadMusicDirectories()
+            setupViewModel.loadAudiobookDirectories()
         }
     }
     BackHandler {
@@ -362,7 +362,7 @@ fun DirectorySelectionPage(
         },
         icons = persistentListOf(
             R.drawable.rounded_folder_24,
-            R.drawable.rounded_music_note_24,
+            R.drawable.rounded_Audiobook_note_24,
             R.drawable.rounded_create_new_folder_24,
             R.drawable.rounded_folder_open_24,
             R.drawable.rounded_audio_file_24
@@ -458,7 +458,7 @@ fun WelcomePage() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "β",
+                    text = "ÃŽÂ²",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Black
                 )
@@ -539,11 +539,11 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     }
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
     val mediaIcons = persistentListOf(
-        R.drawable.rounded_music_note_24,
-        R.drawable.rounded_album_24,
-        R.drawable.rounded_library_music_24,
-        R.drawable.rounded_artist_24,
-        R.drawable.rounded_playlist_play_24
+        R.drawable.rounded_Audiobook_note_24,
+        R.drawable.rounded_Book_24,
+        R.drawable.rounded_library_Audiobook_24,
+        R.drawable.rounded_Author_24,
+        R.drawable.rounded_Booklist_play_24
     )
 
     // Sync the granted state with the ViewModel
@@ -552,7 +552,7 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "Media Permission",
         granted = isGranted,
-        description = "AudioBookPlayer needs access to your audio files to build your music library.",
+        description = "AudioBookPlayer needs access to your audio files to build your Audiobook library.",
         buttonText = if (isGranted) "Permission Granted" else "Grant Media Permission",
         buttonEnabled = !isGranted,
         icons = mediaIcons,
@@ -584,7 +584,7 @@ fun NotificationsPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "Notifications",
         granted = isGranted,
-        description = "Enable notifications to control your music from the lock screen and notification shade.",
+        description = "Enable notifications to control your Audiobook from the lock screen and notification shade.",
         buttonText = if (isGranted) "Permission Granted" else "Enable Notifications",
         buttonEnabled = !isGranted,
         icons = notificationIcons,
@@ -614,7 +614,7 @@ fun AlarmsPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "Alarms & Reminders",
         granted = isGranted,
-        description = "To ensure the Sleep Timer works reliably and pauses music exactly when you want, AudioBookPlayer needs permission to schedule exact alarms.",
+        description = "To ensure the Sleep Timer works reliably and pauses Audiobook exactly when you want, AudioBookPlayer needs permission to schedule exact alarms.",
         buttonText = if (isGranted) "Permission Granted" else "Grant Permission",
         buttonEnabled = !isGranted,
         icons = icons,
@@ -645,7 +645,7 @@ fun AllFilesPermissionPage(uiState: SetupUiState) {
     PermissionPageLayout(
         title = "All Files Access",
         granted = isGranted,
-        description = "For some Android versions, AudioBookPlayer needs broader file access to find all your music.",
+        description = "For some Android versions, AudioBookPlayer needs broader file access to find all your Audiobook.",
         buttonText = if(isGranted) "Permission Granted" else "Go to Settings",
         buttonEnabled = !isGranted,
         icons = fileIcons,
@@ -807,9 +807,9 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             LibraryNavigationPillSetupShow(
-                                title = "Songs",
+                                title = "Tracks",
                                 isExpanded = false,
-                                iconRes = R.drawable.rounded_music_note_24,
+                                iconRes = R.drawable.rounded_Audiobook_note_24,
                                 pageIndex = 0,
                                 onClick = {},
                                 onArrowClick = {}
@@ -847,7 +847,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
-                                        text = "SONGS",
+                                        text = "Tracks",
                                         style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
@@ -875,7 +875,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
-                                        text = "ALBUMS",
+                                        text = "Books",
                                         style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -903,7 +903,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
-                                        text = "ARTISTS",
+                                        text = "Authors",
                                         style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -956,7 +956,7 @@ fun BatteryOptimizationPage(
     }
     
     val batteryIcons = persistentListOf(
-        R.drawable.rounded_music_note_24,
+        R.drawable.rounded_Audiobook_note_24,
         R.drawable.rounded_play_arrow_24,
         R.drawable.rounded_all_inclusive_24,
         R.drawable.rounded_pause_24,
@@ -1021,7 +1021,7 @@ fun FinishPage() {
             icons = finishIcons
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "You're ready to enjoy your music.", style = MaterialTheme.typography.bodyLarge)
+        Text(text = "You're ready to enjoy your Audiobook.", style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -1119,13 +1119,13 @@ fun LibraryNavigationPillSetupShow(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando está expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
     val expandedRadius = 60.dp
 
-    // Animación Esquina Flecha (Interna):
+    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separándose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al título.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
+    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
     val animatedArrowCorner by animateFloatAsState(
         targetValue = if (isExpanded) pillRadius.value else innerRadius.value,
         label = "ArrowCornerAnimation"
@@ -1200,7 +1200,7 @@ fun LibraryNavigationPillSetupShow(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma según estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner.dp, // Anima entre 4.dp y 26.dp
@@ -1235,7 +1235,7 @@ fun LibraryNavigationPillSetupShow(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menú",
+                    contentDescription = "Expandir menÃƒÂº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1244,13 +1244,13 @@ fun LibraryNavigationPillSetupShow(
 }
 
 /**
- * Una Bottom Bar flotante con un diseño expresivo inspirado en Material 3,
+ * Una Bottom Bar flotante con un diseÃƒÂ±o expresivo inspirado en Material 3,
  * que incluye una onda sinusoidal animada en la parte superior.
  *
  * @param modifier Modificador para el Composable.
- * @param pagerState El estado del Pager para mostrar el indicador de página.
- * @param onNextClicked Lambda que se invoca al pulsar el botón "Next".
- * @param onFinishClicked Lambda que se invoca al pulsar el botón "Finalizar".
+ * @param pagerState El estado del Pager para mostrar el indicador de pÃƒÂ¡gina.
+ * @param onNextClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Next".
+ * @param onFinishClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Finalizar".
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -1264,14 +1264,14 @@ fun SetupBottomBar(
     onFinishClicked: () -> Unit,
     isFinishButtonEnabled: Boolean
 ) {
-    // --- Animaciones para el Morphing y Rotación ---
+    // --- Animaciones para el Morphing y RotaciÃƒÂ³n ---
     val morphAnimationSpec = tween<Float>(durationMillis = 600, easing = FastOutSlowInEasing)
-    // Animación más lenta y sutil para la rotación
+    // AnimaciÃƒÂ³n mÃƒÂ¡s lenta y sutil para la rotaciÃƒÂ³n
     val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
 
     // 1. Determina los porcentajes de las esquinas para la forma objetivo
     val targetShapeValues = when (pagerState.currentPage % 3) {
-        0 -> listOf(50f, 50f, 50f, 50f) // Círculo (50% en todas las esquinas)
+        0 -> listOf(50f, 50f, 50f, 50f) // CÃƒÂ­rculo (50% en todas las esquinas)
         1 -> listOf(26f, 26f, 26f, 26f) // Cuadrado Redondeado
         else -> listOf(18f, 50f, 18f, 50f) // Forma de "Hoja"
     }
@@ -1282,7 +1282,7 @@ fun SetupBottomBar(
     val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
     val animatedBottomEnd by animateFloatAsState(targetShapeValues[3], morphAnimationSpec, label = "BottomEnd")
 
-    // 3. Anima la rotación del botón para que gire 360 grados en cada cambio de página.
+    // 3. Anima la rotaciÃƒÂ³n del botÃƒÂ³n para que gire 360 grados en cada cambio de pÃƒÂ¡gina.
     val animatedRotation by animateFloatAsState(
         targetValue = pagerState.currentPage * 360f,
         animationSpec = rotationAnimationSpec,
@@ -1366,7 +1366,7 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                // 4. Aplica la forma y rotación animadas al botón
+                // 4. Aplica la forma y rotaciÃƒÂ³n animadas al botÃƒÂ³n
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
                     shape = AbsoluteSmoothCornerShape(
@@ -1386,7 +1386,7 @@ fun SetupBottomBar(
                         .rotate(animatedRotation)
                         .padding(end = 0.dp)
                 ) {
-                    // 5. Aplica una contra-rotación al contenido del botón (el icono)
+                    // 5. Aplica una contra-rotaciÃƒÂ³n al contenido del botÃƒÂ³n (el icono)
                     AnimatedContent(
                         modifier = Modifier.rotate(-animatedRotation),
                         targetState = pagerState.currentPage < pagerState.pageCount - 1,
@@ -1623,7 +1623,7 @@ fun NavBarPreview(isDefault: Boolean) {
                             ) {
                                 Icon(painterResource(R.drawable.rounded_home_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Icon(painterResource(R.drawable.rounded_search_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Icon(painterResource(R.drawable.rounded_library_music_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painterResource(R.drawable.rounded_library_Audiobook_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     } else {
@@ -1653,7 +1653,7 @@ fun NavBarPreview(isDefault: Boolean) {
                             ) {
                                 Icon(painterResource(R.drawable.rounded_home_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Icon(painterResource(R.drawable.rounded_search_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Icon(painterResource(R.drawable.rounded_library_music_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painterResource(R.drawable.rounded_library_Audiobook_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }

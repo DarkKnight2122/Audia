@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.Mic
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.SurroundSound
@@ -46,17 +46,17 @@ import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
-import com.oakiha.audia.presentation.components.PlaylistBottomSheet
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.BooklistBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.navigation.Screen
-import com.oakiha.audia.presentation.viewmodel.ArtistDetailViewModel
-import com.oakiha.audia.presentation.viewmodel.ArtistAlbumSection
+import com.oakiha.audia.presentation.viewmodel.AuthorDetailViewModel
+import com.oakiha.audia.presentation.viewmodel.AuthorBooksection
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -70,23 +70,23 @@ import coil.request.ImageRequest
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ArtistDetailScreen(
-    artistId: String,
+fun AuthorDetailScreen(
+    AuthorId: String,
     navController: NavController,
     playerViewModel: PlayerViewModel,
-    viewModel: ArtistDetailViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel()
+    viewModel: AuthorDetailViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val playerSheetState by playerViewModel.sheetState.collectAsState()
     val lazyListState = rememberLazyListState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState()
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    val selectedSongForInfo by playerViewModel.selectedSongForInfo.collectAsState()
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState()
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
-    var showPlaylistBottomSheet by remember { mutableStateOf(false) }
+    var showBooklistBottomSheet by remember { mutableStateOf(false) }
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -94,7 +94,7 @@ fun ArtistDetailScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    // --- Lógica del Header Colapsable ---
+    // --- LÃƒÂ³gica del Header Colapsable ---
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val minTopBarHeight = 64.dp + statusBarHeight
     val maxTopBarHeight = 300.dp
@@ -160,7 +160,7 @@ fun ArtistDetailScreen(
             }
         }
     }
-    // --- Fin de la lógica del Header ---
+    // --- Fin de la lÃƒÂ³gica del Header ---
 
     BackHandler(enabled = playerSheetState == PlayerSheetState.EXPANDED) {
         playerViewModel.collapsePlayerSheet()
@@ -172,12 +172,12 @@ fun ArtistDetailScreen(
     ) {
         Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
             when {
-                uiState.isLoading && uiState.artist == null -> {
+                uiState.isLoading && uiState.Author == null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ContainedLoadingIndicator()
                     }
                 }
-                uiState.error != null && uiState.artist == null -> {
+                uiState.error != null && uiState.Author == null -> {
                     Box(
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Alignment.Center
@@ -189,12 +189,12 @@ fun ArtistDetailScreen(
                         )
                     }
                 }
-                uiState.artist != null -> {
-                    val artist = uiState.artist!!
-                    val songs = uiState.songs
+                uiState.Author != null -> {
+                    val Author = uiState.Author!!
+                    val Tracks = uiState.Tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
 
-                    val albumSections = uiState.albumSections
+                    val Booksections = uiState.Booksections
                     LazyColumn(
                         state = lazyListState,
                         contentPadding = PaddingValues(
@@ -205,49 +205,49 @@ fun ArtistDetailScreen(
                             .fillMaxSize()
                             .padding(horizontal = 0.dp)
                     ) {
-                        albumSections.forEachIndexed { index, section ->
-                            if (section.songs.isEmpty()) return@forEachIndexed
+                        Booksections.forEachIndexed { index, section ->
+                            if (section.Tracks.isEmpty()) return@forEachIndexed
 
-                            stickyHeader(key = "artist_album_${section.albumId}_${section.title}_header") {
-                                AlbumSectionHeader(
+                            stickyHeader(key = "Author_Book_${section.BookId}_${section.title}_header") {
+                                BooksectionHeader(
                                     section = section,
-                                    onPlayAlbum = {
-                                        section.songs.firstOrNull()?.let { firstSong ->
-                                            playerViewModel.showAndPlaySong(firstSong, section.songs)
+                                    onPlayBook = {
+                                        section.Tracks.firstOrNull()?.let { firstTrack ->
+                                            playerViewModel.showAndPlayTrack(firstTrack, section.Tracks)
                                         }
                                     }
                                 )
                             }
 
-                            item(key = "artist_album_${section.albumId}_${section.title}_header_spacing") {
+                            item(key = "Author_Book_${section.BookId}_${section.title}_header_spacing") {
                                 Spacer(modifier = Modifier.height(12.dp))
                             }
 
                             itemsIndexed(
-                                items = section.songs,
-                                key = { _, song -> "artist_album_${section.albumId}_song_${song.id}" }
-                            ) { songIndex, song ->
-                                EnhancedSongListItem(
+                                items = section.Tracks,
+                                key = { _, Track -> "Author_Book_${section.BookId}_Track_${Track.id}" }
+                            ) { TrackIndex, Track ->
+                                EnhancedTrackListItem(
                                     modifier = Modifier.padding(horizontal = 16.dp),
-                                    song = song,
-                                    isCurrentSong = stablePlayerState.currentSong?.id == song.id,
+                                    Track = Track,
+                                    isCurrentTrack = stablePlayerState.currentTrack?.id == Track.id,
                                     isPlaying = stablePlayerState.isPlaying,
                                     onMoreOptionsClick = {
-                                        playerViewModel.selectSongForInfo(song)
-                                        showSongInfoBottomSheet = true
+                                        playerViewModel.selectTrackForInfo(Track)
+                                        showTrackInfoBottomSheet = true
                                     },
-                                    onClick = { playerViewModel.showAndPlaySong(song, section.songs) }
+                                    onClick = { playerViewModel.showAndPlayTrack(Track, section.Tracks) }
                                 )
 
-                                if (songIndex != section.songs.lastIndex) {
+                                if (TrackIndex != section.Tracks.lastIndex) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
 
-                            item(key = "artist_album_${section.albumId}_${section.title}_footer_spacing") {
+                            item(key = "Author_Book_${section.BookId}_${section.title}_footer_spacing") {
                                 Spacer(
                                     modifier = Modifier.height(
-                                        if (index == albumSections.lastIndex) 24.dp else 20.dp
+                                        if (index == Booksections.lastIndex) 24.dp else 20.dp
                                     )
                                 )
                             }
@@ -257,79 +257,79 @@ fun ArtistDetailScreen(
                     }
 
                     CustomCollapsingTopBar(
-                        artist = artist,
-                        songsCount = songs.size,
+                        Author = Author,
+                        TracksCount = Tracks.size,
                         collapseFraction = collapseFraction,
                         headerHeight = currentTopBarHeightDp,
                         onBackPressed = { navController.popBackStack() },
                         onPlayClick = {
-                            if (songs.isNotEmpty()) {
-                                val randomSong = songs.random()
-                                playerViewModel.showAndPlaySong(randomSong, songs) }
+                            if (Tracks.isNotEmpty()) {
+                                val randomTrack = Tracks.random()
+                                playerViewModel.showAndPlayTrack(randomTrack, Tracks) }
                         }
                     )
                 }
             }
         }
     }
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteIds) {
-            derivedStateOf { currentSong?.let { favoriteIds.contains(it.id) } }
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteIds) {
+            derivedStateOf { currentTrack?.let { favoriteIds.contains(it.id) } }
         }.value ?: false
 
-        if (currentSong != null) {
-            val removeFromListTrigger = remember(uiState.songs) {
+        if (currentTrack != null) {
+            val removeFromListTrigger = remember(uiState.Tracks) {
                 {
-                    viewModel.removeSongFromAlbumSection(currentSong.id)
+                    viewModel.removeTrackFromBooksection(currentTrack.id)
                 }
             }
-            SongInfoBottomSheet(
-                song = currentSong,
+            TrackInfoBottomSheet(
+                Track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong)
+                    playerViewModel.toggleFavoriteSpecificTrack(currentTrack)
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
-                onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                onDismiss = { showTrackInfoBottomSheet = false },
+                onPlayTrack = {
+                    playerViewModel.showAndPlayTrack(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
-                onAddToPlayList = {
-                    showPlaylistBottomSheet = true;
+                onAddToBooklist = {
+                    showBooklistBottomSheet = true;
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
-                onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                onNavigateToBook = {
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.BookId))
+                    showTrackInfoBottomSheet = false
                 },
-                onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                onNavigateToAuthor = {
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.AuthorId))
+                    showTrackInfoBottomSheet = false
                 },
-                onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(currentSong, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
+                onEditTrack = { newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate ->
+                    playerViewModel.editTrackMetadata(currentTrack, newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate)
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
                 removeFromListTrigger = removeFromListTrigger
             )
-            if (showPlaylistBottomSheet) {
-                val playlistUiState by playlistViewModel.uiState.collectAsState()
+            if (showBooklistBottomSheet) {
+                val BooklistUiState by BooklistViewModel.uiState.collectAsState()
 
-                PlaylistBottomSheet(
-                    playlistUiState = playlistUiState,
-                    song = currentSong,
-                    onDismiss = { showPlaylistBottomSheet = false },
+                BooklistBottomSheet(
+                    BooklistUiState = BooklistUiState,
+                    Track = currentTrack,
+                    onDismiss = { showBooklistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
                 )
@@ -339,10 +339,10 @@ fun ArtistDetailScreen(
 }
 
 @Composable
-private fun AlbumSectionHeader(
-    section: ArtistAlbumSection,
+private fun BooksectionHeader(
+    section: AuthorBooksection,
     modifier: Modifier = Modifier,
-    onPlayAlbum: () -> Unit
+    onPlayBook: () -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -369,9 +369,9 @@ private fun AlbumSectionHeader(
                 val subtitle = buildString {
                     section.year?.takeIf { it > 0 }?.let {
                         append(it.toString())
-                        append(" • ")
+                        append(" Ã¢â‚¬Â¢ ")
                     }
-                    append("${section.songs.size} songs")
+                    append("${section.Tracks.size} Tracks")
                 }
                 Text(
                     text = subtitle,
@@ -382,7 +382,7 @@ private fun AlbumSectionHeader(
                 )
             }
             FilledIconButton(
-                onClick = onPlayAlbum,
+                onClick = onPlayBook,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -397,8 +397,8 @@ private fun AlbumSectionHeader(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CustomCollapsingTopBar(
-    artist: Artist,
-    songsCount: Int,
+    Author: Author,
+    TracksCount: Int,
     collapseFraction: Float, // 0.0 = expandido, 1.0 = colapsado
     headerHeight: Dp,
     onBackPressed: () -> Unit,
@@ -428,25 +428,25 @@ private fun CustomCollapsingTopBar(
             .height(headerHeight)
             .background(surfaceColor.copy(alpha = backgroundAlpha))
     ) {
-        // --- Contenido del Header (visible cuando está expandido) ---
+        // --- Contenido del Header (visible cuando estÃƒÂ¡ expandido) ---
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = headerContentAlpha }
         ) {
-            // Artist artwork or fallback pattern
-            if (!artist.imageUrl.isNullOrEmpty()) {
+            // Author artwork or fallback pattern
+            if (!Author.imageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(artist.imageUrl)
+                        .data(Author.imageUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription = artist.name,
+                    contentDescription = Author.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                MusicIconPattern(
+                AudiobookIconPattern(
                     modifier = Modifier.fillMaxSize(),
                     collapseFraction = collapseFraction
                 )
@@ -486,7 +486,7 @@ private fun CustomCollapsingTopBar(
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
 
-            // Box contenedor para el título
+            // Box contenedor para el tÃƒÂ­tulo
             Box(
                 modifier = Modifier
                     .align(animatedTitleAlignment)
@@ -505,7 +505,7 @@ private fun CustomCollapsingTopBar(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = artist.name,
+                        text = Author.name,
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontSize = 26.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
@@ -517,7 +517,7 @@ private fun CustomCollapsingTopBar(
                     )
 
                     Text(
-                        text = "$songsCount songs",
+                        text = "$TracksCount Tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -526,7 +526,7 @@ private fun CustomCollapsingTopBar(
                 }
             }
 
-            // Botón de Play
+            // BotÃƒÂ³n de Play
             LargeExtendedFloatingActionButton(
                 onClick = onPlayClick,
                 shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
@@ -539,20 +539,20 @@ private fun CustomCollapsingTopBar(
                         alpha = fabScale
                     }
             ) {
-                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play album")
+                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play Book")
             }
         }
     }
 }
 
 @Composable
-private fun MusicIconPattern(modifier: Modifier = Modifier, collapseFraction: Float) {
+private fun AudiobookIconPattern(modifier: Modifier = Modifier, collapseFraction: Float) {
     val color1 = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
     val color2 = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
 
     Box(modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer)) {
         Icon(
-            imageVector = Icons.Rounded.MusicNote,
+            imageVector = Icons.Rounded.AudiobookNote,
             contentDescription = null, tint = color1,
             modifier = Modifier.align(Alignment.TopStart).offset(x = lerp(60.dp, 100.dp, collapseFraction), y = lerp(100.dp, 10.dp, collapseFraction)).size(60.dp).graphicsLayer { rotationZ = lerp(-15f, 30f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )
@@ -563,7 +563,7 @@ private fun MusicIconPattern(modifier: Modifier = Modifier, collapseFraction: Fl
                 (-40).dp, collapseFraction), y = lerp(50.dp, 90.dp, collapseFraction)).size(50.dp).graphicsLayer { rotationZ = lerp(5f, 45f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )
         Icon(
-            imageVector = Icons.Rounded.Album,
+            imageVector = Icons.Rounded.Book,
             contentDescription = null, tint = color2,
             modifier = Modifier.align(Alignment.CenterEnd).offset(x = lerp((-40).dp, 20.dp, collapseFraction), y = lerp(-50.dp, -90.dp, collapseFraction)).size(70.dp).graphicsLayer { rotationZ = lerp(20f, -10f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )
@@ -578,7 +578,7 @@ private fun MusicIconPattern(modifier: Modifier = Modifier, collapseFraction: Fl
             modifier = Modifier.align(Alignment.TopCenter).offset(y = lerp(60.dp, 10.dp, collapseFraction), x = lerp(0.dp, -50.dp, collapseFraction)).size(80.dp).graphicsLayer { rotationZ = lerp(-10f, 20f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )
         Icon(
-            imageVector = Icons.Rounded.MusicNote,
+            imageVector = Icons.Rounded.AudiobookNote,
             contentDescription = null, tint = color1,
             modifier = Modifier.align(Alignment.BottomEnd).offset(x = lerp((-30).dp, (-10).dp, collapseFraction), y = lerp(-120.dp, -150.dp, collapseFraction)).size(45.dp).graphicsLayer { rotationZ = lerp(15f, -30f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )

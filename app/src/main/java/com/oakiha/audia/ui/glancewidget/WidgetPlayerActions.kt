@@ -6,7 +6,7 @@ import android.content.Intent
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSessionService
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookService
 
 object WidgetPlayerActions {
     const val PLAY_PAUSE = "com.oakiha.audia.PLAY_PAUSE"
@@ -15,19 +15,19 @@ object WidgetPlayerActions {
 
     @OptIn(UnstableApi::class)
     fun playPause(context: Context): PendingIntent {
-        val intent = Intent(context, MusicService::class.java).setAction(PLAY_PAUSE)
+        val intent = Intent(context, AudiobookService::class.java).setAction(PLAY_PAUSE)
         return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     @OptIn(UnstableApi::class)
     fun next(context: Context): PendingIntent {
-        val intent = Intent(context, MusicService::class.java).setAction(NEXT)
+        val intent = Intent(context, AudiobookService::class.java).setAction(NEXT)
         return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     @OptIn(UnstableApi::class)
     fun previous(context: Context): PendingIntent {
-        val intent = Intent(context, MusicService::class.java).setAction(PREVIOUS)
+        val intent = Intent(context, AudiobookService::class.java).setAction(PREVIOUS)
         return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 }

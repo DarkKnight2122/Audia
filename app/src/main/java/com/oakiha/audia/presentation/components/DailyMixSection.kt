@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.presentation.screens.SongListItemFavsWrapper
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.presentation.screens.TrackListItemFavsWrapper
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
@@ -48,7 +48,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun DailyMixSection(
-    songs: ImmutableList<Song>,
+    Tracks: ImmutableList<Track>,
     playerViewModel: PlayerViewModel,
     onClickOpen: () -> Unit = {}
 ) {
@@ -58,19 +58,19 @@ fun DailyMixSection(
             .padding(horizontal = 16.dp)
     ) {
         Spacer(Modifier.height(16.dp))
-        DailyMixCard(songs = songs, playerViewModel = playerViewModel, onClickOpen =  onClickOpen)
+        DailyMixCard(Tracks = Tracks, playerViewModel = playerViewModel, onClickOpen =  onClickOpen)
     }
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun DailyMixCard(
-    songs: ImmutableList<Song>,
+    Tracks: ImmutableList<Track>,
     onClickOpen: () -> Unit,
     playerViewModel: PlayerViewModel
 ) {
-    val headerSongs = songs.take(3).toImmutableList()
-    val songsToPlay = songs.take(4).toImmutableList()
+    val headerTracks = Tracks.take(3).toImmutableList()
+    val TracksToPlay = Tracks.take(4).toImmutableList()
     val cornerRadius = 30.dp
     Card(
         shape = AbsoluteSmoothCornerShape(
@@ -88,8 +88,8 @@ private fun DailyMixCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            DailyMixHeader(thumbnails = headerSongs)
-            DailyMixSongList(songs = songsToPlay, playerViewModel)
+            DailyMixHeader(thumbnails = headerTracks)
+            DailyMixTrackList(Tracks = TracksToPlay, playerViewModel)
             ViewAllDailyMixButton(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,7 +108,7 @@ private fun DailyMixCard(
 }
 
 @Composable
-fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
+fun DailyMixHeader(thumbnails: ImmutableList<Track>) {
 
     fun shapeConditionalModifier(index: Int): Modifier {
         if (index == 0){
@@ -160,7 +160,7 @@ fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
                 modifier = Modifier,
                 horizontalArrangement = Arrangement.spacedBy((-16).dp)
             ) {
-                thumbnails.forEachIndexed { index, song ->
+                thumbnails.forEachIndexed { index, Track ->
                     val modifier = shapeConditionalModifier(index)
                     Box(
                         modifier = modifier
@@ -169,7 +169,7 @@ fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
                             .border(2.dp, MaterialTheme.colorScheme.surface, threeShapeSwitch(index))
                     ) {
                         SmartImage(
-                            model = song.albumArtUriString,
+                            model = Track.BookArtUriString,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -205,22 +205,22 @@ fun threeShapeSwitch(index: Int, thirdShapeCornerRadius: Dp = 16.dp): Shape { //
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-private fun DailyMixSongList(
-    songs: ImmutableList<Song>,
+private fun DailyMixTrackList(
+    Tracks: ImmutableList<Track>,
     playerViewModel: PlayerViewModel
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        songs.forEach { song ->
-            SongListItemFavsWrapper(
-                song = song,
+        Tracks.forEach { Track ->
+            TrackListItemFavsWrapper(
+                Track = Track,
                 playerViewModel = playerViewModel,
                 onClick = {
-                    playerViewModel.playSongs(
-                        songsToPlay = songs,
-                        startSong = song,
+                    playerViewModel.playTracks(
+                        TracksToPlay = Tracks,
+                        startTrack = Track,
                         queueName = "DailyMix"
                     )
                 },

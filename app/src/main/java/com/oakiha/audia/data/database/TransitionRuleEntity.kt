@@ -8,11 +8,11 @@ import com.oakiha.audia.data.model.TransitionSettings
 
 @Entity(
     tableName = "transition_rules",
-    indices = [Index(value = ["playlistId", "fromTrackId", "toTrackId"], unique = true)]
+    indices = [Index(value = ["BooklistId", "fromTrackId", "toTrackId"], unique = true)]
 )
 data class TransitionRuleEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val playlistId: String,
+    val BooklistId: String,
     val fromTrackId: String?,
     val toTrackId: String?,
     @Embedded val settings: TransitionSettings

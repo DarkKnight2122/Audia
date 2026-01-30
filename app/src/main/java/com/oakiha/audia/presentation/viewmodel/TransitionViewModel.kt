@@ -22,7 +22,7 @@ data class TransitionUiState(
     val isLoading: Boolean = true,
     val isSaved: Boolean = false,
     val useGlobalDefaults: Boolean = false,
-    val playlistId: String? = null
+    val BooklistId: String? = null
 )
 
 @HiltViewModel
@@ -31,7 +31,7 @@ class TransitionViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val playlistId: String? = savedStateHandle["playlistId"]
+    private val BooklistId: String? = savedStateHandle["BooklistId"]
 
     private val _uiState = MutableStateFlow(TransitionUiState())
     val uiState = _uiState.asStateFlow()
@@ -43,17 +43,17 @@ class TransitionViewModel @Inject constructor(
     private fun loadSettings() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val playlistRule = playlistId?.let { transitionRepository.getPlaylistDefaultRule(it).first() }
+            val BooklistRule = BooklistId?.let { transitionRepository.getBooklistDefaultRule(it).first() }
             val globalSettings = transitionRepository.getGlobalSettings().first()
 
             _uiState.update {
                 it.copy(
-                    rule = playlistRule,
+                    rule = BooklistRule,
                     globalSettings = globalSettings,
                     isLoading = false,
-                    useGlobalDefaults = playlistRule == null,
+                    useGlobalDefaults = BooklistRule == null,
                     isSaved = false,
-                    playlistId = playlistId
+                    BooklistId = BooklistId
                 )
             }
         }
@@ -94,7 +94,7 @@ class TransitionViewModel @Inject constructor(
 
     private fun updateRuleWithNewSettings(newSettings: TransitionSettings) {
         val ruleToUpdate = _uiState.value.rule ?: TransitionRule(
-            playlistId = playlistId ?: "",
+            BooklistId = BooklistId ?: "",
             settings = TransitionSettings()
         )
         _uiState.update {
@@ -107,7 +107,7 @@ class TransitionViewModel @Inject constructor(
     }
 
     fun useGlobalDefaults() {
-        if (playlistId == null) return
+        if (BooklistId == null) return
         _uiState.update {
             it.copy(
                 rule = null,
@@ -117,11 +117,11 @@ class TransitionViewModel @Inject constructor(
         }
     }
 
-    fun enablePlaylistOverride() {
-        if (playlistId == null) return
+    fun enableBooklistOverride() {
+        if (BooklistId == null) return
         val baseSettings = getCurrentSettings()
         val rule = _uiState.value.rule ?: TransitionRule(
-            playlistId = playlistId,
+            BooklistId = BooklistId,
             settings = baseSettings
         )
         _uiState.update {
@@ -137,11 +137,11 @@ class TransitionViewModel @Inject constructor(
         viewModelScope.launch {
             val ruleToSave = _uiState.value.rule
 
-            if (playlistId != null) {
+            if (BooklistId != null) {
                 when {
-                    _uiState.value.useGlobalDefaults -> transitionRepository.deletePlaylistDefaultRule(playlistId)
+                    _uiState.value.useGlobalDefaults -> transitionRepository.deleteBooklistDefaultRule(BooklistId)
                     ruleToSave != null && ruleToSave.settings.mode == TransitionMode.NONE ->
-                        transitionRepository.deletePlaylistDefaultRule(playlistId)
+                        transitionRepository.deleteBooklistDefaultRule(BooklistId)
                     ruleToSave != null -> transitionRepository.saveRule(ruleToSave)
                 }
             } else {

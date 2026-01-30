@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.data.worker.SyncProgress
 import com.oakiha.audia.utils.LogUtils
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val syncManager: SyncManager,
-    musicRepository: MusicRepository,
+    AudiobookRepository: AudiobookRepository,
     userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
@@ -30,14 +30,14 @@ class MainViewModel @Inject constructor(
         )
 
     /**
-     * Un Flow que emite `true` si el SyncWorker está encolado o en ejecución.
+     * Un Flow que emite `true` si el SyncWorker estÃ¡ encolado o en ejecuciÃ³n.
      * Ideal para mostrar un indicador de carga.
      */
     val isSyncing: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true // Asumimos que podría estar sincronizando al inicio
+            initialValue = true // Asumimos que podrÃ­a estar sincronizando al inicio
         )
 
     /**
@@ -54,7 +54,7 @@ class MainViewModel @Inject constructor(
      * Un Flow que emite `true` si la base de datos de Room no tiene canciones.
      * Nos ayuda a saber si es la primera vez que se abre la app.
      */
-    val isLibraryEmpty: StateFlow<Boolean> = musicRepository
+    val isLibraryEmpty: StateFlow<Boolean> = AudiobookRepository
         .getAudioFiles()
         .map { it.isEmpty() }
         .stateIn(
@@ -64,8 +64,8 @@ class MainViewModel @Inject constructor(
         )
 
     /**
-     * Función para iniciar la sincronización de la biblioteca de música.
-     * Se debe llamar después de que los permisos hayan sido concedidos.
+     * FunciÃ³n para iniciar la sincronizaciÃ³n de la biblioteca de mÃºsica.
+     * Se debe llamar despuÃ©s de que los permisos hayan sido concedidos.
      */
     fun startSync() {
         LogUtils.i(this, "startSync called")

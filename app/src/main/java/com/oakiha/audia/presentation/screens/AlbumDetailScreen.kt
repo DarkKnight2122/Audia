@@ -73,17 +73,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Album
+import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
-import com.oakiha.audia.presentation.components.PlaylistBottomSheet
+import com.oakiha.audia.presentation.components.BooklistBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.navigation.Screen
-import com.oakiha.audia.presentation.viewmodel.AlbumDetailViewModel
+import com.oakiha.audia.presentation.viewmodel.BookDetailViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -91,22 +91,22 @@ import kotlin.math.roundToInt
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AlbumDetailScreen(
-    albumId: String,
+fun BookDetailScreen(
+    BookId: String,
     navController: NavController,
     playerViewModel: PlayerViewModel,
-    viewModel: AlbumDetailViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel()
+    viewModel: BookDetailViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val playerSheetState by playerViewModel.sheetState.collectAsState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState()
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    val selectedSongForInfo by playerViewModel.selectedSongForInfo.collectAsState()
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState()
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
-    var showPlaylistBottomSheet by remember { mutableStateOf(false) }
+    var showBooklistBottomSheet by remember { mutableStateOf(false) }
     val surfaceColor = MaterialTheme.colorScheme.surface
     val statusBarColor =
         if (LocalAudioBookPlayerDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
@@ -120,13 +120,13 @@ fun AlbumDetailScreen(
     }
 
     when {
-        uiState.isLoading && uiState.album == null -> {
+        uiState.isLoading && uiState.Book == null -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             ContainedLoadingIndicator()
             }
         }
 
-        uiState.error != null && uiState.album == null -> {
+        uiState.error != null && uiState.Book == null -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -141,9 +141,9 @@ fun AlbumDetailScreen(
             }
         }
 
-        uiState.album != null -> {
-            val album = uiState.album!!
-            val songs = uiState.songs
+        uiState.Book != null -> {
+            val Book = uiState.Book!!
+            val Tracks = uiState.Tracks
             val lazyListState = rememberLazyListState()
 
             val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -240,102 +240,102 @@ fun AlbumDetailScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(songs, key = { song -> "album_song_${song.id}" }) { song ->
-                        EnhancedSongListItem(
-                            song = song,
-                            isCurrentSong = stablePlayerState.currentSong?.id == song.id,
+                    items(Tracks, key = { Track -> "Book_Track_${Track.id}" }) { Track ->
+                        EnhancedTrackListItem(
+                            Track = Track,
+                            isCurrentTrack = stablePlayerState.currentTrack?.id == Track.id,
                             isPlaying = stablePlayerState.isPlaying,
                             onMoreOptionsClick = {
-                                playerViewModel.selectSongForInfo(song)
-                                showSongInfoBottomSheet = true
+                                playerViewModel.selectTrackForInfo(Track)
+                                showTrackInfoBottomSheet = true
                             },
-                            onClick = { playerViewModel.showAndPlaySong(song, songs) }
+                            onClick = { playerViewModel.showAndPlayTrack(Track, Tracks) }
                         )
                     }
                 }
-                CollapsingAlbumTopBar(
-                    album = album,
-                    songsCount = songs.size,
+                CollapsingBookTopBar(
+                    Book = Book,
+                    TracksCount = Tracks.size,
                     collapseFraction = collapseFraction,
                     headerHeight = currentTopBarHeightDp,
                     onBackPressed = { navController.popBackStack() },
                     onPlayClick = {
-                        if (songs.isNotEmpty()) {
-                            val randomSong = songs.random()
-                            playerViewModel.showAndPlaySong(randomSong, songs)
+                        if (Tracks.isNotEmpty()) {
+                            val randomTrack = Tracks.random()
+                            playerViewModel.showAndPlayTrack(randomTrack, Tracks)
                         }
                     }
                 )
             }
         }
     }
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteIds) {
-            derivedStateOf { currentSong?.let { favoriteIds.contains(it.id) } }
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteIds) {
+            derivedStateOf { currentTrack?.let { favoriteIds.contains(it.id) } }
         }.value ?: false
 
-        if (currentSong != null) {
-            val removeFromListTrigger = remember(uiState.songs) {
+        if (currentTrack != null) {
+            val removeFromListTrigger = remember(uiState.Tracks) {
                 {
-                    viewModel.update(uiState.songs.filterNot { it.id == currentSong.id })
+                    viewModel.update(uiState.Tracks.filterNot { it.id == currentTrack.id })
                 }
             }
-            SongInfoBottomSheet(
-                song = currentSong,
+            TrackInfoBottomSheet(
+                Track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong)
+                    playerViewModel.toggleFavoriteSpecificTrack(currentTrack)
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
-                onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                onDismiss = { showTrackInfoBottomSheet = false },
+                onPlayTrack = {
+                    playerViewModel.showAndPlayTrack(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
-                onAddToPlayList = {
-                    showPlaylistBottomSheet = true;
+                onAddToBooklist = {
+                    showBooklistBottomSheet = true;
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
-                onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                onNavigateToBook = {
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.BookId))
+                    showTrackInfoBottomSheet = false
                 },
-                onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                onNavigateToAuthor = {
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.AuthorId))
+                    showTrackInfoBottomSheet = false
                 },
-                onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(
-                        currentSong,
+                onEditTrack = { newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate ->
+                    playerViewModel.editTrackMetadata(
+                        currentTrack,
                         newTitle,
-                        newArtist,
-                        newAlbum,
-                        newGenre,
-                        newLyrics,
+                        newAuthor,
+                        newBook,
+                        newCategory,
+                        newTranscript,
                         newTrackNumber,
                         coverArtUpdate
                     )
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
                 removeFromListTrigger = removeFromListTrigger
             )
-            if (showPlaylistBottomSheet) {
-                val playlistUiState by playlistViewModel.uiState.collectAsState()
+            if (showBooklistBottomSheet) {
+                val BooklistUiState by BooklistViewModel.uiState.collectAsState()
 
-                PlaylistBottomSheet(
-                    playlistUiState = playlistUiState,
-                    song = currentSong,
-                    onDismiss = { showPlaylistBottomSheet = false },
+                BooklistBottomSheet(
+                    BooklistUiState = BooklistUiState,
+                    Track = currentTrack,
+                    onDismiss = { showBooklistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel
                 )
@@ -346,9 +346,9 @@ fun AlbumDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CollapsingAlbumTopBar(
-    album: Album,
-    songsCount: Int,
+private fun CollapsingBookTopBar(
+    Book: Book,
+    TracksCount: Int,
     collapseFraction: Float,
     headerHeight: Dp,
     onBackPressed: () -> Unit,
@@ -388,8 +388,8 @@ private fun CollapsingAlbumTopBar(
                 .graphicsLayer { alpha = headerContentAlpha }
         ) {
             SmartImage(
-                model = album.albumArtUriString,
-                contentDescription = "Cover of ${album.title}",
+                model = Book.BookArtUriString,
+                contentDescription = "Cover of ${Book.title}",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -457,7 +457,7 @@ private fun CollapsingAlbumTopBar(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = album.title,
+                        text = Book.title,
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontSize = 26.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
@@ -468,7 +468,7 @@ private fun CollapsingAlbumTopBar(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${album.artist} • $songsCount songs",
+                        text = "${Book.Author} Ã¢â‚¬Â¢ $TracksCount Tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -489,7 +489,7 @@ private fun CollapsingAlbumTopBar(
                         alpha = fabScale
                     }
             ) {
-                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play album")
+                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play Book")
             }
         }
     }

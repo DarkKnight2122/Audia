@@ -15,12 +15,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Notes
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
 import java.net.URLEncoder
 import timber.log.Timber
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
@@ -87,12 +87,12 @@ import java.io.ByteArrayOutputStream
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 
-fun EditSongSheet(
+fun EditTracksheet(
     visible: Boolean,
-    song: Song,
+    Track: Track,
     onDismiss: () -> Unit,
-    onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
+    onSave: (title: String, Author: String, Book: String, Category: String, Transcript: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
     val transitionState = remember { MutableTransitionState(false) }
     transitionState.targetState = visible
@@ -110,8 +110,8 @@ fun EditSongSheet(
                 enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
                 exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200))
             ) {
-                EditSongContent(
-                    song = song,
+                EditTrackContent(
+                    Track = Track,
                     onDismiss = onDismiss,
                     onSave = onSave,
                     generateAiMetadata = generateAiMetadata
@@ -123,18 +123,18 @@ fun EditSongSheet(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun EditSongContent(
-    song: Song,
+private fun EditTrackContent(
+    Track: Track,
     onDismiss: () -> Unit,
-    onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
+    onSave: (title: String, Author: String, Book: String, Category: String, Transcript: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
-    var title by remember { mutableStateOf(song.title) }
-    var artist by remember { mutableStateOf(song.displayArtist) }
-    var album by remember { mutableStateOf(song.album) }
-    var genre by remember { mutableStateOf(song.genre ?: "") }
-    var lyrics by remember { mutableStateOf(song.lyrics ?: "") }
-    var trackNumber by remember { mutableStateOf(song.trackNumber.toString()) }
+    var title by remember { mutableStateOf(Track.title) }
+    var Author by remember { mutableStateOf(Track.displayAuthor) }
+    var Book by remember { mutableStateOf(Track.Book) }
+    var Category by remember { mutableStateOf(Track.Category ?: "") }
+    var Transcript by remember { mutableStateOf(Track.Transcript ?: "") }
+    var trackNumber by remember { mutableStateOf(Track.trackNumber.toString()) }
     var coverArtPreview by remember { mutableStateOf<ImageBitmap?>(null) }
     var editedCoverArt by remember { mutableStateOf<CoverArtUpdate?>(null) }
     var showCoverArtCropper by remember { mutableStateOf(false) }
@@ -152,13 +152,13 @@ private fun EditSongContent(
         }
     }
 
-    LaunchedEffect(song) {
-        title = song.title
-        artist = song.displayArtist
-        album = song.album
-        genre = song.genre ?: ""
-        lyrics = song.lyrics ?: ""
-        trackNumber = song.trackNumber.toString()
+    LaunchedEffect(Track) {
+        title = Track.title
+        Author = Track.displayAuthor
+        Book = Track.Book
+        Category = Track.Category ?: ""
+        Transcript = Track.Transcript ?: ""
+        trackNumber = Track.trackNumber.toString()
         coverArtPreview = null
         editedCoverArt = null
     }
@@ -178,7 +178,7 @@ private fun EditSongContent(
 
     if (showAiDialog) {
         AiMetadataDialog(
-            song = song,
+            Track = Track,
             onDismiss = { showAiDialog = false },
             onGenerate = { fields ->
                 scope.launch {
@@ -187,9 +187,9 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        artist = metadata.artist ?: artist
-                        album = metadata.album ?: album
-                        genre = metadata.genre ?: genre
+                        Author = metadata.Author ?: Author
+                        Book = metadata.Book ?: Book
+                        Category = metadata.Category ?: Category
                     }.onFailure { error ->
                         Timber.e(error, "Failed to generate AI metadata")
                     }
@@ -216,7 +216,7 @@ private fun EditSongContent(
         )
     }
 
-    // Definición de colores para los TextFields
+    // DefiniciÃƒÂ³n de colores para los TextFields
     val textFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -226,7 +226,7 @@ private fun EditSongContent(
         disabledIndicatorColor = Color.Transparent,
     )
 
-    // Definición de la forma para los TextFields
+    // DefiniciÃƒÂ³n de la forma para los TextFields
     val textFieldShape = AbsoluteSmoothCornerShape(
         cornerRadiusTL = 10.dp,
         smoothnessAsPercentBL = 60,
@@ -242,13 +242,13 @@ private fun EditSongContent(
         exitDirection = FloatingToolbarExitDirection.Bottom
     )
 
-    // --- Diálogo de Información ---
+    // --- DiÃƒÂ¡logo de InformaciÃƒÂ³n ---
     if (showInfoDialog) {
         AlertDialog(
             onDismissRequest = { showInfoDialog = false },
             icon = { Icon(Icons.Rounded.Info, contentDescription = "Information Icon") },
-            title = { Text("Editing Song Metadata") },
-            text = { Text("Editing a song's metadata can affect how it's displayed and organized in your library. Changes are permanent and may not be reversible.") },
+            title = { Text("Editing Track Metadata") },
+            text = { Text("Editing a Track's metadata can affect how it's displayed and organized in your library. Changes are permanent and may not be reversible.") },
             confirmButton = {
                 TextButton(onClick = { showInfoDialog = false }) {
                     Text("Got it")
@@ -267,7 +267,7 @@ private fun EditSongContent(
                 title = {
                     Text(
                         modifier = Modifier.padding(start = 10.dp),
-                        text = "Edit Song",
+                        text = "Edit Track",
                         fontFamily = GoogleSansRounded,
                         style = MaterialTheme.typography.displaySmall
                     )
@@ -334,7 +334,7 @@ private fun EditSongContent(
             item {
                 CoverArtEditorCard(
                     modifier = Modifier.fillMaxWidth(),
-                    albumArtUri = song.albumArtUriString,
+                    BookArtUri = Track.BookArtUriString,
                     preview = coverArtPreview,
                     onPickNewArt = {
                         pickCoverArtLauncher.launch(
@@ -348,7 +348,7 @@ private fun EditSongContent(
                 )
             }
 
-            // --- Campo de Título ---
+            // --- Campo de TÃƒÂ­tulo ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -365,7 +365,7 @@ private fun EditSongContent(
                         colors = textFieldColors,
                         onValueChange = { title = it },
                         placeholder = { Text("Title") },
-                        leadingIcon = { Icon(Icons.Rounded.MusicNote, tint = MaterialTheme.colorScheme.tertiary,contentDescription = "Title Icon") },
+                        leadingIcon = { Icon(Icons.Rounded.AudiobookNote, tint = MaterialTheme.colorScheme.tertiary,contentDescription = "Title Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -396,72 +396,72 @@ private fun EditSongContent(
                 }
             }
 
-            // --- Campo de Artista ---
+            // --- Campo de Authora ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Artist",
+                        text = "Author",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelLarge
                     )
                     OutlinedTextField(
-                        value = artist,
+                        value = Author,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { artist = it },
-                        placeholder = { Text("Artist") },
-                        leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Artist Icon") },
+                        onValueChange = { Author = it },
+                        placeholder = { Text("Author") },
+                        leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Author Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
                 }
             }
 
-            // --- Campo de Álbum ---
+            // --- Campo de ÃƒÂlbum ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Album",
+                        text = "Book",
                         color = MaterialTheme.colorScheme.tertiary,
                         style = MaterialTheme.typography.labelLarge
                     )
                     OutlinedTextField(
-                        value = album,
+                        value = Book,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { album = it },
-                        placeholder = { Text("Album") },
-                        leadingIcon = { Icon(Icons.Rounded.Album, tint = MaterialTheme.colorScheme.tertiary, contentDescription = "Album Icon") },
+                        onValueChange = { Book = it },
+                        placeholder = { Text("Book") },
+                        leadingIcon = { Icon(Icons.Rounded.Book, tint = MaterialTheme.colorScheme.tertiary, contentDescription = "Book Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
                 }
             }
 
-            // --- Campo de Género ---
+            // --- Campo de GÃƒÂ©nero ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Genre",
+                        text = "Category",
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.labelLarge
                     )
                     OutlinedTextField(
-                        value = genre,
+                        value = Category,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { genre = it },
-                        placeholder = { Text("Genre") },
-                        leadingIcon = { Icon(Icons.Rounded.Category, tint = MaterialTheme.colorScheme.secondary, contentDescription = "Genre Icon") },
+                        onValueChange = { Category = it },
+                        placeholder = { Text("Category") },
+                        leadingIcon = { Icon(Icons.Rounded.Category, tint = MaterialTheme.colorScheme.secondary, contentDescription = "Category Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -475,7 +475,7 @@ private fun EditSongContent(
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Lyrics",
+                        text = "Transcript",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -484,12 +484,12 @@ private fun EditSongContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
-                            value = lyrics,
+                            value = Transcript,
                             colors = textFieldColors,
                             shape = textFieldShape,
-                            onValueChange = { lyrics = it },
-                            placeholder = { Text("Lyrics") },
-                            leadingIcon = { Icon(Icons.Rounded.Notes, tint = MaterialTheme.colorScheme.primary, contentDescription = "Lyrics Icon") },
+                            onValueChange = { Transcript = it },
+                            placeholder = { Text("Transcript") },
+                            leadingIcon = { Icon(Icons.Rounded.Notes, tint = MaterialTheme.colorScheme.primary, contentDescription = "Transcript Icon") },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(150.dp)
@@ -498,15 +498,15 @@ private fun EditSongContent(
                         FilledTonalIconButton(
                             onClick = {
                                 val encodedTitle = URLEncoder.encode(title, "UTF-8")
-                                val encodedArtist = URLEncoder.encode(artist, "UTF-8")
-                                val url = "https://lrclib.net/search/$encodedTitle%20$encodedArtist"
+                                val encodedAuthor = URLEncoder.encode(Author, "UTF-8")
+                                val url = "https://lrclib.net/search/$encodedTitle%20$encodedAuthor"
                                 val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse(url))
                                 context.startActivity(intent)
                             },
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_search_24),
-                                contentDescription = "Search lyrics on lrclib.net"
+                                contentDescription = "Search Transcript on lrclib.net"
                             )
                         }
                     }
@@ -545,13 +545,13 @@ private fun EditSongContent(
                         )
                         Button(
                             onClick = {
-                                val resolvedTrackNumber = trackNumber.toIntOrNull() ?: song.trackNumber
+                                val resolvedTrackNumber = trackNumber.toIntOrNull() ?: Track.trackNumber
                                 onSave(
                                     title.trim(),
-                                    artist.trim(),
-                                    album.trim(),
-                                    genre.trim(),
-                                    lyrics,
+                                    Author.trim(),
+                                    Book.trim(),
+                                    Category.trim(),
+                                    Transcript,
                                     resolvedTrackNumber,
                                     editedCoverArt
                                 )
@@ -571,7 +571,7 @@ private fun EditSongContent(
 @Composable
 private fun CoverArtEditorCard(
     modifier: Modifier = Modifier,
-    albumArtUri: String?,
+    BookArtUri: String?,
     preview: ImageBitmap?,
     onPickNewArt: () -> Unit,
     onReset: () -> Unit,
@@ -626,20 +626,20 @@ private fun CoverArtEditorCard(
                             )
                         }
 
-                        albumArtUri != null -> {
+                        BookArtUri != null -> {
                             SmartImage(
-                                model = albumArtUri,
-                                contentDescription = "Current song cover art",
+                                model = BookArtUri,
+                                contentDescription = "Current Track cover art",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
-                                placeholderResId = R.drawable.rounded_album_24,
+                                placeholderResId = R.drawable.rounded_Book_24,
                                 errorResId = R.drawable.rounded_broken_image_24
                             )
                         }
 
                         else -> {
                             Icon(
-                                painter = painterResource(id = R.drawable.rounded_album_24),
+                                painter = painterResource(id = R.drawable.rounded_Book_24),
                                 contentDescription = null,
                                 modifier = Modifier.size(72.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant

@@ -45,16 +45,16 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.MicExternalOn
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Piano
-import androidx.compose.material.icons.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.QueueAudiobook
 import androidx.compose.material.icons.rounded.Speaker
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,11 +101,11 @@ import androidx.compose.ui.window.DialogProperties
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.ImageCropView
-import com.oakiha.audia.data.model.PlaylistShapeType
+import com.oakiha.audia.data.model.BooklistshapeType
 // import com.oakiha.audia.presentation.screens.ShapeType // Removed local enum
-import com.oakiha.audia.presentation.components.SongPickerList
+import com.oakiha.audia.presentation.components.TrackPickerList
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import androidx.compose.material3.Slider
 import androidx.compose.material3.FilterChip
@@ -145,9 +145,9 @@ import androidx.compose.ui.unit.sp
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 @Composable
-fun CreatePlaylistDialog(
+fun CreateBooklistDialog(
     visible: Boolean,
-    allSongs: List<Song>,
+    allTracks: List<Track>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit // ... d4
 ) {
@@ -166,10 +166,10 @@ fun CreatePlaylistDialog(
                 visibleState = transitionState,
                 enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
                 exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
-                label = "create_playlist_dialog"
+                label = "create_Booklist_dialog"
             ) {
-                CreatePlaylistContent(
-                    allSongs = allSongs,
+                CreateBooklistContent(
+                    allTracks = allTracks,
                     onDismiss = onDismiss,
                     onCreate = onCreate
                 )
@@ -178,16 +178,16 @@ fun CreatePlaylistDialog(
     }
 }
 
-// Enum removed, using com.oakiha.audia.data.model.PlaylistShapeType
+// Enum removed, using com.oakiha.audia.data.model.BooklistshapeType
 
 @Composable
-fun EditPlaylistDialog(
+fun EditBooklistDialog(
     visible: Boolean,
     currentName: String,
     currentImageUri: String?,
     currentColor: Int?,
     currentIconName: String?,
-    currentShapeType: PlaylistShapeType?,
+    currentShapeType: BooklistshapeType?,
     currentShapeDetail1: Float?,
     currentShapeDetail2: Float?,
     currentShapeDetail3: Float?,
@@ -210,9 +210,9 @@ fun EditPlaylistDialog(
                 visibleState = transitionState,
                 enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
                 exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
-                label = "edit_playlist_dialog"
+                label = "edit_Booklist_dialog"
             ) {
-                 EditPlaylistContent(
+                 EditBooklistContent(
                     initialName = currentName,
                     initialImageUri = currentImageUri,
                     initialColor = currentColor,
@@ -231,22 +231,22 @@ fun EditPlaylistDialog(
 }
 
 @Composable
-private fun CreatePlaylistContent(
-    allSongs: List<Song>,
+private fun CreateBooklistContent(
+    allTracks: List<Track>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit
 ) {
     val context = LocalContext.current
 
     // Shared State
-    var playlistName by remember { mutableStateOf("") }
+    var BooklistName by remember { mutableStateOf("") }
     
     // Step 1: Info State
-    var currentStep by remember { mutableStateOf(0) } // 0: Info, 1: Songs
+    var currentStep by remember { mutableStateOf(0) } // 0: Info, 1: Tracks
     var selectedTab by remember { mutableStateOf(0) } // 0: Default, 1: Image, 2: Icon
     
-    // Songs State
-    val selectedSongIds = remember { mutableStateMapOf<String, Boolean>() }
+    // Tracks State
+    val selectedTrackIds = remember { mutableStateMapOf<String, Boolean>() }
     
     // Image State
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -261,10 +261,10 @@ private fun CreatePlaylistContent(
     // Custom Color/Icon State
     val defaultColor = MaterialTheme.colorScheme.primaryContainer.toArgb()
     var selectedColor by remember { mutableStateOf<Int?>(defaultColor) }
-    var selectedIconName by remember { mutableStateOf<String?>("MusicNote") }
+    var selectedIconName by remember { mutableStateOf<String?>("AudiobookNote") }
 
     // Shape State
-    var selectedShapeType by remember { mutableStateOf(PlaylistShapeType.Circle) }
+    var selectedShapeType by remember { mutableStateOf(BooklistshapeType.Circle) }
     
     // SmoothRect Params
     var smoothRectCornerRadius by remember { androidx.compose.runtime.mutableFloatStateOf(20f) } // 0-50
@@ -317,7 +317,7 @@ private fun CreatePlaylistContent(
                 title = {
                     AnimatedContent(targetState = currentStep, label = "Title Animation") { step ->
                         Text(
-                            if (step == 0) "New playlist" else "Add Songs",
+                            if (step == 0) "New Booklist" else "Add Tracks",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = 24.sp,
                                 textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
@@ -361,7 +361,7 @@ private fun CreatePlaylistContent(
                     },
                     onClick = {
                         if (currentStep == 0) {
-                            if (playlistName.isNotBlank()) {
+                            if (BooklistName.isNotBlank()) {
                                 currentStep = 1
                             }
                         } else {
@@ -376,18 +376,18 @@ private fun CreatePlaylistContent(
                             val shapeTypeForSave = if (selectedTab == 2) selectedShapeType.name else null
                             val (d1, d2, d3, d4) = if (selectedTab == 2) {
                                 when (selectedShapeType) {
-                                    PlaylistShapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
-                                    PlaylistShapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
+                                    BooklistshapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
+                                    BooklistshapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
                                     else -> Quadruple(0f, 0f, 0f, 0f)
                                 }
                             } else Quadruple(null, null, null, null)
 
                             onCreate(
-                                playlistName, 
+                                BooklistName, 
                                 imageUriString, 
                                 color, 
                                 icon, 
-                                selectedSongIds.filterValues { it }.keys.toList(),
+                                selectedTrackIds.filterValues { it }.keys.toList(),
                                 scale,
                                 panX,
                                 panY,
@@ -401,8 +401,8 @@ private fun CreatePlaylistContent(
                     modifier = Modifier
                         .padding(bottom = 8.dp, end = 8.dp)
                         .height(56.dp), // Standard height, feels substantial
-                    containerColor = if (currentStep == 0 && playlistName.isBlank()) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = if (currentStep == 0 && playlistName.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onTertiaryContainer,
+                    containerColor = if (currentStep == 0 && BooklistName.isBlank()) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = if (currentStep == 0 && BooklistName.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }
         },
@@ -423,9 +423,9 @@ private fun CreatePlaylistContent(
             label = "Step Transition"
         ) { step ->
             if (step == 0) {
-                 PlaylistFormContent(
-                     playlistName = playlistName,
-                     onNameChange = { playlistName = it },
+                 BooklistFormContent(
+                     BooklistName = BooklistName,
+                     onNameChange = { BooklistName = it },
                      selectedTab = selectedTab,
                      onTabChange = { selectedTab = it },
                      selectedImageUri = selectedImageUri,
@@ -457,24 +457,24 @@ private fun CreatePlaylistContent(
                      onStarScaleChange = { starScale = it }
                  )
             } else {
-                 val filteredSongs = remember(searchQuery, allSongs) {
-                      if (searchQuery.isBlank()) allSongs 
-                      else allSongs.filter { 
+                 val filteredTracks = remember(searchQuery, allTracks) {
+                      if (searchQuery.isBlank()) allTracks 
+                      else allTracks.filter { 
                           it.title.contains(searchQuery, ignoreCase = true) || 
-                          it.artist.contains(searchQuery, ignoreCase = true) 
+                          it.Author.contains(searchQuery, ignoreCase = true) 
                       }
                  }
 
-                 val animatedAlbumCornerRadius = 60.dp
-                 val albumShape = remember(animatedAlbumCornerRadius) {
+                 val animatedBookCornerRadius = 60.dp
+                 val Bookshape = remember(animatedBookCornerRadius) {
                      AbsoluteSmoothCornerShape(
-                         cornerRadiusTL = animatedAlbumCornerRadius,
+                         cornerRadiusTL = animatedBookCornerRadius,
                          smoothnessAsPercentTR = 60,
-                         cornerRadiusTR = animatedAlbumCornerRadius,
+                         cornerRadiusTR = animatedBookCornerRadius,
                          smoothnessAsPercentBR = 60,
-                         cornerRadiusBL = animatedAlbumCornerRadius,
+                         cornerRadiusBL = animatedBookCornerRadius,
                          smoothnessAsPercentBL = 60,
-                         cornerRadiusBR = animatedAlbumCornerRadius,
+                         cornerRadiusBR = animatedBookCornerRadius,
                          smoothnessAsPercentTL = 60
                      )
                  }
@@ -486,7 +486,7 @@ private fun CreatePlaylistContent(
                            modifier = Modifier
                                .fillMaxWidth()
                                .padding(16.dp),
-                           label = { Text("Search songs") },
+                           label = { Text("Search Tracks") },
                            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                            trailingIcon = if (searchQuery.isNotEmpty()) {
                                { IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Rounded.Clear, null) } }
@@ -502,11 +502,11 @@ private fun CreatePlaylistContent(
                            )
                       )
                       
-                      SongPickerList(
-                          filteredSongs = filteredSongs,
+                      TrackPickerList(
+                          filteredTracks = filteredTracks,
                           isLoading = false,
-                          selectedSongIds = selectedSongIds,
-                          albumShape = albumShape,
+                          selectedTrackIds = selectedTrackIds,
+                          Bookshape = Bookshape,
                           modifier = Modifier
                               .fillMaxSize()
                               .imePadding()
@@ -518,12 +518,12 @@ private fun CreatePlaylistContent(
 }
 
 @Composable
-fun EditPlaylistContent(
+fun EditBooklistContent(
     initialName: String,
     initialImageUri: String?,
     initialColor: Int?,
     initialIconName: String?,
-    initialShapeType: PlaylistShapeType?,
+    initialShapeType: BooklistshapeType?,
     initialShapeDetail1: Float?,
     initialShapeDetail2: Float?,
     initialShapeDetail3: Float?,
@@ -534,12 +534,12 @@ fun EditPlaylistContent(
     val context = LocalContext.current
     
     // Initial State Setup
-    var playlistName by remember { mutableStateOf(initialName) }
+    var BooklistName by remember { mutableStateOf(initialName) }
     
     // Determine initial tab
     // 0=Default, 1=Image, 2=Icon
     // Logic: If imageUri present -> Image. If Color/Icon present -> Icon. Else Default.
-    // NOTE: existing playlist usually has one of these.
+    // NOTE: existing Booklist usually has one of these.
     var selectedTab by remember { 
         mutableStateOf(
             when {
@@ -557,16 +557,16 @@ fun EditPlaylistContent(
     var showCropUi by remember { mutableStateOf(false) }
     var imageBitmap by remember(selectedImageUri) { mutableStateOf<ImageBitmap?>(null) }
     
-    // Crop: We don't store crop params in DB currently for playlist updates properly unless we re-save image.
+    // Crop: We don't store crop params in DB currently for Booklist updates properly unless we re-save image.
     // But assuming we start with scale 1f if editing.
     var cropScale by remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
     var cropOffset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
 
     val defaultColor = MaterialTheme.colorScheme.primaryContainer.toArgb()
     var selectedColor by remember { mutableStateOf(initialColor ?: defaultColor) }
-    var selectedIconName by remember { mutableStateOf(initialIconName ?: "MusicNote") }
+    var selectedIconName by remember { mutableStateOf(initialIconName ?: "AudiobookNote") }
 
-    var selectedShapeType by remember { mutableStateOf(initialShapeType ?: PlaylistShapeType.Circle) }
+    var selectedShapeType by remember { mutableStateOf(initialShapeType ?: BooklistshapeType.Circle) }
     
     // Shape Params
     var smoothRectCornerRadius by remember { androidx.compose.runtime.mutableFloatStateOf(initialShapeDetail1 ?: 20f) }
@@ -615,7 +615,7 @@ fun EditPlaylistContent(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Edit Playlist",
+                        "Edit Booklist",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = 24.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
@@ -658,14 +658,14 @@ fun EditPlaylistContent(
                         val shapeTypeForSave = if (selectedTab == 2) selectedShapeType.name else null
                         val (d1, d2, d3, d4) = if (selectedTab == 2) {
                             when (selectedShapeType) {
-                                PlaylistShapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
-                                PlaylistShapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
+                                BooklistshapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
+                                BooklistshapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
                                 else -> Quadruple(0f, 0f, 0f, 0f)
                             }
                         } else Quadruple(null, null, null, null)
 
                         onSave(
-                            playlistName,
+                            BooklistName,
                             imageUriString,
                             color,
                             icon,
@@ -688,10 +688,10 @@ fun EditPlaylistContent(
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
-         PlaylistFormContent(
+         BooklistFormContent(
              modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-             playlistName = playlistName,
-             onNameChange = { playlistName = it },
+             BooklistName = BooklistName,
+             onNameChange = { BooklistName = it },
              selectedTab = selectedTab,
              onTabChange = { selectedTab = it },
              selectedImageUri = selectedImageUri,
@@ -727,9 +727,9 @@ fun EditPlaylistContent(
 
 
 @Composable
-private fun PlaylistFormContent(
+private fun BooklistFormContent(
     modifier: Modifier = Modifier,
-    playlistName: String,
+    BooklistName: String,
     onNameChange: (String) -> Unit,
     selectedTab: Int,
     onTabChange: (Int) -> Unit,
@@ -746,8 +746,8 @@ private fun PlaylistFormContent(
     onColorChange: (Int) -> Unit,
     selectedIconName: String?,
     onIconChange: (String) -> Unit,
-    selectedShapeType: PlaylistShapeType,
-    onShapeTypeChange: (PlaylistShapeType) -> Unit,
+    selectedShapeType: BooklistshapeType,
+    onShapeTypeChange: (BooklistshapeType) -> Unit,
     smoothRectCornerRadius: Float,
     onSmoothRectCornerRadiusChange: (Float) -> Unit,
     smoothRectSmoothness: Float,
@@ -892,8 +892,8 @@ private fun PlaylistFormContent(
                              label = "shape_transition"
                          ) { currentShapeType ->
                              val currentShape: Shape = when(currentShapeType) {
-                                 PlaylistShapeType.Circle -> CircleShape
-                                 PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(
+                                 BooklistshapeType.Circle -> CircleShape
+                                 BooklistshapeType.SmoothRect -> AbsoluteSmoothCornerShape(
                                      cornerRadiusTL = smoothRectCornerRadius.dp,
                                      smoothnessAsPercentTR = smoothRectSmoothness.toInt(),
                                      cornerRadiusTR = smoothRectCornerRadius.dp,
@@ -903,7 +903,7 @@ private fun PlaylistFormContent(
                                      cornerRadiusBL = smoothRectCornerRadius.dp,
                                      smoothnessAsPercentBL = smoothRectSmoothness.toInt(),
                                  )
-                                 PlaylistShapeType.RotatedPill -> {
+                                 BooklistshapeType.RotatedPill -> {
                                      androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
                                          val h = size.height
@@ -912,16 +912,16 @@ private fun PlaylistFormContent(
                                          addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                                      }
                                  }
-                                 PlaylistShapeType.Star -> RoundedStarShape(
+                                 BooklistshapeType.Star -> RoundedStarShape(
                                      sides = starSides,
                                      curve = starCurve,
                                      rotation = starRotation
                                  )
                              }
                              
-                             val shapeMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
-                             val iconMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
-                             val scaleMod = if(currentShapeType == PlaylistShapeType.Star) Modifier.graphicsLayer(scaleX = starScale, scaleY = starScale) else Modifier
+                             val shapeMod = if(currentShapeType == BooklistshapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+                             val iconMod = if(currentShapeType == BooklistshapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
+                             val scaleMod = if(currentShapeType == BooklistshapeType.Star) Modifier.graphicsLayer(scaleX = starScale, scaleY = starScale) else Modifier
 
                              Box(
                                  modifier = Modifier
@@ -934,7 +934,7 @@ private fun PlaylistFormContent(
                                  contentAlignment = Alignment.Center
                              ) {
                                  if (selectedIconName != null) {
-                                     val icon = getIconByName(selectedIconName!!) ?: Icons.Rounded.MusicNote
+                                     val icon = getIconByName(selectedIconName!!) ?: Icons.Rounded.AudiobookNote
                                      Icon(
                                          imageVector = icon,
                                          contentDescription = null,
@@ -963,9 +963,9 @@ private fun PlaylistFormContent(
         ) {
             
             OutlinedTextField(
-                value = playlistName,
+                value = BooklistName,
                 onValueChange = onNameChange,
-                label = { Text("Playlist Name") },
+                label = { Text("Booklist Name") },
                 placeholder = { Text("My awesome mix") },
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -1062,7 +1062,7 @@ private fun PlaylistFormContent(
                      )
 
                      val icons = listOf(
-                        "MusicNote", "Headphones", "Album", "Mic", "Speaker", "Favorite", "Piano", "Queue"
+                        "AudiobookNote", "Headphones", "Book", "Mic", "Speaker", "Favorite", "Piano", "Queue"
                      )
                      
                      FlowRow(
@@ -1085,7 +1085,7 @@ private fun PlaylistFormContent(
                                  contentAlignment = Alignment.Center
                              ) {
                                  Icon(
-                                     imageVector = getIconByName(iconName) ?: Icons.Rounded.MusicNote,
+                                     imageVector = getIconByName(iconName) ?: Icons.Rounded.AudiobookNote,
                                      contentDescription = null,
                                      tint = if(isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                                  )
@@ -1109,22 +1109,22 @@ private fun PlaylistFormContent(
                          contentPadding = PaddingValues(horizontal = 16.dp)
                      ) {
                          item {
-                             PlaylistShapeType.entries.forEach { shapeType ->
+                             BooklistshapeType.entries.forEach { shapeType ->
                                  val isSelected = selectedShapeType == shapeType
                                  val previewShape = when(shapeType) {
-                                     PlaylistShapeType.Circle -> CircleShape
-                                     PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(12.dp, 60, 12.dp, 60, 12.dp, 60, 12.dp, 60)
-                                     PlaylistShapeType.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                     BooklistshapeType.Circle -> CircleShape
+                                     BooklistshapeType.SmoothRect -> AbsoluteSmoothCornerShape(12.dp, 60, 12.dp, 60, 12.dp, 60, 12.dp, 60)
+                                     BooklistshapeType.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
                                          val h = size.height
                                          val pillW = w * 0.75f
                                          val offset = (w - pillW) / 2
                                          addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                                      }
-                                     PlaylistShapeType.Star -> RoundedStarShape(5, 0.15, 0f)
+                                     BooklistshapeType.Star -> RoundedStarShape(5, 0.15, 0f)
                                  }
 
-                                 val rotationM = if(shapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+                                 val rotationM = if(shapeType == BooklistshapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
                                  val cornerRadius by animateDpAsState(targetValue = if (isSelected) 12.dp else 24.dp, label = "CornerRadius")
 
                                  Row(modifier = Modifier.padding(2.dp)) {
@@ -1153,7 +1153,7 @@ private fun PlaylistFormContent(
                      }
                      
                      // Params
-                     AnimatedVisibility(visible = selectedShapeType == PlaylistShapeType.SmoothRect) {
+                     AnimatedVisibility(visible = selectedShapeType == BooklistshapeType.SmoothRect) {
                          Column(
                              modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 8.dp),
                              verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -1164,7 +1164,7 @@ private fun PlaylistFormContent(
                          }
                      }
                      
-                     AnimatedVisibility(visible = selectedShapeType == PlaylistShapeType.Star) {
+                     AnimatedVisibility(visible = selectedShapeType == BooklistshapeType.Star) {
                          Column(
                              modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 8.dp),
                              verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -1172,7 +1172,7 @@ private fun PlaylistFormContent(
                              Text("Shape parameters", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                              ShapeParameterCard("Sides", starSides.toFloat(), 3f..20f, { onStarSidesChange(it.toInt()) }, { it.toInt().toString() }, steps = 17)
                              ShapeParameterCard("Curve", starCurve.toFloat(), 0f..0.5f, { onStarCurveChange(it.toDouble()) }, { String.format("%.2f", it) })
-                             ShapeParameterCard("Rotation", starRotation, 0f..360f, onStarRotationChange, { "${it.toInt()}°" })
+                             ShapeParameterCard("Rotation", starRotation, 0f..360f, onStarRotationChange, { "${it.toInt()}Ã‚Â°" })
                              ShapeParameterCard("Scale", starScale, 0.5f..1.5f, onStarScaleChange, { String.format("%.1fx", it) })
                          }
                      }
@@ -1188,14 +1188,14 @@ private fun PlaylistFormContent(
 
 fun getIconByName(name: String?): ImageVector? {
     return when (name) {
-        "MusicNote" -> Icons.Rounded.MusicNote
+        "AudiobookNote" -> Icons.Rounded.AudiobookNote
         "Headphones" -> Icons.Rounded.Headphones
-        "Album" -> Icons.Rounded.Album
+        "Book" -> Icons.Rounded.Book
         "Mic" -> Icons.Rounded.MicExternalOn 
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite
         "Piano" -> Icons.Rounded.Piano
-        "Queue" -> Icons.Rounded.QueueMusic
+        "Queue" -> Icons.Rounded.QueueAudiobook
         else -> null
     }
 }

@@ -129,7 +129,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "β",
+                                text = "Î²",
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black
@@ -194,7 +194,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "New 10-band Equalizer with effects, plus AI integration for smarter playlists.",
+                            text = "New 10-band Equalizer with effects, plus AI integration for smarter Booklists.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -204,7 +204,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Major fixes for Casting, Queue stability, and lyrics synchronization.",
+                            text = "Major fixes for Casting, Queue stability, and Transcript synchronization.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -26,36 +26,36 @@ import kotlin.math.sin
 /**
  * Un LinearProgressIndicator para Glance que simula un efecto de onda generando un Bitmap.
  *
- * IMPORTANTE: La animación de la onda requiere un mecanismo externo (ej. CoroutineWorker)
- * que llame a `GlanceAppWidget.update` periódicamente con un `phaseShift` actualizado.
+ * IMPORTANTE: La animaciÃ³n de la onda requiere un mecanismo externo (ej. CoroutineWorker)
+ * que llame a `GlanceAppWidget.update` periÃ³dicamente con un `phaseShift` actualizado.
  *
  * @param progress El progreso actual (entre 0.0f y 1.0f).
- * @param isPlaying Si el contenido asociado se está reproduciendo (para mostrar la onda).
+ * @param isPlaying Si el contenido asociado se estÃ¡ reproduciendo (para mostrar la onda).
  * @param modifier El GlanceModifier a aplicar.
  * @param height La altura total del componente. Es importante para que ocupe el espacio correcto.
- * @param phaseShift El desplazamiento de fase para la animación de la onda (de 0 a 2*PI).
- * Debe ser actualizado externamente para crear la ilusión de movimiento.
+ * @param phaseShift El desplazamiento de fase para la animaciÃ³n de la onda (de 0 a 2*PI).
+ * Debe ser actualizado externamente para crear la ilusiÃ³n de movimiento.
  * @param activeTrackColor Color de la parte activa de la pista (la onda/parte recorrida).
  * @param trackBackgroundColor Color del fondo de la pista (la parte no recorrida).
- * @param thumbColor Color del círculo al final del progreso.
+ * @param thumbColor Color del cÃ­rculo al final del progreso.
  * @param hideInactiveTrackPortion Si es `true`, la parte del fondo del track que ya ha sido
- * recorrida no se dibujará.
- * @param trackHeight Altura de la línea de la pista.
- * @param thumbRadius Radio del círculo.
+ * recorrida no se dibujarÃ¡.
+ * @param trackHeight Altura de la lÃ­nea de la pista.
+ * @param thumbRadius Radio del cÃ­rculo.
  * @param waveAmplitude Amplitud de la onda cuando `isPlaying` es true.
- * @param waveFrequency Frecuencia de la onda (más alto = más ondulaciones).
+ * @param waveFrequency Frecuencia de la onda (mÃ¡s alto = mÃ¡s ondulaciones).
  */
 @Composable
 fun WavyLinearProgressIndicator(
     progress: Float,
     isPlaying: Boolean,
     modifier: GlanceModifier = GlanceModifier,
-    height: Dp = 24.dp, // Parámetro para controlar la altura
+    height: Dp = 24.dp, // ParÃ¡metro para controlar la altura
     phaseShift: Float = 0f,
     activeTrackColor: Color = Color(0xFF6200EE),
     trackBackgroundColor: Color = Color(0xFF6200EE).copy(alpha = 0.24f),
     thumbColor: Color = Color(0xFF6200EE),
-    hideInactiveTrackPortion: Boolean = true, // Nuevo parámetro
+    hideInactiveTrackPortion: Boolean = true, // Nuevo parÃ¡metro
     trackHeight: Dp = 6.dp,
     thumbRadius: Dp = 8.dp,
     waveAmplitude: Dp = 3.dp,
@@ -87,8 +87,8 @@ fun WavyLinearProgressIndicator(
 }
 
 /**
- * Función de utilidad que genera un Bitmap con el dibujo de la barra de progreso ondulada.
- * Esta función adapta la lógica del WavyMusicSlider original para dibujar en un Canvas de Android.
+ * FunciÃ³n de utilidad que genera un Bitmap con el dibujo de la barra de progreso ondulada.
+ * Esta funciÃ³n adapta la lÃ³gica del WavyAudiobookSlider original para dibujar en un Canvas de Android.
  */
 private fun createWavyProgressBitmap(
     context: Context,
@@ -103,7 +103,7 @@ private fun createWavyProgressBitmap(
     thumbRadius: Dp,
     waveAmplitude: Dp,
     waveFrequency: Float,
-    bitmapWidth: Int = 1000, // Ancho fijo para la resolución del bitmap
+    bitmapWidth: Int = 1000, // Ancho fijo para la resoluciÃ³n del bitmap
     bitmapHeight: Int
 ): Bitmap {
     val bmp = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
@@ -152,7 +152,7 @@ private fun createWavyProgressBitmap(
         canvas.drawLine(trackStart, centerY, trackEnd, centerY, inactivePaint)
     }
 
-    // Dibujar pista activa (onda o línea)
+    // Dibujar pista activa (onda o lÃ­nea)
     if (progress > 0) {
         if (waveAmplitudePx > 0.1f) {
             val wavePath = Path()

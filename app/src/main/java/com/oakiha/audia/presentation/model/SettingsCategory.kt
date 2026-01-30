@@ -6,8 +6,8 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.LibraryMusic
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.LibraryAudiobook
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.SmartToy
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,9 +22,9 @@ enum class SettingsCategory(
 ) {
     LIBRARY(
         id = "library",
-        title = "Music Management",
+        title = "Audiobook Management",
         subtitle = "Manage folders, refresh library, parsing options",
-        icon = Icons.Rounded.LibraryMusic
+        icon = Icons.Rounded.LibraryAudiobook
     ),
     APPEARANCE(
         id = "appearance",
@@ -36,7 +36,7 @@ enum class SettingsCategory(
         id = "playback",
         title = "Playback",
         subtitle = "Audio behavior, crossfade, and background play",
-        icon = Icons.Rounded.MusicNote // Using MusicNote again or maybe PlayCircle if available
+        icon = Icons.Rounded.AudiobookNote // Using AudiobookNote again or maybe PlayCircle if available
     ),
     AI_INTEGRATION(
         id = "ai",

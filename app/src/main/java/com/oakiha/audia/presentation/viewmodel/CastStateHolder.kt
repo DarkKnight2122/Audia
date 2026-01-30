@@ -9,7 +9,7 @@ import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.service.player.CastPlayer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
@@ -61,9 +61,9 @@ class CastStateHolder @Inject constructor(
     // Last known remote state
     var lastRemoteMediaStatus: MediaStatus? = null
         private set
-    var lastRemoteQueue: List<Song> = emptyList()
+    var lastRemoteQueue: List<Track> = emptyList()
         private set
-    var lastRemoteSongId: String? = null
+    var lastRemoteTrackId: String? = null
         private set
     var lastRemoteStreamPosition: Long = 0L
         private set
@@ -72,10 +72,10 @@ class CastStateHolder @Inject constructor(
     var lastRemoteItemId: Int? = null
         private set
     
-    // Pending remote song tracking
-    var pendingRemoteSongId: String? = null
+    // Pending remote Track tracking
+    var pendingRemoteTrackId: String? = null
         private set
-    var pendingRemoteSongMarkedAt: Long = 0L
+    var pendingRemoteTrackMarkedAt: Long = 0L
         private set
     
     // Is currently seeking remotely
@@ -136,23 +136,23 @@ class CastStateHolder @Inject constructor(
     
     fun updateLastRemoteState(
         mediaStatus: MediaStatus? = null,
-        queue: List<Song>? = null,
-        songId: String? = null,
+        queue: List<Track>? = null,
+        TrackId: String? = null,
         streamPosition: Long? = null,
         repeatMode: Int? = null,
         itemId: Int? = null
     ) {
         mediaStatus?.let { lastRemoteMediaStatus = it }
         queue?.let { lastRemoteQueue = it }
-        songId?.let { lastRemoteSongId = it }
+        TrackId?.let { lastRemoteTrackId = it }
         streamPosition?.let { lastRemoteStreamPosition = it }
         repeatMode?.let { lastRemoteRepeatMode = it }
         itemId?.let { lastRemoteItemId = it }
     }
     
-    fun setPendingRemoteSong(songId: String?, markedAt: Long = System.currentTimeMillis()) {
-        pendingRemoteSongId = songId
-        pendingRemoteSongMarkedAt = markedAt
+    fun setPendingRemoteTrack(TrackId: String?, markedAt: Long = System.currentTimeMillis()) {
+        pendingRemoteTrackId = TrackId
+        pendingRemoteTrackMarkedAt = markedAt
     }
     
     fun clearRemoteState() {
@@ -163,10 +163,10 @@ class CastStateHolder @Inject constructor(
         _pendingCastRouteId = null
         lastRemoteMediaStatus = null
         lastRemoteQueue = emptyList()
-        lastRemoteSongId = null
+        lastRemoteTrackId = null
         lastRemoteStreamPosition = 0L
         lastRemoteItemId = null
-        pendingRemoteSongId = null
+        pendingRemoteTrackId = null
     }
     
     // MediaRouter State

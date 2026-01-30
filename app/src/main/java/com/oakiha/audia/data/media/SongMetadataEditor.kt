@@ -10,7 +10,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import com.kyant.taglib.Picture
 import com.kyant.taglib.TagLib
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.gagravarr.opus.OpusFile
@@ -21,7 +21,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Locale
 
-private const val TAG = "SongMetadataEditor"
+private const val TAG = "TrackMetadataEditor"
 private const val METADATA_EDIT_TIMEOUT_MS = 30_000L
 
 /**
@@ -40,7 +40,7 @@ enum class MetadataEditError {
 }
 
 
-class SongMetadataEditor(private val context: Context, private val musicDao: MusicDao) {
+class TrackMetadataEditor(private val context: Context, private val AudiobookDao: AudiobookDao) {
 
     // File extensions that require VorbisJava (TagLib has issues with these via file descriptors)
     private val opusExtensions = setOf("opus", "ogg")
@@ -50,10 +50,10 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
      */
     private object MetadataLimits {
         const val MAX_TITLE_LENGTH = 500
-        const val MAX_ARTIST_LENGTH = 500
-        const val MAX_ALBUM_LENGTH = 500
-        const val MAX_GENRE_LENGTH = 100
-        const val MAX_LYRICS_LENGTH = 50_000
+        const val MAX_Author_LENGTH = 500
+        const val MAX_Book_LENGTH = 500
+        const val MAX_Category_LENGTH = 100
+        const val MAX_Transcript_LENGTH = 50_000
     }
 
     /**
@@ -61,17 +61,17 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
      */
     private fun validateMetadataInput(
         title: String,
-        artist: String,
-        album: String,
-        genre: String,
-        lyrics: String
+        Author: String,
+        Book: String,
+        Category: String,
+        Transcript: String
     ): String? {
         if (title.isBlank()) return "Title cannot be empty"
         if (title.length > MetadataLimits.MAX_TITLE_LENGTH) return "Title too long"
-        if (artist.length > MetadataLimits.MAX_ARTIST_LENGTH) return "Artist name too long"
-        if (album.length > MetadataLimits.MAX_ALBUM_LENGTH) return "Album name too long"
-        if (genre.length > MetadataLimits.MAX_GENRE_LENGTH) return "Genre too long"
-        if (lyrics.length > MetadataLimits.MAX_LYRICS_LENGTH) return "Lyrics too long"
+        if (Author.length > MetadataLimits.MAX_Author_LENGTH) return "Author name too long"
+        if (Book.length > MetadataLimits.MAX_Book_LENGTH) return "Book name too long"
+        if (Category.length > MetadataLimits.MAX_Category_LENGTH) return "Category too long"
+        if (Transcript.length > MetadataLimits.MAX_Transcript_LENGTH) return "Transcript too long"
         return null
     }
 
@@ -87,41 +87,41 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
         return parent.canWrite()
     }
 
-    fun editSongMetadata(
-        songId: Long,
+    fun editTrackMetadata(
+        TrackId: Long,
         newTitle: String,
-        newArtist: String,
-        newAlbum: String,
-        newGenre: String,
-        newLyrics: String,
+        newAuthor: String,
+        newBook: String,
+        newCategory: String,
+        newTranscript: String,
         newTrackNumber: Int,
         coverArtUpdate: CoverArtUpdate? = null,
-    ): SongMetadataEditResult {
+    ): TrackMetadataEditResult {
         // Input validation first
-        val validationError = validateMetadataInput(newTitle, newArtist, newAlbum, newGenre, newLyrics)
+        val validationError = validateMetadataInput(newTitle, newAuthor, newBook, newCategory, newTranscript)
         if (validationError != null) {
             Timber.w("Metadata validation failed: $validationError")
-            return SongMetadataEditResult(
+            return TrackMetadataEditResult(
                 success = false,
-                updatedAlbumArtUri = null,
+                updatedBookArtUri = null,
                 error = MetadataEditError.INVALID_INPUT,
                 errorMessage = validationError
             )
         }
 
         return try {
-            val trimmedLyrics = newLyrics.trim()
-            val trimmedGenre = newGenre.trim()
-            val normalizedGenre = trimmedGenre.takeIf { it.isNotBlank() }
-            val normalizedLyrics = trimmedLyrics.takeIf { it.isNotBlank() }
+            val trimmedTranscript = newTranscript.trim()
+            val trimmedCategory = newCategory.trim()
+            val normalizedCategory = trimmedCategory.takeIf { it.isNotBlank() }
+            val normalizedTranscript = trimmedTranscript.takeIf { it.isNotBlank() }
 
             // Get file path to determine which library to use
-            val filePath = getFilePathFromMediaStore(songId)
+            val filePath = getFilePathFromMediaStore(TrackId)
             if (filePath == null) {
-                Log.e(TAG, "Could not get file path for songId: $songId")
-                return SongMetadataEditResult(
+                Log.e(TAG, "Could not get file path for TrackId: $TrackId")
+                return TrackMetadataEditResult(
                     success = false,
-                    updatedAlbumArtUri = null,
+                    updatedBookArtUri = null,
                     error = MetadataEditError.FILE_NOT_FOUND,
                     errorMessage = "Could not find file in media library"
                 )
@@ -130,9 +130,9 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             // Check write permissions before attempting edit
             if (!checkFileWritePermission(filePath)) {
                 Log.e(TAG, "No write permission for file: $filePath")
-                return SongMetadataEditResult(
+                return TrackMetadataEditResult(
                     success = false,
-                    updatedAlbumArtUri = null,
+                    updatedBookArtUri = null,
                     error = MetadataEditError.NO_WRITE_PERMISSION,
                     errorMessage = "Cannot write to this file. It may be on read-only storage or protected."
                 )
@@ -157,20 +157,20 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
                 updateFileMetadataWithTagLib(
                     filePath = filePath,
                     newTitle = newTitle,
-                    newArtist = newArtist,
-                    newAlbum = newAlbum,
-                    newGenre = trimmedGenre,
-                    newLyrics = trimmedLyrics,
+                    newAuthor = newAuthor,
+                    newBook = newBook,
+                    newCategory = trimmedCategory,
+                    newTranscript = trimmedTranscript,
                     newTrackNumber = newTrackNumber,
                     coverArtUpdate = coverArtUpdate
                 )
             }
 
             if (!fileUpdateSuccess) {
-                Log.e(TAG, "Failed to update file metadata for songId: $songId")
-                return SongMetadataEditResult(
+                Log.e(TAG, "Failed to update file metadata for TrackId: $TrackId")
+                return TrackMetadataEditResult(
                     success = false,
-                    updatedAlbumArtUri = null,
+                    updatedBookArtUri = null,
                     error = MetadataEditError.TAGLIB_ERROR,
                     errorMessage = "Failed to write metadata to file"
                 )
@@ -178,36 +178,36 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
 
             // 2. SECOND: Update MediaStore to reflect the changes
             val mediaStoreSuccess = updateMediaStoreMetadata(
-                songId = songId,
+                TrackId = TrackId,
                 title = newTitle,
-                artist = newArtist,
-                album = newAlbum,
-                genre = trimmedGenre,
+                Author = newAuthor,
+                Book = newBook,
+                Category = trimmedCategory,
                 trackNumber = newTrackNumber
             )
 
             if (!mediaStoreSuccess) {
-                Timber.w("MediaStore update failed, but file was updated for songId: $songId")
+                Timber.w("MediaStore update failed, but file was updated for TrackId: $TrackId")
                 // Continue anyway since the file was updated
             }
 
             // 3. Update local database and save cover art preview
             var storedCoverArtUri: String? = null
             runBlocking {
-                musicDao.updateSongMetadata(
-                    songId,
+                AudiobookDao.updateTrackMetadata(
+                    TrackId,
                     newTitle,
-                    newArtist,
-                    newAlbum,
-                    normalizedGenre,
-                    normalizedLyrics,
+                    newAuthor,
+                    newBook,
+                    normalizedCategory,
+                    normalizedTranscript,
                     newTrackNumber
                 )
 
                 coverArtUpdate?.let { update ->
-                    storedCoverArtUri = saveCoverArtPreview(songId, update)
+                    storedCoverArtUri = saveCoverArtPreview(TrackId, update)
                     storedCoverArtUri?.let { coverUri ->
-                        musicDao.updateSongAlbumArt(songId, coverUri)
+                        AudiobookDao.updateTrackBookArt(TrackId, coverUri)
                     }
                 }
             }
@@ -215,44 +215,44 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             // 4. Force media rescan with the known file path
             forceMediaRescan(filePath)
 
-            Log.e(TAG, "METADATA_EDIT: Successfully updated metadata for songId: $songId")
-            SongMetadataEditResult(success = true, updatedAlbumArtUri = storedCoverArtUri)
+            Log.e(TAG, "METADATA_EDIT: Successfully updated metadata for TrackId: $TrackId")
+            TrackMetadataEditResult(success = true, updatedBookArtUri = storedCoverArtUri)
 
         } catch (e: SecurityException) {
-            Timber.e(e, "Security exception editing metadata for songId: $songId")
-            SongMetadataEditResult(
+            Timber.e(e, "Security exception editing metadata for TrackId: $TrackId")
+            TrackMetadataEditResult(
                 success = false,
-                updatedAlbumArtUri = null,
+                updatedBookArtUri = null,
                 error = MetadataEditError.NO_WRITE_PERMISSION,
                 errorMessage = "Permission denied: ${e.localizedMessage}"
             )
         } catch (e: IOException) {
-            Timber.e(e, "IO exception editing metadata for songId: $songId")
-            SongMetadataEditResult(
+            Timber.e(e, "IO exception editing metadata for TrackId: $TrackId")
+            TrackMetadataEditResult(
                 success = false,
-                updatedAlbumArtUri = null,
+                updatedBookArtUri = null,
                 error = MetadataEditError.IO_ERROR,
                 errorMessage = "Error accessing file: ${e.localizedMessage}"
             )
         } catch (e: OutOfMemoryError) {
-            Timber.e(e, "OOM editing metadata for songId: $songId")
-            SongMetadataEditResult(
+            Timber.e(e, "OOM editing metadata for TrackId: $TrackId")
+            TrackMetadataEditResult(
                 success = false,
-                updatedAlbumArtUri = null,
+                updatedBookArtUri = null,
                 error = MetadataEditError.FILE_CORRUPTED,
                 errorMessage = "File too large or corrupted"
             )
         } catch (e: Exception) {
-            Timber.e(e, "Failed to update metadata for songId: $songId")
+            Timber.e(e, "Failed to update metadata for TrackId: $TrackId")
             // Determine error type from exception
             val errorType = when {
                 e.message?.contains("corrupt", ignoreCase = true) == true -> MetadataEditError.FILE_CORRUPTED
                 e.message?.contains("unsupported", ignoreCase = true) == true -> MetadataEditError.UNSUPPORTED_FORMAT
                 else -> MetadataEditError.UNKNOWN
             }
-            SongMetadataEditResult(
+            TrackMetadataEditResult(
                 success = false,
-                updatedAlbumArtUri = null,
+                updatedBookArtUri = null,
                 error = errorType,
                 errorMessage = e.localizedMessage ?: "Unknown error occurred"
             )
@@ -328,10 +328,10 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
     private fun updateFileMetadataWithTagLib(
         filePath: String,
         newTitle: String,
-        newArtist: String,
-        newAlbum: String,
-        newGenre: String,
-        newLyrics: String,
+        newAuthor: String,
+        newBook: String,
+        newCategory: String,
+        newTranscript: String,
         newTrackNumber: Int,
         coverArtUpdate: CoverArtUpdate? = null
     ): Boolean {
@@ -366,12 +366,12 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
 
                 // Update metadata fields
                 propertyMap["TITLE"] = arrayOf(newTitle)
-                propertyMap["ARTIST"] = arrayOf(newArtist)
-                propertyMap["ALBUM"] = arrayOf(newAlbum)
-                propertyMap.upsertOrRemove("GENRE", newGenre)
-                propertyMap.upsertOrRemove("LYRICS", newLyrics)
+                propertyMap["Author"] = arrayOf(newAuthor)
+                propertyMap["Book"] = arrayOf(newBook)
+                propertyMap.upsertOrRemove("Category", newCategory)
+                propertyMap.upsertOrRemove("Transcript", newTranscript)
                 propertyMap["TRACKNUMBER"] = arrayOf(newTrackNumber.toString())
-                propertyMap["ALBUMARTIST"] = arrayOf(newArtist)
+                propertyMap["BookAuthor"] = arrayOf(newAuthor)
                 Log.e(TAG, "TAGLIB: Updated property map, saving...")
 
                 // Save metadata
@@ -423,10 +423,10 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
     private fun updateFileMetadataWithVorbisJava(
         filePath: String,
         newTitle: String,
-        newArtist: String,
-        newAlbum: String,
-        newGenre: String,
-        newLyrics: String,
+        newAuthor: String,
+        newBook: String,
+        newCategory: String,
+        newTranscript: String,
         newTrackNumber: Int
     ): Boolean {
         val audioFile = File(filePath)
@@ -450,22 +450,22 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             
             // Clear existing tags and set new ones
             tags.removeComments("TITLE")
-            tags.removeComments("ARTIST")
-            tags.removeComments("ALBUM")
-            tags.removeComments("GENRE")
-            tags.removeComments("LYRICS")
+            tags.removeComments("Author")
+            tags.removeComments("Book")
+            tags.removeComments("Category")
+            tags.removeComments("Transcript")
             tags.removeComments("TRACKNUMBER")
-            tags.removeComments("ALBUMARTIST")
+            tags.removeComments("BookAuthor")
             
             // Add new values (only if not blank)
             if (newTitle.isNotBlank()) tags.addComment("TITLE", newTitle)
-            if (newArtist.isNotBlank()) {
-                tags.addComment("ARTIST", newArtist)
-                tags.addComment("ALBUMARTIST", newArtist)
+            if (newAuthor.isNotBlank()) {
+                tags.addComment("Author", newAuthor)
+                tags.addComment("BookAuthor", newAuthor)
             }
-            if (newAlbum.isNotBlank()) tags.addComment("ALBUM", newAlbum)
-            if (newGenre.isNotBlank()) tags.addComment("GENRE", newGenre)
-            if (newLyrics.isNotBlank()) tags.addComment("LYRICS", newLyrics)
+            if (newBook.isNotBlank()) tags.addComment("Book", newBook)
+            if (newCategory.isNotBlank()) tags.addComment("Category", newCategory)
+            if (newTranscript.isNotBlank()) tags.addComment("Transcript", newTranscript)
             if (newTrackNumber > 0) tags.addComment("TRACKNUMBER", newTrackNumber.toString())
             
             Log.e(TAG, "VORBISJAVA: Updated tags: ${tags.allComments}")
@@ -532,25 +532,25 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
     }
 
     private fun updateMediaStoreMetadata(
-        songId: Long,
+        TrackId: Long,
         title: String,
-        artist: String,
-        album: String,
-        genre: String,
+        Author: String,
+        Book: String,
+        Category: String,
         trackNumber: Int
     ): Boolean {
         return try {
-            val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
+            val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, TrackId)
 
             val values = ContentValues().apply {
                 put(MediaStore.Audio.Media.TITLE, title)
-                put(MediaStore.Audio.Media.ARTIST, artist)
-                put(MediaStore.Audio.Media.ALBUM, album)
-                put(MediaStore.Audio.Media.GENRE, genre)
+                put(MediaStore.Audio.Media.Author, Author)
+                put(MediaStore.Audio.Media.Book, Book)
+                put(MediaStore.Audio.Media.Category, Category)
                 put(MediaStore.Audio.Media.TRACK, trackNumber)
                 put(MediaStore.Audio.Media.DISPLAY_NAME, title)
                 put(MediaStore.Audio.Media.DATE_MODIFIED, System.currentTimeMillis() / 1000)
-                put(MediaStore.Audio.Media.ALBUM_ARTIST, artist)
+                put(MediaStore.Audio.Media.Book_Author, Author)
             }
 
             val rowsUpdated = context.contentResolver.update(uri, values, null, null)
@@ -560,7 +560,7 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             success
 
         } catch (e: Exception) {
-            Timber.e(e, "Failed to update MediaStore for songId: $songId")
+            Timber.e(e, "Failed to update MediaStore for TrackId: $TrackId")
             false
         }
     }
@@ -593,14 +593,14 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
         }
     }
 
-    private fun getFilePathFromMediaStore(songId: Long): String? {
-        Log.e(TAG, "getFilePathFromMediaStore: Looking up songId: $songId")
+    private fun getFilePathFromMediaStore(TrackId: Long): String? {
+        Log.e(TAG, "getFilePathFromMediaStore: Looking up TrackId: $TrackId")
         return try {
             context.contentResolver.query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Audio.Media.DATA),
                 "${MediaStore.Audio.Media._ID} = ?",
-                arrayOf(songId.toString()),
+                arrayOf(TrackId.toString()),
                 null
             )?.use { cursor ->
                 Log.e(TAG, "getFilePathFromMediaStore: Cursor count: ${cursor.count}")
@@ -609,7 +609,7 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
                     Log.e(TAG, "getFilePathFromMediaStore: Found path: $path")
                     path
                 } else {
-                    Log.e(TAG, "getFilePathFromMediaStore: No file found for songId: $songId")
+                    Log.e(TAG, "getFilePathFromMediaStore: No file found for TrackId: $TrackId")
                     null
                 }
             }
@@ -618,27 +618,27 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             null
         }
     }
-    private fun saveCoverArtPreview(songId: Long, coverArtUpdate: CoverArtUpdate): String? {
+    private fun saveCoverArtPreview(TrackId: Long, coverArtUpdate: CoverArtUpdate): String? {
         return try {
             val extension = imageExtensionFromMimeType(coverArtUpdate.mimeType) ?: "jpg"
             val directory = File(context.cacheDir, "").apply {
                 if (!exists()) mkdirs()
             }
 
-            // Clean up old cover art files for this song
+            // Clean up old cover art files for this Track
             directory.listFiles { file ->
-                file.name.startsWith("song_art_${songId}")
+                file.name.startsWith("Track_art_${TrackId}")
             }?.forEach { it.delete() }
 
             // Save new cover art
-            val file = File(directory, "song_art_${songId}_${System.currentTimeMillis()}.$extension")
+            val file = File(directory, "Track_art_${TrackId}_${System.currentTimeMillis()}.$extension")
             FileOutputStream(file).use { outputStream ->
                 outputStream.write(coverArtUpdate.bytes)
             }
 
             file.toUri().toString()
         } catch (e: Exception) {
-            Timber.e(e, "Error saving cover art preview for songId: $songId")
+            Timber.e(e, "Error saving cover art preview for TrackId: $TrackId")
             null
         }
     }
@@ -663,9 +663,9 @@ private fun MutableMap<String, Array<String>>.upsertOrRemove(key: String, value:
 }
 
 // Data classes
-data class SongMetadataEditResult(
+data class TrackMetadataEditResult(
     val success: Boolean,
-    val updatedAlbumArtUri: String?,
+    val updatedBookArtUri: String?,
     val error: MetadataEditError? = null,
     val errorMessage: String? = null
 )

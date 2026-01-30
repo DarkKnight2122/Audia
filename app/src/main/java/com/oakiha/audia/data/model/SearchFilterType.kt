@@ -5,8 +5,8 @@ import androidx.compose.runtime.Immutable
 @Immutable
 enum class SearchFilterType {
     ALL,
-    SONGS,
-    ALBUMS,
-    ARTISTS,
-    PLAYLISTS
+    Tracks,
+    Books,
+    Authors,
+    Booklists
 }

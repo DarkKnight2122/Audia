@@ -67,7 +67,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AiPlaylistSheet(
+fun AiBooklistsheet(
     onDismiss: () -> Unit,
     onGenerateClick: (prompt: String, minLength: Int, maxLength: Int) -> Unit,
     isGenerating: Boolean,
@@ -233,7 +233,7 @@ fun AiPlaylistSheet(
                         color = colors.primary
                     )
                     Text(
-                        text = "Playlist Generator",
+                        text = "Booklist Generator",
                         style = MaterialTheme.typography.titleMedium,
                         fontFamily = GoogleSansRounded,
                         color = colors.onSurfaceVariant
@@ -243,7 +243,7 @@ fun AiPlaylistSheet(
 
             // Description text
             Text(
-                text = "Describe the vibe, mood, or activity and let AI curate the perfect playlist from your library.",
+                text = "Describe the vibe, mood, or activity and let AI curate the perfect Booklist from your library.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
@@ -261,7 +261,7 @@ fun AiPlaylistSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Playlist size",
+                        text = "Booklist size",
                         style = MaterialTheme.typography.labelLarge,
                         fontFamily = GoogleSansRounded,
                         fontWeight = FontWeight.SemiBold,
@@ -274,7 +274,7 @@ fun AiPlaylistSheet(
                         OutlinedTextField(
                             value = minLength,
                             onValueChange = { minLength = it.filter { char -> char.isDigit() } },
-                            label = { Text("Min songs") },
+                            label = { Text("Min Tracks") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
@@ -284,7 +284,7 @@ fun AiPlaylistSheet(
                         OutlinedTextField(
                             value = maxLength,
                             onValueChange = { maxLength = it.filter { char -> char.isDigit() } },
-                            label = { Text("Max songs") },
+                            label = { Text("Max Tracks") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
@@ -397,7 +397,7 @@ fun AiPlaylistSheet(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Generate Playlist",
+                            text = "Generate Booklist",
                             style = MaterialTheme.typography.titleMedium,
                             fontFamily = GoogleSansRounded,
                             fontWeight = FontWeight.SemiBold,

@@ -10,8 +10,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.database.FavoritesDao
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -22,12 +22,12 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.net.toUri
-import com.oakiha.audia.data.model.Album
+import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.data.database.SearchHistoryDao
 import com.oakiha.audia.data.database.SearchHistoryEntity
 import com.oakiha.audia.data.database.toSearchHistoryItem
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Playlist
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Booklist
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.SearchHistoryItem
 import com.oakiha.audia.data.model.SearchResultItem
@@ -35,20 +35,20 @@ import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import androidx.sqlite.db.SimpleSQLiteQuery
 
-import com.oakiha.audia.data.model.Genre
-import com.oakiha.audia.data.database.SongEntity
-import com.oakiha.audia.data.database.SongArtistCrossRef
-import com.oakiha.audia.data.database.ArtistEntity
-import com.oakiha.audia.data.database.toAlbum
-import com.oakiha.audia.data.database.toArtist
-import com.oakiha.audia.data.database.toSong
-import com.oakiha.audia.data.database.toSongWithArtistRefs
-import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.model.LyricsSourcePreference
+import com.oakiha.audia.data.model.Category
+import com.oakiha.audia.data.database.TrackEntity
+import com.oakiha.audia.data.database.TrackAuthorCrossRef
+import com.oakiha.audia.data.database.AuthorEntity
+import com.oakiha.audia.data.database.toBook
+import com.oakiha.audia.data.database.toAuthor
+import com.oakiha.audia.data.database.toTrack
+import com.oakiha.audia.data.database.toTrackWithAuthorRefs
+import com.oakiha.audia.data.model.Transcript
+import com.oakiha.audia.data.model.TranscriptSourcePreference
 import com.oakiha.audia.data.model.SyncedLine
 import com.oakiha.audia.utils.LogUtils
-import com.oakiha.audia.data.model.MusicFolder
-import com.oakiha.audia.utils.LyricsUtils
+import com.oakiha.audia.data.model.AudiobookFolder
+import com.oakiha.audia.utils.TranscriptUtils
 import com.oakiha.audia.utils.DirectoryRuleResolver
 import kotlinx.coroutines.flow.conflate
 import kotlinx.collections.immutable.toImmutableList
@@ -73,15 +73,15 @@ import androidx.paging.filter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
-class MusicRepositoryImpl @Inject constructor(
+class AudiobookRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val searchHistoryDao: SearchHistoryDao,
-    private val musicDao: MusicDao,
-    private val lyricsRepository: LyricsRepository,
-    private val songRepository: SongRepository,
+    private val AudiobookDao: AudiobookDao,
+    private val TranscriptRepository: TranscriptRepository,
+    private val TrackRepository: TrackRepository,
     private val favoritesDao: FavoritesDao
-) : MusicRepository {
+) : AudiobookRepository {
 
     private val directoryScanMutex = Mutex()
 
@@ -91,37 +91,37 @@ class MusicRepositoryImpl @Inject constructor(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getAudioFiles(): Flow<List<Song>> {
-        // Delegate to the reactive SongRepository which queries MediaStore directly
+    override fun getAudioFiles(): Flow<List<Track>> {
+        // Delegate to the reactive TrackRepository which queries MediaStore directly
         // and observes directory preference changes in real-time.
-        return songRepository.getSongs()
+        return TrackRepository.getTracks()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getPaginatedSongs(): Flow<PagingData<Song>> {
+    override fun getPaginatedTracks(): Flow<PagingData<Track>> {
        // Delegate to reactive repository for correct filtering and paging
-       return songRepository.getPaginatedSongs()
+       return TrackRepository.getPaginatedTracks()
     }
 
-    override fun getSongCountFlow(): Flow<Int> {
-        return musicDao.getSongCount()
+    override fun getTrackCountFlow(): Flow<Int> {
+        return AudiobookDao.getTrackCount()
     }
 
-    override suspend fun getRandomSongs(limit: Int): List<Song> = withContext(Dispatchers.IO) {
-        musicDao.getRandomSongs(limit).map { it.toSong() }
+    override suspend fun getRandomTracks(limit: Int): List<Track> = withContext(Dispatchers.IO) {
+        AudiobookDao.getRandomTracks(limit).map { it.toTrack() }
     }
 
-    override fun getAlbums(): Flow<List<Album>> {
-        return getAudioFiles().map { songs ->
-            songs.groupBy { it.albumId }
-                .map { (albumId, songs) ->
-                    val first = songs.first()
-                    Album(
-                        id = albumId,
-                        title = first.album,
-                        artist = first.artist, // Or albumArtist if available
-                        albumArtUriString = first.albumArtUriString,
-                        songCount = songs.size,
+    override fun getBooks(): Flow<List<Book>> {
+        return getAudioFiles().map { Tracks ->
+            Tracks.groupBy { it.BookId }
+                .map { (BookId, Tracks) ->
+                    val first = Tracks.first()
+                    Book(
+                        id = BookId,
+                        title = first.Book,
+                        Author = first.Author, // Or BookAuthor if available
+                        BookArtUriString = first.BookArtUriString,
+                        TrackCount = Tracks.size,
                         year = first.year
                     )
                 }
@@ -129,56 +129,56 @@ class MusicRepositoryImpl @Inject constructor(
         }.flowOn(Dispatchers.Default)
     }
 
-    override fun getAlbumById(id: Long): Flow<Album?> {
-        return getAlbums().map { albums -> 
-            albums.find { it.id == id }
+    override fun getBookById(id: Long): Flow<Book?> {
+        return getBooks().map { Books -> 
+            Books.find { it.id == id }
         }
     }
 
-    override fun getArtists(): Flow<List<Artist>> {
-        return getAudioFiles().map { songs ->
-            songs.groupBy { it.artistId }
-                .map { (artistId, songs) ->
-                    val first = songs.first()
-                    Artist(
-                        id = artistId,
-                        name = first.artist,
-                        songCount = songs.size
+    override fun getAuthors(): Flow<List<Author>> {
+        return getAudioFiles().map { Tracks ->
+            Tracks.groupBy { it.AuthorId }
+                .map { (AuthorId, Tracks) ->
+                    val first = Tracks.first()
+                    Author(
+                        id = AuthorId,
+                        name = first.Author,
+                        TrackCount = Tracks.size
                     )
                 }
                 .sortedBy { it.name.lowercase() }
         }.flowOn(Dispatchers.Default)
     }
 
-    override fun getSongsForAlbum(albumId: Long): Flow<List<Song>> {
-        return getAudioFiles().map { songs ->
-            songs.filter { it.albumId == albumId }
+    override fun getTracksForBook(BookId: Long): Flow<List<Track>> {
+        return getAudioFiles().map { Tracks ->
+            Tracks.filter { it.BookId == BookId }
                 .sortedBy { it.trackNumber }
         }
     }
 
-    override fun getArtistById(artistId: Long): Flow<Artist?> {
-         return getArtists().map { artists ->
-             artists.find { it.id == artistId }
+    override fun getAuthorById(AuthorId: Long): Flow<Author?> {
+         return getAuthors().map { Authors ->
+             Authors.find { it.id == AuthorId }
          }
     }
 
-    override fun getArtistsForSong(songId: Long): Flow<List<Artist>> {
-        // Simple implementation assuming single artist per song as per MediaStore
-        // For multi-artist, we would parse the separator/delimiter here.
-        return getAudioFiles().map { songs ->
-            val song = songs.find { it.id == songId.toString() }
-            if (song != null) {
-                listOf(Artist(id = song.artistId, name = song.artist, songCount = 1, imageUrl = null))
+    override fun getAuthorsForTrack(TrackId: Long): Flow<List<Author>> {
+        // Simple implementation assuming single Author per Track as per MediaStore
+        // For multi-Author, we would parse the separator/delimiter here.
+        return getAudioFiles().map { Tracks ->
+            val Track = Tracks.find { it.id == TrackId.toString() }
+            if (Track != null) {
+                listOf(Author(id = Track.AuthorId, name = Track.Author, TrackCount = 1, imageUrl = null))
             } else {
                 emptyList()
             }
         }
     }
 
-    override fun getSongsForArtist(artistId: Long): Flow<List<Song>> {
-        return getAudioFiles().map { songs ->
-            songs.filter { it.artistId == artistId }
+    override fun getTracksForAuthor(AuthorId: Long): Flow<List<Track>> {
+        return getAudioFiles().map { Tracks ->
+            Tracks.filter { it.AuthorId == AuthorId }
                 .sortedBy { it.title }
         }
     }
@@ -188,7 +188,7 @@ class MusicRepositoryImpl @Inject constructor(
         directoryScanMutex.withLock {
             val directories = mutableSetOf<String>()
             val projection = arrayOf(MediaStore.Audio.Media.DATA)
-            val selection = "(${MediaStore.Audio.Media.IS_MUSIC} != 0 OR ${MediaStore.Audio.Media.DATA} LIKE '%.m4a' OR ${MediaStore.Audio.Media.DATA} LIKE '%.flac')"
+            val selection = "(${MediaStore.Audio.Media.IS_Audiobook} != 0 OR ${MediaStore.Audio.Media.DATA} LIKE '%.m4a' OR ${MediaStore.Audio.Media.DATA} LIKE '%.flac')"
             context.contentResolver.query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection, selection, null, null
@@ -203,69 +203,69 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAllUniqueAlbumArtUris(): Flow<List<Uri>> {
-        return musicDao.getAllUniqueAlbumArtUrisFromSongs().map { uriStrings ->
+    override fun getAllUniqueBookArtUris(): Flow<List<Uri>> {
+        return AudiobookDao.getAllUniqueBookArtUrisFromTracks().map { uriStrings ->
             uriStrings.mapNotNull { it.toUri() }
         }.flowOn(Dispatchers.IO)
     }
 
-    // --- Métodos de Búsqueda ---
+    // --- MÃƒÂ©todos de BÃƒÂºsqueda ---
 
-    override fun searchSongs(query: String): Flow<List<Song>> {
+    override fun searchTracks(query: String): Flow<List<Track>> {
         if (query.isBlank()) return flowOf(emptyList())
         // Passing emptyList and false for directory filter as we trust SSOT (SyncWorker filtered)
-        return musicDao.searchSongs(query, emptyList(), false).map { entities ->
-            entities.map { it.toSong() }
+        return AudiobookDao.searchTracks(query, emptyList(), false).map { entities ->
+            entities.map { it.toTrack() }
         }.flowOn(Dispatchers.IO)
     }
 
 
-    override fun searchAlbums(query: String): Flow<List<Album>> {
+    override fun searchBooks(query: String): Flow<List<Book>> {
        if (query.isBlank()) return flowOf(emptyList())
-       return musicDao.searchAlbums(query, emptyList(), false).map { entities ->
-           entities.map { it.toAlbum() }
+       return AudiobookDao.searchBooks(query, emptyList(), false).map { entities ->
+           entities.map { it.toBook() }
        }.flowOn(Dispatchers.IO)
     }
 
-    override fun searchArtists(query: String): Flow<List<Artist>> {
+    override fun searchAuthors(query: String): Flow<List<Author>> {
         if (query.isBlank()) return flowOf(emptyList())
-        return musicDao.searchArtists(query, emptyList(), false).map { entities ->
-            entities.map { it.toArtist() }
+        return AudiobookDao.searchAuthors(query, emptyList(), false).map { entities ->
+            entities.map { it.toAuthor() }
         }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun searchPlaylists(query: String): List<Playlist> {
+    override suspend fun searchBooklists(query: String): List<Booklist> {
         if (query.isBlank()) return emptyList()
-        return userPreferencesRepository.userPlaylistsFlow.first()
-            .filter { playlist ->
-                playlist.name.contains(query, ignoreCase = true)
+        return userPreferencesRepository.userBooklistsFlow.first()
+            .filter { Booklist ->
+                Booklist.name.contains(query, ignoreCase = true)
             }
     }
 
     override fun searchAll(query: String, filterType: SearchFilterType): Flow<List<SearchResultItem>> {
         if (query.isBlank()) return flowOf(emptyList())
-        val playlistsFlow = flow { emit(searchPlaylists(query)) }
+        val BooklistsFlow = flow { emit(searchBooklists(query)) }
 
         return when (filterType) {
             SearchFilterType.ALL -> {
                 combine(
-                    searchSongs(query),
-                    searchAlbums(query),
-                    searchArtists(query),
-                    playlistsFlow
-                ) { songs, albums, artists, playlists ->
+                    searchTracks(query),
+                    searchBooks(query),
+                    searchAuthors(query),
+                    BooklistsFlow
+                ) { Tracks, Books, Authors, Booklists ->
                     mutableListOf<SearchResultItem>().apply {
-                        songs.forEach { add(SearchResultItem.SongItem(it)) }
-                        albums.forEach { add(SearchResultItem.AlbumItem(it)) }
-                        artists.forEach { add(SearchResultItem.ArtistItem(it)) }
-                        playlists.forEach { add(SearchResultItem.PlaylistItem(it)) }
+                        Tracks.forEach { add(SearchResultItem.TrackItem(it)) }
+                        Books.forEach { add(SearchResultItem.BookItem(it)) }
+                        Authors.forEach { add(SearchResultItem.AuthorItem(it)) }
+                        Booklists.forEach { add(SearchResultItem.BooklistItem(it)) }
                     }
                 }
             }
-            SearchFilterType.SONGS -> searchSongs(query).map { songs -> songs.map { SearchResultItem.SongItem(it) } }
-            SearchFilterType.ALBUMS -> searchAlbums(query).map { albums -> albums.map { SearchResultItem.AlbumItem(it) } }
-            SearchFilterType.ARTISTS -> searchArtists(query).map { artists -> artists.map { SearchResultItem.ArtistItem(it) } }
-            SearchFilterType.PLAYLISTS -> playlistsFlow.map { playlists -> playlists.map { SearchResultItem.PlaylistItem(it) } }
+            SearchFilterType.Tracks -> searchTracks(query).map { Tracks -> Tracks.map { SearchResultItem.TrackItem(it) } }
+            SearchFilterType.Books -> searchBooks(query).map { Books -> Books.map { SearchResultItem.BookItem(it) } }
+            SearchFilterType.Authors -> searchAuthors(query).map { Authors -> Authors.map { SearchResultItem.AuthorItem(it) } }
+            SearchFilterType.Booklists -> BooklistsFlow.map { Booklists -> Booklists.map { SearchResultItem.BooklistItem(it) } }
         }.flowOn(Dispatchers.Default)
     }
 
@@ -294,67 +294,67 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getMusicByGenre(genreId: String): Flow<List<Song>> {
-        return userPreferencesRepository.mockGenresEnabledFlow.flatMapLatest { mockEnabled ->
+    override fun getAudiobookByCategory(CategoryId: String): Flow<List<Track>> {
+        return userPreferencesRepository.mockCategoriesEnabledFlow.flatMapLatest { mockEnabled ->
             if (mockEnabled) {
-                // Mock mode: Use the static genre name for filtering.
-                val genreName = "Mock"//GenreDataSource.getStaticGenres().find { it.id.equals(genreId, ignoreCase = true) }?.name ?: genreId
-                getAudioFiles().map { songs ->
-                    songs.filter { it.genre.equals(genreName, ignoreCase = true) }
+                // Mock mode: Use the static Category name for filtering.
+                val CategoryName = "Mock"//CategoryDataSource.getStaticCategories().find { it.id.equals(CategoryId, ignoreCase = true) }?.name ?: CategoryId
+                getAudioFiles().map { Tracks ->
+                    Tracks.filter { it.Category.equals(CategoryName, ignoreCase = true) }
                 }
             } else {
-                // Real mode: Use the genreId directly, which corresponds to the actual genre name from metadata.
-                getAudioFiles().map { songs ->
-                    if (genreId.equals("unknown", ignoreCase = true)) {
-                        // Filter for songs with no genre or an empty genre string.
-                        songs.filter { it.genre.isNullOrBlank() }
+                // Real mode: Use the CategoryId directly, which corresponds to the actual Category name from metadata.
+                getAudioFiles().map { Tracks ->
+                    if (CategoryId.equals("unknown", ignoreCase = true)) {
+                        // Filter for Tracks with no Category or an empty Category string.
+                        Tracks.filter { it.Category.isNullOrBlank() }
                     } else {
-                        // Filter for songs that match the given genre name.
-                        songs.filter { it.genre.equals(genreId, ignoreCase = true) }
+                        // Filter for Tracks that match the given Category name.
+                        Tracks.filter { it.Category.equals(CategoryId, ignoreCase = true) }
                     }
                 }
             }
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun getSongsByIds(songIds: List<String>): Flow<List<Song>> {
-        if (songIds.isEmpty()) return flowOf(emptyList())
-        return songRepository.getSongs().map { songs ->
-             val songsMap = songs.associateBy { it.id }
-             songIds.mapNotNull { songsMap[it] }
+    override fun getTracksByIds(TrackIds: List<String>): Flow<List<Track>> {
+        if (TrackIds.isEmpty()) return flowOf(emptyList())
+        return TrackRepository.getTracks().map { Tracks ->
+             val TracksMap = Tracks.associateBy { it.id }
+             TrackIds.mapNotNull { TracksMap[it] }
         }.flowOn(Dispatchers.Default)
     }
 
-    override suspend fun getSongByPath(path: String): Song? {
+    override suspend fun getTrackByPath(path: String): Track? {
         return withContext(Dispatchers.IO) {
-            musicDao.getSongByPath(path)?.toSong()
+            AudiobookDao.getTrackByPath(path)?.toTrack()
         }
     }
 
     override suspend fun invalidateCachesDependentOnAllowedDirectories() {
-        Log.i("MusicRepo", "invalidateCachesDependentOnAllowedDirectories called. Reactive flows will update automatically.")
+        Log.i("AudiobookRepo", "invalidateCachesDependentOnAllowedDirectories called. Reactive flows will update automatically.")
     }
 
-    suspend fun syncMusicFromContentResolver() {
-        // Esta función ahora está en SyncWorker. Se deja el esqueleto por si se llama desde otro lugar.
-        Log.w("MusicRepo", "syncMusicFromContentResolver was called directly on repository. This should be handled by SyncWorker.")
+    suspend fun syncAudiobookFromContentResolver() {
+        // Esta funciÃƒÂ³n ahora estÃƒÂ¡ en SyncWorker. Se deja el esqueleto por si se llama desde otro lugar.
+        Log.w("AudiobookRepo", "syncAudiobookFromContentResolver was called directly on repository. This should be handled by SyncWorker.")
     }
 
-    // Implementación de las nuevas funciones suspend para carga única
-    override suspend fun getAllSongsOnce(): List<Song> = withContext(Dispatchers.IO) {
-        musicDao.getAllSongsList().map { it.toSong() }
+    // ImplementaciÃƒÂ³n de las nuevas funciones suspend para carga ÃƒÂºnica
+    override suspend fun getAllTracksOnce(): List<Track> = withContext(Dispatchers.IO) {
+        AudiobookDao.getAllTracksList().map { it.toTrack() }
     }
 
-    override suspend fun getAllAlbumsOnce(): List<Album> = withContext(Dispatchers.IO) {
-        musicDao.getAllAlbumsList(emptyList(), false).map { it.toAlbum() }
+    override suspend fun getAllBooksOnce(): List<Book> = withContext(Dispatchers.IO) {
+        AudiobookDao.getAllBooksList(emptyList(), false).map { it.toBook() }
     }
 
-    override suspend fun getAllArtistsOnce(): List<Artist> = withContext(Dispatchers.IO) {
-        musicDao.getAllArtistsListRaw().map { it.toArtist() }
+    override suspend fun getAllAuthorsOnce(): List<Author> = withContext(Dispatchers.IO) {
+        AudiobookDao.getAllAuthorsListRaw().map { it.toAuthor() }
     }
 
-    override suspend fun toggleFavoriteStatus(songId: String): Boolean = withContext(Dispatchers.IO) {
-        val id = songId.toLongOrNull() ?: return@withContext false
+    override suspend fun toggleFavoriteStatus(TrackId: String): Boolean = withContext(Dispatchers.IO) {
+        val id = TrackId.toLongOrNull() ?: return@withContext false
         val isFav = favoritesDao.isFavorite(id) ?: false
         val newFav = !isFav
         if (newFav) {
@@ -365,28 +365,28 @@ class MusicRepositoryImpl @Inject constructor(
         return@withContext newFav
     }
 
-    override fun getSong(songId: String): Flow<Song?> {
-        val id = songId.toLongOrNull() ?: return flowOf(null)
-        return musicDao.getSongById(id).map { it?.toSong() }.flowOn(Dispatchers.IO)
+    override fun getTrack(TrackId: String): Flow<Track?> {
+        val id = TrackId.toLongOrNull() ?: return flowOf(null)
+        return AudiobookDao.getTrackById(id).map { it?.toTrack() }.flowOn(Dispatchers.IO)
     }
 
-    override fun getGenres(): Flow<List<Genre>> {
-        return getAudioFiles().map { songs ->
-            val genresMap = songs.groupBy { song ->
-                song.genre?.trim()?.takeIf { it.isNotBlank() } ?: "Unknown"
+    override fun getCategories(): Flow<List<Category>> {
+        return getAudioFiles().map { Tracks ->
+            val CategoriesMap = Tracks.groupBy { Track ->
+                Track.Category?.trim()?.takeIf { it.isNotBlank() } ?: "Unknown"
             }
 
-            val dynamicGenres = genresMap.keys.mapNotNull { genreName ->
-                val id = if (genreName.equals("Unknown", ignoreCase = true)) "unknown" else genreName.lowercase().replace(" ", "_")
+            val dynamicCategories = CategoriesMap.keys.mapNotNull { CategoryName ->
+                val id = if (CategoryName.equals("Unknown", ignoreCase = true)) "unknown" else CategoryName.lowercase().replace(" ", "_")
                 // Generate colors dynamically or use a default for "Unknown"
-                val colorInt = genreName.hashCode()
+                val colorInt = CategoryName.hashCode()
                 val lightColorHex = "#${(colorInt and 0x00FFFFFF).toString(16).padStart(6, '0').uppercase()}"
                 // Simple inversion for dark color, or use a predefined set
                 val darkColorHex = "#${((colorInt xor 0xFFFFFF) and 0x00FFFFFF).toString(16).padStart(6, '0').uppercase()}"
 
-                Genre(
+                Category(
                     id = id,
-                    name = genreName,
+                    name = CategoryName,
                     lightColorHex = lightColorHex,
                     onLightColorHex = "#000000", // Default black for light theme text
                     darkColorHex = darkColorHex,
@@ -394,96 +394,96 @@ class MusicRepositoryImpl @Inject constructor(
                 )
             }.sortedBy { it.name.lowercase() }
 
-            // Ensure "Unknown" genre is last if it exists.
-            val unknownGenre = dynamicGenres.find { it.id == "unknown" }
-            if (unknownGenre != null) {
-                (dynamicGenres.filterNot { it.id == "unknown" } + unknownGenre)
+            // Ensure "Unknown" Category is last if it exists.
+            val unknownCategory = dynamicCategories.find { it.id == "unknown" }
+            if (unknownCategory != null) {
+                (dynamicCategories.filterNot { it.id == "unknown" } + unknownCategory)
             } else {
-                dynamicGenres
+                dynamicCategories
             }
         }.conflate().flowOn(Dispatchers.IO)
     }
 
-    override suspend fun getLyrics(
-        song: Song,
-        sourcePreference: LyricsSourcePreference,
+    override suspend fun getTranscript(
+        Track: Track,
+        sourcePreference: TranscriptSourcePreference,
         forceRefresh: Boolean
-    ): Lyrics? {
-        return lyricsRepository.getLyrics(song, sourcePreference, forceRefresh)
+    ): Transcript? {
+        return TranscriptRepository.getTranscript(Track, sourcePreference, forceRefresh)
     }
 
     /**
-     * Obtiene la letra de una canción desde la API de LRCLIB, la persiste en la base de datos
-     * y la devuelve como un objeto Lyrics parseado.
+     * Obtiene la letra de una canciÃƒÂ³n desde la API de LRCLIB, la persiste en la base de datos
+     * y la devuelve como un objeto Transcript parseado.
      *
-     * @param song La canción para la cual se buscará la letra.
-     * @return Un objeto Result que contiene el objeto Lyrics si se encontró, o un error.
+     * @param Track La canciÃƒÂ³n para la cual se buscarÃƒÂ¡ la letra.
+     * @return Un objeto Result que contiene el objeto Transcript si se encontrÃƒÂ³, o un error.
      */
-    override suspend fun getLyricsFromRemote(song: Song): Result<Pair<Lyrics, String>> {
-        return lyricsRepository.fetchFromRemote(song)
+    override suspend fun getTranscriptFromRemote(Track: Track): Result<Pair<Transcript, String>> {
+        return TranscriptRepository.fetchFromRemote(Track)
     }
 
-    override suspend fun searchRemoteLyrics(song: Song): Result<Pair<String, List<LyricsSearchResult>>> {
-        return lyricsRepository.searchRemote(song)
+    override suspend fun searchRemoteTranscript(Track: Track): Result<Pair<String, List<TranscriptSearchResult>>> {
+        return TranscriptRepository.searchRemote(Track)
     }
 
-    override suspend fun searchRemoteLyricsByQuery(title: String, artist: String?): Result<Pair<String, List<LyricsSearchResult>>> {
-        return lyricsRepository.searchRemoteByQuery(title, artist)
+    override suspend fun searchRemoteTranscriptByQuery(title: String, Author: String?): Result<Pair<String, List<TranscriptSearchResult>>> {
+        return TranscriptRepository.searchRemoteByQuery(title, Author)
     }
 
-    override suspend fun updateLyrics(songId: Long, lyrics: String) {
-        lyricsRepository.updateLyrics(songId, lyrics)
+    override suspend fun updateTranscript(TrackId: Long, Transcript: String) {
+        TranscriptRepository.updateTranscript(TrackId, Transcript)
     }
 
-    override suspend fun resetLyrics(songId: Long) {
-        lyricsRepository.resetLyrics(songId)
+    override suspend fun resetTranscript(TrackId: Long) {
+        TranscriptRepository.resetTranscript(TrackId)
     }
 
-    override suspend fun resetAllLyrics() {
-        lyricsRepository.resetAllLyrics()
+    override suspend fun resetAllTranscript() {
+        TranscriptRepository.resetAllTranscript()
     }
 
-    override fun getMusicFolders(): Flow<List<MusicFolder>> {
+    override fun getAudiobookFolders(): Flow<List<AudiobookFolder>> {
         return combine(
             getAudioFiles(),
             userPreferencesRepository.allowedDirectoriesFlow,
             userPreferencesRepository.blockedDirectoriesFlow,
             userPreferencesRepository.isFolderFilterActiveFlow
-        ) { songs, allowedDirs, blockedDirs, isFolderFilterActive ->
+        ) { Tracks, allowedDirs, blockedDirs, isFolderFilterActive ->
             val resolver = DirectoryRuleResolver(
                 allowedDirs.map(::normalizePath).toSet(),
                 blockedDirs.map(::normalizePath).toSet()
             )
-            val songsToProcess = if (isFolderFilterActive && blockedDirs.isNotEmpty()) {
-                songs.filter { song ->
-                    val songDir = File(song.path).parentFile ?: return@filter false
-                    val normalized = normalizePath(songDir.path)
+            val TracksToProcess = if (isFolderFilterActive && blockedDirs.isNotEmpty()) {
+                Tracks.filter { Track ->
+                    val TrackDir = File(Track.path).parentFile ?: return@filter false
+                    val normalized = normalizePath(TrackDir.path)
                     !resolver.isBlocked(normalized)
                 }
             } else {
-                songs
+                Tracks
             }
 
-            if (songsToProcess.isEmpty()) return@combine emptyList()
+            if (TracksToProcess.isEmpty()) return@combine emptyList()
 
             data class TempFolder(
                 val path: String,
                 val name: String,
-                val songs: MutableList<Song> = mutableListOf(),
+                val Tracks: MutableList<Track> = mutableListOf(),
                 val subFolderPaths: MutableSet<String> = mutableSetOf()
             )
 
             val tempFolders = mutableMapOf<String, TempFolder>()
 
-            // Optimization: Group songs by parent folder first to reduce File object creations and loop iterations
-            val songsByFolder = songsToProcess.groupBy { File(it.path).parent }
+            // Optimization: Group Tracks by parent folder first to reduce File object creations and loop iterations
+            val TracksByFolder = TracksToProcess.groupBy { File(it.path).parent }
 
-            songsByFolder.forEach { (folderPath, songsInFolder) ->
+            TracksByFolder.forEach { (folderPath, TracksInFolder) ->
                 if (folderPath != null) {
                     val folderFile = File(folderPath)
                     // Create or get the leaf folder
                     val leafFolder = tempFolders.getOrPut(folderPath) { TempFolder(folderPath, folderFile.name) }
-                    leafFolder.songs.addAll(songsInFolder)
+                    leafFolder.Tracks.addAll(TracksInFolder)
 
                     // Build hierarchy upwards
                     var currentPath = folderPath
@@ -507,7 +507,7 @@ class MusicRepositoryImpl @Inject constructor(
                 }
             }
 
-            fun buildImmutableFolder(path: String, visited: MutableSet<String>): MusicFolder? {
+            fun buildImmutableFolder(path: String, visited: MutableSet<String>): AudiobookFolder? {
                 if (path in visited) return null
                 visited.add(path)
                 val tempFolder = tempFolders[path] ?: return null
@@ -515,12 +515,12 @@ class MusicRepositoryImpl @Inject constructor(
                     .mapNotNull { subPath -> buildImmutableFolder(subPath, visited.toMutableSet()) }
                     .sortedBy { it.name.lowercase() }
                     .toImmutableList()
-                return MusicFolder(
+                return AudiobookFolder(
                     path = tempFolder.path,
                     name = tempFolder.name,
-                    songs = tempFolder.songs
+                    Tracks = tempFolder.Tracks
                         .sortedWith(
-                            compareBy<Song> { if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE }
+                            compareBy<Track> { if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE }
                                 .thenBy { it.title.lowercase() }
                         )
                         .toImmutableList(),
@@ -533,7 +533,7 @@ class MusicRepositoryImpl @Inject constructor(
 
             val result = rootTempFolder?.subFolderPaths?.mapNotNull { path ->
                 buildImmutableFolder(path, mutableSetOf())
-            }?.filter { it.totalSongCount > 0 }?.sortedBy { it.name.lowercase() } ?: emptyList()
+            }?.filter { it.totalTrackCount > 0 }?.sortedBy { it.name.lowercase() } ?: emptyList()
 
             // Fallback for devices that might not use the standard storage root path
             if (result.isEmpty() && tempFolders.isNotEmpty()) {
@@ -541,7 +541,7 @@ class MusicRepositoryImpl @Inject constructor(
                  val topLevelPaths = tempFolders.keys - allSubFolderPaths
                  return@combine topLevelPaths
                      .mapNotNull { buildImmutableFolder(it, mutableSetOf()) }
-                     .filter { it.totalSongCount > 0 }
+                     .filter { it.totalTrackCount > 0 }
                     .sortedBy { it.name.lowercase() }
              }
 
@@ -550,6 +550,6 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteById(id: Long) {
-        musicDao.deleteById(id)
+        AudiobookDao.deleteById(id)
     }
 }

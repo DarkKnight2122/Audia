@@ -9,7 +9,7 @@ import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.media3.common.util.UnstableApi
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookService
 import timber.log.Timber
 
 class PlayerControlActionCallback : ActionCallback {
@@ -29,15 +29,15 @@ class PlayerControlActionCallback : ActionCallback {
             return
         }
 
-        val serviceIntent = Intent(context, MusicService::class.java).apply {
+        val serviceIntent = Intent(context, AudiobookService::class.java).apply {
             this.action = action
             if (action == PlayerActions.PLAY_FROM_QUEUE) {
-                val songId = parameters[PlayerActions.songIdKey]
-                if (songId != null) {
-                    putExtra("song_id", songId)
+                val TrackId = parameters[PlayerActions.TrackIdKey]
+                if (TrackId != null) {
+                    putExtra("Track_id", TrackId)
                 } else {
-                    Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no songId found.")
-                    return // No hacer nada si no hay ID de canción
+                    Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no TrackId found.")
+                    return // No hacer nada si no hay ID de canciÃƒÂ³n
                 }
             }
         }
@@ -57,7 +57,7 @@ class PlayerControlActionCallback : ActionCallback {
 
 object PlayerActions {
     val key = ActionParameters.Key<String>("playerActionKey_v1")
-    val songIdKey = ActionParameters.Key<Long>("songIdKey_v1")
+    val TrackIdKey = ActionParameters.Key<Long>("TrackIdKey_v1")
     const val PLAY_PAUSE = "com.example.AudioBookPlayer.ACTION_WIDGET_PLAY_PAUSE"
     const val NEXT = "com.example.AudioBookPlayer.ACTION_WIDGET_NEXT"
     const val PREVIOUS = "com.example.AudioBookPlayer.ACTION_WIDGET_PREVIOUS"

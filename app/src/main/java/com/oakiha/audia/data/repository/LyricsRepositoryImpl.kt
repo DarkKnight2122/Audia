@@ -11,14 +11,14 @@ import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.kyant.taglib.TagLib
 import com.oakiha.audia.R
-import com.oakiha.audia.data.database.MusicDao
-import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.network.lyrics.LrcLibApiService
-import com.oakiha.audia.data.network.lyrics.LrcLibResponse
+import com.oakiha.audia.data.database.AudiobookDao
+import com.oakiha.audia.data.model.Transcript
+import com.oakiha.audia.data.model.TranscriptSourcePreference
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.network.Transcript.LrcLibApiService
+import com.oakiha.audia.data.network.Transcript.LrcLibResponse
 import com.oakiha.audia.utils.LogUtils
-import com.oakiha.audia.utils.LyricsUtils
+import com.oakiha.audia.utils.TranscriptUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,32 +43,32 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
-private fun Lyrics.isValid(): Boolean = !synced.isNullOrEmpty() || !plain.isNullOrEmpty()
+private fun Transcript.isValid(): Boolean = !synced.isNullOrEmpty() || !plain.isNullOrEmpty()
 
 /**
- * LyricsData for JSON disk cache (matches Rhythm's format)
+ * TranscriptData for JSON disk cache (matches Rhythm's format)
  */
-private data class LyricsData(
-    val plainLyrics: String?,
-    val syncedLyrics: String?,
-    val wordByWordLyrics: String? = null
+private data class TranscriptData(
+    val plainTranscript: String?,
+    val syncedTranscript: String?,
+    val wordByWordTranscript: String? = null
 ) {
-    fun hasLyrics(): Boolean = !plainLyrics.isNullOrBlank() || !syncedLyrics.isNullOrBlank()
+    fun hasTranscript(): Boolean = !plainTranscript.isNullOrBlank() || !syncedTranscript.isNullOrBlank()
 }
 
 @Singleton
-class LyricsRepositoryImpl @Inject constructor(
+class TranscriptRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val lrcLibApiService: LrcLibApiService,
-    private val lyricsDao: com.oakiha.audia.data.database.LyricsDao
-) : LyricsRepository {
+    private val TranscriptDao: com.oakiha.audia.data.database.TranscriptDao
+) : TranscriptRepository {
 
 
     companion object {
-        private const val TAG = "LyricsRepository"
+        private const val TAG = "TranscriptRepository"
         
         // Cache sizes (matching Rhythm)
-        private const val MAX_LYRICS_CACHE_SIZE = 150
+        private const val MAX_Transcript_CACHE_SIZE = 150
         
         // API rate limiting constants (matching Rhythm)
         private const val LRCLIB_MIN_DELAY = 100L
@@ -79,9 +79,9 @@ class LyricsRepositoryImpl @Inject constructor(
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // LRU Cache with Rhythm-style LinkedHashMap (access-order for true LRU)
-    private val lyricsCache = object : LinkedHashMap<String, Lyrics>(50, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Lyrics>?): Boolean {
-            return size > MAX_LYRICS_CACHE_SIZE
+    private val TranscriptCache = object : LinkedHashMap<String, Transcript>(50, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Transcript>?): Boolean {
+            return size > MAX_Transcript_CACHE_SIZE
         }
     }
 
@@ -137,22 +137,22 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Main lyrics fetching method with source preference support (matching Rhythm)
+     * Main Transcript fetching method with source preference support (matching Rhythm)
      */
-    override suspend fun getLyrics(
-        song: Song,
-        sourcePreference: LyricsSourcePreference,
+    override suspend fun getTranscript(
+        Track: Track,
+        sourcePreference: TranscriptSourcePreference,
         forceRefresh: Boolean
-    ): Lyrics? = withContext(Dispatchers.IO) {
-        val cacheKey = generateCacheKey(song.id)
+    ): Transcript? = withContext(Dispatchers.IO) {
+        val cacheKey = generateCacheKey(Track.id)
         
-        Log.d(TAG, "===== FETCH LYRICS START: ${song.displayArtist} - ${song.title} (forceRefresh=$forceRefresh, source=$sourcePreference) =====")
+        Log.d(TAG, "===== FETCH Transcript START: ${Track.displayAuthor} - ${Track.title} (forceRefresh=$forceRefresh, source=$sourcePreference) =====")
 
         // Check in-memory cache unless force refresh (early return - matching Rhythm)
         if (!forceRefresh) {
-            synchronized(lyricsCache) {
-                lyricsCache[cacheKey]?.let { cached ->
-                    Log.d(TAG, "===== RETURNING IN-MEMORY CACHED LYRICS =====")
+            synchronized(TranscriptCache) {
+                TranscriptCache[cacheKey]?.let { cached ->
+                    Log.d(TAG, "===== RETURNING IN-MEMORY CACHED Transcript =====")
                     return@withContext cached
                 }
             }
@@ -162,60 +162,60 @@ class LyricsRepositoryImpl @Inject constructor(
         }
 
         // Define source fetchers (matching Rhythm pattern)
-        val fetchFromLocal: suspend () -> Lyrics? = {
-            findLocalLrcFile(song)
+        val fetchFromLocal: suspend () -> Transcript? = {
+            findLocalLrcFile(Track)
         }
 
-        val fetchFromEmbedded: suspend () -> Lyrics? = {
-            loadLyricsFromStorage(song)
+        val fetchFromEmbedded: suspend () -> Transcript? = {
+            loadTranscriptFromStorage(Track)
         }
 
-        val fetchFromAPI: suspend () -> Lyrics? = {
-            fetchLyricsFromAPI(song)
+        val fetchFromAPI: suspend () -> Transcript? = {
+            fetchTranscriptFromAPI(Track)
         }
 
         // Try sources in order based on preference, with fallback (matching Rhythm)
         val sourceFetchers = when (sourcePreference) {
-            LyricsSourcePreference.API_FIRST -> listOf(fetchFromAPI, fetchFromEmbedded, fetchFromLocal)
-            LyricsSourcePreference.EMBEDDED_FIRST -> listOf(fetchFromEmbedded, fetchFromAPI, fetchFromLocal)
-            LyricsSourcePreference.LOCAL_FIRST -> listOf(fetchFromLocal, fetchFromEmbedded, fetchFromAPI)
+            TranscriptSourcePreference.API_FIRST -> listOf(fetchFromAPI, fetchFromEmbedded, fetchFromLocal)
+            TranscriptSourcePreference.EMBEDDED_FIRST -> listOf(fetchFromEmbedded, fetchFromAPI, fetchFromLocal)
+            TranscriptSourcePreference.LOCAL_FIRST -> listOf(fetchFromLocal, fetchFromEmbedded, fetchFromAPI)
         }
 
-        // Try each source in order until we find lyrics (early return on success)
+        // Try each source in order until we find Transcript (early return on success)
         for ((index, fetcher) in sourceFetchers.withIndex()) {
             try {
-                val lyrics = fetcher()
-                if (lyrics != null && lyrics.isValid()) {
+                val Transcript = fetcher()
+                if (Transcript != null && Transcript.isValid()) {
                     val sourceName = when (index) {
                         0 -> when (sourcePreference) {
-                            LyricsSourcePreference.API_FIRST -> "API"
-                            LyricsSourcePreference.EMBEDDED_FIRST -> "Embedded"
-                            LyricsSourcePreference.LOCAL_FIRST -> "Local"
+                            TranscriptSourcePreference.API_FIRST -> "API"
+                            TranscriptSourcePreference.EMBEDDED_FIRST -> "Embedded"
+                            TranscriptSourcePreference.LOCAL_FIRST -> "Local"
                         }
                         1 -> when (sourcePreference) {
-                            LyricsSourcePreference.API_FIRST -> "Embedded"
-                            LyricsSourcePreference.EMBEDDED_FIRST -> "API"
-                            LyricsSourcePreference.LOCAL_FIRST -> "Embedded"
+                            TranscriptSourcePreference.API_FIRST -> "Embedded"
+                            TranscriptSourcePreference.EMBEDDED_FIRST -> "API"
+                            TranscriptSourcePreference.LOCAL_FIRST -> "Embedded"
                         }
                         else -> when (sourcePreference) {
-                            LyricsSourcePreference.API_FIRST -> "Local"
-                            LyricsSourcePreference.EMBEDDED_FIRST -> "Local"
-                            LyricsSourcePreference.LOCAL_FIRST -> "API"
+                            TranscriptSourcePreference.API_FIRST -> "Local"
+                            TranscriptSourcePreference.EMBEDDED_FIRST -> "Local"
+                            TranscriptSourcePreference.LOCAL_FIRST -> "API"
                         }
                     }
-                    Log.d(TAG, "Found lyrics from $sourceName for: ${song.displayArtist} - ${song.title}")
+                    Log.d(TAG, "Found Transcript from $sourceName for: ${Track.displayAuthor} - ${Track.title}")
                     
                     // Cache the result
-                    synchronized(lyricsCache) {
-                        lyricsCache[cacheKey] = lyrics
+                    synchronized(TranscriptCache) {
+                        TranscriptCache[cacheKey] = Transcript
                     }
                     
                     // Save to JSON disk cache if from API
                     if (sourceName == "API") {
-                        saveLocalLyricsJson(song, lyrics)
+                        saveLocalTranscriptJson(Track, Transcript)
                     }
                     
-                    return@withContext lyrics
+                    return@withContext Transcript
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Error fetching from source ${index + 1}: ${e.message}")
@@ -223,19 +223,19 @@ class LyricsRepositoryImpl @Inject constructor(
             }
         }
 
-        // No lyrics found from any source
-        Log.d(TAG, "No lyrics found from any source for: ${song.displayArtist} - ${song.title}")
+        // No Transcript found from any source
+        Log.d(TAG, "No Transcript found from any source for: ${Track.displayAuthor} - ${Track.title}")
         return@withContext null
     }
 
     /**
-     * Fetches lyrics from LRCLIB API with rate limiting (matching Rhythm)
+     * Fetches Transcript from LRCLIB API with rate limiting (matching Rhythm)
      */
-    private suspend fun fetchLyricsFromAPI(song: Song): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun fetchTranscriptFromAPI(Track: Track): Transcript? = withContext(Dispatchers.IO) {
         // Check JSON disk cache first (matching Rhythm)
-        val cachedJson = loadLocalLyricsJson(song)
+        val cachedJson = loadLocalTranscriptJson(Track)
         if (cachedJson != null) {
-            Log.d(TAG, "===== LOADED LYRICS FROM JSON DISK CACHE =====")
+            Log.d(TAG, "===== LOADED Transcript FROM JSON DISK CACHE =====")
             return@withContext cachedJson
         }
 
@@ -249,28 +249,28 @@ class LyricsRepositoryImpl @Inject constructor(
         updateLastApiCall("lrclib", System.currentTimeMillis())
 
         try {
-            val cleanArtist = song.displayArtist.trim().replace(Regex("\\(.*?\\)"), "").trim()
-            val cleanTitle = song.title.trim().replace(Regex("\\(.*?\\)"), "").trim()
+            val cleanAuthor = Track.displayAuthor.trim().replace(Regex("\\(.*?\\)"), "").trim()
+            val cleanTitle = Track.title.trim().replace(Regex("\\(.*?\\)"), "").trim()
 
-            // Strategy 1: Search by track name and artist name (matching Rhythm)
+            // Strategy 1: Search by track name and Author name (matching Rhythm)
             var results = runCatching {
-                lrcLibApiService.searchLyrics(trackName = cleanTitle, artistName = cleanArtist)
+                lrcLibApiService.searchTranscript(trackName = cleanTitle, AuthorName = cleanAuthor)
             }.getOrNull()
 
             // Strategy 2: Combined query (matching Rhythm)
             if (results.isNullOrEmpty()) {
-                val query = "$cleanArtist $cleanTitle"
+                val query = "$cleanAuthor $cleanTitle"
                 results = runCatching {
-                    lrcLibApiService.searchLyrics(query = query)
+                    lrcLibApiService.searchTranscript(query = query)
                 }.getOrNull()
             }
 
             // Strategy 3: Simplified names without feat. etc (matching Rhythm)
             if (results.isNullOrEmpty()) {
-                val simplifiedArtist = cleanArtist.split(" feat.", " ft.", " featuring").first().trim()
+                val simplifiedAuthor = cleanAuthor.split(" feat.", " ft.", " featuring").first().trim()
                 val simplifiedTitle = cleanTitle.split(" feat.", " ft.", " featuring").first().trim()
                 results = runCatching {
-                    lrcLibApiService.searchLyrics(trackName = simplifiedTitle, artistName = simplifiedArtist)
+                    lrcLibApiService.searchTranscript(trackName = simplifiedTitle, AuthorName = simplifiedAuthor)
                 }.getOrNull()
             }
 
@@ -279,67 +279,67 @@ class LyricsRepositoryImpl @Inject constructor(
                 return@withContext null
             }
 
-            // Find best match - prioritize exact matches, then synced lyrics (matching Rhythm)
-            val songDurationSeconds = song.duration / 1000
+            // Find best match - prioritize exact matches, then synced Transcript (matching Rhythm)
+            val TrackDurationSeconds = Track.duration / 1000
             val bestMatch = results.firstOrNull { result ->
-                val artistMatch = result.artistName.lowercase().contains(cleanArtist.lowercase()) ||
-                        cleanArtist.lowercase().contains(result.artistName.lowercase())
+                val AuthorMatch = result.AuthorName.lowercase().contains(cleanAuthor.lowercase()) ||
+                        cleanAuthor.lowercase().contains(result.AuthorName.lowercase())
                 val titleMatch = result.name.lowercase().contains(cleanTitle.lowercase()) ||
                         cleanTitle.lowercase().contains(result.name.lowercase())
-                val durationDiff = abs(result.duration - songDurationSeconds)
+                val durationDiff = abs(result.duration - TrackDurationSeconds)
 
-                (artistMatch && titleMatch) && durationDiff <= 15 && hasLyrics(result)
-            } ?: results.firstOrNull { hasSyncedLyrics(it) && abs(it.duration - songDurationSeconds) <= 15 }
-            ?: results.firstOrNull { hasLyrics(it) && abs(it.duration - songDurationSeconds) <= 15 }
+                (AuthorMatch && titleMatch) && durationDiff <= 15 && hasTranscript(result)
+            } ?: results.firstOrNull { hasSyncedTranscript(it) && abs(it.duration - TrackDurationSeconds) <= 15 }
+            ?: results.firstOrNull { hasTranscript(it) && abs(it.duration - TrackDurationSeconds) <= 15 }
 
             if (bestMatch != null) {
-                val rawLyrics = bestMatch.syncedLyrics ?: bestMatch.plainLyrics
-                if (!rawLyrics.isNullOrBlank()) {
-                    val parsedLyrics = LyricsUtils.parseLyrics(rawLyrics).copy(areFromRemote = true)
-                    if (parsedLyrics.isValid()) {
-                        Log.d(TAG, "LRCLIB lyrics found - Synced: ${!bestMatch.syncedLyrics.isNullOrBlank()}, Plain: ${!bestMatch.plainLyrics.isNullOrBlank()}")
+                val rawTranscript = bestMatch.syncedTranscript ?: bestMatch.plainTranscript
+                if (!rawTranscript.isNullOrBlank()) {
+                    val parsedTranscript = TranscriptUtils.parseTranscript(rawTranscript).copy(areFromRemote = true)
+                    if (parsedTranscript.isValid()) {
+                        Log.d(TAG, "LRCLIB Transcript found - Synced: ${!bestMatch.syncedTranscript.isNullOrBlank()}, Plain: ${!bestMatch.plainTranscript.isNullOrBlank()}")
                         
                         // Save to database
                         // Save to database
-                        lyricsDao.insert(
-                            com.oakiha.audia.data.database.LyricsEntity(
-                                songId = song.id.toLong(),
-                                content = rawLyrics,
-                                isSynced = !bestMatch.syncedLyrics.isNullOrBlank(),
+                        TranscriptDao.insert(
+                            com.oakiha.audia.data.database.TranscriptEntity(
+                                TrackId = Track.id.toLong(),
+                                content = rawTranscript,
+                                isSynced = !bestMatch.syncedTranscript.isNullOrBlank(),
                                 source = "remote"
                             )
                         )
                         
-                        return@withContext parsedLyrics
+                        return@withContext parsedTranscript
                     }
                 }
             }
 
             return@withContext null
         } catch (e: Exception) {
-            Log.e(TAG, "LRCLIB lyrics fetch failed: ${e.message}", e)
+            Log.e(TAG, "LRCLIB Transcript fetch failed: ${e.message}", e)
             return@withContext null
         }
     }
 
-    private fun hasLyrics(response: LrcLibResponse): Boolean =
-        !response.plainLyrics.isNullOrBlank() || !response.syncedLyrics.isNullOrBlank()
+    private fun hasTranscript(response: LrcLibResponse): Boolean =
+        !response.plainTranscript.isNullOrBlank() || !response.syncedTranscript.isNullOrBlank()
 
-    private fun hasSyncedLyrics(response: LrcLibResponse): Boolean =
-        !response.syncedLyrics.isNullOrBlank()
+    private fun hasSyncedTranscript(response: LrcLibResponse): Boolean =
+        !response.syncedTranscript.isNullOrBlank()
 
     /**
-     * Find local .lrc file next to the music file (matching Rhythm)
+     * Find local .lrc file next to the Audiobook file (matching Rhythm)
      */
-    private suspend fun findLocalLrcFile(song: Song): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun findLocalLrcFile(Track: Track): Transcript? = withContext(Dispatchers.IO) {
         try {
-            val songFile = File(song.path)
-            val directory = songFile.parentFile ?: return@withContext null
-            val songNameWithoutExt = songFile.nameWithoutExtension
+            val TrackFile = File(Track.path)
+            val directory = TrackFile.parentFile ?: return@withContext null
+            val TrackNameWithoutExt = TrackFile.nameWithoutExtension
 
             if (directory.exists()) {
-                // Look for .lrc file with same name as the song
-                val lrcFile = File(directory, "$songNameWithoutExt.lrc")
+                // Look for .lrc file with same name as the Track
+                val lrcFile = File(directory, "$TrackNameWithoutExt.lrc")
                 if (lrcFile.exists() && lrcFile.canRead()) {
                     val lrcContent = lrcFile.readText()
                     val parsed = parseLrcFile(lrcContent)
@@ -349,10 +349,10 @@ class LyricsRepositoryImpl @Inject constructor(
                     }
                 }
 
-                // Also try with artist - title pattern
-                val cleanArtist = song.displayArtist.replace(Regex("[^a-zA-Z0-9]"), "_")
-                val cleanTitle = song.title.replace(Regex("[^a-zA-Z0-9]"), "_")
-                val alternativeLrcFile = File(directory, "${cleanArtist}_${cleanTitle}.lrc")
+                // Also try with Author - title pattern
+                val cleanAuthor = Track.displayAuthor.replace(Regex("[^a-zA-Z0-9]"), "_")
+                val cleanTitle = Track.title.replace(Regex("[^a-zA-Z0-9]"), "_")
+                val alternativeLrcFile = File(directory, "${cleanAuthor}_${cleanTitle}.lrc")
                 if (alternativeLrcFile.exists() && alternativeLrcFile.canRead()) {
                     val lrcContent = alternativeLrcFile.readText()
                     val parsed = parseLrcFile(lrcContent)
@@ -369,53 +369,53 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Parse .lrc file content into Lyrics format (matching Rhythm)
+     * Parse .lrc file content into Transcript format (matching Rhythm)
      */
-    private fun parseLrcFile(lrcContent: String): Lyrics? {
+    private fun parseLrcFile(lrcContent: String): Transcript? {
         if (lrcContent.isBlank()) return null
         
-        // Use existing LyricsUtils parser
-        val parsed = LyricsUtils.parseLyrics(lrcContent)
+        // Use existing TranscriptUtils parser
+        val parsed = TranscriptUtils.parseTranscript(lrcContent)
         return if (parsed.isValid()) parsed else null
     }
 
     /**
-     * Save lyrics to JSON disk cache (matching Rhythm)
+     * Save Transcript to JSON disk cache (matching Rhythm)
      */
-    private fun saveLocalLyricsJson(song: Song, lyrics: Lyrics) {
+    private fun saveLocalTranscriptJson(Track: Track, Transcript: Transcript) {
         try {
-            val fileName = "${song.id}.json"
-            val lyricsDir = File(context.filesDir, "lyrics")
-            lyricsDir.mkdirs()
+            val fileName = "${Track.id}.json"
+            val TranscriptDir = File(context.filesDir, "Transcript")
+            TranscriptDir.mkdirs()
 
-            val lyricsData = LyricsData(
-                plainLyrics = lyrics.plain?.joinToString("\n"),
-                syncedLyrics = lyrics.synced?.joinToString("\n") { "[${formatTimestamp(it.time)}]${it.line}" }
+            val TranscriptData = TranscriptData(
+                plainTranscript = Transcript.plain?.joinToString("\n"),
+                syncedTranscript = Transcript.synced?.joinToString("\n") { "[${formatTimestamp(it.time)}]${it.line}" }
             )
 
-            val file = File(lyricsDir, fileName)
-            val json = gson.toJson(lyricsData)
+            val file = File(TranscriptDir, fileName)
+            val json = gson.toJson(TranscriptData)
             file.writeText(json)
-            Log.d(TAG, "Saved lyrics to JSON cache: ${file.absolutePath}")
+            Log.d(TAG, "Saved Transcript to JSON cache: ${file.absolutePath}")
         } catch (e: Exception) {
-            Log.e(TAG, "Error saving lyrics to JSON cache: ${e.message}", e)
+            Log.e(TAG, "Error saving Transcript to JSON cache: ${e.message}", e)
         }
     }
 
     /**
-     * Load lyrics from JSON disk cache (matching Rhythm)
+     * Load Transcript from JSON disk cache (matching Rhythm)
      */
-    private fun loadLocalLyricsJson(song: Song): Lyrics? {
+    private fun loadLocalTranscriptJson(Track: Track): Transcript? {
         try {
-            val fileName = "${song.id}.json"
-            val file = File(context.filesDir, "lyrics/$fileName")
+            val fileName = "${Track.id}.json"
+            val file = File(context.filesDir, "Transcript/$fileName")
             
             if (file.exists()) {
                 val json = file.readText()
-                val data = gson.fromJson(json, LyricsData::class.java)
-                if (data.hasLyrics()) {
-                    val rawLyrics = data.syncedLyrics ?: data.plainLyrics
-                    val parsed = LyricsUtils.parseLyrics(rawLyrics)
+                val data = gson.fromJson(json, TranscriptData::class.java)
+                if (data.hasTranscript()) {
+                    val rawTranscript = data.syncedTranscript ?: data.plainTranscript
+                    val parsed = TranscriptUtils.parseTranscript(rawTranscript)
                     if (parsed.isValid()) {
                         return parsed
                     }
@@ -436,38 +436,38 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Load embedded lyrics from audio file metadata
+     * Load embedded Transcript from audio file metadata
      */
-    private suspend fun loadLyricsFromStorage(song: Song): Lyrics? = withContext(Dispatchers.IO) {
-        // First check database for persisted lyrics (was user-imported or cached)
-        val persisted = lyricsDao.getLyrics(song.id.toLong())
+    private suspend fun loadTranscriptFromStorage(Track: Track): Transcript? = withContext(Dispatchers.IO) {
+        // First check database for persisted Transcript (was user-imported or cached)
+        val persisted = TranscriptDao.getTranscript(Track.id.toLong())
         if (persisted != null && !persisted.content.isBlank()) {
-            val parsedLyrics = LyricsUtils.parseLyrics(persisted.content)
-            if (parsedLyrics.isValid()) {
+            val parsedTranscript = TranscriptUtils.parseTranscript(persisted.content)
+            if (parsedTranscript.isValid()) {
                 // If we found it in DB, we treat it as "embedded" or "locally cached" for this flow
-                return@withContext parsedLyrics.copy(areFromRemote = false)
+                return@withContext parsedTranscript.copy(areFromRemote = false)
             }
         }
 
         // Then try to read from file metadata
         return@withContext try {
-            val uri = song.contentUriString.toUri()
+            val uri = Track.contentUriString.toUri()
             val tempFile = createTempFileFromUri(uri)
             if (tempFile == null) {
-                LogUtils.w(this@LyricsRepositoryImpl, "Could not create temp file from URI: ${song.contentUriString}")
+                LogUtils.w(this@TranscriptRepositoryImpl, "Could not create temp file from URI: ${Track.contentUriString}")
                 return@withContext null
             }
 
             try {
                 ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
                     val metadata = TagLib.getMetadata(fd.detachFd())
-                    val lyricsField = metadata?.propertyMap?.get("LYRICS")?.firstOrNull()
+                    val TranscriptField = metadata?.propertyMap?.get("Transcript")?.firstOrNull()
 
-                    if (!lyricsField.isNullOrBlank()) {
-                        val parsedLyrics = LyricsUtils.parseLyrics(lyricsField)
-                        if (parsedLyrics.isValid()) {
-                            Log.d(TAG, "===== FOUND EMBEDDED LYRICS =====")
-                            parsedLyrics.copy(areFromRemote = false)
+                    if (!TranscriptField.isNullOrBlank()) {
+                        val parsedTranscript = TranscriptUtils.parseTranscript(TranscriptField)
+                        if (parsedTranscript.isValid()) {
+                            Log.d(TAG, "===== FOUND EMBEDDED Transcript =====")
+                            parsedTranscript.copy(areFromRemote = false)
                         } else {
                             null
                         }
@@ -479,261 +479,261 @@ class LyricsRepositoryImpl @Inject constructor(
                 tempFile.delete()
             }
         } catch (e: Exception) {
-            LogUtils.e(this@LyricsRepositoryImpl, e, "Error reading lyrics from file metadata")
+            LogUtils.e(this@TranscriptRepositoryImpl, e, "Error reading Transcript from file metadata")
             null
         }
     }
 
     // ========== Original methods (kept for backward compatibility) ==========
 
-    override suspend fun fetchFromRemote(song: Song): Result<Pair<Lyrics, String>> = withContext(Dispatchers.IO) {
+    override suspend fun fetchFromRemote(Track: Track): Result<Pair<Transcript, String>> = withContext(Dispatchers.IO) {
         try {
-            LogUtils.d(this@LyricsRepositoryImpl, "Fetching lyrics from remote for: ${song.title}")
+            LogUtils.d(this@TranscriptRepositoryImpl, "Fetching Transcript from remote for: ${Track.title}")
 
             // First, try the search API which is more flexible, then pick the best match
-            val searchResult = searchRemote(song)
+            val searchResult = searchRemote(Track)
             if (searchResult.isSuccess) {
                 val (_, results) = searchResult.getOrThrow()
                 if (results.isNotEmpty()) {
                     // Pick the first result (already sorted by synced priority)
                     val best = results.first()
-                    val rawLyricsToSave = best.rawLyrics
+                    val rawTranscriptToSave = best.rawTranscript
 
 
 
-                    lyricsDao.insert(
-                         com.oakiha.audia.data.database.LyricsEntity(
-                             songId = song.id.toLong(),
-                             content = rawLyricsToSave,
-                             isSynced = !best.lyrics.synced.isNullOrEmpty(),
+                    TranscriptDao.insert(
+                         com.oakiha.audia.data.database.TranscriptEntity(
+                             TrackId = Track.id.toLong(),
+                             content = rawTranscriptToSave,
+                             isSynced = !best.Transcript.synced.isNullOrEmpty(),
                              source = "remote"
                          )
                     )
 
-                    val cacheKey = generateCacheKey(song.id)
-                    synchronized(lyricsCache) {
-                        lyricsCache[cacheKey] = best.lyrics
+                    val cacheKey = generateCacheKey(Track.id)
+                    synchronized(TranscriptCache) {
+                        TranscriptCache[cacheKey] = best.Transcript
                     }
-                    LogUtils.d(this@LyricsRepositoryImpl, "Fetched and cached remote lyrics for: ${song.title}")
+                    LogUtils.d(this@TranscriptRepositoryImpl, "Fetched and cached remote Transcript for: ${Track.title}")
 
-                    return@withContext Result.success(Pair(best.lyrics, rawLyricsToSave))
+                    return@withContext Result.success(Pair(best.Transcript, rawTranscriptToSave))
                 }
             }
 
             // Fallback: Try the exact match API (less likely to succeed, but worth a shot)
-            val response = lrcLibApiService.getLyrics(
-                trackName = song.title,
-                artistName = song.displayArtist,
-                albumName = song.album,
-                duration = (song.duration / 1000).toInt()
+            val response = lrcLibApiService.getTranscript(
+                trackName = Track.title,
+                AuthorName = Track.displayAuthor,
+                BookName = Track.Book,
+                duration = (Track.duration / 1000).toInt()
             )
 
-            if (response != null && (!response.syncedLyrics.isNullOrEmpty() || !response.plainLyrics.isNullOrEmpty())) {
-                val rawLyricsToSave = response.syncedLyrics ?: response.plainLyrics!!
+            if (response != null && (!response.syncedTranscript.isNullOrEmpty() || !response.plainTranscript.isNullOrEmpty())) {
+                val rawTranscriptToSave = response.syncedTranscript ?: response.plainTranscript!!
 
-                val parsedLyrics = LyricsUtils.parseLyrics(rawLyricsToSave).copy(areFromRemote = true)
-                if (!parsedLyrics.isValid()) {
-                    return@withContext Result.failure(LyricsException("Parsed lyrics are empty"))
+                val parsedTranscript = TranscriptUtils.parseTranscript(rawTranscriptToSave).copy(areFromRemote = true)
+                if (!parsedTranscript.isValid()) {
+                    return@withContext Result.failure(TranscriptException("Parsed Transcript are empty"))
                 }
 
-                lyricsDao.insert(
-                     com.oakiha.audia.data.database.LyricsEntity(
-                         songId = song.id.toLong(),
-                         content = rawLyricsToSave,
-                         isSynced = !parsedLyrics.synced.isNullOrEmpty(),
+                TranscriptDao.insert(
+                     com.oakiha.audia.data.database.TranscriptEntity(
+                         TrackId = Track.id.toLong(),
+                         content = rawTranscriptToSave,
+                         isSynced = !parsedTranscript.synced.isNullOrEmpty(),
                          source = "remote"
                      )
                 )
 
-                val cacheKey = generateCacheKey(song.id)
-                synchronized(lyricsCache) {
-                    lyricsCache[cacheKey] = parsedLyrics
+                val cacheKey = generateCacheKey(Track.id)
+                synchronized(TranscriptCache) {
+                    TranscriptCache[cacheKey] = parsedTranscript
                 }
-                LogUtils.d(this@LyricsRepositoryImpl, "Fetched and cached remote lyrics (exact match) for: ${song.title}")
+                LogUtils.d(this@TranscriptRepositoryImpl, "Fetched and cached remote Transcript (exact match) for: ${Track.title}")
 
-                Result.success(Pair(parsedLyrics, rawLyricsToSave))
+                Result.success(Pair(parsedTranscript, rawTranscriptToSave))
             } else {
-                LogUtils.d(this@LyricsRepositoryImpl, "No lyrics found remotely for: ${song.title}")
-                Result.failure(NoLyricsFoundException())
+                LogUtils.d(this@TranscriptRepositoryImpl, "No Transcript found remotely for: ${Track.title}")
+                Result.failure(NoTranscriptFoundException())
             }
         } catch (e: Exception) {
-            LogUtils.e(this@LyricsRepositoryImpl, e, "Error fetching lyrics from remote")
+            LogUtils.e(this@TranscriptRepositoryImpl, e, "Error fetching Transcript from remote")
             when {
-                e is HttpException && e.code() == 404 -> Result.failure(NoLyricsFoundException())
-                e is SocketTimeoutException -> Result.failure(LyricsException(context.getString(R.string.lyrics_fetch_timeout), e))
-                e is UnknownHostException -> Result.failure(LyricsException(context.getString(R.string.lyrics_network_error), e))
-                e is IOException -> Result.failure(LyricsException(context.getString(R.string.lyrics_network_error), e))
-                e is HttpException -> Result.failure(LyricsException(context.getString(R.string.lyrics_server_error, e.code()), e))
-                else -> Result.failure(LyricsException(context.getString(R.string.failed_to_fetch_lyrics_from_remote), e))
+                e is HttpException && e.code() == 404 -> Result.failure(NoTranscriptFoundException())
+                e is SocketTimeoutException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_fetch_timeout), e))
+                e is UnknownHostException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_network_error), e))
+                e is IOException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_network_error), e))
+                e is HttpException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_server_error, e.code()), e))
+                else -> Result.failure(TranscriptException(context.getString(R.string.failed_to_fetch_Transcript_from_remote), e))
             }
         }
     }
 
-    override suspend fun searchRemote(song: Song): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
+    override suspend fun searchRemote(Track: Track): Result<Pair<String, List<TranscriptSearchResult>>> = withContext(Dispatchers.IO) {
         try {
-            LogUtils.d(this@LyricsRepositoryImpl, "Searching remote for lyrics for: ${song.title} by ${song.displayArtist}")
+            LogUtils.d(this@TranscriptRepositoryImpl, "Searching remote for Transcript for: ${Track.title} by ${Track.displayAuthor}")
 
-            val combinedQuery = "${song.title} ${song.displayArtist}"
+            val combinedQuery = "${Track.title} ${Track.displayAuthor}"
 
             // SEQUENTIAL STRATEGY: Try each search strategy one by one
             val strategies: List<suspend () -> Array<LrcLibResponse>?> = listOf(
-                { runCatching { lrcLibApiService.searchLyrics(query = combinedQuery, artistName = song.displayArtist) }.getOrNull() },
-                { runCatching { lrcLibApiService.searchLyrics(trackName = song.title, artistName = song.displayArtist) }.getOrNull() },
-                { runCatching { lrcLibApiService.searchLyrics(trackName = song.title) }.getOrNull() },
-                { runCatching { lrcLibApiService.searchLyrics(query = song.title) }.getOrNull() }
+                { runCatching { lrcLibApiService.searchTranscript(query = combinedQuery, AuthorName = Track.displayAuthor) }.getOrNull() },
+                { runCatching { lrcLibApiService.searchTranscript(trackName = Track.title, AuthorName = Track.displayAuthor) }.getOrNull() },
+                { runCatching { lrcLibApiService.searchTranscript(trackName = Track.title) }.getOrNull() },
+                { runCatching { lrcLibApiService.searchTranscript(query = Track.title) }.getOrNull() }
             )
 
             var allResults: List<LrcLibResponse> = emptyList()
             for ((index, strategy) in strategies.withIndex()) {
-                LogUtils.d(this@LyricsRepositoryImpl, "Trying search strategy ${index + 1}/4...")
+                LogUtils.d(this@TranscriptRepositoryImpl, "Trying search strategy ${index + 1}/4...")
                 val result = strategy()
                 if (!result.isNullOrEmpty()) {
-                    LogUtils.d(this@LyricsRepositoryImpl, "Strategy ${index + 1} returned ${result.size} results")
+                    LogUtils.d(this@TranscriptRepositoryImpl, "Strategy ${index + 1} returned ${result.size} results")
                     allResults = result.toList()
                     break
                 }
-                LogUtils.d(this@LyricsRepositoryImpl, "Strategy ${index + 1} returned no results, trying next...")
+                LogUtils.d(this@TranscriptRepositoryImpl, "Strategy ${index + 1} returned no results, trying next...")
             }
 
             val uniqueResults = allResults.distinctBy { it.id }
 
             if (uniqueResults.isNotEmpty()) {
-                val songDurationSeconds = song.duration / 1000
+                val TrackDurationSeconds = Track.duration / 1000
                 val results = uniqueResults.mapNotNull { response ->
-                    val durationDiff = abs(response.duration - songDurationSeconds)
+                    val durationDiff = abs(response.duration - TrackDurationSeconds)
                     if (durationDiff > 15) {
-                        LogUtils.d(this@LyricsRepositoryImpl, "  Skipping '${response.name}' - duration mismatch: ${response.duration}s vs ${songDurationSeconds}s (diff: ${durationDiff}s)")
+                        LogUtils.d(this@TranscriptRepositoryImpl, "  Skipping '${response.name}' - duration mismatch: ${response.duration}s vs ${TrackDurationSeconds}s (diff: ${durationDiff}s)")
                         return@mapNotNull null
                     }
 
-                    val rawLyrics = response.syncedLyrics ?: response.plainLyrics ?: return@mapNotNull null
-                    val parsedLyrics = LyricsUtils.parseLyrics(rawLyrics).copy(areFromRemote = true)
-                    if (!parsedLyrics.isValid()) {
-                        LogUtils.w(this@LyricsRepositoryImpl, "Parsed lyrics are empty for: ${song.title}")
+                    val rawTranscript = response.syncedTranscript ?: response.plainTranscript ?: return@mapNotNull null
+                    val parsedTranscript = TranscriptUtils.parseTranscript(rawTranscript).copy(areFromRemote = true)
+                    if (!parsedTranscript.isValid()) {
+                        LogUtils.w(this@TranscriptRepositoryImpl, "Parsed Transcript are empty for: ${Track.title}")
                         return@mapNotNull null
                     }
-                    val hasSynced = !response.syncedLyrics.isNullOrEmpty()
-                    LogUtils.d(this@LyricsRepositoryImpl, "  Found: ${response.name} by ${response.artistName} (synced: $hasSynced)")
-                    LyricsSearchResult(response, parsedLyrics, rawLyrics)
+                    val hasSynced = !response.syncedTranscript.isNullOrEmpty()
+                    LogUtils.d(this@TranscriptRepositoryImpl, "  Found: ${response.name} by ${response.AuthorName} (synced: $hasSynced)")
+                    TranscriptSearchResult(response, parsedTranscript, rawTranscript)
                 }
-                    .sortedByDescending { !it.record.syncedLyrics.isNullOrEmpty() }
+                    .sortedByDescending { !it.record.syncedTranscript.isNullOrEmpty() }
 
                 if (results.isNotEmpty()) {
-                    val syncedCount = results.count { !it.record.syncedLyrics.isNullOrEmpty() }
-                    LogUtils.d(this@LyricsRepositoryImpl, "Found ${results.size} lyrics for: ${song.title} ($syncedCount with synced)")
+                    val syncedCount = results.count { !it.record.syncedTranscript.isNullOrEmpty() }
+                    LogUtils.d(this@TranscriptRepositoryImpl, "Found ${results.size} Transcript for: ${Track.title} ($syncedCount with synced)")
                     Result.success(Pair(combinedQuery, results))
                 } else {
-                    LogUtils.d(this@LyricsRepositoryImpl, "No matching lyrics found for: ${song.title}")
-                    Result.failure(NoLyricsFoundException(combinedQuery))
+                    LogUtils.d(this@TranscriptRepositoryImpl, "No matching Transcript found for: ${Track.title}")
+                    Result.failure(NoTranscriptFoundException(combinedQuery))
                 }
             } else {
-                LogUtils.d(this@LyricsRepositoryImpl, "No lyrics found remotely for: ${song.title}")
-                Result.failure(NoLyricsFoundException(combinedQuery))
+                LogUtils.d(this@TranscriptRepositoryImpl, "No Transcript found remotely for: ${Track.title}")
+                Result.failure(NoTranscriptFoundException(combinedQuery))
             }
         } catch (e: Exception) {
-            LogUtils.e(this@LyricsRepositoryImpl, e, "Error searching remote for lyrics")
+            LogUtils.e(this@TranscriptRepositoryImpl, e, "Error searching remote for Transcript")
             when {
-                e is SocketTimeoutException -> Result.failure(LyricsException(context.getString(R.string.lyrics_fetch_timeout), e))
-                e is UnknownHostException -> Result.failure(LyricsException(context.getString(R.string.lyrics_network_error), e))
-                e is IOException -> Result.failure(LyricsException(context.getString(R.string.lyrics_network_error), e))
-                e is HttpException -> Result.failure(LyricsException(context.getString(R.string.lyrics_server_error, e.code()), e))
-                else -> Result.failure(LyricsException(context.getString(R.string.failed_to_search_for_lyrics), e))
+                e is SocketTimeoutException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_fetch_timeout), e))
+                e is UnknownHostException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_network_error), e))
+                e is IOException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_network_error), e))
+                e is HttpException -> Result.failure(TranscriptException(context.getString(R.string.Transcript_server_error, e.code()), e))
+                else -> Result.failure(TranscriptException(context.getString(R.string.failed_to_search_for_Transcript), e))
             }
         }
     }
 
-    override suspend fun searchRemoteByQuery(title: String, artist: String?): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
+    override suspend fun searchRemoteByQuery(title: String, Author: String?): Result<Pair<String, List<TranscriptSearchResult>>> = withContext(Dispatchers.IO) {
         try {
             val query = listOfNotNull(
                 title.takeIf { it.isNotBlank() },
-                artist?.takeIf { it.isNotBlank() }
+                Author?.takeIf { it.isNotBlank() }
             ).joinToString(" ")
 
-            LogUtils.d(this@LyricsRepositoryImpl, "Manual lyrics search: title=$title, artist=$artist")
+            LogUtils.d(this@TranscriptRepositoryImpl, "Manual Transcript search: title=$title, Author=$Author")
 
             // Search using the custom query provided by user
-            val responses = lrcLibApiService.searchLyrics(query = query)
+            val responses = lrcLibApiService.searchTranscript(query = query)
                 ?.distinctBy { it.id }
                 ?: emptyList()
 
             if (responses.isEmpty()) {
-                return@withContext Result.failure(NoLyricsFoundException(query))
+                return@withContext Result.failure(NoTranscriptFoundException(query))
             }
 
             val results = responses.mapNotNull { response ->
-                val rawLyrics = response.syncedLyrics ?: response.plainLyrics ?: return@mapNotNull null
-                val parsed = LyricsUtils.parseLyrics(rawLyrics).copy(areFromRemote = true)
+                val rawTranscript = response.syncedTranscript ?: response.plainTranscript ?: return@mapNotNull null
+                val parsed = TranscriptUtils.parseTranscript(rawTranscript).copy(areFromRemote = true)
                 if (!parsed.isValid()) return@mapNotNull null
 
-                LyricsSearchResult(response, parsed, rawLyrics)
-            }.sortedByDescending { !it.record.syncedLyrics.isNullOrEmpty() }
+                TranscriptSearchResult(response, parsed, rawTranscript)
+            }.sortedByDescending { !it.record.syncedTranscript.isNullOrEmpty() }
 
             if (results.isEmpty()) {
-                Result.failure(NoLyricsFoundException(query))
+                Result.failure(NoTranscriptFoundException(query))
             } else {
                 Result.success(Pair(query, results))
             }
         } catch (e: Exception) {
-            LogUtils.e(this@LyricsRepositoryImpl, e, "Manual search failed")
-            Result.failure(LyricsException(context.getString(R.string.failed_to_search_for_lyrics), e)
+            LogUtils.e(this@TranscriptRepositoryImpl, e, "Manual search failed")
+            Result.failure(TranscriptException(context.getString(R.string.failed_to_search_for_Transcript), e)
             )
         }
     }
 
-    override suspend fun updateLyrics(songId: Long, lyricsContent: String): Unit = withContext(Dispatchers.IO) {
-        LogUtils.d(this@LyricsRepositoryImpl, "Updating lyrics for songId: $songId")
+    override suspend fun updateTranscript(TrackId: Long, TranscriptContent: String): Unit = withContext(Dispatchers.IO) {
+        LogUtils.d(this@TranscriptRepositoryImpl, "Updating Transcript for TrackId: $TrackId")
 
-        val parsedLyrics = LyricsUtils.parseLyrics(lyricsContent)
-        if (!parsedLyrics.isValid()) {
-            LogUtils.w(this@LyricsRepositoryImpl, "Attempted to save empty lyrics for songId: $songId")
+        val parsedTranscript = TranscriptUtils.parseTranscript(TranscriptContent)
+        if (!parsedTranscript.isValid()) {
+            LogUtils.w(this@TranscriptRepositoryImpl, "Attempted to save empty Transcript for TrackId: $TrackId")
             return@withContext
         }
 
-        lyricsDao.insert(
-             com.oakiha.audia.data.database.LyricsEntity(
-                 songId = songId,
-                 content = lyricsContent,
-                 isSynced = parsedLyrics.synced?.isNotEmpty() == true,
+        TranscriptDao.insert(
+             com.oakiha.audia.data.database.TranscriptEntity(
+                 TrackId = TrackId,
+                 content = TranscriptContent,
+                 isSynced = parsedTranscript.synced?.isNotEmpty() == true,
                  source = "manual"
              )
         )
 
-        val cacheKey = generateCacheKey(songId.toString())
-        synchronized(lyricsCache) {
-            lyricsCache[cacheKey] = parsedLyrics
+        val cacheKey = generateCacheKey(TrackId.toString())
+        synchronized(TranscriptCache) {
+            TranscriptCache[cacheKey] = parsedTranscript
         }
-        LogUtils.d(this@LyricsRepositoryImpl, "Updated and cached lyrics for songId: $songId")
+        LogUtils.d(this@TranscriptRepositoryImpl, "Updated and cached Transcript for TrackId: $TrackId")
     }
 
-    override suspend fun resetLyrics(songId: Long): Unit = withContext(Dispatchers.IO) {
-        LogUtils.d(this, "Resetting lyrics for songId: $songId")
-        val cacheKey = generateCacheKey(songId.toString())
-        synchronized(lyricsCache) {
-            lyricsCache.remove(cacheKey)
+    override suspend fun resetTranscript(TrackId: Long): Unit = withContext(Dispatchers.IO) {
+        LogUtils.d(this, "Resetting Transcript for TrackId: $TrackId")
+        val cacheKey = generateCacheKey(TrackId.toString())
+        synchronized(TranscriptCache) {
+            TranscriptCache.remove(cacheKey)
         }
-        lyricsDao.deleteLyrics(songId)
+        TranscriptDao.deleteTranscript(TrackId)
         
         // Also remove JSON cache
         try {
-            val file = File(context.filesDir, "lyrics/${songId}.json")
+            val file = File(context.filesDir, "Transcript/${TrackId}.json")
             if (file.exists()) file.delete()
         } catch (e: Exception) {
             Log.w(TAG, "Error deleting JSON cache: ${e.message}")
         }
     }
 
-    override suspend fun resetAllLyrics(): Unit = withContext(Dispatchers.IO) {
-        LogUtils.d(this, "Resetting all lyrics")
-        synchronized(lyricsCache) {
-            lyricsCache.clear()
+    override suspend fun resetAllTranscript(): Unit = withContext(Dispatchers.IO) {
+        LogUtils.d(this, "Resetting all Transcript")
+        synchronized(TranscriptCache) {
+            TranscriptCache.clear()
         }
-        lyricsDao.deleteAll()
+        TranscriptDao.deleteAll()
         
         // Also clear JSON cache directory
         try {
-            val lyricsDir = File(context.filesDir, "lyrics")
-            if (lyricsDir.exists()) {
-                lyricsDir.listFiles()?.forEach { it.delete() }
+            val TranscriptDir = File(context.filesDir, "Transcript")
+            if (TranscriptDir.exists()) {
+                TranscriptDir.listFiles()?.forEach { it.delete() }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Error clearing JSON cache: ${e.message}")
@@ -741,52 +741,52 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun scanAndAssignLocalLrcFiles(
-        songs: List<Song>,
+        Tracks: List<Track>,
         onProgress: suspend (current: Int, total: Int) -> Unit
     ): Int = withContext(Dispatchers.IO) {
-        LogUtils.d(this@LyricsRepositoryImpl, "Starting bulk scan for .lrc files for ${songs.size} songs")
+        LogUtils.d(this@TranscriptRepositoryImpl, "Starting bulk scan for .lrc files for ${Tracks.size} Tracks")
         val updatedCount = AtomicInteger(0)
         val processedCount = AtomicInteger(0)
-        val total = songs.size
+        val total = Tracks.size
         
-        // Only scan songs that don't have lyrics
-        val songsToScan = songs.filter { it.lyrics.isNullOrBlank() }
-        val skippedCount = total - songsToScan.size
+        // Only scan Tracks that don't have Transcript
+        val TracksToScan = Tracks.filter { it.Transcript.isNullOrBlank() }
+        val skippedCount = total - TracksToScan.size
         processedCount.addAndGet(skippedCount)
         
-        LogUtils.d(this@LyricsRepositoryImpl, "Skipping $skippedCount songs that already have lyrics. Scanning ${songsToScan.size} songs.")
+        LogUtils.d(this@TranscriptRepositoryImpl, "Skipping $skippedCount Tracks that already have Transcript. Scanning ${TracksToScan.size} Tracks.")
         
         onProgress(processedCount.get(), total)
         
-        if (songsToScan.isEmpty()) {
+        if (TracksToScan.isEmpty()) {
             return@withContext 0
         }
 
         val semaphore = Semaphore(8) // Limit concurrency
 
         coroutineScope {
-            songsToScan.map { song ->
+            TracksToScan.map { Track ->
                 async {
                     semaphore.withPermit {
                         try {
-                            // Find lyrics file
-                            val songFile = File(song.path)
-                            val directory = songFile.parentFile
+                            // Find Transcript file
+                            val TrackFile = File(Track.path)
+                            val directory = TrackFile.parentFile
                             
                             if (directory != null && directory.exists()) {
                                 var foundFile: File? = null
                                 
                                 // Strategy 1: Exact match name
-                                val exactMatch = File(directory, "${songFile.nameWithoutExtension}.lrc")
+                                val exactMatch = File(directory, "${TrackFile.nameWithoutExtension}.lrc")
                                 if (exactMatch.exists() && exactMatch.canRead()) {
                                     foundFile = exactMatch
                                 }
                                 
-                                // Strategy 2: Artist - Title
+                                // Strategy 2: Author - Title
                                 if (foundFile == null) {
-                                    val cleanArtist = song.displayArtist.replace(Regex("[^a-zA-Z0-9]"), "_")
-                                    val cleanTitle = song.title.replace(Regex("[^a-zA-Z0-9]"), "_")
-                                    val altMatch = File(directory, "${cleanArtist}_${cleanTitle}.lrc")
+                                    val cleanAuthor = Track.displayAuthor.replace(Regex("[^a-zA-Z0-9]"), "_")
+                                    val cleanTitle = Track.title.replace(Regex("[^a-zA-Z0-9]"), "_")
+                                    val altMatch = File(directory, "${cleanAuthor}_${cleanTitle}.lrc")
                                     if (altMatch.exists() && altMatch.canRead()) {
                                         foundFile = altMatch
                                     }
@@ -795,22 +795,22 @@ class LyricsRepositoryImpl @Inject constructor(
                                 if (foundFile != null) {
                                     val content = foundFile.readText()
                                     // Verify validity
-                                    if (LyricsUtils.parseLyrics(content).isValid()) {
-                                        lyricsDao.insert(
-                                             com.oakiha.audia.data.database.LyricsEntity(
-                                                 songId = song.id.toLong(),
+                                    if (TranscriptUtils.parseTranscript(content).isValid()) {
+                                        TranscriptDao.insert(
+                                             com.oakiha.audia.data.database.TranscriptEntity(
+                                                 TrackId = Track.id.toLong(),
                                                  content = content,
-                                                 isSynced = LyricsUtils.parseLyrics(content).synced?.isNotEmpty() == true,
+                                                 isSynced = TranscriptUtils.parseTranscript(content).synced?.isNotEmpty() == true,
                                                  source = "local_file"
                                              )
                                         )
                                         updatedCount.incrementAndGet()
-                                        LogUtils.d(this@LyricsRepositoryImpl, "Auto-assigned lyrics from ${foundFile.name}")
+                                        LogUtils.d(this@TranscriptRepositoryImpl, "Auto-assigned Transcript from ${foundFile.name}")
                                     }
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.w(TAG, "Error scanning lyrics for ${song.title}: ${e.message}")
+                            Log.w(TAG, "Error scanning Transcript for ${Track.title}: ${e.message}")
                         }
                         
                         val current = processedCount.incrementAndGet()
@@ -822,18 +822,18 @@ class LyricsRepositoryImpl @Inject constructor(
             }.awaitAll()
         }
         
-        LogUtils.d(this@LyricsRepositoryImpl, "Bulk scan complete. Updated ${updatedCount.get()} songs.")
+        LogUtils.d(this@TranscriptRepositoryImpl, "Bulk scan complete. Updated ${updatedCount.get()} Tracks.")
         return@withContext updatedCount.get()
     }
 
     override fun clearCache() {
-        LogUtils.d(this, "Clearing lyrics in-memory cache")
-        synchronized(lyricsCache) {
-            lyricsCache.clear()
+        LogUtils.d(this, "Clearing Transcript in-memory cache")
+        synchronized(TranscriptCache) {
+            TranscriptCache.clear()
         }
     }
 
-    private fun generateCacheKey(songId: String): String = songId
+    private fun generateCacheKey(TrackId: String): String = TrackId
 
     private fun createTempFileFromUri(uri: Uri): File? {
         return try {
@@ -845,7 +845,7 @@ class LyricsRepositoryImpl @Inject constructor(
                     } else "temp_audio"
                 } ?: "temp_audio"
 
-                val tempFile = File.createTempFile("lyrics_", "_$fileName", context.cacheDir)
+                val tempFile = File.createTempFile("Transcript_", "_$fileName", context.cacheDir)
                 FileOutputStream(tempFile).use { output ->
                     inputStream.copyTo(output)
                 }
@@ -858,8 +858,8 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 }
 
-data class LyricsSearchResult(val record: LrcLibResponse, val lyrics: Lyrics, val rawLyrics: String)
+data class TranscriptSearchResult(val record: LrcLibResponse, val Transcript: Transcript, val rawTranscript: String)
 
-data class NoLyricsFoundException(val query: String? = null) : Exception()
+data class NoTranscriptFoundException(val query: String? = null) : Exception()
 
-class LyricsException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class TranscriptException(message: String, cause: Throwable? = null) : Exception(message, cause)

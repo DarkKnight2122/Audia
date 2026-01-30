@@ -3,7 +3,7 @@ package com.oakiha.audia.data.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class Genre(
+data class Category(
     val id: String,
     val name: String,
     val iconResId: Int? = null, // Optional: For a Material symbol or drawable

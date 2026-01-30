@@ -244,7 +244,7 @@ class FileExplorerStateHolder(
         // Remove any explicit "Block" rules that are children (they are redundant now)
         currentBlocked.removeAll { it.startsWith("$path/") }
         // Remove any explicit "Allow" rules that are inside (they are overridden unless we want nested allow?)
-        // Wait, usually we want to Keep nested allows if we support "Block Music, Allow Music/Favorites".
+        // Wait, usually we want to Keep nested allows if we support "Block Audiobook, Allow Audiobook/Favorites".
         // DirectoryRuleResolver supports nesting. 
         // But the previous code removed them: `currentAllowed.removeAll { ... }`
         // Let's stick to previous behavior of clearing conflicting rules to avoid confusion.
@@ -337,13 +337,13 @@ class FileExplorerStateHolder(
                         }
                     }
                     // Optimization: If we have found enough files to know it's populated, we can stop counting strictly?
-                    // But we need the counts for the UI ("12 songs").
-                    // If the user has 10,000 songs, this loop is slow.
+                    // But we need the counts for the UI ("12 Tracks").
+                    // If the user has 10,000 Tracks, this loop is slow.
                     // Let's cap at 500 for display purposes to keep it fast, or rely on MediaStore later?
                     // For now, let's keep the 100 limit from original code or bump slightly,
                     // but the original code had `if (totalCount > 100) return`.
                     // This implies the UI shows "100+" or similar?
-                    // The UI shows `"$displayCount songs"`. If we return 100, it says "100 songs".
+                    // The UI shows `"$displayCount Tracks"`. If we return 100, it says "100 Tracks".
                     // If we stop at 100, the user won't know the real count.
                     // But for performance, avoiding deep traversal of massive folders is key.
                     if (totalCount > 99) {

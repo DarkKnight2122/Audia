@@ -8,11 +8,11 @@ import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.LibraryNavigationMode
 import com.oakiha.audia.data.preferences.ThemePreference
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.preferences.AlbumArtQuality
+import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
-import com.oakiha.audia.data.repository.LyricsRepository
-import com.oakiha.audia.data.repository.MusicRepository
-import com.oakiha.audia.data.model.LyricsSourcePreference
+import com.oakiha.audia.data.repository.TranscriptRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
+import com.oakiha.audia.data.model.TranscriptSourcePreference
 import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.data.worker.SyncProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,14 +26,14 @@ import com.oakiha.audia.data.preferences.NavBarStyle
 import com.oakiha.audia.data.ai.GeminiModelService
 import com.oakiha.audia.data.ai.GeminiModel
 import com.oakiha.audia.data.preferences.LaunchTab
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import java.io.File
 
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
     val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,
-    val playerThemePreference: String = ThemePreference.ALBUM_ART,
-    val mockGenresEnabled: Boolean = false,
+    val playerThemePreference: String = ThemePreference.Book_ART,
+    val mockCategoriesEnabled: Boolean = false,
     val navBarCornerRadius: Int = 32,
     val navBarStyle: String = NavBarStyle.DEFAULT,
     val carouselStyle: String = CarouselStyle.NO_PEEK,
@@ -45,7 +45,7 @@ data class SettingsUiState(
     val isCrossfadeEnabled: Boolean = true,
     val crossfadeDuration: Int = 6000,
     val persistentShuffleEnabled: Boolean = false,
-    val lyricsSourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
+    val TranscriptSourcePreference: TranscriptSourcePreference = TranscriptSourcePreference.EMBEDDED_FIRST,
     val autoScanLrcFiles: Boolean = false,
     val blockedDirectories: Set<String> = emptySet(),
     val availableModels: List<GeminiModel> = emptyList(),
@@ -54,30 +54,30 @@ data class SettingsUiState(
     val appRebrandDialogShown: Boolean = false,
     val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
     // Developer Options
-    val albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM,
+    val BookArtQuality: BookArtQuality = BookArtQuality.MEDIUM,
     val tapBackgroundClosesPlayer: Boolean = true,
-    val immersiveLyricsEnabled: Boolean = false,
-    val immersiveLyricsTimeout: Long = 4000L
+    val immersiveTranscriptEnabled: Boolean = false,
+    val immersiveTranscriptTimeout: Long = 4000L
 )
 
-data class FailedSongInfo(
+data class FailedTrackInfo(
     val id: String,
     val title: String,
-    val artist: String
+    val Author: String
 )
 
-data class LyricsRefreshProgress(
-    val totalSongs: Int = 0,
+data class TranscriptRefreshProgress(
+    val totalTracks: Int = 0,
     val currentCount: Int = 0,
     val savedCount: Int = 0,
     val notFoundCount: Int = 0,
     val skippedCount: Int = 0,
     val isComplete: Boolean = false,
-    val failedSongs: List<FailedSongInfo> = emptyList()
+    val failedTracks: List<FailedTrackInfo> = emptyList()
 ) {
-    val hasProgress: Boolean get() = totalSongs > 0
-    val progress: Float get() = if (totalSongs > 0) currentCount.toFloat() / totalSongs else 0f
-    val hasFailedSongs: Boolean get() = failedSongs.isNotEmpty()
+    val hasProgress: Boolean get() = totalTracks > 0
+    val progress: Float get() = if (totalTracks > 0) currentCount.toFloat() / totalTracks else 0f
+    val hasFailedTracks: Boolean get() = failedTracks.isNotEmpty()
 }
 
 // Helper classes for consolidated combine() collectors to reduce coroutine overhead
@@ -86,7 +86,7 @@ private sealed interface SettingsUiUpdate {
         val appRebrandDialogShown: Boolean,
         val appThemeMode: String,
         val playerThemePreference: String,
-        val mockGenresEnabled: Boolean,
+        val mockCategoriesEnabled: Boolean,
         val navBarCornerRadius: Int,
         val navBarStyle: String,
         val libraryNavigationMode: String,
@@ -101,11 +101,11 @@ private sealed interface SettingsUiUpdate {
         val isCrossfadeEnabled: Boolean,
         val crossfadeDuration: Int,
         val persistentShuffleEnabled: Boolean,
-        val lyricsSourcePreference: LyricsSourcePreference,
+        val TranscriptSourcePreference: TranscriptSourcePreference,
         val autoScanLrcFiles: Boolean,
         val blockedDirectories: Set<String>,
-        val immersiveLyricsEnabled: Boolean,
-        val immersiveLyricsTimeout: Long
+        val immersiveTranscriptEnabled: Boolean,
+        val immersiveTranscriptTimeout: Long
     ) : SettingsUiUpdate
 }
 
@@ -114,8 +114,8 @@ class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val syncManager: SyncManager,
     private val geminiModelService: GeminiModelService,
-    private val lyricsRepository: LyricsRepository,
-    private val musicRepository: MusicRepository,
+    private val TranscriptRepository: TranscriptRepository,
+    private val AudiobookRepository: AudiobookRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -166,7 +166,7 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.appRebrandDialogShownFlow,
                 userPreferencesRepository.appThemeModeFlow,
                 userPreferencesRepository.playerThemePreferenceFlow,
-                userPreferencesRepository.mockGenresEnabledFlow,
+                userPreferencesRepository.mockCategoriesEnabledFlow,
                 userPreferencesRepository.navBarCornerRadiusFlow,
                 userPreferencesRepository.navBarStyleFlow,
                 userPreferencesRepository.libraryNavigationModeFlow,
@@ -177,7 +177,7 @@ class SettingsViewModel @Inject constructor(
                     appRebrandDialogShown = values[0] as Boolean,
                     appThemeMode = values[1] as String,
                     playerThemePreference = values[2] as String,
-                    mockGenresEnabled = values[3] as Boolean,
+                    mockCategoriesEnabled = values[3] as Boolean,
                     navBarCornerRadius = values[4] as Int,
                     navBarStyle = values[5] as String,
                     libraryNavigationMode = values[6] as String,
@@ -190,7 +190,7 @@ class SettingsViewModel @Inject constructor(
                         appRebrandDialogShown = update.appRebrandDialogShown,
                         appThemeMode = update.appThemeMode,
                         playerThemePreference = update.playerThemePreference,
-                        mockGenresEnabled = update.mockGenresEnabled,
+                        mockCategoriesEnabled = update.mockCategoriesEnabled,
                         navBarCornerRadius = update.navBarCornerRadius,
                         navBarStyle = update.navBarStyle,
                         libraryNavigationMode = update.libraryNavigationMode,
@@ -210,11 +210,11 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.isCrossfadeEnabledFlow,
                 userPreferencesRepository.crossfadeDurationFlow,
                 userPreferencesRepository.persistentShuffleEnabledFlow,
-                userPreferencesRepository.lyricsSourcePreferenceFlow,
+                userPreferencesRepository.TranscriptSourcePreferenceFlow,
                 userPreferencesRepository.autoScanLrcFilesFlow,
                 userPreferencesRepository.blockedDirectoriesFlow,
-                userPreferencesRepository.immersiveLyricsEnabledFlow,
-                userPreferencesRepository.immersiveLyricsTimeoutFlow
+                userPreferencesRepository.immersiveTranscriptEnabledFlow,
+                userPreferencesRepository.immersiveTranscriptTimeoutFlow
             ) { values ->
                 SettingsUiUpdate.Group2(
                     keepPlayingInBackground = values[0] as Boolean,
@@ -223,11 +223,11 @@ class SettingsViewModel @Inject constructor(
                     isCrossfadeEnabled = values[3] as Boolean,
                     crossfadeDuration = values[4] as Int,
                     persistentShuffleEnabled = values[5] as Boolean,
-                    lyricsSourcePreference = values[6] as LyricsSourcePreference,
+                    TranscriptSourcePreference = values[6] as TranscriptSourcePreference,
                     autoScanLrcFiles = values[7] as Boolean,
                     blockedDirectories = @Suppress("UNCHECKED_CAST") (values[8] as Set<String>),
-                    immersiveLyricsEnabled = values[9] as Boolean,
-                    immersiveLyricsTimeout = values[10] as Long
+                    immersiveTranscriptEnabled = values[9] as Boolean,
+                    immersiveTranscriptTimeout = values[10] as Long
                 )
             }.collect { update ->
                 _uiState.update { state ->
@@ -238,11 +238,11 @@ class SettingsViewModel @Inject constructor(
                         isCrossfadeEnabled = update.isCrossfadeEnabled,
                         crossfadeDuration = update.crossfadeDuration,
                         persistentShuffleEnabled = update.persistentShuffleEnabled,
-                        lyricsSourcePreference = update.lyricsSourcePreference,
+                        TranscriptSourcePreference = update.TranscriptSourcePreference,
                         autoScanLrcFiles = update.autoScanLrcFiles,
                         blockedDirectories = update.blockedDirectories,
-                        immersiveLyricsEnabled = update.immersiveLyricsEnabled,
-                        immersiveLyricsTimeout = update.immersiveLyricsTimeout
+                        immersiveTranscriptEnabled = update.immersiveTranscriptEnabled,
+                        immersiveTranscriptTimeout = update.immersiveTranscriptTimeout
                     )
                 }
             }
@@ -263,8 +263,8 @@ class SettingsViewModel @Inject constructor(
 
         // Beta Features Collectors
         viewModelScope.launch {
-            userPreferencesRepository.albumArtQualityFlow.collect { quality ->
-                _uiState.update { it.copy(albumArtQuality = quality) }
+            userPreferencesRepository.BookArtQualityFlow.collect { quality ->
+                _uiState.update { it.copy(BookArtQuality = quality) }
             }
         }
 
@@ -317,7 +317,7 @@ class SettingsViewModel @Inject constructor(
 
     fun explorerRoot(): File = fileExplorerStateHolder.rootDirectory()
 
-    // Método para guardar la preferencia de tema del reproductor
+    // MÃƒÂ©todo para guardar la preferencia de tema del reproductor
     fun setPlayerThemePreference(preference: String) {
         viewModelScope.launch {
             userPreferencesRepository.setPlayerThemePreference(preference)
@@ -390,9 +390,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setLyricsSourcePreference(preference: LyricsSourcePreference) {
+    fun setTranscriptSourcePreference(preference: TranscriptSourcePreference) {
         viewModelScope.launch {
-            userPreferencesRepository.setLyricsSourcePreference(preference)
+            userPreferencesRepository.setTranscriptSourcePreference(preference)
         }
     }
 
@@ -408,15 +408,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setDelayAlbumCarousel(enabled: Boolean) {
+    fun setDelayBookCarousel(enabled: Boolean) {
         viewModelScope.launch {
-            userPreferencesRepository.setDelayAlbumCarousel(enabled)
+            userPreferencesRepository.setDelayBookCarousel(enabled)
         }
     }
 
-    fun setDelaySongMetadata(enabled: Boolean) {
+    fun setDelayTrackMetadata(enabled: Boolean) {
         viewModelScope.launch {
-            userPreferencesRepository.setDelaySongMetadata(enabled)
+            userPreferencesRepository.setDelayTrackMetadata(enabled)
         }
     }
 
@@ -464,7 +464,7 @@ class SettingsViewModel @Inject constructor(
 
     /**
      * Performs a full library rescan - rescans all files from scratch.
-     * Use when songs are missing or metadata is incorrect.
+     * Use when Tracks are missing or metadata is incorrect.
      */
     fun fullSyncLibrary() {
         viewModelScope.launch {
@@ -473,21 +473,21 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setImmersiveLyricsEnabled(enabled: Boolean) {
+    fun setImmersiveTranscriptEnabled(enabled: Boolean) {
         viewModelScope.launch {
-            userPreferencesRepository.setImmersiveLyricsEnabled(enabled)
+            userPreferencesRepository.setImmersiveTranscriptEnabled(enabled)
         }
     }
 
-    fun setImmersiveLyricsTimeout(timeout: Long) {
+    fun setImmersiveTranscriptTimeout(timeout: Long) {
         viewModelScope.launch {
-            userPreferencesRepository.setImmersiveLyricsTimeout(timeout)
+            userPreferencesRepository.setImmersiveTranscriptTimeout(timeout)
         }
     }
 
     /**
      * Completely rebuilds the database from scratch.
-     * Clears all data including user edits (lyrics, favorites) and rescans.
+     * Clears all data including user edits (Transcript, favorites) and rescans.
      * Use when database is corrupted or as a last resort.
      */
     fun rebuildDatabase() {
@@ -590,8 +590,8 @@ class SettingsViewModel @Inject constructor(
 
     // ===== Developer Options =====
 
-    val albumArtQuality: StateFlow<AlbumArtQuality> = userPreferencesRepository.albumArtQualityFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlbumArtQuality.MEDIUM)
+    val BookArtQuality: StateFlow<BookArtQuality> = userPreferencesRepository.BookArtQualityFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BookArtQuality.MEDIUM)
 
     val useSmoothCorners: StateFlow<Boolean> = userPreferencesRepository.useSmoothCornersFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -599,9 +599,9 @@ class SettingsViewModel @Inject constructor(
     val tapBackgroundClosesPlayer: StateFlow<Boolean> = userPreferencesRepository.tapBackgroundClosesPlayerFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    fun setAlbumArtQuality(quality: AlbumArtQuality) {
+    fun setBookArtQuality(quality: BookArtQuality) {
         viewModelScope.launch {
-            userPreferencesRepository.setAlbumArtQuality(quality)
+            userPreferencesRepository.setBookArtQuality(quality)
         }
     }
 

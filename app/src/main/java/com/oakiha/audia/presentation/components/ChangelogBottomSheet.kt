@@ -71,9 +71,9 @@ val changelog = listOf(
                     "10-band Equalizer & Effects",
                     "New Library Sync Flow",
                     "AI Integration (Gemini Models)",
-                    "M3U Playlist Import/Export",
-                    "Deezer Artist Artwork Integration",
-                    "Custom Playlist Covers"
+                    "M3U Booklist Import/Export",
+                    "Deezer Author Artwork Integration",
+                    "Custom Booklist Covers"
                 )
             ),
             ChangelogSection(
@@ -82,7 +82,7 @@ val changelog = listOf(
                     "Settings Architecture Refactor",
                     "Queue & Player Animations",
                     "Baseline Profiles & Performance",
-                    "Better Lyrics System with Sync Offset"
+                    "Better Transcript System with Sync Offset"
                 )
             ),
             ChangelogSection(
@@ -106,9 +106,9 @@ val changelog = listOf(
                     "New file explorer for choosing source directories",
                     "New Connectivity and casting functionalities",
                     "Seamless continuity between remote devices",
-                    "Gapless transition between songs",
+                    "Gapless transition between books",
                     "Crossfade control",
-                    "New Custom Transitions feature (only for playlists)",
+                    "New Custom Transitions feature (only for Booklists)",
                     "Keep playing after closed the app",
                     "UI Optimizations",
                     "Improved stats feature",
@@ -129,7 +129,7 @@ val changelog = listOf(
                 items = listOf(
                     "Introduced a richer listening stats hub with deeper insights into your sessions.",
                     "Launched a floating quick player to instantly open and preview local files.",
-                    "Added a folders tab with a tree-style navigator and playlist-ready view."
+                    "Added a folders tab with a tree-style navigator and Booklist-ready view."
                 )
             ),
             ChangelogSection(
@@ -138,9 +138,9 @@ val changelog = listOf(
                     "Refined the overall Material 3 UI for a cleaner and more cohesive experience.",
                     "Metadata editing now supports cover art change.",
                     "Smoothed out animations and transitions across the app for more fluid navigation.",
-                    "Enhanced the artist screen layout with richer details and polish.",
+                    "Enhanced the Author screen layout with richer details and polish.",
                     "Upgraded DailyMix and YourMix generation with smarter, more diverse selections.",
-                    "Strengthened the AI playlist generation.",
+                    "Strengthened the AI Booklist generation.",
                     "Improved search relevance and presentation for faster discovery.",
                     "Expanded support for a broader range of audio file formats."
                 )
@@ -148,7 +148,7 @@ val changelog = listOf(
             ChangelogSection(
                 title = "Fixes",
                 items = listOf(
-                    "Resolved metadata quirks so song details stay accurate everywhere.",
+                    "Resolved metadata quirks so Track details stay accurate everywhere.",
                     "Restored notification shortcuts so they reliably jump back into playback."
                 )
             )
@@ -164,10 +164,10 @@ val changelog = listOf(
                     "Chromecast support for casting audio from your device.",
                     "In-app changelog to keep you updated on the latest features.",
                     "Support for .LRC files, both embedded and external.",
-                    "Offline lyrics support.",
-                    "Synchronized lyrics (synced with the song).",
+                    "Offline Transcript support.",
+                    "Synchronized Transcript (synced with the Track).",
                     "New screen to view the full queue.",
-                    "Reorder and remove songs from the queue.",
+                    "Reorder and remove Tracks from the queue.",
                     "Mini-player gestures (swipe down to close).",
                     "Added more material animations.",
                     "New settings to customize the look and feel.",

@@ -14,13 +14,13 @@
     <group android:translateX="16" android:translateY="16">
         <!-- Top Section -->
 
-        <!-- Album Art Background (Rounded Rect 16dp) -->
+        <!-- Book Art Background (Rounded Rect 16dp) -->
         <!-- Secondary Container (#E8DEF8 for Light M3 Baseline) -->
         <path
             android:pathData="M16,0 h48 a16,16 0 0 1 16,16 v48 a16,16 0 0 1 -16,16 h-48 a16,16 0 0 1 -16,-16 v-48 a16,16 0 0 1 16,-16 z"
             android:fillColor="#FFE8DEF8"/>
 
-        <!-- Album Art Icon (Music Note) centered in 80x80 -->
+        <!-- Book Art Icon (Audiobook Note) centered in 80x80 -->
         <!-- On Secondary Container (#1D192B for Light M3 Baseline) -->
         <group android:translateX="28" android:translateY="28" android:scaleX="1" android:scaleY="1">
              <path
@@ -42,7 +42,7 @@
                 android:fillColor="#FF1D1B20"
                 android:pathData="M6,16 L64,16 A6,6 0 0 1 64,28 L6,28 A6,6 0 0 1 6,16 z"/>
 
-            <!-- Artist Line: 50x10. Radius 5. Y=40 -->
+            <!-- Author Line: 50x10. Radius 5. Y=40 -->
             <!-- On Surface Variant (#49454F for Light M3 Baseline) -->
             <path
                 android:fillColor="#FF49454F"

@@ -59,7 +59,7 @@ import java.io.File
 //            TopAppBar(
 //                title = {
 //                    Text(
-//                        text = if (fromSetup) "Setup: Choose music folders" else "Music folders",
+//                        text = if (fromSetup) "Setup: Choose Audiobook folders" else "Audiobook folders",
 //                        style = MaterialTheme.typography.titleMedium
 //                    )
 //                },
@@ -98,7 +98,7 @@ import java.io.File
 //            onRefresh = onRefresh,
 //            onSmartViewToggle = onSmartViewToggle,
 //            onDone = onDone,
-//            title = if (fromSetup) "Select folders for setup" else "Select music folders",
+//            title = if (fromSetup) "Select folders for setup" else "Select Audiobook folders",
 //            leadingContent = null,
 //            modifier = Modifier.fillMaxSize().padding(padding)
 //        )

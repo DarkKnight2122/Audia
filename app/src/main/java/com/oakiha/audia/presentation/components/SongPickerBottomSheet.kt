@@ -48,47 +48,47 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.size.Size
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SongPickerBottomSheet(
-    allSongs: List<Song>,
+fun TrackPickerBottomSheet(
+    allTracks: List<Track>,
     isLoading: Boolean,
-    initiallySelectedSongIds: Set<String>,
+    initiallySelectedTrackIds: Set<String>,
     onDismiss: () -> Unit,
     onConfirm: (Set<String>) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val selectedSongIds = remember {
+    val selectedTrackIds = remember {
         mutableStateMapOf<String, Boolean>().apply {
-            initiallySelectedSongIds.forEach { put(it, true) }
+            initiallySelectedTrackIds.forEach { put(it, true) }
         }
     }
     var searchQuery by remember { mutableStateOf("") }
-    val filteredSongs = remember(searchQuery, allSongs) {
-        if (searchQuery.isBlank()) allSongs
-        else allSongs.filter {
-            it.title.contains(searchQuery, true) || it.artist.contains(
+    val filteredTracks = remember(searchQuery, allTracks) {
+        if (searchQuery.isBlank()) allTracks
+        else allTracks.filter {
+            it.title.contains(searchQuery, true) || it.Author.contains(
                 searchQuery,
                 true
             )
         }
     }
 
-    val animatedAlbumCornerRadius = 60.dp
+    val animatedBookCornerRadius = 60.dp
 
-    val albumShape = remember(animatedAlbumCornerRadius) {
+    val Bookshape = remember(animatedBookCornerRadius) {
         AbsoluteSmoothCornerShape(
-            cornerRadiusTL = animatedAlbumCornerRadius,
+            cornerRadiusTL = animatedBookCornerRadius,
             smoothnessAsPercentTR = 60,
-            cornerRadiusTR = animatedAlbumCornerRadius,
+            cornerRadiusTR = animatedBookCornerRadius,
             smoothnessAsPercentBR = 60,
-            cornerRadiusBL = animatedAlbumCornerRadius,
+            cornerRadiusBL = animatedBookCornerRadius,
             smoothnessAsPercentBL = 60,
-            cornerRadiusBR = animatedAlbumCornerRadius,
+            cornerRadiusBR = animatedBookCornerRadius,
             smoothnessAsPercentTL = 60
         )
     }
@@ -99,26 +99,26 @@ fun SongPickerBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.fillMaxSize()
     ) {
-        SongPickerContent(
-            filteredSongs = filteredSongs,
+        TrackPickerContent(
+            filteredTracks = filteredTracks,
             isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
-            selectedSongIds = selectedSongIds,
-            albumShape = albumShape,
+            selectedTrackIds = selectedTrackIds,
+            Bookshape = Bookshape,
             onConfirm = onConfirm
         )
     }
 }
 
 @Composable
-fun SongPickerContent(
-    filteredSongs: List<Song>,
+fun TrackPickerContent(
+    filteredTracks: List<Track>,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    selectedSongIds: MutableMap<String, Boolean>,
-    albumShape: androidx.compose.ui.graphics.Shape,
+    selectedTrackIds: MutableMap<String, Boolean>,
+    Bookshape: androidx.compose.ui.graphics.Shape,
     onConfirm: (Set<String>) -> Unit
 ) {
     Box(
@@ -135,7 +135,7 @@ fun SongPickerContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "Add Songs",
+                            "Add Tracks",
                             style = MaterialTheme.typography.displaySmall,
                             fontFamily = GoogleSansRounded
                         )
@@ -153,7 +153,7 @@ fun SongPickerContent(
                             focusedSupportingTextColor = Color.Transparent,
                         ),
                         onValueChange = onSearchQueryChange,
-                        label = { Text("Search for songs...") },
+                        label = { Text("Search for Tracks...") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -171,17 +171,17 @@ fun SongPickerContent(
                 ExtendedFloatingActionButton(
                     modifier = Modifier.padding(bottom = 18.dp, end = 8.dp),
                     shape = CircleShape,
-                    onClick = { onConfirm(selectedSongIds.filterValues { it }.keys) },
-                    icon = { Icon(Icons.Rounded.Check, "Añadir canciones") },
+                    onClick = { onConfirm(selectedTrackIds.filterValues { it }.keys) },
+                    icon = { Icon(Icons.Rounded.Check, "AÃ±adir canciones") },
                     text = { Text("Add") },
                 )
             }
         ) { innerPadding ->
-            SongPickerList(
-                filteredSongs = filteredSongs,
+            TrackPickerList(
+                filteredTracks = filteredTracks,
                 isLoading = isLoading,
-                selectedSongIds = selectedSongIds,
-                albumShape = albumShape,
+                selectedTrackIds = selectedTrackIds,
+                Bookshape = Bookshape,
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -205,11 +205,11 @@ fun SongPickerContent(
 }
 
 @Composable
-fun SongPickerList(
-    filteredSongs: List<Song>,
+fun TrackPickerList(
+    filteredTracks: List<Track>,
     isLoading: Boolean,
-    selectedSongIds: MutableMap<String, Boolean>,
-    albumShape: androidx.compose.ui.graphics.Shape,
+    selectedTrackIds: MutableMap<String, Boolean>,
+    Bookshape: androidx.compose.ui.graphics.Shape,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(bottom = 100.dp, top = 20.dp)
 ) {
@@ -225,14 +225,14 @@ fun SongPickerList(
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(filteredSongs, key = { it.id }) { song ->
+            items(filteredTracks, key = { it.id }) { Track ->
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .clip(CircleShape)
                         .clickable {
-                            val currentSelection = selectedSongIds[song.id] ?: false
-                            selectedSongIds[song.id] = !currentSelection
+                            val currentSelection = selectedTrackIds[Track.id] ?: false
+                            selectedTrackIds[Track.id] = !currentSelection
                         }
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -242,9 +242,9 @@ fun SongPickerList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = selectedSongIds[song.id] ?: false,
+                        checked = selectedTrackIds[Track.id] ?: false,
                         onCheckedChange = { isChecked ->
-                            selectedSongIds[song.id] = isChecked
+                            selectedTrackIds[Track.id] = isChecked
                         }
                     )
                     Box(
@@ -256,9 +256,9 @@ fun SongPickerList(
                             )
                     ) {
                         SmartImage(
-                            model = song.albumArtUriString,
-                            contentDescription = song.title,
-                            shape = albumShape,
+                            model = Track.BookArtUriString,
+                            contentDescription = Track.title,
+                            shape = Bookshape,
                             targetSize = Size(
                                 168,
                                 168
@@ -268,9 +268,9 @@ fun SongPickerList(
                     }
                     Spacer(Modifier.width(16.dp))
                     Column {
-                        Text(song.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(Track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(
-                            song.displayArtist,
+                            Track.displayAuthor,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

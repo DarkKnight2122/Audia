@@ -89,8 +89,8 @@ class EqualizerViewModel @Inject constructor(
     
     private fun loadSystemVolume() {
         try {
-            val current = audioManager.getStreamVolume(android.media.AudioManager.STREAM_MUSIC)
-            val max = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+            val current = audioManager.getStreamVolume(android.media.AudioManager.STREAM_Audiobook)
+            val max = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_Audiobook)
             _systemVolume.value = if (max > 0) current.toFloat() / max.toFloat() else 0.5f
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Failed to load system volume")
@@ -100,9 +100,9 @@ class EqualizerViewModel @Inject constructor(
     fun setSystemVolume(percent: Float) {
         viewModelScope.launch {
             try {
-                val max = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+                val max = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_Audiobook)
                 val target = (percent * max).roundToInt().coerceIn(0, max)
-                audioManager.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, target, 0) // flag 0 to not show system UI
+                audioManager.setStreamVolume(android.media.AudioManager.STREAM_Audiobook, target, 0) // flag 0 to not show system UI
                 _systemVolume.value = percent
             } catch (e: Exception) {
                 Timber.tag(TAG).e(e, "Failed to set system volume")

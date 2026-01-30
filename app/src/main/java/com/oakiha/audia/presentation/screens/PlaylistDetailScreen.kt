@@ -39,7 +39,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.MusicOff
+import androidx.compose.material.icons.filled.AudiobookOff
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Add
@@ -103,28 +103,28 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil.size.Size
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
-import com.oakiha.audia.presentation.components.PlaylistBottomSheet
-import com.oakiha.audia.presentation.components.QueuePlaylistSongItem
-import com.oakiha.audia.presentation.components.SongPickerBottomSheet
+import com.oakiha.audia.presentation.components.BooklistBottomSheet
+import com.oakiha.audia.presentation.components.QueueBooklistTrackItem
+import com.oakiha.audia.presentation.components.TrackPickerBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel.Companion.FOLDER_PLAYLIST_PREFIX
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel.Companion.FOLDER_Booklist_PREFIX
 import com.oakiha.audia.ui.theme.GoogleSansRounded
-import com.oakiha.audia.presentation.viewmodel.PlaylistSongsOrderMode
+import com.oakiha.audia.presentation.viewmodel.BooklistTracksOrderMode
 import com.oakiha.audia.utils.formatTotalDuration
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import com.oakiha.audia.presentation.components.LibrarySortBottomSheet
 import com.oakiha.audia.data.model.SortOption
-import com.oakiha.audia.data.model.PlaylistShapeType
+import com.oakiha.audia.data.model.BooklistshapeType
 import kotlinx.coroutines.launch
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -133,61 +133,61 @@ import kotlinx.coroutines.launch
     ExperimentalMaterial3Api::class
 )
 @Composable
-fun PlaylistDetailScreen(
-    playlistId: String,
+fun BooklistDetailScreen(
+    BooklistId: String,
     onBackClick: () -> Unit,
-    onDeletePlayListClick: () -> Unit,
+    onDeleteBooklistClick: () -> Unit,
     playerViewModel: PlayerViewModel,
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    val uiState by playlistViewModel.uiState.collectAsState()
+    val uiState by BooklistViewModel.uiState.collectAsState()
     val playerStableState by playerViewModel.stablePlayerState.collectAsState()
     val playerSheetState by playerViewModel.sheetState.collectAsState()
     val context = LocalContext.current
-    val currentPlaylist = uiState.currentPlaylistDetails
-    val isFolderPlaylist = currentPlaylist?.id?.startsWith(FOLDER_PLAYLIST_PREFIX) == true
-    val songsInPlaylist = uiState.currentPlaylistSongs
+    val currentBooklist = uiState.currentBooklistDetails
+    val isFolderBooklist = currentBooklist?.id?.startsWith(FOLDER_Booklist_PREFIX) == true
+    val TracksInBooklist = uiState.currentBooklistTracks
 
-    LaunchedEffect(playlistId) {
-        playlistViewModel.loadPlaylistDetails(playlistId)
+    LaunchedEffect(BooklistId) {
+        BooklistViewModel.loadBooklistDetails(BooklistId)
     }
 
     BackHandler(enabled = playerSheetState == PlayerSheetState.EXPANDED) {
         playerViewModel.collapsePlayerSheet()
     }
 
-    var showAddSongsSheet by remember { mutableStateOf(false) }
+    var showAddTracksSheet by remember { mutableStateOf(false) }
 
     var isReorderModeEnabled by remember { mutableStateOf(false) }
     var isRemoveModeEnabled by remember { mutableStateOf(false) }
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    var showPlaylistOptionsSheet by remember { mutableStateOf(false) }
-    var showEditPlaylistDialog by remember { mutableStateOf(false) }
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    var showBooklistOptionsSheet by remember { mutableStateOf(false) }
+    var showEditBooklistDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     val m3uExportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("audio/x-mpegurl")
     ) { uri ->
         uri?.let {
-            currentPlaylist?.let { playlist ->
-                playlistViewModel.exportM3u(playlist, it, context)
+            currentBooklist?.let { Booklist ->
+                BooklistViewModel.exportM3u(Booklist, it, context)
             }
         }
     }
 
-    val selectedSongForInfo by playerViewModel.selectedSongForInfo.collectAsState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState() // Reintroducir favoriteIds aquí
-    val stableOnMoreOptionsClick: (Song) -> Unit = remember {
-        { song ->
-            playerViewModel.selectSongForInfo(song)
-            showSongInfoBottomSheet = true
+    val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃƒÂ­
+    val stableOnMoreOptionsClick: (Track) -> Unit = remember {
+        { Track ->
+            playerViewModel.selectTrackForInfo(Track)
+            showTrackInfoBottomSheet = true
         }
     }
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = NavBarContentHeight + systemNavBarInset
-    var showPlaylistBottomSheet by remember { mutableStateOf(false) }
-    var localReorderableSongs by remember(songsInPlaylist) { mutableStateOf(songsInPlaylist) }
+    var showBooklistBottomSheet by remember { mutableStateOf(false) }
+    var localReorderableTracks by remember(TracksInBooklist) { mutableStateOf(TracksInBooklist) }
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -198,7 +198,7 @@ fun PlaylistDetailScreen(
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
-            localReorderableSongs = localReorderableSongs.toMutableList().apply {
+            localReorderableTracks = localReorderableTracks.toMutableList().apply {
                 add(to.index, removeAt(from.index))
             }
             if (lastMovedFrom == null) {
@@ -208,14 +208,14 @@ fun PlaylistDetailScreen(
         }
     )
 
-    LaunchedEffect(reorderableState.isAnyItemDragging, isFolderPlaylist) {
-        if (!isFolderPlaylist && !reorderableState.isAnyItemDragging && lastMovedFrom != null && lastMovedTo != null) {
-            currentPlaylist?.let {
-                playlistViewModel.reorderSongsInPlaylist(it.id, lastMovedFrom!!, lastMovedTo!!)
+    LaunchedEffect(reorderableState.isAnyItemDragging, isFolderBooklist) {
+        if (!isFolderBooklist && !reorderableState.isAnyItemDragging && lastMovedFrom != null && lastMovedTo != null) {
+            currentBooklist?.let {
+                BooklistViewModel.reorderTracksInBooklist(it.id, lastMovedFrom!!, lastMovedTo!!)
             }
             lastMovedFrom = null
             lastMovedTo = null
-        } else if (isFolderPlaylist && !reorderableState.isAnyItemDragging) {
+        } else if (isFolderBooklist && !reorderableState.isAnyItemDragging) {
             lastMovedFrom = null
             lastMovedTo = null
         }
@@ -231,7 +231,7 @@ fun PlaylistDetailScreen(
                 title = {
                     Text(
                         modifier = Modifier.padding(start = 8.dp),
-                        text = currentPlaylist?.name ?: "Playlist",
+                        text = currentBooklist?.name ?: "Booklist",
                         fontFamily = GoogleSansRounded,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -244,9 +244,9 @@ fun PlaylistDetailScreen(
                 subtitle = {
                     Text(
                         modifier = Modifier.padding(start = 8.dp),
-                        text = "${songsInPlaylist.size} songs • ${
+                        text = "${TracksInBooklist.size} Tracks Ã¢â‚¬Â¢ ${
                             formatTotalDuration(
-                                songsInPlaylist
+                                TracksInBooklist
                             )
                         }",
                         style = MaterialTheme.typography.labelMedium.copy(fontFamily = GoogleSansRounded),
@@ -273,17 +273,17 @@ fun PlaylistDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.Sort,
-                            contentDescription = "Sort Songs"
+                            contentDescription = "Sort Tracks"
                         )
                     }
-                    if (!isFolderPlaylist) {
+                    if (!isFolderBooklist) {
                         FilledTonalIconButton(
                             modifier = Modifier.padding(end = 10.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 contentColor = MaterialTheme.colorScheme.onSurface
                             ),
-                            onClick = { showPlaylistOptionsSheet = true }
+                            onClick = { showBooklistOptionsSheet = true }
                         ) { Icon(Icons.Filled.MoreVert, "More Options") }
                     }
                 },
@@ -291,19 +291,19 @@ fun PlaylistDetailScreen(
             )
         }
     ) { innerPadding ->
-        if (uiState.isLoading && currentPlaylist == null) {
+        if (uiState.isLoading && currentBooklist == null) {
             Box(
                 Modifier
                     .fillMaxSize()
                     .padding(top = innerPadding.calculateTopPadding()), Alignment.Center
             ) { CircularProgressIndicator() }
-        } else if (uiState.playlistNotFound) {
+        } else if (uiState.BooklistNotFound) {
             Box(
                 Modifier
                     .fillMaxSize()
                     .padding(top = innerPadding.calculateTopPadding()), Alignment.Center
-            ) { Text(stringResource(id = R.string.playlist_not_found)) }
-        } else if (currentPlaylist == null) {
+            ) { Text(stringResource(id = R.string.Booklist_not_found)) }
+        } else if (currentBooklist == null) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -316,7 +316,7 @@ fun PlaylistDetailScreen(
                     .padding(top = innerPadding.calculateTopPadding())
             ) {
                 val actionButtonsHeight = 42.dp
-                val playbackControlBottomPadding = if (isFolderPlaylist) 8.dp else 6.dp
+                val playbackControlBottomPadding = if (isFolderBooklist) 8.dp else 6.dp
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -327,11 +327,11 @@ fun PlaylistDetailScreen(
                 ) {
                     Button(
                         onClick = {
-                            if (localReorderableSongs.isNotEmpty()) {
-                                playerViewModel.playSongs(
-                                    localReorderableSongs,
-                                    localReorderableSongs.first(),
-                                    currentPlaylist.name
+                            if (localReorderableTracks.isNotEmpty()) {
+                                playerViewModel.playTracks(
+                                    localReorderableTracks,
+                                    localReorderableTracks.first(),
+                                    currentBooklist.name
                                 )
                                 if (playerStableState.isShuffleEnabled) playerViewModel.toggleShuffle()
                             }
@@ -339,7 +339,7 @@ fun PlaylistDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(76.dp),
-                        enabled = localReorderableSongs.isNotEmpty(),
+                        enabled = localReorderableTracks.isNotEmpty(),
                         shape = AbsoluteSmoothCornerShape(
                             cornerRadiusTL = 60.dp,
                             smoothnessAsPercentTR = 60,
@@ -361,18 +361,18 @@ fun PlaylistDetailScreen(
                     }
                     FilledTonalButton(
                         onClick = {
-                            if (localReorderableSongs.isNotEmpty()) {
-                                playerViewModel.playSongsShuffled(
-                                    songsToPlay = localReorderableSongs,
-                                    queueName = currentPlaylist.name,
-                                    playlistId = currentPlaylist.id
+                            if (localReorderableTracks.isNotEmpty()) {
+                                playerViewModel.playTracksShuffled(
+                                    TracksToPlay = localReorderableTracks,
+                                    queueName = currentBooklist.name,
+                                    BooklistId = currentBooklist.id
                                 )
                             }
                         },
                         modifier = Modifier
                             .weight(1f)
                             .height(76.dp),
-                        enabled = localReorderableSongs.isNotEmpty(),
+                        enabled = localReorderableTracks.isNotEmpty(),
                         shape = AbsoluteSmoothCornerShape(
                             cornerRadiusTL = 14.dp,
                             smoothnessAsPercentTR = 60,
@@ -394,7 +394,7 @@ fun PlaylistDetailScreen(
                     }
                 }
 
-                if (!isFolderPlaylist) {
+                if (!isFolderBooklist) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -429,7 +429,7 @@ fun PlaylistDetailScreen(
                         )
 
                         Button(
-                            onClick = { showAddSongsSheet = true },
+                            onClick = { showAddTracksSheet = true },
                             shape = CircleShape,
                             contentPadding = PaddingValues(horizontal = 12.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -443,7 +443,7 @@ fun PlaylistDetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Add,
-                                contentDescription = "Add songs",
+                                contentDescription = "Add Tracks",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
@@ -470,7 +470,7 @@ fun PlaylistDetailScreen(
                             Icon(
                                 modifier = Modifier.size(18.dp),
                                 imageVector = Icons.Default.RemoveCircleOutline,
-                                contentDescription = "Remove songs",
+                                contentDescription = "Remove Tracks",
                                 tint = removeIconColor
                             )
                             Spacer(Modifier.width(6.dp))
@@ -499,7 +499,7 @@ fun PlaylistDetailScreen(
                             Icon(
                                 modifier = Modifier.size(22.dp),
                                 painter = painterResource(R.drawable.drag_order_icon),
-                                contentDescription = "Reorder songs",
+                                contentDescription = "Reorder Tracks",
                                 tint = reorderIconColor
                             )
                             Spacer(Modifier.width(6.dp))
@@ -513,18 +513,18 @@ fun PlaylistDetailScreen(
                     }
                 }
 
-                if (localReorderableSongs.isEmpty()) {
+                if (localReorderableTracks.isEmpty()) {
                     Box(Modifier
                         .fillMaxSize()
                         .weight(1f), Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Filled.MusicOff, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(Icons.Filled.AudiobookOff, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(Modifier.height(8.dp))
-                            Text("This playlist is empty.", style = MaterialTheme.typography.titleMedium)
-                            val emptyMessage = if (isFolderPlaylist) {
-                                "This folder doesn't contain songs."
+                            Text("This Booklist is empty.", style = MaterialTheme.typography.titleMedium)
+                            val emptyMessage = if (isFolderBooklist) {
+                                "This folder doesn't contain Tracks."
                             } else {
-                                "Tap on 'Add Songs' to begin."
+                                "Tap on 'Add Tracks' to begin."
                             }
                             Text(emptyMessage, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
@@ -552,18 +552,18 @@ fun PlaylistDetailScreen(
                         )
                     ) {
                         itemsIndexed(
-                            localReorderableSongs,
-                            key = { _, item -> item.id }) { _, song ->
+                            localReorderableTracks,
+                            key = { _, item -> item.id }) { _, Track ->
                             ReorderableItem(
                                 state = reorderableState,
-                                key = song.id,
+                                key = Track.id,
                             ) { isDragging ->
                                 val scale by animateFloatAsState(
                                     if (isDragging) 1.05f else 1f,
                                     label = "scale"
                                 )
 
-                                QueuePlaylistSongItem(
+                                QueueBooklistTrackItem(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 0.dp)
@@ -572,25 +572,25 @@ fun PlaylistDetailScreen(
                                             scaleY = scale
                                         },
                                     onClick = {
-                                        playerViewModel.playSongs(
-                                            localReorderableSongs,
-                                            song,
-                                            currentPlaylist.name,
-                                            currentPlaylist.id
+                                        playerViewModel.playTracks(
+                                            localReorderableTracks,
+                                            Track,
+                                            currentBooklist.name,
+                                            currentBooklist.id
                                         )
                                     },
-                                    song = song,
-                                    isCurrentSong = playerStableState.currentSong?.id == song.id,
+                                    Track = Track,
+                                    isCurrentTrack = playerStableState.currentTrack?.id == Track.id,
                                     isPlaying = playerStableState.isPlaying,
                                     isDragging = isDragging,
                                     onRemoveClick = {
-                                        if (!isFolderPlaylist) {
-                                            currentPlaylist.let {
-                                                playlistViewModel.removeSongFromPlaylist(it.id, song.id)
+                                        if (!isFolderBooklist) {
+                                            currentBooklist.let {
+                                                BooklistViewModel.removeTrackFromBooklist(it.id, Track.id)
                                             }
                                         }
                                     },
-                                    isFromPlaylist = true,
+                                    isFromBooklist = true,
                                     isReorderModeEnabled = isReorderModeEnabled,
                                     isDragHandleVisible = isReorderModeEnabled,
                                     isRemoveButtonVisible = isRemoveModeEnabled,
@@ -617,7 +617,7 @@ fun PlaylistDetailScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Rounded.DragIndicator,
-                                                contentDescription = "Reorder song",
+                                                contentDescription = "Reorder Track",
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -631,23 +631,23 @@ fun PlaylistDetailScreen(
         }
     }
 
-    if (showAddSongsSheet && currentPlaylist != null && !isFolderPlaylist) {
-        SongPickerBottomSheet(
-            allSongs = uiState.songSelectionForPlaylist,
-            isLoading = uiState.isLoadingSongSelection,
-            initiallySelectedSongIds = currentPlaylist.songIds.toSet(),
-            onDismiss = { showAddSongsSheet = false },
+    if (showAddTracksSheet && currentBooklist != null && !isFolderBooklist) {
+        TrackPickerBottomSheet(
+            allTracks = uiState.TrackselectionForBooklist,
+            isLoading = uiState.isLoadingTrackselection,
+            initiallySelectedTrackIds = currentBooklist.TrackIds.toSet(),
+            onDismiss = { showAddTracksSheet = false },
             onConfirm = { selectedIds ->
-                playlistViewModel.addSongsToPlaylist(currentPlaylist.id, selectedIds.toList())
-                showAddSongsSheet = false
+                BooklistViewModel.addTracksToBooklist(currentBooklist.id, selectedIds.toList())
+                showAddTracksSheet = false
             }
         )
     }
-    if (showPlaylistOptionsSheet && !isFolderPlaylist) {
+    if (showBooklistOptionsSheet && !isFolderBooklist) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         ModalBottomSheet(
-            onDismissRequest = { showPlaylistOptionsSheet = false },
+            onDismissRequest = { showBooklistOptionsSheet = false },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             tonalElevation = 4.dp,
@@ -669,11 +669,11 @@ fun PlaylistDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = "Playlist options",
+                        text = "Booklist options",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    currentPlaylist?.name?.let {
+                    currentBooklist?.name?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
@@ -681,64 +681,64 @@ fun PlaylistDetailScreen(
                         )
                     }
                 }
-                PlaylistActionItem(
+                BooklistActionItem(
                     icon = painterResource(R.drawable.rounded_edit_24),
-                    label = "Edit playlist",
+                    label = "Edit Booklist",
                     onClick = {
-                        showPlaylistOptionsSheet = false
-                        showEditPlaylistDialog = true
+                        showBooklistOptionsSheet = false
+                        showEditBooklistDialog = true
                     }
                 )
-                PlaylistActionItem(
+                BooklistActionItem(
                     icon = painterResource(R.drawable.rounded_delete_24),
-                    label = "Delete playlist",
+                    label = "Delete Booklist",
                     onClick = {
-                        showPlaylistOptionsSheet = false
+                        showBooklistOptionsSheet = false
                         showDeleteConfirmation = true
                     }
                 )
-                PlaylistActionItem(
+                BooklistActionItem(
                     icon = painterResource(R.drawable.outline_graph_1_24),
                     label = "Set default transition",
                     onClick = {
-                        showPlaylistOptionsSheet = false
-                        navController.navigate(Screen.EditTransition.createRoute(playlistId))
+                        showBooklistOptionsSheet = false
+                        navController.navigate(Screen.EditTransition.createRoute(BooklistId))
                     }
                 )
-                PlaylistActionItem(
+                BooklistActionItem(
                     icon = painterResource(R.drawable.rounded_attach_file_24),
                     label = "Export M3U",
                     onClick = {
-                        showPlaylistOptionsSheet = false
-                        m3uExportLauncher.launch("${currentPlaylist?.name ?: "playlist"}.m3u")
+                        showBooklistOptionsSheet = false
+                        m3uExportLauncher.launch("${currentBooklist?.name ?: "Booklist"}.m3u")
                     }
                 )
             }
         }
     }
     
-    if (showEditPlaylistDialog && currentPlaylist != null) {
+    if (showEditBooklistDialog && currentBooklist != null) {
         val initialShapeType = try {
-            currentPlaylist.coverShapeType?.let { PlaylistShapeType.valueOf(it) } ?: PlaylistShapeType.Circle
+            currentBooklist.coverShapeType?.let { BooklistshapeType.valueOf(it) } ?: BooklistshapeType.Circle
         } catch (e: Exception) {
-            PlaylistShapeType.Circle
+            BooklistshapeType.Circle
         }
         
-        EditPlaylistDialog(
-            visible = showEditPlaylistDialog,
-            currentName = currentPlaylist.name,
-            currentImageUri = currentPlaylist.coverImageUri,
-            currentColor = currentPlaylist.coverColorArgb,
-            currentIconName = currentPlaylist.coverIconName,
+        EditBooklistDialog(
+            visible = showEditBooklistDialog,
+            currentName = currentBooklist.name,
+            currentImageUri = currentBooklist.coverImageUri,
+            currentColor = currentBooklist.coverColorArgb,
+            currentIconName = currentBooklist.coverIconName,
             currentShapeType = initialShapeType,
-            currentShapeDetail1 = currentPlaylist.coverShapeDetail1,
-            currentShapeDetail2 = currentPlaylist.coverShapeDetail2,
-            currentShapeDetail3 = currentPlaylist.coverShapeDetail3,
-            currentShapeDetail4 = currentPlaylist.coverShapeDetail4,
-            onDismiss = { showEditPlaylistDialog = false },
+            currentShapeDetail1 = currentBooklist.coverShapeDetail1,
+            currentShapeDetail2 = currentBooklist.coverShapeDetail2,
+            currentShapeDetail3 = currentBooklist.coverShapeDetail3,
+            currentShapeDetail4 = currentBooklist.coverShapeDetail4,
+            onDismiss = { showEditBooklistDialog = false },
             onSave = { name, imageUri, color, icon, scale, panX, panY, shapeType, d1, d2, d3, d4 ->
-                playlistViewModel.updatePlaylistParameters(
-                    playlistId = currentPlaylist.id,
+                BooklistViewModel.updateBooklistParameters(
+                    BooklistId = currentBooklist.id,
                     name = name,
                     coverImageUri = imageUri,
                     coverColor = color,
@@ -752,22 +752,22 @@ fun PlaylistDetailScreen(
                     coverShapeDetail3 = d3,
                     coverShapeDetail4 = d4
                 )
-                showEditPlaylistDialog = false
+                showEditBooklistDialog = false
             }
         )
     }
-    if (showDeleteConfirmation && currentPlaylist != null) {
+    if (showDeleteConfirmation && currentBooklist != null) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete playlist?") },
+            title = { Text("Delete Booklist?") },
             text = {
-                Text("Are you sure you want to delete this playlist?")
+                Text("Are you sure you want to delete this Booklist?")
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        playlistViewModel.deletePlaylist(currentPlaylist.id)
-                        onDeletePlayListClick()
+                        BooklistViewModel.deleteBooklist(currentBooklist.id)
+                        onDeleteBooklistClick()
                         showDeleteConfirmation = false
                     }
                 ) {
@@ -782,11 +782,11 @@ fun PlaylistDetailScreen(
         )
     }
 
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteIds) {
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteIds) {
             derivedStateOf {
-                currentSong?.let {
+                currentTrack?.let {
                     favoriteIds.contains(
                         it.id
                     )
@@ -794,70 +794,70 @@ fun PlaylistDetailScreen(
             }
         }.value ?: false
 
-        if (currentSong != null) {
-            SongInfoBottomSheet(
-                song = currentSong,
+        if (currentTrack != null) {
+            TrackInfoBottomSheet(
+                Track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     // Directly use PlayerViewModel's method to toggle, which should handle UserPreferencesRepository
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong) // Assumes such a method exists or will be added to PlayerViewModel
+                    playerViewModel.toggleFavoriteSpecificTrack(currentTrack) // Assumes such a method exists or will be added to PlayerViewModel
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
-                onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                onDismiss = { showTrackInfoBottomSheet = false },
+                onPlayTrack = {
+                    playerViewModel.showAndPlayTrack(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong) // Assumes such a method exists or will be added
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackToQueue(currentTrack) // Assumes such a method exists or will be added
+                    showTrackInfoBottomSheet = false
                     playerViewModel.sendToast("Added to the queue")
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addTrackNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                     playerViewModel.sendToast("Will play next")
                 },
-                onAddToPlayList = {
-                    showPlaylistBottomSheet = true;
+                onAddToBooklist = {
+                    showBooklistBottomSheet = true;
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
-                onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                onNavigateToBook = {
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.BookId))
+                    showTrackInfoBottomSheet = false
                 },
-                onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                onNavigateToAuthor = {
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.AuthorId))
+                    showTrackInfoBottomSheet = false
                 },
-                onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(
-                        currentSong,
+                onEditTrack = { newTitle, newAuthor, newBook, newCategory, newTranscript, newTrackNumber, coverArtUpdate ->
+                    playerViewModel.editTrackMetadata(
+                        currentTrack,
                         newTitle,
-                        newArtist,
-                        newAlbum,
-                        newGenre,
-                        newLyrics,
+                        newAuthor,
+                        newBook,
+                        newCategory,
+                        newTranscript,
                         newTrackNumber,
                         coverArtUpdate
                     )
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
                 removeFromListTrigger = {
-                    playlistViewModel.removeSongFromPlaylist(playlistId, currentSong.id)
+                    BooklistViewModel.removeTrackFromBooklist(BooklistId, currentTrack.id)
                 }
             )
-            if (showPlaylistBottomSheet) {
-                val playlistUiState by playlistViewModel.uiState.collectAsState()
+            if (showBooklistBottomSheet) {
+                val BooklistUiState by BooklistViewModel.uiState.collectAsState()
 
-                PlaylistBottomSheet(
-                    playlistUiState = playlistUiState,
-                    song = currentSong,
+                BooklistBottomSheet(
+                    BooklistUiState = BooklistUiState,
+                    Track = currentTrack,
                     onDismiss = {
-                        showPlaylistBottomSheet = false
+                        showBooklistBottomSheet = false
                     },
-                    currentPlaylistId = playlistId,
+                    currentBooklistId = BooklistId,
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
                 )
@@ -868,36 +868,36 @@ fun PlaylistDetailScreen(
     val isSortSheetVisible by playerViewModel.isSortingSheetVisible.collectAsState()
 
     if (isSortSheetVisible) {
-        // Check if playlist is in Manual mode (which corresponds to Default Order)
-        val isManualMode = uiState.playlistSongsOrderMode is PlaylistSongsOrderMode.Manual
-        val rawOption = uiState.currentPlaylistSongsSortOption
-        // If in Manual mode, show SongDefaultOrder as selected; otherwise use the stored sort option
+        // Check if Booklist is in Manual mode (which corresponds to Default Order)
+        val isManualMode = uiState.BooklistTracksOrderMode is BooklistTracksOrderMode.Manual
+        val rawOption = uiState.currentBooklistTracksSortOption
+        // If in Manual mode, show TrackDefaultOrder as selected; otherwise use the stored sort option
         val currentSortOption = if (isManualMode) {
-            SortOption.SongDefaultOrder
-        } else if ((isFolderPlaylist || currentPlaylist != null) && rawOption != null) {
+            SortOption.TrackDefaultOrder
+        } else if ((isFolderBooklist || currentBooklist != null) && rawOption != null) {
             rawOption
         } else {
-            SortOption.SongTitleAZ
+            SortOption.TrackTitleAZ
         }
 
         // Build options list inline to avoid potential static initialization issues
-        val songSortOptions = listOf(
-            SortOption.SongDefaultOrder,
-            SortOption.SongTitleAZ,
-            SortOption.SongTitleZA,
-            SortOption.SongArtist,
-            SortOption.SongAlbum,
-            SortOption.SongDateAdded,
-            SortOption.SongDuration
+        val TracksortOptions = listOf(
+            SortOption.TrackDefaultOrder,
+            SortOption.TrackTitleAZ,
+            SortOption.TrackTitleZA,
+            SortOption.TrackAuthor,
+            SortOption.TrackBook,
+            SortOption.TrackDateAdded,
+            SortOption.TrackDuration
         )
 
         LibrarySortBottomSheet(
-            title = "Sort Songs",
-            options = songSortOptions,
+            title = "Sort Tracks",
+            options = TracksortOptions,
             selectedOption = currentSortOption,
             onDismiss = { playerViewModel.hideSortingSheet() },
             onOptionSelected = { option ->
-                 playlistViewModel.sortPlaylistSongs(option)
+                 BooklistViewModel.sortBooklistTracks(option)
                  playerViewModel.hideSortingSheet()
                  // Auto-scroll to first item after sorting (delay to allow list to update)
                  scope.launch {
@@ -912,7 +912,7 @@ fun PlaylistDetailScreen(
 
 
 @Composable
-private fun PlaylistActionItem(
+private fun BooklistActionItem(
     icon: Painter,
     label: String,
     onClick: () -> Unit
@@ -951,12 +951,12 @@ private fun PlaylistActionItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// SongPickerBottomSheet moved to com.oakiha.audia.presentation.components
-fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (String) -> Unit) {
+// TrackPickerBottomSheet moved to com.oakiha.audia.presentation.components
+fun RenameBooklistDialog(currentName: String, onDismiss: () -> Unit, onRename: (String) -> Unit) {
     var newName by remember { mutableStateOf(TextFieldValue(currentName)) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Rename Playlist") },
+        title = { Text("Rename Booklist") },
         text = {
             OutlinedTextField(
                 value = newName,

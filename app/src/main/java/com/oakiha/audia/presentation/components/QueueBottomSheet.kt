@@ -138,12 +138,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.AutoScrollingText
 import com.oakiha.audia.presentation.components.SmartImage
 import com.oakiha.audia.presentation.components.subcomps.PlayingEqIcon
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
@@ -182,17 +182,17 @@ import coil.size.Size
 @Composable
 fun QueueBottomSheet(
     viewModel: PlayerViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    BooklistViewModel: BooklistViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
-    queue: List<Song>,
+    queue: List<Track>,
     currentQueueSourceName: String,
-    currentSongId: String?,
+    currentTrackId: String?,
     repeatMode: Int,
     isShuffleOn: Boolean,
     onDismiss: () -> Unit,
-    onSongInfoClick: (Song) -> Unit,
-    onPlaySong: (Song) -> Unit,
-    onRemoveSong: (String) -> Unit,
+    onTrackInfoClick: (Track) -> Unit,
+    onPlayTrack: (Track) -> Unit,
+    onRemoveTrack: (String) -> Unit,
     onReorder: (from: Int, to: Int) -> Unit,
     onToggleRepeat: () -> Unit,
     onToggleShuffle: () -> Unit,
@@ -206,8 +206,8 @@ fun QueueBottomSheet(
     onCancelTimer: () -> Unit,
     onCancelCountedPlay: () -> Unit,
     onPlayCounter: (count: Int) -> Unit,
-    onRequestSaveAsPlaylist: (
-        songs: List<Song>,
+    onRequestSaveAsBooklist: (
+        Tracks: List<Track>,
         defaultName: String,
         onConfirm: (String, Set<String>) -> Unit
     ) -> Unit,
@@ -225,43 +225,43 @@ fun QueueBottomSheet(
 
     val stablePlayerState by viewModel.stablePlayerState.collectAsState()
 
-    val albumColorSchemePair by viewModel.currentAlbumArtColorSchemePair.collectAsState()
+    val BookColorSchemePair by viewModel.currentBookArtColorSchemePair.collectAsState()
     val isDark = isSystemInDarkTheme()
-    val albumColorScheme = remember(albumColorSchemePair, isDark) {
-        albumColorSchemePair?.let { pair -> if (isDark) pair.dark else pair.light }
+    val BookColorScheme = remember(BookColorSchemePair, isDark) {
+        BookColorSchemePair?.let { pair -> if (isDark) pair.dark else pair.light }
     }
 
     val isPlaying = stablePlayerState.isPlaying
 
-    val currentSongIndex = remember(queue, currentSongId) {
-        queue.indexOfFirst { it.id == currentSongId }
+    val currentTrackIndex = remember(queue, currentTrackId) {
+        queue.indexOfFirst { it.id == currentTrackId }
     }
 
-    // Generic wrapper to ensure unique keys for LazyColumn even with duplicate songs
+    // Generic wrapper to ensure unique keys for LazyColumn even with duplicate Tracks
     // @Immutable is moved to top-level QueueUiItem class below for better recomposition behavior
 
     // Read show queue history preference
     val settingsState by settingsViewModel.uiState.collectAsState()
     val showQueueHistory = settingsState.showQueueHistory
 
-    // Show full queue including history (Apple Music style) OR only from current song
-    // Only regenerate when queue changes, NOT when currentSongId changes
+    // Show full queue including history (Apple Audiobook style) OR only from current Track
+    // Only regenerate when queue changes, NOT when currentTrackId changes
     // This preserves item identity (UUIDs) for smooth scroll animation
-    val displayQueue = remember(queue, showQueueHistory, currentSongIndex) {
-        val songsToShow = if (showQueueHistory || currentSongIndex < 0) {
+    val displayQueue = remember(queue, showQueueHistory, currentTrackIndex) {
+        val TracksToShow = if (showQueueHistory || currentTrackIndex < 0) {
             queue
         } else {
-            queue.drop(currentSongIndex)
+            queue.drop(currentTrackIndex)
         }
-        songsToShow.map { QueueUiItem(song = it) }
+        TracksToShow.map { QueueUiItem(Track = it) }
     }
     
     // Offset to convert display indices to queue indices when history is hidden
-    val queueIndexOffset = if (showQueueHistory || currentSongIndex < 0) 0 else currentSongIndex
+    val queueIndexOffset = if (showQueueHistory || currentTrackIndex < 0) 0 else currentTrackIndex
 
-    // Calculate the display index of the current song (depends on whether we show history or not)
-    val currentSongDisplayIndex = remember(displayQueue, currentSongId) {
-        displayQueue.indexOfFirst { it.song.id == currentSongId }
+    // Calculate the display index of the current Track (depends on whether we show history or not)
+    val currentTrackDisplayIndex = remember(displayQueue, currentTrackId) {
+        displayQueue.indexOfFirst { it.Track.id == currentTrackId }
     }
 
     val queueSnapshot = remember(queue) { queue.toList() }
@@ -282,10 +282,10 @@ fun QueueBottomSheet(
         }
     }
     
-    // Animate scroll when current song changes
-    LaunchedEffect(currentSongDisplayIndex) {
-        if (currentSongDisplayIndex > 0) {
-            listState.animateScrollToItem(currentSongDisplayIndex)
+    // Animate scroll when current Track changes
+    LaunchedEffect(currentTrackDisplayIndex) {
+        if (currentTrackDisplayIndex > 0) {
+            listState.animateScrollToItem(currentTrackDisplayIndex)
         }
     }
     val canDragSheetFromList by remember {
@@ -299,7 +299,7 @@ fun QueueBottomSheet(
     val view = LocalView.current
     var lastMovedFrom by remember { mutableStateOf<Int?>(null) }
     var lastMovedTo by remember { mutableStateOf<Int?>(null) }
-    var pendingReorderSongId by remember { mutableStateOf<String?>(null) }
+    var pendingReorderTrackId by remember { mutableStateOf<String?>(null) }
     var reorderHandleInUse by remember { mutableStateOf(false) }
     val updatedReorderHandleInUse by rememberUpdatedState(reorderHandleInUse)
 
@@ -315,7 +315,7 @@ fun QueueBottomSheet(
             val fromLocalIndex = mapKeyToLocalIndex(from.key) ?: return@rememberReorderableLazyListState
             val toLocalIndex = mapKeyToLocalIndex(to.key) ?: return@rememberReorderableLazyListState
             val movingItem = items.getOrNull(fromLocalIndex)
-            val movingSongId = movingItem?.song?.id
+            val movingTrackId = movingItem?.Track?.id
             items = items.toMutableList().apply {
                 add(toLocalIndex, removeAt(fromLocalIndex))
             }
@@ -323,8 +323,8 @@ fun QueueBottomSheet(
                 lastMovedFrom = fromLocalIndex
             }
             lastMovedTo = toLocalIndex
-            if (movingSongId != null && pendingReorderSongId == null) {
-                pendingReorderSongId = movingSongId
+            if (movingTrackId != null && pendingReorderTrackId == null) {
+                pendingReorderTrackId = movingTrackId
             }
         },
     )
@@ -340,13 +340,13 @@ fun QueueBottomSheet(
         if (!reorderableState.isAnyItemDragging) {
             val fromIndex = lastMovedFrom
             val toIndex = lastMovedTo
-            val movedSongId = pendingReorderSongId
+            val movedTrackId = pendingReorderTrackId
 
             lastMovedFrom = null
             lastMovedTo = null
-            pendingReorderSongId = null
+            pendingReorderTrackId = null
 
-            if (fromIndex != null && toIndex != null && movedSongId != null) {
+            if (fromIndex != null && toIndex != null && movedTrackId != null) {
                 // Convert display indices to queue indices by adding the offset
                 val fromQueueIndex = fromIndex + queueIndexOffset
                 val toQueueIndex = toIndex + queueIndexOffset
@@ -498,19 +498,19 @@ fun QueueBottomSheet(
                     .asPaddingValues()
                     .calculateTopPadding() + 10.dp
 
-                stablePlayerState.currentSong?.let { nowPlaying ->
+                stablePlayerState.currentTrack?.let { nowPlaying ->
                     QueueMiniPlayer(
-                        song = nowPlaying,
+                        Track = nowPlaying,
                         isPlaying = isPlaying,
                         headerPadding = headerTopPadding,
                         onPlayPause = { viewModel.playPause() },
-                        onNext = { viewModel.nextSong() },
-                        colorScheme = albumColorScheme,
+                        onNext = { viewModel.nextTrack() },
+                        colorScheme = BookColorScheme,
                         onTap = {
                             scrollToTopJob?.cancel()
                             scrollToTopJob = queueListScope.launch {
                                 try {
-                                    val targetIndex = currentSongDisplayIndex.coerceAtLeast(0)
+                                    val targetIndex = currentTrackDisplayIndex.coerceAtLeast(0)
                                     val currentVisibleIndex = listState.firstVisibleItemIndex
                                     // Use warm-up scroll for large jumps to ensure smooth animation
                                     if (kotlin.math.abs(currentVisibleIndex - targetIndex) > 6) {
@@ -542,7 +542,7 @@ fun QueueBottomSheet(
                         .padding(
                             start = 12.dp,
                             end = 12.dp,
-                            top = if (stablePlayerState.currentSong == null) headerTopPadding else 2.dp,
+                            top = if (stablePlayerState.currentTrack == null) headerTopPadding else 2.dp,
                             bottom = 12.dp,
                         )
                         .then(directSheetDragModifier)
@@ -604,9 +604,9 @@ fun QueueBottomSheet(
                         }
 
                         itemsIndexed(items, key = { _, item -> item.uniqueId }) { index, item ->
-                            val song = item.song
-                            // Use currentSongDisplayIndex for comparison since index is in displayQueue
-                            val canReorder = index > currentSongDisplayIndex
+                            val Track = item.Track
+                            // Use currentTrackDisplayIndex for comparison since index is in displayQueue
+                            val canReorder = index > currentTrackDisplayIndex
                             ReorderableItem(
                                 state = reorderableState,
                                 key = item.uniqueId,
@@ -617,7 +617,7 @@ fun QueueBottomSheet(
                                     label = "scaleAnimation"
                                 )
 
-                                QueuePlaylistSongItem(
+                                QueueBooklistTrackItem(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 0.dp)
@@ -626,21 +626,21 @@ fun QueueBottomSheet(
                                             scaleY = scale
                                         }
                                     ,
-                                    onClick = { onPlaySong(song) },
-                                    song = song,
-                                    // Use index comparison to correctly highlight only the current song
-                                    // even when the same song appears multiple times in the queue
-                                    isCurrentSong = index == currentSongDisplayIndex,
+                                    onClick = { onPlayTrack(Track) },
+                                    Track = Track,
+                                    // Use index comparison to correctly highlight only the current Track
+                                    // even when the same Track appears multiple times in the queue
+                                    isCurrentTrack = index == currentTrackDisplayIndex,
                                     isPlaying = isPlaying,
                                     isDragging = isDragging,
-                                    onRemoveClick = { onRemoveSong(song.id) },
+                                    onRemoveClick = { onRemoveTrack(Track.id) },
                                     isReorderModeEnabled = false,
                                     isDragHandleVisible = canReorder,
                                     isRemoveButtonVisible = false,
                                     enableSwipeToDismiss = canReorder,
-                                    onDismiss = { onRemoveSong(song.id) },
-                                    isFromPlaylist = true,
-                                    onMoreOptionsClick = { onSongInfoClick(song) },
+                                    onDismiss = { onRemoveTrack(Track.id) },
+                                    isFromBooklist = true,
+                                    onMoreOptionsClick = { onTrackInfoClick(Track) },
                                     dragHandle = {
                                         IconButton(
                                             onClick = {},
@@ -666,7 +666,7 @@ fun QueueBottomSheet(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Rounded.DragIndicator,
-                                                contentDescription = "Reorder song",
+                                                contentDescription = "Reorder Track",
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -734,7 +734,7 @@ fun QueueBottomSheet(
                         ),
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevación flat
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevaciÃƒÂ³n flat
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
@@ -803,7 +803,7 @@ fun QueueBottomSheet(
                                 }
                             )
                             QueueToolbarMenuButton(
-                                text = "Save as Playlist",
+                                text = "Save as Booklist",
                                 icon = Icons.Filled.LibraryAdd,
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -814,7 +814,7 @@ fun QueueBottomSheet(
                                     } else {
                                         "Current Queue"
                                     }
-                                    onRequestSaveAsPlaylist(
+                                    onRequestSaveAsBooklist(
                                         queueSnapshot,
                                         defaultName
                                     ) { name, selectedIds ->
@@ -822,9 +822,9 @@ fun QueueBottomSheet(
                                             .filter { selectedIds.contains(it.id) }
                                             .map { it.id }
                                         if (orderedSelection.isNotEmpty()) {
-                                            playlistViewModel.createPlaylist(
+                                            BooklistViewModel.createBooklist(
                                                 name = name,
-                                                songIds = orderedSelection,
+                                                TrackIds = orderedSelection,
                                                 isQueueGenerated = true
                                             )
                                         }
@@ -873,7 +873,7 @@ fun QueueBottomSheet(
             AlertDialog(
                 onDismissRequest = { showClearQueueDialog = false },
                 title = { Text("Clear Queue") },
-                text = { Text("Are you sure you want to clear all songs from the queue except the current one?") },
+                text = { Text("Are you sure you want to clear all Tracks from the queue except the current one?") },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -1071,49 +1071,49 @@ private fun QueueControlsToolbar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SaveQueueAsPlaylistSheet(
-    songs: List<Song>,
+fun SaveQueueAsBooklistsheet(
+    Tracks: List<Track>,
     defaultName: String,
     onDismiss: () -> Unit,
     onConfirm: (String, Set<String>) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
-    val animatedAlbumCornerRadius = 60.dp
-    val albumShape = remember(animatedAlbumCornerRadius) {
+    val animatedBookCornerRadius = 60.dp
+    val Bookshape = remember(animatedBookCornerRadius) {
         AbsoluteSmoothCornerShape(
-            cornerRadiusTL = animatedAlbumCornerRadius,
+            cornerRadiusTL = animatedBookCornerRadius,
             smoothnessAsPercentTR = 60,
-            cornerRadiusTR = animatedAlbumCornerRadius,
+            cornerRadiusTR = animatedBookCornerRadius,
             smoothnessAsPercentBR = 60,
-            cornerRadiusBL = animatedAlbumCornerRadius,
+            cornerRadiusBL = animatedBookCornerRadius,
             smoothnessAsPercentBL = 60,
-            cornerRadiusBR = animatedAlbumCornerRadius,
+            cornerRadiusBR = animatedBookCornerRadius,
             smoothnessAsPercentTL = 60
         )
     }
 
-    var playlistName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    var BooklistName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(defaultName, selection = TextRange(defaultName.length)))
     }
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    val selectedSongIds = remember(songs) {
+    val selectedTrackIds = remember(Tracks) {
         mutableStateMapOf<String, Boolean>().apply {
-            songs.forEach { put(it.id, true) }
+            Tracks.forEach { put(it.id, true) }
         }
     }
 
-    val filteredSongs = remember(searchQuery, songs) {
-        if (searchQuery.isBlank()) songs
-        else songs.filter {
-            it.title.contains(searchQuery, true) || it.artist.contains(searchQuery, true)
+    val filteredTracks = remember(searchQuery, Tracks) {
+        if (searchQuery.isBlank()) Tracks
+        else Tracks.filter {
+            it.title.contains(searchQuery, true) || it.Author.contains(searchQuery, true)
         }
     }
 
     val hasSelection by remember {
-        derivedStateOf { selectedSongIds.any { it.value } }
+        derivedStateOf { selectedTrackIds.any { it.value } }
     }
     val allSelected by remember {
-        derivedStateOf { selectedSongIds.isNotEmpty() && selectedSongIds.all { it.value } }
+        derivedStateOf { selectedTrackIds.isNotEmpty() && selectedTrackIds.all { it.value } }
     }
 
     LaunchedEffect(Unit) {
@@ -1147,7 +1147,7 @@ fun SaveQueueAsPlaylistSheet(
                             title = {
                                 Text(
                                     modifier = Modifier.padding(start = 4.dp),
-                                    text = "Save as playlist",
+                                    text = "Save as Booklist",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontFamily = GoogleSansRounded,
                                     fontWeight = FontWeight.SemiBold,
@@ -1187,12 +1187,12 @@ fun SaveQueueAsPlaylistSheet(
                                         .height(40.dp)
                                         .clickable {
                                             if (allSelected) {
-                                                selectedSongIds.keys.forEach {
-                                                    selectedSongIds[it] = false
+                                                selectedTrackIds.keys.forEach {
+                                                    selectedTrackIds[it] = false
                                                 }
                                             } else {
-                                                selectedSongIds.keys.forEach {
-                                                    selectedSongIds[it] = true
+                                                selectedTrackIds.keys.forEach {
+                                                    selectedTrackIds[it] = true
                                                 }
                                             }
                                         },
@@ -1233,9 +1233,9 @@ fun SaveQueueAsPlaylistSheet(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             OutlinedTextField(
-                                value = playlistName,
-                                onValueChange = { playlistName = it },
-                                label = { Text("Playlist Name") },
+                                value = BooklistName,
+                                onValueChange = { BooklistName = it },
+                                label = { Text("Booklist Name") },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester),
@@ -1253,7 +1253,7 @@ fun SaveQueueAsPlaylistSheet(
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
-                                placeholder = { Text("Search songs to include...") },
+                                placeholder = { Text("Search Tracks to include...") },
                                 leadingIcon = {
                                     Icon(
                                         Icons.Rounded.Search,
@@ -1315,12 +1315,12 @@ fun SaveQueueAsPlaylistSheet(
                                         .padding(start = 12.dp)
                                 ) {
                                     Text(
-                                        text = "${selectedSongIds.count { it.value }} songs selected",
+                                        text = "${selectedTrackIds.count { it.value }} Tracks selected",
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSecondaryContainer
                                     )
                                     Text(
-                                        text = if (playlistName.text.isNotBlank()) "Save as: ${playlistName.text}" else "Enter a playlist name",
+                                        text = if (BooklistName.text.isNotBlank()) "Save as: ${BooklistName.text}" else "Enter a Booklist name",
                                         style = MaterialTheme.typography.bodySmall,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
@@ -1334,8 +1334,8 @@ fun SaveQueueAsPlaylistSheet(
                                     onClick = {
                                         if (hasSelection) {
                                             val finalName =
-                                                playlistName.text.ifBlank { defaultName }
-                                            val chosenIds = selectedSongIds
+                                                BooklistName.text.ifBlank { defaultName }
+                                            val chosenIds = selectedTrackIds
                                                 .filterValues { it }
                                                 .keys
                                             onConfirm(finalName, chosenIds)
@@ -1376,7 +1376,7 @@ fun SaveQueueAsPlaylistSheet(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (filteredSongs.isEmpty()) {
+                    if (filteredTracks.isEmpty()) {
                         item {
                             Column(
                                 modifier = Modifier
@@ -1392,21 +1392,21 @@ fun SaveQueueAsPlaylistSheet(
                                     modifier = Modifier.size(48.dp)
                                 )
                                 Text(
-                                    text = "No songs match \"$searchQuery\"",
+                                    text = "No Tracks match \"$searchQuery\"",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     } else {
-                        items(filteredSongs, key = { it.id }) { song ->
+                        items(filteredTracks, key = { it.id }) { Track ->
                             Row(
                                 Modifier
                                     .fillMaxWidth()
                                     .clip(CircleShape)
                                     .clickable {
-                                        val currentSelection = selectedSongIds[song.id] ?: false
-                                        selectedSongIds[song.id] = !currentSelection
+                                        val currentSelection = selectedTrackIds[Track.id] ?: false
+                                        selectedTrackIds[Track.id] = !currentSelection
                                     }
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -1416,9 +1416,9 @@ fun SaveQueueAsPlaylistSheet(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
-                                    checked = selectedSongIds[song.id] ?: false,
+                                    checked = selectedTrackIds[Track.id] ?: false,
                                     onCheckedChange = { isChecked ->
-                                        selectedSongIds[song.id] = isChecked
+                                        selectedTrackIds[Track.id] = isChecked
                                     }
                                 )
                                 Box(
@@ -1430,18 +1430,18 @@ fun SaveQueueAsPlaylistSheet(
                                         )
                                 ) {
                                     SmartImage(
-                                        model = song.albumArtUriString,
-                                        contentDescription = song.title,
-                                        shape = albumShape,
+                                        model = Track.BookArtUriString,
+                                        contentDescription = Track.title,
+                                        shape = Bookshape,
                                         targetSize = Size(168, 168),
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }
                                 Spacer(Modifier.width(16.dp))
                                 Column {
-                                    Text(song.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(Track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Text(
-                                        song.displayArtist,
+                                        Track.displayAuthor,
                                         style = MaterialTheme.typography.bodySmall,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -1457,7 +1457,7 @@ fun SaveQueueAsPlaylistSheet(
 
 @Composable
 private fun QueueMiniPlayer(
-    song: Song,
+    Track: Track,
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
@@ -1470,7 +1470,7 @@ private fun QueueMiniPlayer(
     val haptic = LocalHapticFeedback.current
     val bodyTapInteractionSource = remember { MutableInteractionSource() }
     val corners = 20.dp
-    val albumCorners = 10.dp
+    val BookCorners = 10.dp
     val shape = AbsoluteSmoothCornerShape(
         cornerRadiusTR = corners,
         smoothnessAsPercentTL = 60,
@@ -1481,14 +1481,14 @@ private fun QueueMiniPlayer(
         cornerRadiusBL = corners,
         smoothnessAsPercentBR = 60
     )
-    val albumShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = albumCorners,
+    val Bookshape = AbsoluteSmoothCornerShape(
+        cornerRadiusTR = BookCorners,
         smoothnessAsPercentTL = 60,
-        cornerRadiusTL = albumCorners,
+        cornerRadiusTL = BookCorners,
         smoothnessAsPercentTR = 60,
-        cornerRadiusBR = albumCorners,
+        cornerRadiusBR = BookCorners,
         smoothnessAsPercentBL = 60,
-        cornerRadiusBL = albumCorners,
+        cornerRadiusBL = BookCorners,
         smoothnessAsPercentBR = 60
     )
 
@@ -1524,12 +1524,12 @@ private fun QueueMiniPlayer(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SmartImage(
-                model = song.albumArtUriString ?: R.drawable.rounded_album_24,
-                shape = albumShape,
-                contentDescription = "Carátula",
+                model = Track.BookArtUriString ?: R.drawable.rounded_Book_24,
+                shape = Bookshape,
+                contentDescription = "CarÃƒÂ¡tula",
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(albumShape),
+                    .clip(Bookshape),
                 contentScale = ContentScale.Crop
             )
 
@@ -1538,7 +1538,7 @@ private fun QueueMiniPlayer(
                 verticalArrangement = Arrangement.Center
             ) {
                 AutoScrollingText(
-                    text = song.title,
+                    text = Track.title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold,
                         color = colors.onPrimaryContainer
@@ -1546,7 +1546,7 @@ private fun QueueMiniPlayer(
                     gradientEdgeColor = colors.primaryContainer
                 )
                 AutoScrollingText(
-                    text = song.displayArtist,
+                    text = Track.displayAuthor,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = colors.onPrimaryContainer.copy(alpha = 0.7f)
                     ),
@@ -1593,27 +1593,27 @@ private fun QueueMiniPlayer(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun QueuePlaylistSongItem(
+fun QueueBooklistTrackItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    song: Song,
-    isCurrentSong: Boolean,
+    Track: Track,
+    isCurrentTrack: Boolean,
     isPlaying: Boolean? = null,
     isDragging: Boolean,
     onRemoveClick: () -> Unit,
     dragHandle: @Composable () -> Unit,
     isReorderModeEnabled: Boolean,
-    onMoreOptionsClick: (song: Song) -> Unit,
+    onMoreOptionsClick: (Track: Track) -> Unit,
     isDragHandleVisible: Boolean,
     isRemoveButtonVisible: Boolean,
     enableSwipeToDismiss: Boolean = false,
     onDismiss: () -> Unit = {},
-    isFromPlaylist: Boolean
+    isFromBooklist: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
 
     val cornerRadius by animateDpAsState(
-        targetValue = if (isCurrentSong) 60.dp else 22.dp,
+        targetValue = if (isCurrentTrack) 60.dp else 22.dp,
         label = "cornerRadiusAnimation"
     )
 
@@ -1628,19 +1628,19 @@ fun QueuePlaylistSongItem(
         smoothnessAsPercentBR = 60
     )
 
-    val albumCornerRadius by animateDpAsState(
-        targetValue = if (isCurrentSong) 60.dp else 8.dp,
+    val BookCornerRadius by animateDpAsState(
+        targetValue = if (isCurrentTrack) 60.dp else 8.dp,
         label = "cornerRadiusAnimation"
     )
 
-    val albumShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = albumCornerRadius,
+    val Bookshape = AbsoluteSmoothCornerShape(
+        cornerRadiusTR = BookCornerRadius,
         smoothnessAsPercentTL = 60,
-        cornerRadiusTL = albumCornerRadius,
+        cornerRadiusTL = BookCornerRadius,
         smoothnessAsPercentTR = 60,
-        cornerRadiusBR = albumCornerRadius,
+        cornerRadiusBR = BookCornerRadius,
         smoothnessAsPercentBL = 60,
-        cornerRadiusBL = albumCornerRadius,
+        cornerRadiusBL = BookCornerRadius,
         smoothnessAsPercentBR = 60
     )
 
@@ -1650,11 +1650,11 @@ fun QueuePlaylistSongItem(
     )
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isCurrentSong) colors.surfaceContainerLowest else colors.surfaceContainerLowest,
+        targetValue = if (isCurrentTrack) colors.surfaceContainerLowest else colors.surfaceContainerLowest,
         label = "backgroundColorAnimation"
     )
-    val mvContainerColor = if (isCurrentSong) colors.tertiaryContainer else colors.surfaceContainerHigh
-    val mvContentColor = if (isCurrentSong) colors.onTertiaryContainer else colors.onSurface
+    val mvContainerColor = if (isCurrentTrack) colors.tertiaryContainer else colors.surfaceContainerHigh
+    val mvContentColor = if (isCurrentTrack) colors.onTertiaryContainer else colors.onSurface
 
     val density = LocalDensity.current
 
@@ -1775,7 +1775,7 @@ fun QueuePlaylistSongItem(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.rounded_close_24),
-                        contentDescription = "Dismiss song",
+                        contentDescription = "Dismiss Track",
                         modifier = Modifier.graphicsLayer {
                             scaleX = iconScale
                             scaleY = iconScale
@@ -1808,19 +1808,19 @@ fun QueuePlaylistSongItem(
                         dragHandle()
                     }
 
-                    val albumArtPadding by animateDpAsState(
+                    val BookArtPadding by animateDpAsState(
                         targetValue = if (isDragHandleVisible) 6.dp else 12.dp,
-                        label = "albumArtPadding"
+                        label = "BookArtPadding"
                     )
-                    Spacer(Modifier.width(albumArtPadding))
+                    Spacer(Modifier.width(BookArtPadding))
 
                     SmartImage(
-                        model = song.albumArtUriString,
-                        shape = albumShape,
-                        contentDescription = "Carátula",
+                        model = Track.BookArtUriString,
+                        shape = Bookshape,
+                        contentDescription = "CarÃƒÂ¡tula",
                         modifier = Modifier
                             .size(42.dp)
-                            .clip(albumShape),
+                            .clip(Bookshape),
                         contentScale = ContentScale.Crop
                     )
 
@@ -1828,19 +1828,19 @@ fun QueuePlaylistSongItem(
 
                     Column(Modifier.weight(1f)) {
                         Text(
-                            song.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                            color = if (isCurrentSong) colors.primary else colors.onSurface,
-                            fontWeight = if (isCurrentSong) FontWeight.Bold else FontWeight.Normal,
+                            Track.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            color = if (isCurrentTrack) colors.primary else colors.onSurface,
+                            fontWeight = if (isCurrentTrack) FontWeight.Bold else FontWeight.Normal,
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            song.displayArtist, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            Track.displayAuthor, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (isCurrentSong) colors.primary.copy(alpha = 0.8f) else colors.onSurfaceVariant
+                            color = if (isCurrentTrack) colors.primary.copy(alpha = 0.8f) else colors.onSurfaceVariant
                         )
                     }
 
-                    if (isCurrentSong) {
+                    if (isCurrentTrack) {
                         if (isPlaying != null) {
                             PlayingEqIcon(
                                 modifier = Modifier
@@ -1858,9 +1858,9 @@ fun QueuePlaylistSongItem(
                         Spacer(Modifier.width(8.dp))
                     }
 
-                    if (isFromPlaylist) {
+                    if (isFromBooklist) {
                         FilledIconButton(
-                            onClick = { onMoreOptionsClick(song) },
+                            onClick = { onMoreOptionsClick(Track) },
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = mvContainerColor,
                                 contentColor = mvContentColor //.copy(alpha = 0.7f)
@@ -1871,7 +1871,7 @@ fun QueuePlaylistSongItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.MoreVert,
-                                contentDescription = "More options for ${song.title}",
+                                contentDescription = "More options for ${Track.title}",
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -1892,7 +1892,7 @@ fun QueuePlaylistSongItem(
                             Icon(
                                 modifier = Modifier.size(18.dp),
                                 painter = painterResource(R.drawable.rounded_close_24),
-                                contentDescription = "Remove from playlist",
+                                contentDescription = "Remove from Booklist",
                             )
                         }
                     }
@@ -1912,5 +1912,5 @@ private enum class SwipeState { Resting, Dismissed }
 @Immutable
 data class QueueUiItem(
     val uniqueId: String = java.util.UUID.randomUUID().toString(),
-    val song: Song
+    val Track: Track
 )

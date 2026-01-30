@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LyricsSyncControls(
+fun TranscriptSyncControls(
     modifier: Modifier = Modifier,
     offsetMillis: Int,
     onOffsetChange: (Int) -> Unit,
@@ -45,7 +45,7 @@ fun LyricsSyncControls(
     ) {
         // -0.5s
         SyncButton(
-            text = "−.5",
+            text = "âˆ’.5",
             onClick = { onOffsetChange(offsetMillis - 500) },
             weight = 1f,
             containerColor = onAccentColor,
@@ -53,7 +53,7 @@ fun LyricsSyncControls(
         )
         // -0.1s
         SyncButton(
-            text = "−.1",
+            text = "âˆ’.1",
             onClick = { onOffsetChange(offsetMillis - 100) },
             weight = 1f,
             containerColor = onAccentColor,

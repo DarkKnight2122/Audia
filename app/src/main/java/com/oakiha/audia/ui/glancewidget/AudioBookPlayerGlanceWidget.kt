@@ -57,7 +57,7 @@ import timber.log.Timber
 class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
 
     companion object {
-        // Tamaños definidos para diferentes configuraciones del widget
+        // TamaÃƒÂ±os definidos para diferentes configuraciones del widget
         private val VERY_THIN_LAYOUT_SIZE = DpSize(width = 200.dp, height = 60.dp)
         private val THIN_LAYOUT_SIZE = DpSize(width = 250.dp, height = 80.dp)
         private val SMALL_HORIZONTAL_LAYOUT_SIZE = DpSize(width = 110.dp, height = 60.dp)
@@ -72,7 +72,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         private val HUGE_LAYOUT_SIZE = DpSize(width = 400.dp, height = 300.dp)
 
         // LruCache for Bitmaps
-        private object AlbumArtBitmapCache {
+        private object BookArtBitmapCache {
             private const val CACHE_SIZE_BYTES = 4 * 1024 * 1024 // 4 MiB
             private val lruCache = object : LruCache<String, Bitmap>(CACHE_SIZE_BYTES) {
                 override fun sizeOf(key: String, value: Bitmap): Int {
@@ -103,7 +103,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
             val currentSize = LocalSize.current
 
             Timber.tag("AudioBookPlayerGlanceWidget")
-                .d("Providing Glance. PlayerInfo: title='${playerInfo.songTitle}', artist='${playerInfo.artistName}', isPlaying=${playerInfo.isPlaying}, hasBitmap=${playerInfo.albumArtBitmapData != null}, progress=${playerInfo.currentPositionMs}/${playerInfo.totalDurationMs}")
+                .d("Providing Glance. PlayerInfo: title='${playerInfo.TrackTitle}', Author='${playerInfo.AuthorName}', isPlaying=${playerInfo.isPlaying}, hasBitmap=${playerInfo.BookArtBitmapData != null}, progress=${playerInfo.currentPositionMs}/${playerInfo.totalDurationMs}")
 
             GlanceTheme {
                 WidgetUi(playerInfo = playerInfo, size = currentSize, context = context)
@@ -117,14 +117,14 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         size: DpSize,
         context: Context
     ) {
-        val title = playerInfo.songTitle.ifEmpty { "AudioBookPlayer" }
-        val artist = playerInfo.artistName.ifEmpty { "Toca para abrir" }
+        val title = playerInfo.TrackTitle.ifEmpty { "AudioBookPlayer" }
+        val Author = playerInfo.AuthorName.ifEmpty { "Toca para abrir" }
         val isPlaying = playerInfo.isPlaying
         val isFavorite = playerInfo.isFavorite
-        val albumArtBitmapData = playerInfo.albumArtBitmapData
+        val BookArtBitmapData = playerInfo.BookArtBitmapData
 
         Timber.tag("AudioBookPlayerGlanceWidget")
-            .d("WidgetUi: PlayerInfo received. Title: $title, Artist: $artist, HasBitmapData: ${albumArtBitmapData != null}, BitmapDataSize: ${albumArtBitmapData?.size ?: "N/A"}")
+            .d("WidgetUi: PlayerInfo received. Title: $title, Author: $Author, HasBitmapData: ${BookArtBitmapData != null}, BitmapDataSize: ${BookArtBitmapData?.size ?: "N/A"}")
 
         val actualBackgroundColor = GlanceTheme.colors.surface
         val onBackgroundColor = GlanceTheme.colors.onSurface
@@ -151,7 +151,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 60.dp,
-                        albumArtBitmapData = albumArtBitmapData,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         context = context
                     )
@@ -159,7 +159,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 360.dp,
-                        albumArtBitmapData = albumArtBitmapData,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         context = context
                     )
@@ -170,15 +170,15 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 60.dp,
-                        albumArtBitmapData = albumArtBitmapData,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         context = context
                     )
                     size.width < THIN_LAYOUT_SIZE.width -> VeryThinWidgetLayout(
                         modifier = baseModifier,
                         title = title,
-                        artist = artist,
-                        albumArtBitmapData = albumArtBitmapData,
+                        Author = Author,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         textColor = onBackgroundColor,
                         context = context,
@@ -190,8 +190,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 60.dp,
                         title = title,
-                        artist = artist,
-                        albumArtBitmapData = albumArtBitmapData,
+                        Author = Author,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         textColor = onBackgroundColor,
                         context = context
@@ -203,15 +203,15 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 28.dp,
-                        albumArtBitmapData = albumArtBitmapData,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         context = context
                     )
                     size.width < LARGE_LAYOUT_SIZE.width || size.height < LARGE_LAYOUT_SIZE.height -> MediumWidgetLayout(
                         modifier = baseModifier,
                         title = title,
-                        artist = artist,
-                        albumArtBitmapData = albumArtBitmapData,
+                        Author = Author,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         textColor = onBackgroundColor,
                         context = context,
@@ -221,8 +221,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                     size.width < EXTRA_LARGE_LAYOUT_SIZE.width || size.height < EXTRA_LARGE_LAYOUT_SIZE.height -> LargeWidgetLayout(
                         modifier = baseModifier,
                         title = title,
-                        artist = artist,
-                        albumArtBitmapData = albumArtBitmapData,
+                        Author = Author,
+                        BookArtBitmapData = BookArtBitmapData,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 28.dp,
                         isPlaying = isPlaying,
@@ -233,8 +233,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                     else -> ExtraLargeWidgetLayout(
                         modifier = baseModifier,
                         title = title,
-                        artist = artist,
-                        albumArtBitmapData = albumArtBitmapData,
+                        Author = Author,
+                        BookArtBitmapData = BookArtBitmapData,
                         isPlaying = isPlaying,
                         backgroundColor = actualBackgroundColor,
                         bgCornerRadius = 28.dp,
@@ -253,8 +253,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         title: String,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        artist: String,
-        albumArtBitmapData: ByteArray?,
+        Author: String,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         textColor: ColorProvider,
         context: Context
@@ -264,7 +264,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         val primaryContainerColor = GlanceTheme.colors.primaryContainer
         val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
         val size = LocalSize.current
-        val albumArtSize = size.height - 32.dp
+        val BookArtSize = size.height - 32.dp
 
         Box(
             modifier = modifier
@@ -280,18 +280,18 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally
             ) {
 
-                AlbumArtImageGlance(
+                BookArtImageGlance(
                     modifier = GlanceModifier
-                        .size(albumArtSize),
-                    bitmapData = albumArtBitmapData,
+                        .size(BookArtSize),
+                    bitmapData = BookArtBitmapData,
                     context = context,
                     cornerRadius = bgCornerRadius
                 )
                 Spacer(GlanceModifier.width(10.dp))
                 Column(modifier = GlanceModifier.defaultWeight()) {
                     Text(text = title, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textColor), maxLines = 1)
-                    if (artist.isNotEmpty() && artist != "Toca para abrir") {
-                        Text(text = artist, style = TextStyle(fontSize = 14.sp, color = textColor), maxLines = 1)
+                    if (Author.isNotEmpty() && Author != "Toca para abrir") {
+                        Text(text = Author, style = TextStyle(fontSize = 14.sp, color = textColor), maxLines = 1)
                     }
                 }
                 Spacer(GlanceModifier.width(8.dp))
@@ -328,8 +328,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
         title: String,
-        artist: String,
-        albumArtBitmapData: ByteArray?,
+        Author: String,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         textColor: ColorProvider,
         context: Context
@@ -339,7 +339,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         val primaryContainerColor = GlanceTheme.colors.primaryContainer
         val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
         val size = LocalSize.current
-        val albumArtSize = size.height - 32.dp
+        val BookArtSize = size.height - 32.dp
 
         Box(
             modifier = modifier
@@ -356,18 +356,18 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally
             ) {
 
-                AlbumArtImageGlance(
+                BookArtImageGlance(
                     modifier = GlanceModifier
-                        .size(albumArtSize),
-                    bitmapData = albumArtBitmapData,
+                        .size(BookArtSize),
+                    bitmapData = BookArtBitmapData,
                     context = context,
                     cornerRadius = bgCornerRadius
                 )
                 Spacer(GlanceModifier.width(14.dp))
                 Column(modifier = GlanceModifier.defaultWeight()) {
                     Text(text = title, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textColor), maxLines = 1)
-                    if (artist.isNotEmpty() && artist != "Toca para abrir") {
-                        Text(text = artist, style = TextStyle(fontSize = 14.sp, color = textColor), maxLines = 1)
+                    if (Author.isNotEmpty() && Author != "Toca para abrir") {
+                        Text(text = Author, style = TextStyle(fontSize = 14.sp, color = textColor), maxLines = 1)
                     }
                 }
                 Spacer(GlanceModifier.width(8.dp))
@@ -402,7 +402,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         modifier: GlanceModifier,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        albumArtBitmapData: ByteArray?,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         context: Context
     ) {
@@ -423,13 +423,13 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
 
-                AlbumArtImageGlance(
+                BookArtImageGlance(
                     modifier = GlanceModifier
                         .defaultWeight()
                         .height(48.dp)
                         //.padding(4.dp)
                     ,
-                    bitmapData = albumArtBitmapData,
+                    bitmapData = BookArtBitmapData,
                     //size = 48.dp,
                     context = context,
                     cornerRadius = 64.dp
@@ -470,7 +470,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         modifier: GlanceModifier,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        albumArtBitmapData: ByteArray?,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         context: Context
     ) {
@@ -490,12 +490,12 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
-                AlbumArtImageGlance(
+                BookArtImageGlance(
                     modifier = GlanceModifier
                         .defaultWeight()
                         .fillMaxWidth()
                         .height(48.dp),
-                    bitmapData = albumArtBitmapData,
+                    bitmapData = BookArtBitmapData,
                     context = context,
                     cornerRadius = 64.dp
                 )
@@ -573,7 +573,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         modifier: GlanceModifier,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        albumArtBitmapData: ByteArray?,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         context: Context
     ) {
@@ -593,9 +593,9 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally
             ) {
-                AlbumArtImageGlance(
+                BookArtImageGlance(
                     modifier = GlanceModifier.padding(vertical = 6.dp),
-                    bitmapData = albumArtBitmapData,
+                    bitmapData = BookArtBitmapData,
                     size = 58.dp,
                     context = context,
                     cornerRadius = 64.dp
@@ -620,7 +620,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         modifier: GlanceModifier,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        albumArtBitmapData: ByteArray?,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         context: Context
     ) {
@@ -649,9 +649,9 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.Top,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    AlbumArtImageGlance(
+                    BookArtImageGlance(
                         modifier = GlanceModifier.defaultWeight(),
-                        bitmapData = albumArtBitmapData,
+                        bitmapData = BookArtBitmapData,
                         context = context,
                         cornerRadius = 64.dp
                     )
@@ -705,10 +705,10 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
     fun MediumWidgetLayout(
         modifier: GlanceModifier,
         title: String,
-        artist: String,
+        Author: String,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
-        albumArtBitmapData: ByteArray?,
+        BookArtBitmapData: ByteArray?,
         isPlaying: Boolean,
         textColor: ColorProvider,
         context: Context
@@ -732,13 +732,13 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Top part: Album Art + Title/Artist
+                // Top part: Book Art + Title/Author
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AlbumArtImageGlance(
-                        bitmapData = albumArtBitmapData,
+                    BookArtImageGlance(
+                        bitmapData = BookArtBitmapData,
                         size = 80.dp,
                         context = context,
                         cornerRadius = 16.dp
@@ -756,7 +756,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         )
                         Spacer(GlanceModifier.height(4.dp))
                         Text(
-                            text = artist,
+                            text = Author,
                             style = TextStyle(fontSize = 13.sp, color = textColor),
                             maxLines = 2
                         )
@@ -809,8 +809,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
     fun LargeWidgetLayout(
         modifier: GlanceModifier,
         title: String,
-        artist: String,
-        albumArtBitmapData: ByteArray?,
+        Author: String,
+        BookArtBitmapData: ByteArray?,
         backgroundColor: ColorProvider,
         bgCornerRadius: Dp,
         isPlaying: Boolean,
@@ -828,11 +828,11 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
             // *** FIX: Removed padding from the inner Column ***
             Column(modifier = GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                    AlbumArtImageGlance(bitmapData = albumArtBitmapData, size = 64.dp, context = context, cornerRadius = 18.dp)
+                    BookArtImageGlance(bitmapData = BookArtBitmapData, size = 64.dp, context = context, cornerRadius = 18.dp)
                     Spacer(GlanceModifier.width(12.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(text = title, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textColor), maxLines = 1)
-                        Text(text = artist, style = TextStyle(fontSize = 13.sp, color = textColor), maxLines = 1)
+                        Text(text = Author, style = TextStyle(fontSize = 13.sp, color = textColor), maxLines = 1)
                     }
                     Spacer(GlanceModifier.width(4.dp))
                     Image(
@@ -898,7 +898,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
 
     @Composable
     fun ExtraLargeWidgetLayout(
-        modifier: GlanceModifier, title: String, artist: String, albumArtBitmapData: ByteArray?,
+        modifier: GlanceModifier, title: String, Author: String, BookArtBitmapData: ByteArray?,
         isPlaying: Boolean, backgroundColor: ColorProvider, bgCornerRadius: Dp,
         textColor: ColorProvider,
         context: Context,
@@ -915,13 +915,13 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         ) {
             // *** FIX: Removed padding from the inner Column ***
             Column(modifier = GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                // Top Row: Album Art & Info
+                // Top Row: Book Art & Info
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = GlanceModifier.fillMaxWidth()
                 ) {
-                    AlbumArtImageGlance(
-                        bitmapData = albumArtBitmapData,
+                    BookArtImageGlance(
+                        bitmapData = BookArtBitmapData,
                         size = 68.dp,
                         context = context,
                         cornerRadius = 16.dp
@@ -934,7 +934,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                             maxLines = 2
                         )
                         Text(
-                            text = artist,
+                            text = Author,
                             style = TextStyle(fontSize = 16.sp, color = textColor),
                             maxLines = 1
                         )
@@ -1032,16 +1032,16 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                         ) {
                             if (i < items.size) {
                                 val queueItem = items[i]
-                                AlbumArtImageGlance(
+                                BookArtImageGlance(
                                     modifier = GlanceModifier.clickable(
                                         actionRunCallback<PlayerControlActionCallback>(
                                             actionParametersOf(
                                                 PlayerActions.key to PlayerActions.PLAY_FROM_QUEUE,
-                                                PlayerActions.songIdKey to queueItem.id
+                                                PlayerActions.TrackIdKey to queueItem.id
                                             )
                                         )
                                     ),
-                                    bitmapData = queueItem.albumArtBitmapData,
+                                    bitmapData = queueItem.BookArtBitmapData,
                                     size = itemSize,
                                     context = context,
                                     cornerRadius = cornerRadius
@@ -1064,14 +1064,14 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
     }
 
     @Composable
-    fun AlbumArtImageGlance(
+    fun BookArtImageGlance(
         bitmapData: ByteArray?,
         size: Dp? = null,
         context: Context,
         modifier: GlanceModifier = GlanceModifier,
         cornerRadius: Dp = 16.dp
     ) {
-        val TAG_AAIG = "AlbumArtImageGlance"
+        val TAG_AAIG = "BookArtImageGlance"
         Timber.tag(TAG_AAIG)
             .d("Init. bitmapData is null: ${bitmapData == null}. Requested Dp size: $size")
         if (bitmapData != null) Timber.tag(TAG_AAIG).d("bitmapData size: ${bitmapData.size} bytes")
@@ -1080,8 +1080,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         val widgetDpSize = LocalSize.current // Get the actual size of the composable
 
         val imageProvider = bitmapData?.let { data ->
-            val cacheKey = AlbumArtBitmapCache.getKey(data)
-            var bitmap = AlbumArtBitmapCache.getBitmap(cacheKey)
+            val cacheKey = BookArtBitmapCache.getKey(data)
+            var bitmap = BookArtBitmapCache.getBitmap(cacheKey)
 
             if (bitmap != null) {
                 Timber.tag(TAG_AAIG).d("Bitmap cache HIT for key: $cacheKey. Using cached bitmap.")
@@ -1142,7 +1142,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
 
                     Timber.tag(TAG_AAIG)
                         .d("Final bitmap size: ${bitmap.width}x${bitmap.height}. Putting into cache with key: $cacheKey")
-                    bitmap.let { AlbumArtBitmapCache.putBitmap(cacheKey, it) }
+                    bitmap.let { BookArtBitmapCache.putBitmap(cacheKey, it) }
 
                 } catch (e: Exception) {
                     Timber.tag(TAG_AAIG).e(e, "Error decoding or scaling bitmap: ${e.message}")
@@ -1158,7 +1158,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
             if (imageProvider != null) {
                 Image(
                     provider = imageProvider,
-                    contentDescription = "Album Art",
+                    contentDescription = "Book Art",
                     modifier = GlanceModifier.fillMaxSize().cornerRadius(cornerRadius),
                     contentScale = ContentScale.Crop
                 )
@@ -1181,8 +1181,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        provider = ImageProvider(R.drawable.ic_music_placeholder),
-                        contentDescription = "Album Art Placeholder",
+                        provider = ImageProvider(R.drawable.ic_Audiobook_placeholder),
+                        contentDescription = "Book Art Placeholder",
                         modifier = GlanceModifier.size(placeholderSize),
                         contentScale = ContentScale.Fit,
                         colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant)
@@ -1338,7 +1338,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
     }
 }
 
-// Helper para formatear duración en Glance (no puede usar TimeUnit directamente)
+// Helper para formatear duraciÃƒÂ³n en Glance (no puede usar TimeUnit directamente)
 private fun formatDurationGlance(millis: Long): String {
     if (millis < 0) return "00:00"
     val totalSeconds = millis / 1000

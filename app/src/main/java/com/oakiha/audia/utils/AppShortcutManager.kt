@@ -20,40 +20,40 @@ class AppShortcutManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     companion object {
-        private const val SHORTCUT_ID_LAST_PLAYLIST = "last_playlist"
+        private const val SHORTCUT_ID_LAST_Booklist = "last_Booklist"
     }
 
     /**
-     * Updates the dynamic shortcut for the last played playlist.
-     * @param playlistId The ID of the playlist
-     * @param playlistName The display name of the playlist
+     * Updates the dynamic shortcut for the last played Booklist.
+     * @param BooklistId The ID of the Booklist
+     * @param BooklistName The display name of the Booklist
      */
-    fun updateLastPlaylistShortcut(playlistId: String, playlistName: String) {
+    fun updateLastBooklistshortcut(BooklistId: String, BooklistName: String) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
             return // Shortcuts not supported before API 25
         }
         
         val intent = Intent(context, MainActivity::class.java).apply {
-            action = MainActivity.ACTION_OPEN_PLAYLIST
-            putExtra(MainActivity.EXTRA_PLAYLIST_ID, playlistId)
+            action = MainActivity.ACTION_OPEN_Booklist
+            putExtra(MainActivity.EXTRA_Booklist_ID, BooklistId)
         }
 
-        val shortcut = ShortcutInfoCompat.Builder(context, SHORTCUT_ID_LAST_PLAYLIST)
-            .setShortLabel(playlistName)
-            .setLongLabel(playlistName)
-            .setIcon(IconCompat.createWithResource(context, R.drawable.shortcut_playlist_purple))
+        val shortcut = ShortcutInfoCompat.Builder(context, SHORTCUT_ID_LAST_Booklist)
+            .setShortLabel(BooklistName)
+            .setLongLabel(BooklistName)
+            .setIcon(IconCompat.createWithResource(context, R.drawable.shortcut_Booklist_purple))
             .setIntent(intent)
             .build()
 
         // Remove old shortcut first to force icon refresh
-        ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(SHORTCUT_ID_LAST_PLAYLIST))
+        ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(SHORTCUT_ID_LAST_Booklist))
         ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
     }
 
     /**
-     * Removes the last playlist shortcut if it exists.
+     * Removes the last Booklist shortcut if it exists.
      */
-    fun removeLastPlaylistShortcut() {
-        ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(SHORTCUT_ID_LAST_PLAYLIST))
+    fun removeLastBooklistshortcut() {
+        ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(SHORTCUT_ID_LAST_Booklist))
     }
 }

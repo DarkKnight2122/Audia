@@ -23,27 +23,27 @@ class TransitionRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun resolveTransitionSettings(
-        playlistId: String,
+        BooklistId: String,
         fromTrackId: String,
         toTrackId: String
     ): Flow<TransitionResolution> {
-        // Chain the lookups according to priority: specific -> playlist -> global
-        return transitionDao.getSpecificRule(playlistId, fromTrackId, toTrackId)
+        // Chain the lookups according to priority: specific -> Booklist -> global
+        return transitionDao.getSpecificRule(BooklistId, fromTrackId, toTrackId)
             .flatMapLatest { specificRule ->
                 if (specificRule != null) {
                     flowOf(
                         TransitionResolution(
                             settings = specificRule.settings,
-                            source = TransitionSource.PLAYLIST_SPECIFIC,
+                            source = TransitionSource.Booklist_SPECIFIC,
                         )
                     )
                 } else {
-                    transitionDao.getPlaylistDefaultRule(playlistId).flatMapLatest { playlistRule ->
-                        if (playlistRule != null) {
+                    transitionDao.getBooklistDefaultRule(BooklistId).flatMapLatest { BooklistRule ->
+                        if (BooklistRule != null) {
                             flowOf(
                                 TransitionResolution(
-                                    settings = playlistRule.settings,
-                                    source = TransitionSource.PLAYLIST_DEFAULT,
+                                    settings = BooklistRule.settings,
+                                    source = TransitionSource.Booklist_DEFAULT,
                                 )
                             )
                         } else {
@@ -59,14 +59,14 @@ class TransitionRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getAllRulesForPlaylist(playlistId: String): Flow<List<TransitionRule>> {
-        return transitionDao.getAllRulesForPlaylist(playlistId).map { entities ->
+    override fun getAllRulesForBooklist(BooklistId: String): Flow<List<TransitionRule>> {
+        return transitionDao.getAllRulesForBooklist(BooklistId).map { entities ->
             entities.map { it.toModel() }
         }
     }
 
-    override fun getPlaylistDefaultRule(playlistId: String): Flow<TransitionRule?> {
-        return transitionDao.getPlaylistDefaultRule(playlistId).map { entity ->
+    override fun getBooklistDefaultRule(BooklistId: String): Flow<TransitionRule?> {
+        return transitionDao.getBooklistDefaultRule(BooklistId).map { entity ->
             entity?.toModel()
         }
     }
@@ -79,8 +79,8 @@ class TransitionRepositoryImpl @Inject constructor(
         transitionDao.deleteRule(ruleId)
     }
 
-    override suspend fun deletePlaylistDefaultRule(playlistId: String) {
-        transitionDao.deletePlaylistDefaultRule(playlistId)
+    override suspend fun deleteBooklistDefaultRule(BooklistId: String) {
+        transitionDao.deleteBooklistDefaultRule(BooklistId)
     }
 
     override fun getGlobalSettings(): Flow<TransitionSettings> {
@@ -96,7 +96,7 @@ class TransitionRepositoryImpl @Inject constructor(
     private fun TransitionRuleEntity.toModel(): TransitionRule {
         return TransitionRule(
             id = this.id,
-            playlistId = this.playlistId,
+            BooklistId = this.BooklistId,
             fromTrackId = this.fromTrackId,
             toTrackId = this.toTrackId,
             settings = this.settings
@@ -105,10 +105,10 @@ class TransitionRepositoryImpl @Inject constructor(
 
     private fun TransitionRule.toEntity(): TransitionRuleEntity {
         // The ID is included for updates. If it's the default 0, Room treats it as a new entry for auto-generation.
-        // The unique index on (playlistId, from, to) ensures upsert logic works correctly.
+        // The unique index on (BooklistId, from, to) ensures upsert logic works correctly.
         return TransitionRuleEntity(
             id = this.id,
-            playlistId = this.playlistId,
+            BooklistId = this.BooklistId,
             fromTrackId = this.fromTrackId,
             toTrackId = this.toTrackId,
             settings = this.settings

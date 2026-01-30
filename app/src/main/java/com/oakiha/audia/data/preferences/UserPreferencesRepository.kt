@@ -12,9 +12,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.media3.common.Player
-import com.oakiha.audia.data.model.Playlist
+import com.oakiha.audia.data.model.Booklist
 import com.oakiha.audia.data.model.SortOption // Added import
-import com.oakiha.audia.data.model.LyricsSourcePreference
+import com.oakiha.audia.data.model.TranscriptSourcePreference
 import com.oakiha.audia.data.model.TransitionSettings
 import com.oakiha.audia.data.equalizer.EqualizerPreset // Added import
 import java.util.UUID
@@ -34,7 +34,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 object ThemePreference {
     const val DEFAULT = "default"
     const val DYNAMIC = "dynamic"
-    const val ALBUM_ART = "album_art"
+    const val Book_ART = "Book_art"
     const val GLOBAL = "global"
 }
 
@@ -45,14 +45,14 @@ object AppThemeMode {
 }
 
 /**
- * Album art quality settings for developer options.
- * Controls maximum resolution for album artwork in player view.
+ * Book art quality settings for developer options.
+ * Controls maximum resolution for Book artwork in player view.
  * Thumbnails in lists always use low resolution for performance.
  * 
  * @property maxSize Maximum size in pixels (0 = original size)
  * @property label Human-readable label for UI
  */
-enum class AlbumArtQuality(val maxSize: Int, val label: String) {
+enum class BookArtQuality(val maxSize: Int, val label: String) {
     LOW(256, "Low (256px) - Better performance"),
     MEDIUM(512, "Medium (512px) - Balanced"),
     HIGH(800, "High (800px) - Best quality"),
@@ -64,7 +64,7 @@ class UserPreferencesRepository
 @Inject
 constructor(
         private val dataStore: DataStore<Preferences>,
-        private val json: Json // Inyectar Json para serialización
+        private val json: Json // Inyectar Json para serializaciÃƒÂ³n
 ) {
 
     private object PreferencesKeys {
@@ -79,25 +79,25 @@ constructor(
         // Removed
         val PLAYER_THEME_PREFERENCE = stringPreferencesKey("player_theme_preference_v2")
         val APP_THEME_MODE = stringPreferencesKey("app_theme_mode")
-        val FAVORITE_SONG_IDS = stringSetPreferencesKey("favorite_song_ids")
-        val USER_PLAYLISTS = stringPreferencesKey("user_playlists_json_v1")
-        val PLAYLIST_SONG_ORDER_MODES = stringPreferencesKey("playlist_song_order_modes")
+        val FAVORITE_Track_IDS = stringSetPreferencesKey("favorite_Track_ids")
+        val USER_Booklists = stringPreferencesKey("user_Booklists_json_v1")
+        val Booklist_Track_ORDER_MODES = stringPreferencesKey("Booklist_Track_order_modes")
 
         // Sort Option Keys
-        val SONGS_SORT_OPTION = stringPreferencesKey("songs_sort_option")
-        val SONGS_SORT_OPTION_MIGRATED = booleanPreferencesKey("songs_sort_option_migrated_v2")
-        val ALBUMS_SORT_OPTION = stringPreferencesKey("albums_sort_option")
-        val ARTISTS_SORT_OPTION = stringPreferencesKey("artists_sort_option")
-        val PLAYLISTS_SORT_OPTION = stringPreferencesKey("playlists_sort_option")
-        val LIKED_SONGS_SORT_OPTION = stringPreferencesKey("liked_songs_sort_option")
+        val Tracks_SORT_OPTION = stringPreferencesKey("Tracks_sort_option")
+        val Tracks_SORT_OPTION_MIGRATED = booleanPreferencesKey("Tracks_sort_option_migrated_v2")
+        val Books_SORT_OPTION = stringPreferencesKey("Books_sort_option")
+        val Authors_SORT_OPTION = stringPreferencesKey("Authors_sort_option")
+        val Booklists_SORT_OPTION = stringPreferencesKey("Booklists_sort_option")
+        val LIKED_Tracks_SORT_OPTION = stringPreferencesKey("liked_Tracks_sort_option")
 
         // UI State Keys
         val LAST_LIBRARY_TAB_INDEX =
                 intPreferencesKey("last_library_tab_index") // Corrected: Add intPreferencesKey here
-        val MOCK_GENRES_ENABLED = booleanPreferencesKey("mock_genres_enabled")
+        val MOCK_Categories_ENABLED = booleanPreferencesKey("mock_Categories_enabled")
         val LAST_DAILY_MIX_UPDATE = longPreferencesKey("last_daily_mix_update")
-        val DAILY_MIX_SONG_IDS = stringPreferencesKey("daily_mix_song_ids")
-        val YOUR_MIX_SONG_IDS = stringPreferencesKey("your_mix_song_ids")
+        val DAILY_MIX_Track_IDS = stringPreferencesKey("daily_mix_Track_ids")
+        val YOUR_MIX_Track_IDS = stringPreferencesKey("your_mix_Track_ids")
         val NAV_BAR_CORNER_RADIUS = intPreferencesKey("nav_bar_corner_radius")
         val NAV_BAR_STYLE = stringPreferencesKey("nav_bar_style")
         val CAROUSEL_STYLE = stringPreferencesKey("carousel_style")
@@ -108,7 +108,7 @@ constructor(
         val GLOBAL_TRANSITION_SETTINGS = stringPreferencesKey("global_transition_settings_json")
         val LIBRARY_TABS_ORDER = stringPreferencesKey("library_tabs_order")
         val IS_FOLDER_FILTER_ACTIVE = booleanPreferencesKey("is_folder_filter_active")
-        val IS_FOLDERS_PLAYLIST_VIEW = booleanPreferencesKey("is_folders_playlist_view")
+        val IS_FOLDERS_Booklist_VIEW = booleanPreferencesKey("is_folders_Booklist_view")
         val USE_SMOOTH_CORNERS = booleanPreferencesKey("use_smooth_corners")
         val KEEP_PLAYING_IN_BACKGROUND = booleanPreferencesKey("keep_playing_in_background")
         val IS_CROSSFADE_ENABLED = booleanPreferencesKey("is_crossfade_enabled")
@@ -119,7 +119,7 @@ constructor(
         val DISABLE_CAST_AUTOPLAY = booleanPreferencesKey("disable_cast_autoplay")
         val SHOW_QUEUE_HISTORY = booleanPreferencesKey("show_queue_history")
         val FULL_PLAYER_DELAY_ALL = booleanPreferencesKey("full_player_delay_all")
-        val FULL_PLAYER_DELAY_ALBUM = booleanPreferencesKey("full_player_delay_album")
+        val FULL_PLAYER_DELAY_Book = booleanPreferencesKey("full_player_delay_Book")
         val FULL_PLAYER_DELAY_METADATA = booleanPreferencesKey("full_player_delay_metadata")
         val FULL_PLAYER_DELAY_PROGRESS = booleanPreferencesKey("full_player_delay_progress")
         val FULL_PLAYER_DELAY_CONTROLS = booleanPreferencesKey("full_player_delay_controls")
@@ -127,11 +127,11 @@ constructor(
         val FULL_PLAYER_PLACEHOLDER_TRANSPARENT = booleanPreferencesKey("full_player_placeholder_transparent")
         val FULL_PLAYER_DELAY_THRESHOLD = intPreferencesKey("full_player_delay_threshold_percent")
 
-        // Multi-Artist Settings
-        val ARTIST_DELIMITERS = stringPreferencesKey("artist_delimiters")
-        val GROUP_BY_ALBUM_ARTIST = booleanPreferencesKey("group_by_album_artist")
-        val ARTIST_SETTINGS_RESCAN_REQUIRED =
-                booleanPreferencesKey("artist_settings_rescan_required")
+        // Multi-Author Settings
+        val Author_DELIMITERS = stringPreferencesKey("Author_delimiters")
+        val GROUP_BY_Book_Author = booleanPreferencesKey("group_by_Book_Author")
+        val Author_SETTINGS_RESCAN_REQUIRED =
+                booleanPreferencesKey("Author_settings_rescan_required")
 
         // Equalizer Settings
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
@@ -160,18 +160,18 @@ constructor(
         // Library Sync
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         
-        // Lyrics Sync Offset per song (Map<songId, offsetMs> as JSON)
-        val LYRICS_SYNC_OFFSETS = stringPreferencesKey("lyrics_sync_offsets_json")
+        // Transcript Sync Offset per Track (Map<TrackId, offsetMs> as JSON)
+        val Transcript_SYNC_OFFSETS = stringPreferencesKey("Transcript_sync_offsets_json")
         
-        // Lyrics Source Preference
-        val LYRICS_SOURCE_PREFERENCE = stringPreferencesKey("lyrics_source_preference")
+        // Transcript Source Preference
+        val Transcript_SOURCE_PREFERENCE = stringPreferencesKey("Transcript_source_preference")
         val AUTO_SCAN_LRC_FILES = booleanPreferencesKey("auto_scan_lrc_files")
         
         // Developer Options
-        val ALBUM_ART_QUALITY = stringPreferencesKey("album_art_quality")
+        val Book_ART_QUALITY = stringPreferencesKey("Book_art_quality")
         val TAP_BACKGROUND_CLOSES_PLAYER = booleanPreferencesKey("tap_background_closes_player")
-        val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
-        val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
+        val IMMERSIVE_Transcript_ENABLED = booleanPreferencesKey("immersive_Transcript_enabled")
+        val IMMERSIVE_Transcript_TIMEOUT = longPreferencesKey("immersive_Transcript_timeout")
     }
 
     val appRebrandDialogShownFlow: Flow<Boolean> =
@@ -319,60 +319,60 @@ constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.PERSISTENT_SHUFFLE_ENABLED] = enabled }
     }
 
-    // ===== Multi-Artist Settings =====
+    // ===== Multi-Author Settings =====
 
-    val artistDelimitersFlow: Flow<List<String>> =
+    val AuthorDelimitersFlow: Flow<List<String>> =
             dataStore.data.map { preferences ->
-                val stored = preferences[PreferencesKeys.ARTIST_DELIMITERS]
+                val stored = preferences[PreferencesKeys.Author_DELIMITERS]
                 if (stored != null) {
                     try {
                         json.decodeFromString<List<String>>(stored)
                     } catch (e: Exception) {
-                        DEFAULT_ARTIST_DELIMITERS
+                        DEFAULT_Author_DELIMITERS
                     }
                 } else {
-                    DEFAULT_ARTIST_DELIMITERS
+                    DEFAULT_Author_DELIMITERS
                 }
             }
 
-    suspend fun setArtistDelimiters(delimiters: List<String>) {
+    suspend fun setAuthorDelimiters(delimiters: List<String>) {
         // Ensure at least one delimiter is always maintained
         if (delimiters.isEmpty()) {
             return
         }
 
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ARTIST_DELIMITERS] = json.encodeToString(delimiters)
+            preferences[PreferencesKeys.Author_DELIMITERS] = json.encodeToString(delimiters)
             // Mark rescan as required when delimiters change
-            preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] = true
+            preferences[PreferencesKeys.Author_SETTINGS_RESCAN_REQUIRED] = true
         }
     }
 
-    suspend fun resetArtistDelimitersToDefault() {
-        setArtistDelimiters(DEFAULT_ARTIST_DELIMITERS)
+    suspend fun resetAuthorDelimitersToDefault() {
+        setAuthorDelimiters(DEFAULT_Author_DELIMITERS)
     }
 
-    val groupByAlbumArtistFlow: Flow<Boolean> =
+    val groupByBookAuthorFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.GROUP_BY_ALBUM_ARTIST] ?: false
+                preferences[PreferencesKeys.GROUP_BY_Book_Author] ?: false
             }
 
-    suspend fun setGroupByAlbumArtist(enabled: Boolean) {
+    suspend fun setGroupByBookAuthor(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.GROUP_BY_ALBUM_ARTIST] = enabled
+            preferences[PreferencesKeys.GROUP_BY_Book_Author] = enabled
             // Mark rescan as required when this setting changes
-            preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] = true
+            preferences[PreferencesKeys.Author_SETTINGS_RESCAN_REQUIRED] = true
         }
     }
 
-    val artistSettingsRescanRequiredFlow: Flow<Boolean> =
+    val AuthorsettingsRescanRequiredFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] ?: false
+                preferences[PreferencesKeys.Author_SETTINGS_RESCAN_REQUIRED] ?: false
             }
 
-    suspend fun clearArtistSettingsRescanRequired() {
+    suspend fun clearAuthorsettingsRescanRequired() {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] = false
+            preferences[PreferencesKeys.Author_SETTINGS_RESCAN_REQUIRED] = false
         }
     }
 
@@ -395,17 +395,17 @@ constructor(
 
     // ===== End Library Sync Settings =====
 
-    // ===== Lyrics Sync Offset Settings =====
+    // ===== Transcript Sync Offset Settings =====
     
     /**
-     * Lyrics sync offset per song in milliseconds.
-     * Stored as a JSON map: { "songId": offsetMs, ... }
-     * Positive values = lyrics appear later (use when lyrics are ahead of audio)
-     * Negative values = lyrics appear earlier (use when lyrics are behind audio)
+     * Transcript sync offset per Track in milliseconds.
+     * Stored as a JSON map: { "TrackId": offsetMs, ... }
+     * Positive values = Transcript appear later (use when Transcript are ahead of audio)
+     * Negative values = Transcript appear earlier (use when Transcript are behind audio)
      */
-    private val lyricsSyncOffsetsFlow: Flow<Map<String, Int>> =
+    private val TranscriptSyncOffsetsFlow: Flow<Map<String, Int>> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.LYRICS_SYNC_OFFSETS]?.let { jsonString ->
+                preferences[PreferencesKeys.Transcript_SYNC_OFFSETS]?.let { jsonString ->
                     try {
                         json.decodeFromString<Map<String, Int>>(jsonString)
                     } catch (e: Exception) {
@@ -414,17 +414,17 @@ constructor(
                 } ?: emptyMap()
             }
 
-    fun getLyricsSyncOffsetFlow(songId: String): Flow<Int> {
-        return lyricsSyncOffsetsFlow.map { offsets -> offsets[songId] ?: 0 }
+    fun getTranscriptSyncOffsetFlow(TrackId: String): Flow<Int> {
+        return TranscriptSyncOffsetsFlow.map { offsets -> offsets[TrackId] ?: 0 }
     }
 
-    suspend fun getLyricsSyncOffset(songId: String): Int {
-        return getLyricsSyncOffsetFlow(songId).first()
+    suspend fun getTranscriptSyncOffset(TrackId: String): Int {
+        return getTranscriptSyncOffsetFlow(TrackId).first()
     }
 
-    suspend fun setLyricsSyncOffset(songId: String, offsetMs: Int) {
+    suspend fun setTranscriptSyncOffset(TrackId: String, offsetMs: Int) {
         dataStore.edit { preferences ->
-            val currentOffsets = preferences[PreferencesKeys.LYRICS_SYNC_OFFSETS]?.let { jsonString ->
+            val currentOffsets = preferences[PreferencesKeys.Transcript_SYNC_OFFSETS]?.let { jsonString ->
                 try {
                     json.decodeFromString<Map<String, Int>>(jsonString).toMutableMap()
                 } catch (e: Exception) {
@@ -433,27 +433,27 @@ constructor(
             } ?: mutableMapOf()
             
             if (offsetMs == 0) {
-                currentOffsets.remove(songId) // Don't store default value
+                currentOffsets.remove(TrackId) // Don't store default value
             } else {
-                currentOffsets[songId] = offsetMs
+                currentOffsets[TrackId] = offsetMs
             }
             
-            preferences[PreferencesKeys.LYRICS_SYNC_OFFSETS] = json.encodeToString(currentOffsets)
+            preferences[PreferencesKeys.Transcript_SYNC_OFFSETS] = json.encodeToString(currentOffsets)
         }
     }
 
-    // ===== End Lyrics Sync Offset Settings =====
+    // ===== End Transcript Sync Offset Settings =====
 
-    // ===== Lyrics Source Preference Settings =====
+    // ===== Transcript Source Preference Settings =====
     
-    val lyricsSourcePreferenceFlow: Flow<LyricsSourcePreference> =
+    val TranscriptSourcePreferenceFlow: Flow<TranscriptSourcePreference> =
             dataStore.data.map { preferences ->
-                LyricsSourcePreference.fromName(preferences[PreferencesKeys.LYRICS_SOURCE_PREFERENCE])
+                TranscriptSourcePreference.fromName(preferences[PreferencesKeys.Transcript_SOURCE_PREFERENCE])
             }
 
-    suspend fun setLyricsSourcePreference(preference: LyricsSourcePreference) {
+    suspend fun setTranscriptSourcePreference(preference: TranscriptSourcePreference) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.LYRICS_SOURCE_PREFERENCE] = preference.name
+            preferences[PreferencesKeys.Transcript_SOURCE_PREFERENCE] = preference.name
         }
     }
 
@@ -468,31 +468,31 @@ constructor(
         }
     }
 
-    val immersiveLyricsEnabledFlow: Flow<Boolean> =
+    val immersiveTranscriptEnabledFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.IMMERSIVE_LYRICS_ENABLED] ?: false
+                preferences[PreferencesKeys.IMMERSIVE_Transcript_ENABLED] ?: false
             }
 
-    val immersiveLyricsTimeoutFlow: Flow<Long> =
+    val immersiveTranscriptTimeoutFlow: Flow<Long> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.IMMERSIVE_LYRICS_TIMEOUT] ?: 4000L
+                preferences[PreferencesKeys.IMMERSIVE_Transcript_TIMEOUT] ?: 4000L
             }
 
-    suspend fun setImmersiveLyricsEnabled(enabled: Boolean) {
+    suspend fun setImmersiveTranscriptEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.IMMERSIVE_LYRICS_ENABLED] = enabled
+            preferences[PreferencesKeys.IMMERSIVE_Transcript_ENABLED] = enabled
         }
     }
 
-    suspend fun setImmersiveLyricsTimeout(timeout: Long) {
+    suspend fun setImmersiveTranscriptTimeout(timeout: Long) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.IMMERSIVE_LYRICS_TIMEOUT] = timeout
+            preferences[PreferencesKeys.IMMERSIVE_Transcript_TIMEOUT] = timeout
         }
     }
 
-    // ===== End Lyrics Source Preference Settings =====
+    // ===== End Transcript Source Preference Settings =====
 
-    // ===== End Multi-Artist Settings =====
+    // ===== End Multi-Author Settings =====
 
     val globalTransitionSettingsFlow: Flow<TransitionSettings> =
             dataStore.data.map { preferences ->
@@ -517,9 +517,9 @@ constructor(
         }
     }
 
-    val dailyMixSongIdsFlow: Flow<List<String>> =
+    val dailyMixTrackIdsFlow: Flow<List<String>> =
             dataStore.data.map { preferences ->
-                val jsonString = preferences[PreferencesKeys.DAILY_MIX_SONG_IDS]
+                val jsonString = preferences[PreferencesKeys.DAILY_MIX_Track_IDS]
                 if (jsonString != null) {
                     try {
                         json.decodeFromString<List<String>>(jsonString)
@@ -531,15 +531,15 @@ constructor(
                 }
             }
 
-    suspend fun saveDailyMixSongIds(songIds: List<String>) {
+    suspend fun saveDailyMixTrackIds(TrackIds: List<String>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DAILY_MIX_SONG_IDS] = json.encodeToString(songIds)
+            preferences[PreferencesKeys.DAILY_MIX_Track_IDS] = json.encodeToString(TrackIds)
         }
     }
 
-    val yourMixSongIdsFlow: Flow<List<String>> =
+    val yourMixTrackIdsFlow: Flow<List<String>> =
             dataStore.data.map { preferences ->
-                val jsonString = preferences[PreferencesKeys.YOUR_MIX_SONG_IDS]
+                val jsonString = preferences[PreferencesKeys.YOUR_MIX_Track_IDS]
                 if (jsonString != null) {
                     try {
                         json.decodeFromString<List<String>>(jsonString)
@@ -551,9 +551,9 @@ constructor(
                 }
             }
 
-    suspend fun saveYourMixSongIds(songIds: List<String>) {
+    suspend fun saveYourMixTrackIds(TrackIds: List<String>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.YOUR_MIX_SONG_IDS] = json.encodeToString(songIds)
+            preferences[PreferencesKeys.YOUR_MIX_Track_IDS] = json.encodeToString(TrackIds)
         }
     }
 
@@ -586,7 +586,7 @@ constructor(
     val playerThemePreferenceFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 preferences[PreferencesKeys.PLAYER_THEME_PREFERENCE]
-                        ?: ThemePreference.ALBUM_ART // Default to Album Art
+                        ?: ThemePreference.Book_ART // Default to Book Art
             }
 
     val appThemeModeFlow: Flow<String> =
@@ -617,17 +617,17 @@ constructor(
 
     val fullPlayerLoadingTweaksFlow: Flow<FullPlayerLoadingTweaks> = dataStore.data
         .map { preferences ->
-            val delayAlbum = preferences[PreferencesKeys.FULL_PLAYER_DELAY_ALBUM] ?: true
+            val delayBook = preferences[PreferencesKeys.FULL_PLAYER_DELAY_Book] ?: true
             val delayMetadata = preferences[PreferencesKeys.FULL_PLAYER_DELAY_METADATA] ?: true
             val delayProgress = preferences[PreferencesKeys.FULL_PLAYER_DELAY_PROGRESS] ?: true
             val delayControls = preferences[PreferencesKeys.FULL_PLAYER_DELAY_CONTROLS] ?: true
             
-            val delayAll = delayAlbum && delayMetadata && delayProgress && delayControls
+            val delayAll = delayBook && delayMetadata && delayProgress && delayControls
 
             FullPlayerLoadingTweaks(
                 delayAll = delayAll,
-                delayAlbumCarousel = delayAlbum,
-                delaySongMetadata = delayMetadata,
+                delayBookCarousel = delayBook,
+                delayTrackMetadata = delayMetadata,
                 delayProgressBar = delayProgress,
                 delayControls = delayControls,
                 showPlaceholders = preferences[PreferencesKeys.FULL_PLAYER_PLACEHOLDERS] ?: false,
@@ -636,15 +636,15 @@ constructor(
             )
         }
 
-    val favoriteSongIdsFlow: Flow<Set<String>> =
+    val favoriteTrackIdsFlow: Flow<Set<String>> =
             dataStore.data // Nuevo flujo para favoritos
                     .map { preferences ->
-                preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()
+                preferences[PreferencesKeys.FAVORITE_Track_IDS] ?: emptySet()
             }
 
-    val playlistSongOrderModesFlow: Flow<Map<String, String>> =
+    val BooklistTrackOrderModesFlow: Flow<Map<String, String>> =
             dataStore.data.map { preferences ->
-                val serializedModes = preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES]
+                val serializedModes = preferences[PreferencesKeys.Booklist_Track_ORDER_MODES]
                 if (serializedModes.isNullOrBlank()) {
                     emptyMap()
                 } else {
@@ -653,14 +653,14 @@ constructor(
                 }
             }
 
-    val userPlaylistsFlow: Flow<List<Playlist>> =
+    val userBooklistsFlow: Flow<List<Booklist>> =
             dataStore.data.map { preferences ->
-                val jsonString = preferences[PreferencesKeys.USER_PLAYLISTS]
+                val jsonString = preferences[PreferencesKeys.USER_Booklists]
                 if (jsonString != null) {
                     try {
-                        json.decodeFromString<List<Playlist>>(jsonString)
+                        json.decodeFromString<List<Booklist>>(jsonString)
                     } catch (e: Exception) {
-                        // Error al deserializar, devolver lista vacía o manejar error
+                        // Error al deserializar, devolver lista vacÃƒÂ­a o manejar error
                         emptyList()
                     }
                 } else {
@@ -668,15 +668,15 @@ constructor(
                 }
             }
 
-    private suspend fun savePlaylists(playlists: List<Playlist>) {
+    private suspend fun saveBooklists(Booklists: List<Booklist>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.USER_PLAYLISTS] = json.encodeToString(playlists)
+            preferences[PreferencesKeys.USER_Booklists] = json.encodeToString(Booklists)
         }
     }
 
-    suspend fun createPlaylist(
+    suspend fun createBooklist(
             name: String,
-            songIds: List<String> = emptyList(),
+            TrackIds: List<String> = emptyList(),
             isAiGenerated: Boolean = false,
             isQueueGenerated: Boolean = false,
             coverImageUri: String? = null,
@@ -687,13 +687,13 @@ constructor(
             coverShapeDetail2: Float? = null,
             coverShapeDetail3: Float? = null,
             coverShapeDetail4: Float? = null
-    ): Playlist {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val newPlaylist =
-                Playlist(
+    ): Booklist {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val newBooklist =
+                Booklist(
                         id = UUID.randomUUID().toString(),
                         name = name,
-                        songIds = songIds,
+                        TrackIds = TrackIds,
                         isAiGenerated = isAiGenerated,
                         isQueueGenerated = isQueueGenerated,
                         coverImageUri = coverImageUri,
@@ -705,116 +705,116 @@ constructor(
                         coverShapeDetail3 = coverShapeDetail3,
                         coverShapeDetail4 = coverShapeDetail4
                 )
-        currentPlaylists.add(newPlaylist)
-        savePlaylists(currentPlaylists)
-        return newPlaylist
+        currentBooklists.add(newBooklist)
+        saveBooklists(currentBooklists)
+        return newBooklist
     }
 
-    suspend fun deletePlaylist(playlistId: String) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        currentPlaylists.removeAll { it.id == playlistId }
-        savePlaylists(currentPlaylists)
-        clearPlaylistSongOrderMode(playlistId)
+    suspend fun deleteBooklist(BooklistId: String) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        currentBooklists.removeAll { it.id == BooklistId }
+        saveBooklists(currentBooklists)
+        clearBooklistTrackOrderMode(BooklistId)
     }
 
-    suspend fun renamePlaylist(playlistId: String, newName: String) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val index = currentPlaylists.indexOfFirst { it.id == playlistId }
+    suspend fun renameBooklist(BooklistId: String, newName: String) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val index = currentBooklists.indexOfFirst { it.id == BooklistId }
         if (index != -1) {
-            currentPlaylists[index] =
-                    currentPlaylists[index].copy(
+            currentBooklists[index] =
+                    currentBooklists[index].copy(
                             name = newName,
                             lastModified = System.currentTimeMillis()
                     )
-            savePlaylists(currentPlaylists)
+            saveBooklists(currentBooklists)
         }
     }
 
-    suspend fun updatePlaylist(playlist: Playlist) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val index = currentPlaylists.indexOfFirst { it.id == playlist.id }
+    suspend fun updateBooklist(Booklist: Booklist) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val index = currentBooklists.indexOfFirst { it.id == Booklist.id }
         if (index != -1) {
-            currentPlaylists[index] = playlist.copy(lastModified = System.currentTimeMillis())
-            savePlaylists(currentPlaylists)
+            currentBooklists[index] = Booklist.copy(lastModified = System.currentTimeMillis())
+            saveBooklists(currentBooklists)
         }
     }
 
-    suspend fun addSongsToPlaylist(playlistId: String, songIdsToAdd: List<String>) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val index = currentPlaylists.indexOfFirst { it.id == playlistId }
+    suspend fun addTracksToBooklist(BooklistId: String, TrackIdsToAdd: List<String>) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val index = currentBooklists.indexOfFirst { it.id == BooklistId }
         if (index != -1) {
-            val playlist = currentPlaylists[index]
-            // Evitar duplicados, añadir solo los nuevos
-            val newSongIds = (playlist.songIds + songIdsToAdd).distinct()
-            currentPlaylists[index] =
-                    playlist.copy(songIds = newSongIds, lastModified = System.currentTimeMillis())
-            savePlaylists(currentPlaylists)
+            val Booklist = currentBooklists[index]
+            // Evitar duplicados, aÃƒÂ±adir solo los nuevos
+            val newTrackIds = (Booklist.TrackIds + TrackIdsToAdd).distinct()
+            currentBooklists[index] =
+                    Booklist.copy(TrackIds = newTrackIds, lastModified = System.currentTimeMillis())
+            saveBooklists(currentBooklists)
         }
     }
 
     /*
-     * @param playlistIds playlistIds Ids of playlists to add the song to
-     * will remove song from the playlists which are not in playlistIds
+     * @param BooklistIds BooklistIds Ids of Booklists to add the Track to
+     * will remove Track from the Booklists which are not in BooklistIds
      * */
-    suspend fun addOrRemoveSongFromPlaylists(
-            songId: String,
-            playlistIds: List<String>
+    suspend fun addOrRemoveTrackFromBooklists(
+            TrackId: String,
+            BooklistIds: List<String>
     ): MutableList<String> {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val removedPlaylistIds = mutableListOf<String>()
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val removedBooklistIds = mutableListOf<String>()
 
-        // adding to playlist if not already in
-        playlistIds.forEach { playlistId ->
-            val index = currentPlaylists.indexOfFirst { it.id == playlistId }
+        // adding to Booklist if not already in
+        BooklistIds.forEach { BooklistId ->
+            val index = currentBooklists.indexOfFirst { it.id == BooklistId }
             if (index != -1) {
-                val playlist = currentPlaylists[index]
-                if (playlist.songIds.contains(songId)) return@forEach
+                val Booklist = currentBooklists[index]
+                if (Booklist.TrackIds.contains(TrackId)) return@forEach
                 else {
-                    val newSongIds = (playlist.songIds + songId).distinct()
-                    currentPlaylists[index] =
-                            playlist.copy(
-                                    songIds = newSongIds,
+                    val newTrackIds = (Booklist.TrackIds + TrackId).distinct()
+                    currentBooklists[index] =
+                            Booklist.copy(
+                                    TrackIds = newTrackIds,
                                     lastModified = System.currentTimeMillis()
                             )
-                    savePlaylists(currentPlaylists)
+                    saveBooklists(currentBooklists)
                 }
             }
         }
 
-        // removing from playlist if not in playlistIds
-        currentPlaylists.forEach { playlist ->
-            if (playlist.songIds.contains(songId) && !playlistIds.contains(playlist.id)) {
-                removeSongFromPlaylist(playlist.id, songId)
-                removedPlaylistIds.add(playlist.id)
+        // removing from Booklist if not in BooklistIds
+        currentBooklists.forEach { Booklist ->
+            if (Booklist.TrackIds.contains(TrackId) && !BooklistIds.contains(Booklist.id)) {
+                removeTrackFromBooklist(Booklist.id, TrackId)
+                removedBooklistIds.add(Booklist.id)
             }
         }
-        return removedPlaylistIds
+        return removedBooklistIds
     }
 
-    suspend fun removeSongFromPlaylist(playlistId: String, songIdToRemove: String) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val index = currentPlaylists.indexOfFirst { it.id == playlistId }
+    suspend fun removeTrackFromBooklist(BooklistId: String, TrackIdToRemove: String) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val index = currentBooklists.indexOfFirst { it.id == BooklistId }
         if (index != -1) {
-            val playlist = currentPlaylists[index]
-            currentPlaylists[index] =
-                    playlist.copy(
-                            songIds = playlist.songIds.filterNot { it == songIdToRemove },
+            val Booklist = currentBooklists[index]
+            currentBooklists[index] =
+                    Booklist.copy(
+                            TrackIds = Booklist.TrackIds.filterNot { it == TrackIdToRemove },
                             lastModified = System.currentTimeMillis()
                     )
-            savePlaylists(currentPlaylists)
+            saveBooklists(currentBooklists)
         }
     }
 
-    suspend fun removeSongFromAllPlaylists(songId: String) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
+    suspend fun removeTrackFromAllBooklists(TrackId: String) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
         var updated = false
 
-        // Iterate through all playlists and remove the song
-        currentPlaylists.forEachIndexed { index, playlist ->
-            if (playlist.songIds.contains(songId)) {
-                currentPlaylists[index] =
-                        playlist.copy(
-                                songIds = playlist.songIds.filterNot { it == songId },
+        // Iterate through all Booklists and remove the Track
+        currentBooklists.forEachIndexed { index, Booklist ->
+            if (Booklist.TrackIds.contains(TrackId)) {
+                currentBooklists[index] =
+                        Booklist.copy(
+                                TrackIds = Booklist.TrackIds.filterNot { it == TrackId },
                                 lastModified = System.currentTimeMillis()
                         )
                 updated = true
@@ -822,54 +822,54 @@ constructor(
         }
 
         if (updated) {
-            savePlaylists(currentPlaylists)
+            saveBooklists(currentBooklists)
         }
     }
 
-    suspend fun reorderSongsInPlaylist(playlistId: String, newSongOrderIds: List<String>) {
-        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
-        val index = currentPlaylists.indexOfFirst { it.id == playlistId }
+    suspend fun reorderTracksInBooklist(BooklistId: String, newTrackOrderIds: List<String>) {
+        val currentBooklists = userBooklistsFlow.first().toMutableList()
+        val index = currentBooklists.indexOfFirst { it.id == BooklistId }
         if (index != -1) {
-            currentPlaylists[index] =
-                    currentPlaylists[index].copy(
-                            songIds = newSongOrderIds,
+            currentBooklists[index] =
+                    currentBooklists[index].copy(
+                            TrackIds = newTrackOrderIds,
                             lastModified = System.currentTimeMillis()
                     )
-            savePlaylists(currentPlaylists)
+            saveBooklists(currentBooklists)
         }
     }
 
-    suspend fun setPlaylistSongOrderMode(playlistId: String, modeValue: String) {
+    suspend fun setBooklistTrackOrderMode(BooklistId: String, modeValue: String) {
         dataStore.edit { preferences ->
             val existingModes =
-                    preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES]?.let { raw ->
+                    preferences[PreferencesKeys.Booklist_Track_ORDER_MODES]?.let { raw ->
                         runCatching { json.decodeFromString<Map<String, String>>(raw) }
                                 .getOrDefault(emptyMap())
                     }
                             ?: emptyMap()
 
             val updated = existingModes.toMutableMap()
-            updated[playlistId] = modeValue
+            updated[BooklistId] = modeValue
 
-            preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES] = json.encodeToString(updated)
+            preferences[PreferencesKeys.Booklist_Track_ORDER_MODES] = json.encodeToString(updated)
         }
     }
 
-    suspend fun clearPlaylistSongOrderMode(playlistId: String) {
+    suspend fun clearBooklistTrackOrderMode(BooklistId: String) {
         dataStore.edit { preferences ->
             val existingModes =
-                    preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES]?.let { raw ->
+                    preferences[PreferencesKeys.Booklist_Track_ORDER_MODES]?.let { raw ->
                         runCatching { json.decodeFromString<Map<String, String>>(raw) }
                                 .getOrDefault(emptyMap())
                     }
                             ?: emptyMap()
 
-            if (!existingModes.containsKey(playlistId)) return@edit
+            if (!existingModes.containsKey(BooklistId)) return@edit
 
             val updated = existingModes.toMutableMap()
-            updated.remove(playlistId)
+            updated.remove(BooklistId)
 
-            preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES] = json.encodeToString(updated)
+            preferences[PreferencesKeys.Booklist_Track_ORDER_MODES] = json.encodeToString(updated)
         }
     }
 
@@ -896,19 +896,19 @@ constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.APP_THEME_MODE] = themeMode }
     }
 
-    suspend fun toggleFavoriteSong(
-            songId: String,
+    suspend fun toggleFavoriteTrack(
+            TrackId: String,
             removing: Boolean = false
-    ) { // Nueva función para favoritos
+    ) { // Nueva funciÃƒÂ³n para favoritos
         dataStore.edit { preferences ->
-            val currentFavorites = preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()
-            val contains = currentFavorites.contains(songId)
+            val currentFavorites = preferences[PreferencesKeys.FAVORITE_Track_IDS] ?: emptySet()
+            val contains = currentFavorites.contains(TrackId)
 
-            if (contains) preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - songId
+            if (contains) preferences[PreferencesKeys.FAVORITE_Track_IDS] = currentFavorites - TrackId
             else {
                 if (removing)
-                        preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - songId
-                else preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites + songId
+                        preferences[PreferencesKeys.FAVORITE_Track_IDS] = currentFavorites - TrackId
+                else preferences[PreferencesKeys.FAVORITE_Track_IDS] = currentFavorites + TrackId
             }
         }
     }
@@ -918,139 +918,139 @@ constructor(
     }
 
     // Flows for Sort Options
-    val songsSortOptionFlow: Flow<String> =
+    val TracksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
-                                preferences[PreferencesKeys.SONGS_SORT_OPTION],
-                                SortOption.SONGS,
-                                SortOption.SongTitleAZ
+                                preferences[PreferencesKeys.Tracks_SORT_OPTION],
+                                SortOption.Tracks,
+                                SortOption.TrackTitleAZ
                         )
                         .storageKey
             }
 
-    val albumsSortOptionFlow: Flow<String> =
+    val BooksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
-                                preferences[PreferencesKeys.ALBUMS_SORT_OPTION],
-                                SortOption.ALBUMS,
-                                SortOption.AlbumTitleAZ
+                                preferences[PreferencesKeys.Books_SORT_OPTION],
+                                SortOption.Books,
+                                SortOption.BookTitleAZ
                         )
                         .storageKey
             }
 
-    val artistsSortOptionFlow: Flow<String> =
+    val AuthorsSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
-                                preferences[PreferencesKeys.ARTISTS_SORT_OPTION],
-                                SortOption.ARTISTS,
-                                SortOption.ArtistNameAZ
+                                preferences[PreferencesKeys.Authors_SORT_OPTION],
+                                SortOption.Authors,
+                                SortOption.AuthorNameAZ
                         )
                         .storageKey
             }
 
-    val playlistsSortOptionFlow: Flow<String> =
+    val BooklistsSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
-                                preferences[PreferencesKeys.PLAYLISTS_SORT_OPTION],
-                                SortOption.PLAYLISTS,
-                                SortOption.PlaylistNameAZ
+                                preferences[PreferencesKeys.Booklists_SORT_OPTION],
+                                SortOption.Booklists,
+                                SortOption.BooklistNameAZ
                         )
                         .storageKey
             }
 
-    val likedSongsSortOptionFlow: Flow<String> =
+    val likedTracksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
-                                preferences[PreferencesKeys.LIKED_SONGS_SORT_OPTION],
+                                preferences[PreferencesKeys.LIKED_Tracks_SORT_OPTION],
                                 SortOption.LIKED,
-                                SortOption.LikedSongDateLiked
+                                SortOption.LikedTrackDateLiked
                         )
                         .storageKey
             }
 
     // Functions to update Sort Options
-    suspend fun setSongsSortOption(optionKey: String) {
+    suspend fun setTracksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SONGS_SORT_OPTION] = optionKey
-            preferences[PreferencesKeys.SONGS_SORT_OPTION_MIGRATED] = true
+            preferences[PreferencesKeys.Tracks_SORT_OPTION] = optionKey
+            preferences[PreferencesKeys.Tracks_SORT_OPTION_MIGRATED] = true
         }
     }
 
-    suspend fun setAlbumsSortOption(optionKey: String) {
+    suspend fun setBooksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ALBUMS_SORT_OPTION] = optionKey
+            preferences[PreferencesKeys.Books_SORT_OPTION] = optionKey
         }
     }
 
-    suspend fun setArtistsSortOption(optionKey: String) {
+    suspend fun setAuthorsSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ARTISTS_SORT_OPTION] = optionKey
+            preferences[PreferencesKeys.Authors_SORT_OPTION] = optionKey
         }
     }
 
-    suspend fun setPlaylistsSortOption(optionKey: String) {
+    suspend fun setBooklistsSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.PLAYLISTS_SORT_OPTION] = optionKey
+            preferences[PreferencesKeys.Booklists_SORT_OPTION] = optionKey
         }
     }
 
-    suspend fun setLikedSongsSortOption(optionKey: String) {
+    suspend fun setLikedTracksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.LIKED_SONGS_SORT_OPTION] = optionKey
+            preferences[PreferencesKeys.LIKED_Tracks_SORT_OPTION] = optionKey
         }
     }
 
     suspend fun ensureLibrarySortDefaults() {
         dataStore.edit { preferences ->
-            val songsMigrated = preferences[PreferencesKeys.SONGS_SORT_OPTION_MIGRATED] ?: false
-            val rawSongSort = preferences[PreferencesKeys.SONGS_SORT_OPTION]
-            val resolvedSongSort =
-                    SortOption.fromStorageKey(rawSongSort, SortOption.SONGS, SortOption.SongTitleAZ)
-            val shouldForceSongDefault =
-                    !songsMigrated &&
-                            (rawSongSort.isNullOrBlank() ||
-                                    rawSongSort == SortOption.SongTitleZA.storageKey ||
-                                    rawSongSort == SortOption.SongTitleZA.displayName)
+            val TracksMigrated = preferences[PreferencesKeys.Tracks_SORT_OPTION_MIGRATED] ?: false
+            val rawTracksort = preferences[PreferencesKeys.Tracks_SORT_OPTION]
+            val resolvedTracksort =
+                    SortOption.fromStorageKey(rawTracksort, SortOption.Tracks, SortOption.TrackTitleAZ)
+            val shouldForceTrackDefault =
+                    !TracksMigrated &&
+                            (rawTracksort.isNullOrBlank() ||
+                                    rawTracksort == SortOption.TrackTitleZA.storageKey ||
+                                    rawTracksort == SortOption.TrackTitleZA.displayName)
 
-            preferences[PreferencesKeys.SONGS_SORT_OPTION] =
-                    if (shouldForceSongDefault) {
-                        SortOption.SongTitleAZ.storageKey
+            preferences[PreferencesKeys.Tracks_SORT_OPTION] =
+                    if (shouldForceTrackDefault) {
+                        SortOption.TrackTitleAZ.storageKey
                     } else {
-                        resolvedSongSort.storageKey
+                        resolvedTracksort.storageKey
                     }
-            if (!songsMigrated) {
-                preferences[PreferencesKeys.SONGS_SORT_OPTION_MIGRATED] = true
+            if (!TracksMigrated) {
+                preferences[PreferencesKeys.Tracks_SORT_OPTION_MIGRATED] = true
             }
 
             migrateSortPreference(
                     preferences,
-                    PreferencesKeys.SONGS_SORT_OPTION,
-                    SortOption.SONGS,
-                    SortOption.SongTitleAZ
+                    PreferencesKeys.Tracks_SORT_OPTION,
+                    SortOption.Tracks,
+                    SortOption.TrackTitleAZ
             )
             migrateSortPreference(
                     preferences,
-                    PreferencesKeys.ALBUMS_SORT_OPTION,
-                    SortOption.ALBUMS,
-                    SortOption.AlbumTitleAZ
+                    PreferencesKeys.Books_SORT_OPTION,
+                    SortOption.Books,
+                    SortOption.BookTitleAZ
             )
             migrateSortPreference(
                     preferences,
-                    PreferencesKeys.ARTISTS_SORT_OPTION,
-                    SortOption.ARTISTS,
-                    SortOption.ArtistNameAZ
+                    PreferencesKeys.Authors_SORT_OPTION,
+                    SortOption.Authors,
+                    SortOption.AuthorNameAZ
             )
             migrateSortPreference(
                     preferences,
-                    PreferencesKeys.PLAYLISTS_SORT_OPTION,
-                    SortOption.PLAYLISTS,
-                    SortOption.PlaylistNameAZ
+                    PreferencesKeys.Booklists_SORT_OPTION,
+                    SortOption.Booklists,
+                    SortOption.BooklistNameAZ
             )
             migrateSortPreference(
                     preferences,
-                    PreferencesKeys.LIKED_SONGS_SORT_OPTION,
+                    PreferencesKeys.LIKED_Tracks_SORT_OPTION,
                     SortOption.LIKED,
-                    SortOption.LikedSongDateLiked
+                    SortOption.LikedTrackDateLiked
             )
         }
     }
@@ -1070,7 +1070,7 @@ constructor(
     // --- Library UI State ---
     val lastLibraryTabIndexFlow: Flow<Int> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.LAST_LIBRARY_TAB_INDEX] ?: 0 // Default to 0 (Songs tab)
+                preferences[PreferencesKeys.LAST_LIBRARY_TAB_INDEX] ?: 0 // Default to 0 (Tracks tab)
             }
 
     suspend fun saveLastLibraryTabIndex(tabIndex: Int) {
@@ -1079,13 +1079,13 @@ constructor(
         }
     }
 
-    val mockGenresEnabledFlow: Flow<Boolean> =
+    val mockCategoriesEnabledFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
-                preferences[PreferencesKeys.MOCK_GENRES_ENABLED] ?: false // Default to false
+                preferences[PreferencesKeys.MOCK_Categories_ENABLED] ?: false // Default to false
             }
 
-    suspend fun setMockGenresEnabled(enabled: Boolean) {
-        dataStore.edit { preferences -> preferences[PreferencesKeys.MOCK_GENRES_ENABLED] = enabled }
+    suspend fun setMockCategoriesEnabled(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.MOCK_Categories_ENABLED] = enabled }
     }
 
     val geminiApiKey: Flow<String> =
@@ -1104,10 +1104,10 @@ constructor(
 
     companion object {
         const val DEFAULT_SYSTEM_PROMPT =
-                "You are a helpful AI assistant integrated into a music player app. You help users create perfect playlists based on their request."
+                "You are a helpful AI assistant integrated into a Audiobook player app. You help users create perfect Booklists based on their request."
 
-        /** Default delimiters for splitting multi-artist tags */
-        val DEFAULT_ARTIST_DELIMITERS = listOf("/", ";", ",", "+", "&")
+        /** Default delimiters for splitting multi-Author tags */
+        val DEFAULT_Author_DELIMITERS = listOf("/", ";", ",", "+", "&")
     }
 
     val geminiSystemPrompt: Flow<String> =
@@ -1191,20 +1191,20 @@ constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_ALL] = enabled
             
-            preferences[PreferencesKeys.FULL_PLAYER_DELAY_ALBUM] = enabled
+            preferences[PreferencesKeys.FULL_PLAYER_DELAY_Book] = enabled
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_METADATA] = enabled
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_PROGRESS] = enabled
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_CONTROLS] = enabled
         }
     }
 
-    suspend fun setDelayAlbumCarousel(enabled: Boolean) {
+    suspend fun setDelayBookCarousel(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.FULL_PLAYER_DELAY_ALBUM] = enabled
+            preferences[PreferencesKeys.FULL_PLAYER_DELAY_Book] = enabled
         }
     }
 
-    suspend fun setDelaySongMetadata(enabled: Boolean) {
+    suspend fun setDelayTrackMetadata(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_METADATA] = enabled
         }
@@ -1273,12 +1273,12 @@ constructor(
                         preferences[PreferencesKeys.LIBRARY_TABS_ORDER] = json.encodeToString(order)
                     }
                 } catch (e: Exception) {
-                    // Si la deserialización falla, no hacemos nada para evitar sobrescribir los
+                    // Si la deserializaciÃƒÂ³n falla, no hacemos nada para evitar sobrescribir los
                     // datos del usuario.
                 }
             }
             // Si orderJson es nulo, significa que el usuario nunca ha reordenado,
-            // por lo que se utilizará el orden predeterminado que ya incluye FOLDERS.
+            // por lo que se utilizarÃƒÂ¡ el orden predeterminado que ya incluye FOLDERS.
         }
     }
 
@@ -1293,9 +1293,9 @@ constructor(
         }
     }
 
-    val isFoldersPlaylistViewFlow: Flow<Boolean> = dataStore.data
+    val isFoldersBooklistViewFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.IS_FOLDERS_PLAYLIST_VIEW] ?: false
+            preferences[PreferencesKeys.IS_FOLDERS_Booklist_VIEW] ?: false
         }
 
     val useSmoothCornersFlow: Flow<Boolean> = dataStore.data
@@ -1309,9 +1309,9 @@ constructor(
         }
     }
 
-    suspend fun setFoldersPlaylistView(isPlaylistView: Boolean) {
+    suspend fun setFoldersBooklistView(isBooklistView: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.IS_FOLDERS_PLAYLIST_VIEW] = isPlaylistView
+            preferences[PreferencesKeys.IS_FOLDERS_Booklist_VIEW] = isBooklistView
         }
     }
 
@@ -1451,23 +1451,23 @@ constructor(
     // ===== Developer Options =====
     
     /**
-     * Album art quality for player view.
-     * Controls the maximum resolution for album artwork displayed in the full player.
+     * Book art quality for player view.
+     * Controls the maximum resolution for Book artwork displayed in the full player.
      * Thumbnails in lists always use low resolution (256px) for optimal performance.
      */
-    val albumArtQualityFlow: Flow<AlbumArtQuality> =
+    val BookArtQualityFlow: Flow<BookArtQuality> =
         dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.ALBUM_ART_QUALITY]
+            preferences[PreferencesKeys.Book_ART_QUALITY]
                 ?.let { 
-                    try { AlbumArtQuality.valueOf(it) } 
-                    catch (e: Exception) { AlbumArtQuality.ORIGINAL }
+                    try { BookArtQuality.valueOf(it) } 
+                    catch (e: Exception) { BookArtQuality.ORIGINAL }
                 }
-                ?: AlbumArtQuality.ORIGINAL
+                ?: BookArtQuality.ORIGINAL
         }
 
-    suspend fun setAlbumArtQuality(quality: AlbumArtQuality) {
+    suspend fun setBookArtQuality(quality: BookArtQuality) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ALBUM_ART_QUALITY] = quality.name
+            preferences[PreferencesKeys.Book_ART_QUALITY] = quality.name
         }
     }
 

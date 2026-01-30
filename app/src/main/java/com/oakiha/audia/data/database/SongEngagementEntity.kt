@@ -5,15 +5,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Room entity for storing song engagement statistics.
+ * Room entity for storing Track engagement statistics.
  * This replaces the JSON-based storage in DailyMixManager for better performance
  * and structured querying.
  */
-@Entity(tableName = "song_engagements")
-data class SongEngagementEntity(
+@Entity(tableName = "Track_engagements")
+data class TrackEngagementEntity(
     @PrimaryKey
-    @ColumnInfo(name = "song_id")
-    val songId: String,
+    @ColumnInfo(name = "Track_id")
+    val TrackId: String,
     
     @ColumnInfo(name = "play_count")
     val playCount: Int = 0,

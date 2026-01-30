@@ -13,10 +13,10 @@ class DeckController(
     var player: ExoPlayer? = null
         private set
 
-    fun loadSong(songUri: Uri) {
+    fun loadTrack(TrackUri: Uri) {
         release()
         player = ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(songUri))
+            setMediaItem(MediaItem.fromUri(TrackUri))
             prepare()
         }
     }

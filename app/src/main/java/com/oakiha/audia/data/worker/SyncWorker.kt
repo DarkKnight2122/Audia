@@ -14,21 +14,21 @@ import androidx.work.CoroutineWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.oakiha.audia.data.database.AlbumEntity
-import com.oakiha.audia.data.database.ArtistEntity
-import com.oakiha.audia.data.database.MusicDao
-import com.oakiha.audia.data.database.SongArtistCrossRef
-import com.oakiha.audia.data.database.SongEntity
+import com.oakiha.audia.data.database.BookEntity
+import com.oakiha.audia.data.database.AuthorEntity
+import com.oakiha.audia.data.database.AudiobookDao
+import com.oakiha.audia.data.database.TrackAuthorCrossRef
+import com.oakiha.audia.data.database.TrackEntity
 import com.oakiha.audia.data.media.AudioMetadataReader
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.LyricsRepository
-import com.oakiha.audia.utils.AlbumArtCacheManager
-import com.oakiha.audia.utils.AlbumArtUtils
+import com.oakiha.audia.data.repository.TranscriptRepository
+import com.oakiha.audia.utils.BookArtCacheManager
+import com.oakiha.audia.utils.BookArtUtils
 import com.oakiha.audia.utils.AudioMetaUtils.getAudioMetadata
 import com.oakiha.audia.utils.DirectoryRuleResolver
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
-import com.oakiha.audia.utils.splitArtistsByDelimiters
+import com.oakiha.audia.utils.splitAuthorsByDelimiters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.io.File
@@ -59,9 +59,9 @@ class SyncWorker
 constructor(
         @Assisted appContext: Context,
         @Assisted workerParams: WorkerParameters,
-        private val musicDao: MusicDao,
+        private val AudiobookDao: AudiobookDao,
         private val userPreferencesRepository: UserPreferencesRepository,
-        private val lyricsRepository: LyricsRepository
+        private val TranscriptRepository: TranscriptRepository
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val contentResolver: ContentResolver = appContext.contentResolver
@@ -79,11 +79,11 @@ constructor(
                         .i("Starting MediaStore synchronization (Mode: $syncMode, ForceMetadata: $forceMetadata)...")
                     val startTime = System.currentTimeMillis()
 
-                    val artistDelimiters = userPreferencesRepository.artistDelimitersFlow.first()
-                    val groupByAlbumArtist =
-                            userPreferencesRepository.groupByAlbumArtistFlow.first()
+                    val AuthorDelimiters = userPreferencesRepository.AuthorDelimitersFlow.first()
+                    val groupByBookAuthor =
+                            userPreferencesRepository.groupByBookAuthorFlow.first()
                     val rescanRequired =
-                            userPreferencesRepository.artistSettingsRescanRequiredFlow.first()
+                            userPreferencesRepository.AuthorsettingsRescanRequiredFlow.first()
 
                     // Feature: Directory Filtering
                     val allowedDirs = userPreferencesRepository.allowedDirectoriesFlow.first()
@@ -93,7 +93,7 @@ constructor(
                     var lastSyncTimestamp = userPreferencesRepository.getLastSyncTimestamp()
 
                     Timber.tag(TAG)
-                        .d("Artist parsing delimiters: $artistDelimiters, groupByAlbumArtist: $groupByAlbumArtist, rescanRequired: $rescanRequired")
+                        .d("Author parsing delimiters: $AuthorDelimiters, groupByBookAuthor: $groupByBookAuthor, rescanRequired: $rescanRequired")
 
                     // --- MEDIA SCAN PHASE ---
                     // For INCREMENTAL or FULL sync, trigger a media scan to detect new files
@@ -103,32 +103,32 @@ constructor(
                     }
 
                     // --- DELETION PHASE ---
-                    // Detect and remove deleted songs efficiently using ID comparison
+                    // Detect and remove deleted Tracks efficiently using ID comparison
                     // We do this for INCREMENTAL and FULL modes. REBUILD clears everything anyway.
                     if (syncMode != SyncMode.REBUILD) {
-                        val localSongIds = musicDao.getAllSongIds().toHashSet()
+                        val localTrackIds = AudiobookDao.getAllTrackIds().toHashSet()
                         val mediaStoreIds = fetchMediaStoreIds(directoryResolver)
 
                         // Identify IDs that are in local DB but not in MediaStore
-                        val deletedIds = localSongIds - mediaStoreIds
+                        val deletedIds = localTrackIds - mediaStoreIds
 
                         if (deletedIds.isNotEmpty()) {
                             Timber.tag(TAG)
-                                .i("Found ${deletedIds.size} deleted songs. Removing from database...")
+                                .i("Found ${deletedIds.size} deleted Tracks. Removing from database...")
                             // Chunk deletions to avoid SQLite variable limit (default 999)
                             val batchSize = 500
                             deletedIds.chunked(batchSize).forEach { chunk ->
-                                musicDao.deleteSongsByIds(chunk.toList())
-                                musicDao.deleteCrossRefsBySongIds(chunk.toList())
+                                AudiobookDao.deleteTracksByIds(chunk.toList())
+                                AudiobookDao.deleteCrossRefsByTrackIds(chunk.toList())
                             }
                         } else {
-                            Timber.tag(TAG).d("No deleted songs found.")
+                            Timber.tag(TAG).d("No deleted Tracks found.")
                         }
                     }
 
                     // --- FETCH PHASE ---
                     // Determine what to fetch based on mode
-                    val isFreshInstall = musicDao.getSongCount().first() == 0
+                    val isFreshInstall = AudiobookDao.getTrackCount().first() == 0
 
                     // If REBUILD or FULL or RescanRequired or Fresh Install -> Fetch EVERYTHING
                     // (timestamp = 0)
@@ -145,13 +145,13 @@ constructor(
                             }
 
                     Timber.tag(TAG)
-                        .i("Fetching music from MediaStore (since: $fetchTimestamp seconds)...")
+                        .i("Fetching Audiobook from MediaStore (since: $fetchTimestamp seconds)...")
 
-                    // Update every 50 songs or ~5% of library
+                    // Update every 50 Tracks or ~5% of library
                     val progressBatchSize = 50
 
-                    val mediaStoreSongs =
-                            fetchMusicFromMediaStore(
+                    val mediaStoreTracks =
+                            fetchAudiobookFromMediaStore(
                                     fetchTimestamp,
                                     forceMetadata,
                                     directoryResolver,
@@ -167,179 +167,179 @@ constructor(
                             }
 
                     Timber.tag(TAG)
-                        .i("Fetched ${mediaStoreSongs.size} new/modified songs from MediaStore.")
+                        .i("Fetched ${mediaStoreTracks.size} new/modified Tracks from MediaStore.")
 
                     // --- PROCESSING PHASE ---
-                    if (mediaStoreSongs.isNotEmpty()) {
+                    if (mediaStoreTracks.isNotEmpty()) {
 
                         // If rebuilding, clear everything first
                         if (syncMode == SyncMode.REBUILD) {
                             Timber.tag(TAG)
-                                .i("Rebuild mode: Clearing all music data before insert.")
-                            musicDao.clearAllMusicDataWithCrossRefs()
+                                .i("Rebuild mode: Clearing all Audiobook data before insert.")
+                            AudiobookDao.clearAllAudiobookDataWithCrossRefs()
                         }
 
-                        val allExistingArtists =
+                        val allExistingAuthors =
                                 if (syncMode == SyncMode.REBUILD) {
                                     emptyList()
                                 } else {
-                                    musicDao.getAllArtistsListRaw()
+                                    AudiobookDao.getAllAuthorsListRaw()
                                 }
 
-                        val existingArtistImageUrls =
-                                allExistingArtists.associate { it.id to it.imageUrl }
+                        val existingAuthorImageUrls =
+                                allExistingAuthors.associate { it.id to it.imageUrl }
                         
-                        // Load all existing artist IDs to ensure stability across incremental syncs
-                        val existingArtistIdMap = allExistingArtists.associate { it.name to it.id }.toMutableMap()
-                        val maxArtistId = musicDao.getMaxArtistId() ?: 0L
+                        // Load all existing Author IDs to ensure stability across incremental syncs
+                        val existingAuthorIdMap = allExistingAuthors.associate { it.name to it.id }.toMutableMap()
+                        val maxAuthorId = AudiobookDao.getMaxAuthorId() ?: 0L
 
-                        // Prepare list of existing songs to preserve user edits
-                        // We only need to check against existing songs if we are updating them
-                        val localSongsMap =
+                        // Prepare list of existing Tracks to preserve user edits
+                        // We only need to check against existing Tracks if we are updating them
+                        val localTracksMap =
                                 if (syncMode != SyncMode.REBUILD) {
-                                    musicDao.getAllSongsList().associateBy { it.id }
+                                    AudiobookDao.getAllTracksList().associateBy { it.id }
                                 } else {
                                     emptyMap()
                                 }
 
-                        val songsToProcess = mediaStoreSongs
+                        val TracksToProcess = mediaStoreTracks
 
                         Timber.tag(TAG)
-                            .i("Processing ${songsToProcess.size} songs for upsert. Hash: ${songsToProcess.hashCode()}")
+                            .i("Processing ${TracksToProcess.size} Tracks for upsert. Hash: ${TracksToProcess.hashCode()}")
 
-                        val songsToInsert =
-                                songsToProcess.map { mediaStoreSong ->
-                                    val localSong = localSongsMap[mediaStoreSong.id]
-                                    if (localSong != null) {
+                        val TracksToInsert =
+                                TracksToProcess.map { mediaStoreTrack ->
+                                    val localTrack = localTracksMap[mediaStoreTrack.id]
+                                    if (localTrack != null) {
                                         // Preserve user-edited fields
-                                        val needsArtistCompare =
+                                        val needsAuthorCompare =
                                                 !rescanRequired &&
-                                                        localSong.artistName.isNotBlank() &&
-                                                        localSong.artistName !=
-                                                                mediaStoreSong.artistName
+                                                        localTrack.AuthorName.isNotBlank() &&
+                                                        localTrack.AuthorName !=
+                                                                mediaStoreTrack.AuthorName
 
-                                        val shouldPreserveArtistName =
-                                                if (needsArtistCompare) {
-                                                    val mediaStoreArtists =
-                                                            mediaStoreSong.artistName
-                                                                    .splitArtistsByDelimiters(
-                                                                            artistDelimiters
+                                        val shouldPreserveAuthorName =
+                                                if (needsAuthorCompare) {
+                                                    val mediaStoreAuthors =
+                                                            mediaStoreTrack.AuthorName
+                                                                    .splitAuthorsByDelimiters(
+                                                                            AuthorDelimiters
                                                                     )
-                                                    val mediaStorePrimaryArtist =
-                                                            mediaStoreArtists.firstOrNull()?.trim()
-                                                    val mediaStoreHasMultipleArtists =
-                                                            mediaStoreArtists.size > 1
-                                                    !(mediaStoreHasMultipleArtists &&
-                                                            mediaStorePrimaryArtist != null &&
-                                                            localSong.artistName.trim() ==
-                                                                    mediaStorePrimaryArtist)
+                                                    val mediaStorePrimaryAuthor =
+                                                            mediaStoreAuthors.firstOrNull()?.trim()
+                                                    val mediaStoreHasMultipleAuthors =
+                                                            mediaStoreAuthors.size > 1
+                                                    !(mediaStoreHasMultipleAuthors &&
+                                                            mediaStorePrimaryAuthor != null &&
+                                                            localTrack.AuthorName.trim() ==
+                                                                    mediaStorePrimaryAuthor)
                                                 } else {
                                                     false
                                                 }
 
-                                        mediaStoreSong.copy(
+                                        mediaStoreTrack.copy(
                                                 dateAdded =
-                                                        localSong.dateAdded, // Preserve original
+                                                        localTrack.dateAdded, // Preserve original
                                                 // date added if needed
-                                                lyrics = localSong.lyrics,
+                                                Transcript = localTrack.Transcript,
                                                 title =
-                                                        if (localSong.title !=
-                                                                        mediaStoreSong.title &&
-                                                                        localSong.title.isNotBlank()
+                                                        if (localTrack.title !=
+                                                                        mediaStoreTrack.title &&
+                                                                        localTrack.title.isNotBlank()
                                                         )
-                                                                localSong.title
-                                                        else mediaStoreSong.title,
-                                                artistName =
-                                                        if (shouldPreserveArtistName)
-                                                                localSong.artistName
-                                                        else mediaStoreSong.artistName,
-                                                albumName =
-                                                        if (localSong.albumName !=
-                                                                        mediaStoreSong.albumName &&
-                                                                        localSong.albumName
+                                                                localTrack.title
+                                                        else mediaStoreTrack.title,
+                                                AuthorName =
+                                                        if (shouldPreserveAuthorName)
+                                                                localTrack.AuthorName
+                                                        else mediaStoreTrack.AuthorName,
+                                                BookName =
+                                                        if (localTrack.BookName !=
+                                                                        mediaStoreTrack.BookName &&
+                                                                        localTrack.BookName
                                                                                 .isNotBlank()
                                                         )
-                                                                localSong.albumName
-                                                        else mediaStoreSong.albumName,
-                                                genre = localSong.genre ?: mediaStoreSong.genre,
+                                                                localTrack.BookName
+                                                        else mediaStoreTrack.BookName,
+                                                Category = localTrack.Category ?: mediaStoreTrack.Category,
                                                 trackNumber =
-                                                        if (localSong.trackNumber != 0 &&
-                                                                        localSong.trackNumber !=
-                                                                                mediaStoreSong
+                                                        if (localTrack.trackNumber != 0 &&
+                                                                        localTrack.trackNumber !=
+                                                                                mediaStoreTrack
                                                                                         .trackNumber
                                                         )
-                                                                localSong.trackNumber
-                                                        else mediaStoreSong.trackNumber,
-                                                albumArtUriString = localSong.albumArtUriString
-                                                                ?: mediaStoreSong.albumArtUriString
+                                                                localTrack.trackNumber
+                                                        else mediaStoreTrack.trackNumber,
+                                                BookArtUriString = localTrack.BookArtUriString
+                                                                ?: mediaStoreTrack.BookArtUriString
                                         )
                                     } else {
-                                        mediaStoreSong
+                                        mediaStoreTrack
                                     }
                                 }
 
-                        val (correctedSongs, albums, artists, crossRefs) =
-                                preProcessAndDeduplicateWithMultiArtist(
-                                        songs = songsToInsert,
-                                        artistDelimiters = artistDelimiters,
-                                        groupByAlbumArtist = groupByAlbumArtist,
-                                        existingArtistImageUrls = existingArtistImageUrls,
-                                        existingArtistIdMap = existingArtistIdMap,
-                                        initialMaxArtistId = maxArtistId
+                        val (correctedTracks, Books, Authors, crossRefs) =
+                                preProcessAndDeduplicateWithMultiAuthor(
+                                        Tracks = TracksToInsert,
+                                        AuthorDelimiters = AuthorDelimiters,
+                                        groupByBookAuthor = groupByBookAuthor,
+                                        existingAuthorImageUrls = existingAuthorImageUrls,
+                                        existingAuthorIdMap = existingAuthorIdMap,
+                                        initialMaxAuthorId = maxAuthorId
                                 )
 
-                        // Use incrementalSyncMusicData for all modes except REBUILD
+                        // Use incrementalSyncAudiobookData for all modes except REBUILD
                         // Even for FULL sync, we can just upsert the values
                         if (syncMode == SyncMode.REBUILD) {
-                            musicDao.insertMusicDataWithCrossRefs(
-                                    correctedSongs,
-                                    albums,
-                                    artists,
+                            AudiobookDao.insertAudiobookDataWithCrossRefs(
+                                    correctedTracks,
+                                    Books,
+                                    Authors,
                                     crossRefs
                             )
                         } else {
-                            // incrementalSyncMusicData handles upserts efficiently
-                            // processing deleted songs was already handled at the start
-                            musicDao.incrementalSyncMusicData(
-                                    songs = correctedSongs,
-                                    albums = albums,
-                                    artists = artists,
+                            // incrementalSyncAudiobookData handles upserts efficiently
+                            // processing deleted Tracks was already handled at the start
+                            AudiobookDao.incrementalSyncAudiobookData(
+                                    Tracks = correctedTracks,
+                                    Books = Books,
+                                    Authors = Authors,
                                     crossRefs = crossRefs,
-                                    deletedSongIds = emptyList() // Already handled
+                                    deletedTrackIds = emptyList() // Already handled
                             )
                         }
 
                         // Clear the rescan required flag
-                        userPreferencesRepository.clearArtistSettingsRescanRequired()
+                        userPreferencesRepository.clearAuthorsettingsRescanRequired()
 
                         val endTime = System.currentTimeMillis()
                         Timber.tag(TAG)
                             .i("Synchronization finished successfully in ${endTime - startTime}ms.")
                         userPreferencesRepository.setLastSyncTimestamp(System.currentTimeMillis())
 
-                        // Count total songs for the output
-                        val totalSongs = musicDao.getSongCount().first()
+                        // Count total Tracks for the output
+                        val totalTracks = AudiobookDao.getTrackCount().first()
 
                         // --- LRC SCANNING PHASE ---
                         val autoScanLrc = userPreferencesRepository.autoScanLrcFilesFlow.first()
                         if (autoScanLrc) {
                             Timber.tag(TAG).i("Auto-scan LRC files enabled. Starting scan phase...")
 
-                            val allSongsEntities = musicDao.getAllSongsList()
-                            val allSongs =
-                                    allSongsEntities.map { entity ->
-                                        Song(
+                            val allTracksEntities = AudiobookDao.getAllTracksList()
+                            val allTracks =
+                                    allTracksEntities.map { entity ->
+                                        Track(
                                                 id = entity.id.toString(),
                                                 title = entity.title,
-                                                artist = entity.artistName,
-                                                artistId = entity.artistId,
-                                                album = entity.albumName,
-                                                albumId = entity.albumId,
+                                                Author = entity.AuthorName,
+                                                AuthorId = entity.AuthorId,
+                                                Book = entity.BookName,
+                                                BookId = entity.BookId,
                                                 path = entity.filePath,
                                                 contentUriString = entity.contentUriString,
-                                                albumArtUriString = entity.albumArtUriString,
+                                                BookArtUriString = entity.BookArtUriString,
                                                 duration = entity.duration,
-                                                lyrics = entity.lyrics,
+                                                Transcript = entity.Transcript,
                                                 dateAdded = entity.dateAdded,
                                                 trackNumber = entity.trackNumber,
                                                 year = entity.year,
@@ -350,7 +350,7 @@ constructor(
                                     }
 
                             val scannedCount =
-                                    lyricsRepository.scanAndAssignLocalLrcFiles(allSongs) {
+                                    TranscriptRepository.scanAndAssignLocalLrcFiles(allTracks) {
                                             current,
                                             total ->
                                         setProgress(
@@ -364,25 +364,25 @@ constructor(
                                         )
                                     }
 
-                            Log.i(TAG, "LRC Scan finished. Assigned lyrics to $scannedCount songs.")
+                            Log.i(TAG, "LRC Scan finished. Assigned Transcript to $scannedCount Tracks.")
                         }
                         
-                        // Clean orphaned album art cache files
-                        val allSongIds = musicDao.getAllSongIds().toSet()
-                        AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
+                        // Clean orphaned Book art cache files
+                        val allTrackIds = AudiobookDao.getAllTrackIds().toSet()
+                        BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allTrackIds)
 
-                        Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
+                        Result.success(workDataOf(OUTPUT_TOTAL_Tracks to totalTracks))
                     } else {
-                        Log.i(TAG, "No new or modified songs found.")
+                        Log.i(TAG, "No new or modified Tracks found.")
 
                         // If it was a fresh install/rebuild and we found nothing, clear everything
                         if ((syncMode == SyncMode.REBUILD || isFreshInstall) &&
-                                        mediaStoreSongs.isEmpty()
+                                        mediaStoreTracks.isEmpty()
                         ) {
-                            musicDao.clearAllMusicDataWithCrossRefs()
+                            AudiobookDao.clearAllAudiobookDataWithCrossRefs()
                             Log.w(
                                     TAG,
-                                    "MediaStore fetch resulted in empty list. Local music data cleared."
+                                    "MediaStore fetch resulted in empty list. Local Audiobook data cleared."
                             )
                         }
 
@@ -393,13 +393,13 @@ constructor(
                         )
                         userPreferencesRepository.setLastSyncTimestamp(System.currentTimeMillis())
 
-                        val totalSongs = musicDao.getSongCount().first()
+                        val totalTracks = AudiobookDao.getTrackCount().first()
                         
-                        // Clean orphaned album art cache files
-                        val allSongIds = musicDao.getAllSongIds().toSet()
-                        AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
+                        // Clean orphaned Book art cache files
+                        val allTrackIds = AudiobookDao.getAllTrackIds().toSet()
+                        BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allTrackIds)
                         
-                        Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
+                        Result.success(workDataOf(OUTPUT_TOTAL_Tracks to totalTracks))
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error during MediaStore synchronization", e)
@@ -410,7 +410,7 @@ constructor(
             }
 
     /**
-     * Efficiently fetches ONLY the IDs of all songs in MediaStore. Used for fast deletion
+     * Efficiently fetches ONLY the IDs of all Tracks in MediaStore. Used for fast deletion
      * detection.
      */
     private fun getBaseSelection(): Pair<String, Array<String>> {
@@ -418,7 +418,7 @@ constructor(
         val selectionArgsList = mutableListOf<String>()
 
         selectionBuilder.append(
-                "((${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= ?) "
+                "((${MediaStore.Audio.Media.IS_Audiobook} != 0 AND ${MediaStore.Audio.Media.DURATION} >= ?) "
         )
         selectionArgsList.add("10000")
 
@@ -432,7 +432,7 @@ constructor(
     }
 
     /**
-     * Efficiently fetches ONLY the IDs of all songs in MediaStore. Used for fast deletion
+     * Efficiently fetches ONLY the IDs of all Tracks in MediaStore. Used for fast deletion
      * detection.
      */
     private fun fetchMediaStoreIds(directoryResolver: DirectoryRuleResolver): Set<Long> {
@@ -465,172 +465,172 @@ constructor(
         return ids
     }
 
-    /** Data class to hold the result of multi-artist preprocessing. */
-    private data class MultiArtistProcessResult(
-            val songs: List<SongEntity>,
-            val albums: List<AlbumEntity>,
-            val artists: List<ArtistEntity>,
-            val crossRefs: List<SongArtistCrossRef>
+    /** Data class to hold the result of multi-Author preprocessing. */
+    private data class MultiAuthorProcessResult(
+            val Tracks: List<TrackEntity>,
+            val Books: List<BookEntity>,
+            val Authors: List<AuthorEntity>,
+            val crossRefs: List<TrackAuthorCrossRef>
     )
 
     /**
-     * Process songs with multi-artist support. Splits artist names by delimiters and creates proper
+     * Process Tracks with multi-Author support. Splits Author names by delimiters and creates proper
      * cross-references.
      */
-    private fun preProcessAndDeduplicateWithMultiArtist(
-            songs: List<SongEntity>,
-            artistDelimiters: List<String>,
-            groupByAlbumArtist: Boolean,
-            existingArtistImageUrls: Map<Long, String?>,
-            existingArtistIdMap: MutableMap<String, Long>,
-            initialMaxArtistId: Long
-    ): MultiArtistProcessResult {
+    private fun preProcessAndDeduplicateWithMultiAuthor(
+            Tracks: List<TrackEntity>,
+            AuthorDelimiters: List<String>,
+            groupByBookAuthor: Boolean,
+            existingAuthorImageUrls: Map<Long, String?>,
+            existingAuthorIdMap: MutableMap<String, Long>,
+            initialMaxAuthorId: Long
+    ): MultiAuthorProcessResult {
         
-        val nextArtistId = AtomicLong(initialMaxArtistId + 1)
-        val artistNameToId = existingArtistIdMap // Re-use the map passed in
+        val nextAuthorId = AtomicLong(initialMaxAuthorId + 1)
+        val AuthorNameToId = existingAuthorIdMap // Re-use the map passed in
         
-        val allCrossRefs = mutableListOf<SongArtistCrossRef>()
-        val artistTrackCounts = mutableMapOf<Long, Int>()
-        val albumMap = mutableMapOf<Pair<String, String>, Long>()
-        val artistSplitCache = mutableMapOf<String, List<String>>()
-        val correctedSongs = ArrayList<SongEntity>(songs.size)
+        val allCrossRefs = mutableListOf<TrackAuthorCrossRef>()
+        val AuthorTrackCounts = mutableMapOf<Long, Int>()
+        val BookMap = mutableMapOf<Pair<String, String>, Long>()
+        val AuthorsplitCache = mutableMapOf<String, List<String>>()
+        val correctedTracks = ArrayList<TrackEntity>(Tracks.size)
 
-        songs.forEach { song ->
-            val rawArtistName = song.artistName
-            val songArtistNameTrimmed = rawArtistName.trim()
-            val artistsForSong =
-                    artistSplitCache.getOrPut(rawArtistName) {
-                        rawArtistName.splitArtistsByDelimiters(artistDelimiters)
+        Tracks.forEach { Track ->
+            val rawAuthorName = Track.AuthorName
+            val TrackAuthorNameTrimmed = rawAuthorName.trim()
+            val AuthorsForTrack =
+                    AuthorsplitCache.getOrPut(rawAuthorName) {
+                        rawAuthorName.splitAuthorsByDelimiters(AuthorDelimiters)
                     }
 
-            artistsForSong.forEach { artistName ->
-                val normalizedName = artistName.trim()
-                if (normalizedName.isNotEmpty() && !artistNameToId.containsKey(normalizedName)) {
-                     // Check if it's the song's primary artist and we want to preserve that ID if possible?
+            AuthorsForTrack.forEach { AuthorName ->
+                val normalizedName = AuthorName.trim()
+                if (normalizedName.isNotEmpty() && !AuthorNameToId.containsKey(normalizedName)) {
+                     // Check if it's the Track's primary Author and we want to preserve that ID if possible?
                      // Actually, just generate new ID if not found in map.
-                     val id = nextArtistId.getAndIncrement()
-                     artistNameToId[normalizedName] = id
+                     val id = nextAuthorId.getAndIncrement()
+                     AuthorNameToId[normalizedName] = id
                 }
             }
             
-            val primaryArtistName =
-                    artistsForSong.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
-                            ?: songArtistNameTrimmed
-            val primaryArtistId = artistNameToId[primaryArtistName] ?: song.artistId
+            val primaryAuthorName =
+                    AuthorsForTrack.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
+                            ?: TrackAuthorNameTrimmed
+            val primaryAuthorId = AuthorNameToId[primaryAuthorName] ?: Track.AuthorId
 
-            artistsForSong.forEachIndexed { index, artistName ->
-                val normalizedName = artistName.trim()
-                val artistId = artistNameToId[normalizedName]
-                if (artistId != null) {
-                    val isPrimary = (index == 0) // First artist is primary
+            AuthorsForTrack.forEachIndexed { index, AuthorName ->
+                val normalizedName = AuthorName.trim()
+                val AuthorId = AuthorNameToId[normalizedName]
+                if (AuthorId != null) {
+                    val isPrimary = (index == 0) // First Author is primary
                     allCrossRefs.add(
-                            SongArtistCrossRef(
-                                    songId = song.id,
-                                    artistId = artistId,
+                            TrackAuthorCrossRef(
+                                    TrackId = Track.id,
+                                    AuthorId = AuthorId,
                                     isPrimary = isPrimary
                             )
                     )
-                    artistTrackCounts[artistId] = (artistTrackCounts[artistId] ?: 0) + 1
+                    AuthorTrackCounts[AuthorId] = (AuthorTrackCounts[AuthorId] ?: 0) + 1
                 }
             }
 
-            // --- Album Logic ---
-            val rawAlbumName = song.albumName.trim()
-            val albumIdentityArtist = if (groupByAlbumArtist) {
-                song.albumArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
+            // --- Book Logic ---
+            val rawBookName = Track.BookName.trim()
+            val BookIdentityAuthor = if (groupByBookAuthor) {
+                Track.BookAuthor?.trim()?.takeIf { it.isNotEmpty() } ?: primaryAuthorName
             } else {
-                primaryArtistName
+                primaryAuthorName
             }
             
-            val albumKey = rawAlbumName to albumIdentityArtist
+            val BookKey = rawBookName to BookIdentityAuthor
             
-            if (!albumMap.containsKey(albumKey)) {
-                albumMap[albumKey] = song.albumId 
+            if (!BookMap.containsKey(BookKey)) {
+                BookMap[BookKey] = Track.BookId 
             }
-            val finalAlbumId = albumMap[albumKey] ?: song.albumId // fallback
+            val finalBookId = BookMap[BookKey] ?: Track.BookId // fallback
 
-            correctedSongs.add(
-                    song.copy(
-                            artistId = primaryArtistId,
-                            artistName = primaryArtistName,
-                            albumId = finalAlbumId
+            correctedTracks.add(
+                    Track.copy(
+                            AuthorId = primaryAuthorId,
+                            AuthorName = primaryAuthorName,
+                            BookId = finalBookId
                     )
             )
         }
 
         // Build Entities
-        val artistEntities = artistNameToId.map { (name, id) ->
-            val count = artistTrackCounts[id] ?: 0
-            ArtistEntity(
+        val AuthorEntities = AuthorNameToId.map { (name, id) ->
+            val count = AuthorTrackCounts[id] ?: 0
+            AuthorEntity(
                 id = id,
                 name = name,
                 trackCount = count,
-                imageUrl = existingArtistImageUrls[id]
+                imageUrl = existingAuthorImageUrls[id]
             )
         }
         
-        // Re-calculate Album Entities from the corrected songs to ensure we have valid metadata (Art, Year)
-        // which isn't available in the simple albumMap (which only has ID)
-        val albumEntities = correctedSongs.groupBy { it.albumId }.map { (catAlbumId, songsInAlbum) ->
-             val firstSong = songsInAlbum.first()
-             // Determine Album Artist Name
-             val determinedAlbumArtist = firstSong.albumArtist?.takeIf { it.isNotBlank() } 
-                 ?: firstSong.artistName
+        // Re-calculate Book Entities from the corrected Tracks to ensure we have valid metadata (Art, Year)
+        // which isn't available in the simple BookMap (which only has ID)
+        val BookEntities = correctedTracks.groupBy { it.BookId }.map { (catBookId, TracksInBook) ->
+             val firstTrack = TracksInBook.first()
+             // Determine Book Author Name
+             val determinedBookAuthor = firstTrack.BookAuthor?.takeIf { it.isNotBlank() } 
+                 ?: firstTrack.AuthorName
                  
-             // Determine Album Artist ID (best effort lookup)
-             val determinedAlbumArtistId = artistNameToId[determinedAlbumArtist] ?: 0L
+             // Determine Book Author ID (best effort lookup)
+             val determinedBookAuthorId = AuthorNameToId[determinedBookAuthor] ?: 0L
 
-             AlbumEntity(
-                 id = catAlbumId,
-                 title = firstSong.albumName,
-                 artistName = determinedAlbumArtist,
-                 artistId = determinedAlbumArtistId,
-                 albumArtUriString = firstSong.albumArtUriString,
-                 songCount = songsInAlbum.size, 
-                 year = firstSong.year
+             BookEntity(
+                 id = catBookId,
+                 title = firstTrack.BookName,
+                 AuthorName = determinedBookAuthor,
+                 AuthorId = determinedBookAuthorId,
+                 BookArtUriString = firstTrack.BookArtUriString,
+                 TrackCount = TracksInBook.size, 
+                 year = firstTrack.year
              )
         }
 
-        return MultiArtistProcessResult(
-                songs = correctedSongs, // Corrected songs have the right Album IDs now
-                albums = albumEntities,
-                artists = artistEntities,
+        return MultiAuthorProcessResult(
+                Tracks = correctedTracks, // Corrected Tracks have the right Book IDs now
+                Books = BookEntities,
+                Authors = AuthorEntities,
                 crossRefs = allCrossRefs
         )
     }
 
-    private fun fetchAlbumArtUrisByAlbumId(): Map<Long, String> {
-        val projection = arrayOf(MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM_ART)
+    private fun fetchBookArtUrisByBookId(): Map<Long, String> {
+        val projection = arrayOf(MediaStore.Audio.Books._ID, MediaStore.Audio.Books.Book_ART)
 
         return buildMap {
             contentResolver.query(
-                            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                            MediaStore.Audio.Books.EXTERNAL_CONTENT_URI,
                             projection,
                             null,
                             null,
                             null
                     )
                     ?.use { cursor ->
-                        val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
-                        val artCol = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)
+                        val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Books._ID)
+                        val artCol = cursor.getColumnIndex(MediaStore.Audio.Books.Book_ART)
                         if (artCol >= 0) {
                             while (cursor.moveToNext()) {
-                                val albumId = cursor.getLong(idCol)
+                                val BookId = cursor.getLong(idCol)
                                 val storedArtPath = cursor.getString(artCol)
                                 val uriString =
                                         when {
                                             !storedArtPath.isNullOrBlank() ->
                                                     File(storedArtPath).toURI().toString()
-                                            albumId > 0 ->
+                                            BookId > 0 ->
                                                     ContentUris.withAppendedId(
-                                                                    "content://media/external/audio/albumart".toUri(),
-                                                                    albumId
+                                                                    "content://media/external/audio/Bookart".toUri(),
+                                                                    BookId
                                                             )
                                                             .toString()
                                             else -> null
                                         }
 
-                                if (uriString != null) put(albumId, uriString)
+                                if (uriString != null) put(BookId, uriString)
                             }
                         }
                     }
@@ -638,69 +638,69 @@ constructor(
     }
 
     /**
-     * Fetches a map of Song ID -> Genre Name using the MediaStore.Audio.Genres table. This is
-     * necessary because the GENRE column in MediaStore.Audio.Media is not reliably available or
+     * Fetches a map of Track ID -> Category Name using the MediaStore.Audio.Categories table. This is
+     * necessary because the Category column in MediaStore.Audio.Media is not reliably available or
      * populated on all Android versions (especially pre-API 30).
      * 
      * Optimized: 
      * 1. Caches results for 1 hour to avoid refetching on incremental syncs
-     * 2. Fetches all genres first, then queries members in parallel with controlled concurrency
+     * 2. Fetches all Categories first, then queries members in parallel with controlled concurrency
      */
-    private suspend fun fetchGenreMap(forceRefresh: Boolean = false): Map<Long, String> = coroutineScope {
+    private suspend fun fetchCategoryMap(forceRefresh: Boolean = false): Map<Long, String> = coroutineScope {
         // Check cache first (valid for 1 hour)
         val now = System.currentTimeMillis()
-        val cacheAge = now - genreMapCacheTimestamp
-        if (!forceRefresh && genreMapCache.isNotEmpty() && cacheAge < GENRE_CACHE_TTL_MS) {
-            Log.d(TAG, "Using cached genre map (${genreMapCache.size} entries, age: ${cacheAge/1000}s)")
-            return@coroutineScope genreMapCache
+        val cacheAge = now - CategoryMapCacheTimestamp
+        if (!forceRefresh && CategoryMapCache.isNotEmpty() && cacheAge < Category_CACHE_TTL_MS) {
+            Log.d(TAG, "Using cached Category map (${CategoryMapCache.size} entries, age: ${cacheAge/1000}s)")
+            return@coroutineScope CategoryMapCache
         }
         
-        val genreMap = ConcurrentHashMap<Long, String>()
-        val genreProjection = arrayOf(MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME)
+        val CategoryMap = ConcurrentHashMap<Long, String>()
+        val CategoryProjection = arrayOf(MediaStore.Audio.Categories._ID, MediaStore.Audio.Categories.NAME)
         
         // Semaphore to limit concurrent queries (avoid overwhelming ContentResolver)
         val querySemaphore = Semaphore(4)
 
         try {
-            // Step 1: Fetch all genres (single query)
-            val genres = mutableListOf<Pair<Long, String>>()
+            // Step 1: Fetch all Categories (single query)
+            val Categories = mutableListOf<Pair<Long, String>>()
             
             contentResolver.query(
-                            MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-                            genreProjection,
+                            MediaStore.Audio.Categories.EXTERNAL_CONTENT_URI,
+                            CategoryProjection,
                             null,
                             null,
                             null
                     )
                     ?.use { cursor ->
-                        val idCol = cursor.getColumnIndex(MediaStore.Audio.Genres._ID)
-                        val nameCol = cursor.getColumnIndex(MediaStore.Audio.Genres.NAME)
+                        val idCol = cursor.getColumnIndex(MediaStore.Audio.Categories._ID)
+                        val nameCol = cursor.getColumnIndex(MediaStore.Audio.Categories.NAME)
 
                         if (idCol >= 0 && nameCol >= 0) {
                             while (cursor.moveToNext()) {
-                                val genreId = cursor.getLong(idCol)
-                                val genreName = cursor.getString(nameCol)
+                                val CategoryId = cursor.getLong(idCol)
+                                val CategoryName = cursor.getString(nameCol)
 
-                                if (!genreName.isNullOrBlank() &&
-                                                !genreName.equals("unknown", ignoreCase = true)
+                                if (!CategoryName.isNullOrBlank() &&
+                                                !CategoryName.equals("unknown", ignoreCase = true)
                                 ) {
-                                    genres.add(genreId to genreName)
+                                    Categories.add(CategoryId to CategoryName)
                                 }
                             }
                         }
                     }
             
-            // Step 2: Fetch members for each genre in parallel (controlled concurrency)
-            genres.map { (genreId, genreName) ->
+            // Step 2: Fetch members for each Category in parallel (controlled concurrency)
+            Categories.map { (CategoryId, CategoryName) ->
                 async(Dispatchers.IO) {
                     querySemaphore.withPermit {
                         val membersUri =
-                                MediaStore.Audio.Genres.Members.getContentUri(
+                                MediaStore.Audio.Categories.Members.getContentUri(
                                         "external",
-                                        genreId
+                                        CategoryId
                                 )
                         val membersProjection =
-                                arrayOf(MediaStore.Audio.Genres.Members.AUDIO_ID)
+                                arrayOf(MediaStore.Audio.Categories.Members.AUDIO_ID)
 
                         contentResolver.query(
                                         membersUri,
@@ -712,14 +712,14 @@ constructor(
                                 ?.use { membersCursor ->
                                     val audioIdCol =
                                             membersCursor.getColumnIndex(
-                                                    MediaStore.Audio.Genres.Members.AUDIO_ID
+                                                    MediaStore.Audio.Categories.Members.AUDIO_ID
                                             )
                                     if (audioIdCol >= 0) {
                                         while (membersCursor.moveToNext()) {
                                             val audioId = membersCursor.getLong(audioIdCol)
-                                            // If a song has multiple genres, the last one processed wins.
-                                            // This is acceptable as a primary genre for display.
-                                            genreMap[audioId] = genreName
+                                            // If a Track has multiple Categories, the last one processed wins.
+                                            // This is acceptable as a primary Category for display.
+                                            CategoryMap[audioId] = CategoryName
                                         }
                                     }
                                 }
@@ -728,57 +728,57 @@ constructor(
             }.awaitAll()
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching genre map", e)
+            Log.e(TAG, "Error fetching Category map", e)
         }
         
         // Update cache
-        if (genreMap.isNotEmpty()) {
-            genreMapCache = genreMap.toMap()
-            genreMapCacheTimestamp = System.currentTimeMillis()
-            Log.d(TAG, "Genre map cache updated with ${genreMap.size} entries")
+        if (CategoryMap.isNotEmpty()) {
+            CategoryMapCache = CategoryMap.toMap()
+            CategoryMapCacheTimestamp = System.currentTimeMillis()
+            Log.d(TAG, "Category map cache updated with ${CategoryMap.size} entries")
         }
         
-        genreMap
+        CategoryMap
     }
 
     /** Raw data extracted from cursor - lightweight class for fast iteration */
-    private data class RawSongData(
+    private data class RawTrackData(
             val id: Long,
-            val albumId: Long,
-            val artistId: Long,
+            val BookId: Long,
+            val AuthorId: Long,
             val filePath: String,
             val title: String,
-            val artist: String,
-            val album: String,
-            val albumArtist: String?,
+            val Author: String,
+            val Book: String,
+            val BookAuthor: String?,
             val duration: Long,
             val trackNumber: Int,
             val year: Int,
             val dateModified: Long
     )
 
-    private suspend fun fetchMusicFromMediaStore(
+    private suspend fun fetchAudiobookFromMediaStore(
             sinceTimestamp: Long, // Seconds
             forceMetadata: Boolean,
             directoryResolver: DirectoryRuleResolver,
             progressBatchSize: Int,
             onProgress: suspend (current: Int, total: Int, phaseOrdinal: Int) -> Unit
-    ): List<SongEntity> {
-        Trace.beginSection("SyncWorker.fetchMusicFromMediaStore")
+    ): List<TrackEntity> {
+        Trace.beginSection("SyncWorker.fetchAudiobookFromMediaStore")
 
         val deepScan = forceMetadata
-        val albumArtByAlbumId = if (!deepScan) fetchAlbumArtUrisByAlbumId() else emptyMap()
-        val genreMap = fetchGenreMap() // Load genres upfront
+        val BookArtByBookId = if (!deepScan) fetchBookArtUrisByBookId() else emptyMap()
+        val CategoryMap = fetchCategoryMap() // Load Categories upfront
 
         val projection =
                 arrayOf(
                         MediaStore.Audio.Media._ID,
                         MediaStore.Audio.Media.TITLE,
-                        MediaStore.Audio.Media.ARTIST,
-                        MediaStore.Audio.Media.ARTIST_ID,
-                        MediaStore.Audio.Media.ALBUM,
-                        MediaStore.Audio.Media.ALBUM_ID,
-                        MediaStore.Audio.Media.ALBUM_ARTIST,
+                        MediaStore.Audio.Media.Author,
+                        MediaStore.Audio.Media.Author_ID,
+                        MediaStore.Audio.Media.Book,
+                        MediaStore.Audio.Media.Book_ID,
+                        MediaStore.Audio.Media.Book_Author,
                         MediaStore.Audio.Media.DURATION,
                         MediaStore.Audio.Media.DATA,
                         MediaStore.Audio.Media.TRACK,
@@ -803,7 +803,7 @@ constructor(
         val selectionArgs = selectionArgsList.toTypedArray()
 
         // Phase 1: Fast cursor iteration to collect raw data
-        val rawDataList = mutableListOf<RawSongData>()
+        val rawDataList = mutableListOf<RawTrackData>()
 
         contentResolver.query(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -818,11 +818,11 @@ constructor(
 
                     val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
                     val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-                    val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-                    val artistIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
-                    val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-                    val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                    val albumArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                    val AuthorCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.Author)
+                    val AuthorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.Author_ID)
+                    val BookCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.Book)
+                    val BookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.Book_ID)
+                    val BookAuthorCol = cursor.getColumnIndex(MediaStore.Audio.Media.Book_Author)
                     val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                     val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
@@ -844,28 +844,28 @@ constructor(
                             // Proceed on error
                         }
 
-                        val songId = cursor.getLong(idCol)
+                        val TrackId = cursor.getLong(idCol)
                         rawDataList.add(
-                                RawSongData(
+                                RawTrackData(
                                         id = cursor.getLong(idCol),
-                                        albumId = cursor.getLong(albumIdCol),
-                                        artistId = cursor.getLong(artistIdCol),
+                                        BookId = cursor.getLong(BookIdCol),
+                                        AuthorId = cursor.getLong(AuthorIdCol),
                                         filePath = cursor.getString(dataCol) ?: "",
                                         title =
                                                 cursor.getString(titleCol)
                                                         .normalizeMetadataTextOrEmpty()
                                                         .ifEmpty { "Unknown Title" },
-                                        artist =
-                                                cursor.getString(artistCol)
+                                        Author =
+                                                cursor.getString(AuthorCol)
                                                         .normalizeMetadataTextOrEmpty()
-                                                        .ifEmpty { "Unknown Artist" },
-                                        album =
-                                                cursor.getString(albumCol)
+                                                        .ifEmpty { "Unknown Author" },
+                                        Book =
+                                                cursor.getString(BookCol)
                                                         .normalizeMetadataTextOrEmpty()
-                                                        .ifEmpty { "Unknown Album" },
-                                        albumArtist =
-                                                if (albumArtistCol >= 0)
-                                                        cursor.getString(albumArtistCol)
+                                                        .ifEmpty { "Unknown Book" },
+                                        BookAuthor =
+                                                if (BookAuthorCol >= 0)
+                                                        cursor.getString(BookAuthorCol)
                                                                 ?.normalizeMetadataTextOrEmpty()
                                                                 ?.takeIf { it.isNotBlank() }
                                                 else null,
@@ -884,18 +884,18 @@ constructor(
             return emptyList()
         }
 
-        // Phase 2: Parallel processing of songs
+        // Phase 2: Parallel processing of Tracks
         val processedCount = AtomicInteger(0)
         val concurrencyLimit = 8 // Limit parallel operations to prevent resource exhaustion
         val semaphore = Semaphore(concurrencyLimit)
 
-        val songs = coroutineScope {
+        val Tracks = coroutineScope {
             rawDataList
                     .map { raw ->
                         async {
                             semaphore.withPermit {
-                                val song =
-                                        processSongData(raw, albumArtByAlbumId, genreMap, deepScan)
+                                val Track =
+                                        processTrackData(raw, BookArtByBookId, CategoryMap, deepScan)
 
                                 // Report progress
                                 val count = processedCount.incrementAndGet()
@@ -907,7 +907,7 @@ constructor(
                                     )
                                 }
 
-                                song
+                                Track
                             }
                         }
                     }
@@ -915,46 +915,46 @@ constructor(
         }
 
         Trace.endSection()
-        return songs
+        return Tracks
     }
 
     /**
-     * Process a single song's raw data into a SongEntity. This is the CPU/IO intensive work that
+     * Process a single Track's raw data into a TrackEntity. This is the CPU/IO intensive work that
      * benefits from parallelization.
      */
-    private suspend fun processSongData(
-            raw: RawSongData,
-            albumArtByAlbumId: Map<Long, String>,
-            genreMap: Map<Long, String>,
+    private suspend fun processTrackData(
+            raw: RawTrackData,
+            BookArtByBookId: Map<Long, String>,
+            CategoryMap: Map<Long, String>,
             deepScan: Boolean
-    ): SongEntity {
+    ): TrackEntity {
         val parentDir = java.io.File(raw.filePath).parent ?: ""
         val contentUriString =
                 ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, raw.id)
                         .toString()
 
-        var albumArtUriString = albumArtByAlbumId[raw.albumId]
+        var BookArtUriString = BookArtByBookId[raw.BookId]
         if (deepScan) {
-            albumArtUriString =
-                    AlbumArtUtils.getAlbumArtUri(
+            BookArtUriString =
+                    BookArtUtils.getBookArtUri(
                             applicationContext,
-                            musicDao,
+                            AudiobookDao,
                             raw.filePath,
-                            raw.albumId,
+                            raw.BookId,
                             raw.id,
                             true
                     )
-                            ?: albumArtUriString
+                            ?: BookArtUriString
         }
         val audioMetadata =
-                if (deepScan) getAudioMetadata(musicDao, raw.id, raw.filePath, true) else null
+                if (deepScan) getAudioMetadata(AudiobookDao, raw.id, raw.filePath, true) else null
 
         var title = raw.title
-        var artist = raw.artist
-        var album = raw.album
+        var Author = raw.Author
+        var Book = raw.Book
         var trackNumber = raw.trackNumber
         var year = raw.year
-        var genre: String? = genreMap[raw.id] // Use mapped genre as default
+        var Category: String? = CategoryMap[raw.id] // Use mapped Category as default
 
         val shouldAugmentMetadata =
                 deepScan ||
@@ -970,20 +970,20 @@ constructor(
                 try {
                     AudioMetadataReader.read(file)?.let { meta ->
                         if (!meta.title.isNullOrBlank()) title = meta.title
-                        if (!meta.artist.isNullOrBlank()) artist = meta.artist
-                        if (!meta.album.isNullOrBlank()) album = meta.album
-                        if (!meta.genre.isNullOrBlank()) genre = meta.genre
+                        if (!meta.Author.isNullOrBlank()) Author = meta.Author
+                        if (!meta.Book.isNullOrBlank()) Book = meta.Book
+                        if (!meta.Category.isNullOrBlank()) Category = meta.Category
                         if (meta.trackNumber != null) trackNumber = meta.trackNumber
                         if (meta.year != null) year = meta.year
 
                         meta.artwork?.let { art ->
                             val uri =
-                                    AlbumArtUtils.saveAlbumArtToCache(
+                                    BookArtUtils.saveBookArtToCache(
                                             applicationContext,
                                             art.bytes,
                                             raw.id
                                     )
-                            albumArtUriString = uri.toString()
+                            BookArtUriString = uri.toString()
                         }
                     }
                 } catch (e: Exception) {
@@ -992,18 +992,18 @@ constructor(
             }
         }
 
-        return SongEntity(
+        return TrackEntity(
                 id = raw.id,
                 title = title,
-                artistName = artist,
-                artistId = raw.artistId,
-                albumArtist = raw.albumArtist,
-                albumName = album,
-                albumId = raw.albumId,
+                AuthorName = Author,
+                AuthorId = raw.AuthorId,
+                BookAuthor = raw.BookAuthor,
+                BookName = Book,
+                BookId = raw.BookId,
                 contentUriString = contentUriString,
-                albumArtUriString = albumArtUriString,
+                BookArtUriString = BookArtUriString,
                 duration = raw.duration,
-                genre = genre,
+                Category = Category,
                 filePath = raw.filePath,
                 parentDirectoryPath = parentDir,
                 trackNumber = trackNumber,
@@ -1150,17 +1150,17 @@ constructor(
         const val PROGRESS_CURRENT = "progress_current"
         const val PROGRESS_TOTAL = "progress_total"
         const val PROGRESS_PHASE = "progress_phase"
-        const val OUTPUT_TOTAL_SONGS = "output_total_songs"
+        const val OUTPUT_TOTAL_Tracks = "output_total_Tracks"
         
-        // Genre cache - shared across worker instances to avoid refetching on incremental syncs
-        private const val GENRE_CACHE_TTL_MS = 60 * 60 * 1000L // 1 hour
-        @Volatile private var genreMapCache: Map<Long, String> = emptyMap()
-        @Volatile private var genreMapCacheTimestamp: Long = 0L
+        // Category cache - shared across worker instances to avoid refetching on incremental syncs
+        private const val Category_CACHE_TTL_MS = 60 * 60 * 1000L // 1 hour
+        @Volatile private var CategoryMapCache: Map<Long, String> = emptyMap()
+        @Volatile private var CategoryMapCacheTimestamp: Long = 0L
         
-        fun invalidateGenreCache() {
-            genreMapCache = emptyMap()
-            genreMapCacheTimestamp = 0L
-            Log.d(TAG, "Genre cache invalidated")
+        fun invalidateCategoryCache() {
+            CategoryMapCache = emptyMap()
+            CategoryMapCacheTimestamp = 0L
+            Log.d(TAG, "Category cache invalidated")
         }
 
         fun startUpSyncWork(deepScan: Boolean = false) =

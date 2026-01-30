@@ -56,7 +56,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookService
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.UnifiedPlayerSheet
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
     lateinit var syncManager: SyncManager
     
     // For handling shortcut navigation - using StateFlow so composables can observe changes
-    private val _pendingPlaylistNavigation = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    private val _pendingBooklistNavigation = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     private val _pendingShuffleAll = kotlinx.coroutines.flow.MutableStateFlow(false)
 
     private val requestAllFilesAccessLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        // LEER SEÑAL DE BENCHMARK
+        // LEER SEÃƒâ€˜AL DE BENCHMARK
         val isBenchmarkMode = intent.getBooleanExtra("is_benchmark", false)
 
         setContent {
@@ -278,10 +278,10 @@ class MainActivity : ComponentActivity() {
                 intent.action = null // Clear action to prevent re-triggering
             }
             
-            // Handle playlist shortcut
-            intent.action == ACTION_OPEN_PLAYLIST -> {
-                intent.getStringExtra(EXTRA_PLAYLIST_ID)?.let { playlistId ->
-                    _pendingPlaylistNavigation.value = playlistId
+            // Handle Booklist shortcut
+            intent.action == ACTION_OPEN_Booklist -> {
+                intent.getStringExtra(EXTRA_Booklist_ID)?.let { BooklistId ->
+                    _pendingBooklistNavigation.value = BooklistId
                 }
                 intent.action = null
             }
@@ -310,8 +310,8 @@ class MainActivity : ComponentActivity() {
     
     companion object {
         const val ACTION_SHUFFLE_ALL = "com.oakiha.audia.ACTION_SHUFFLE_ALL"
-        const val ACTION_OPEN_PLAYLIST = "com.oakiha.audia.ACTION_OPEN_PLAYLIST"
-        const val EXTRA_PLAYLIST_ID = "playlist_id"
+        const val ACTION_OPEN_Booklist = "com.oakiha.audia.ACTION_OPEN_Booklist"
+        const val EXTRA_Booklist_ID = "Booklist_id"
     }
 
     private fun resolveStreamUri(intent: Intent): android.net.Uri? {
@@ -374,42 +374,42 @@ class MainActivity : ComponentActivity() {
                 processedShuffle = true
                 // Wait a bit for the library to be ready
                 kotlinx.coroutines.delay(500)
-                playerViewModel.shuffleAllSongs()
+                playerViewModel.shuffleAllTracks()
                 _pendingShuffleAll.value = false
             } else if (!pendingShuffleAll) {
                 processedShuffle = false
             }
         }
         
-        // Observe pending playlist navigation
-        val pendingPlaylistNav by _pendingPlaylistNavigation.collectAsState()
-        var processedPlaylistId by remember { mutableStateOf<String?>(null) }
+        // Observe pending Booklist navigation
+        val pendingBooklistNav by _pendingBooklistNavigation.collectAsState()
+        var processedBooklistId by remember { mutableStateOf<String?>(null) }
         
-        LaunchedEffect(pendingPlaylistNav) {
-            val playlistId = pendingPlaylistNav
-            // Only process if we have a new playlist ID that hasn't been processed yet
-            if (playlistId != null && playlistId != processedPlaylistId) {
-                processedPlaylistId = playlistId
+        LaunchedEffect(pendingBooklistNav) {
+            val BooklistId = pendingBooklistNav
+            // Only process if we have a new Booklist ID that hasn't been processed yet
+            if (BooklistId != null && BooklistId != processedBooklistId) {
+                processedBooklistId = BooklistId
                 // Wait for navigation graph to be ready (retry with delay)
                 var success = false
                 var attempts = 0
                 while (!success && attempts < 50) { // 5 seconds max
                     try {
-                        navController.navigate(Screen.PlaylistDetail.createRoute(playlistId))
+                        navController.navigate(Screen.BooklistDetail.createRoute(BooklistId))
                         success = true
-                        _pendingPlaylistNavigation.value = null
+                        _pendingBooklistNavigation.value = null
                     } catch (e: IllegalArgumentException) {
                         delay(100)
                         attempts++
                     }
                 }
-            } else if (playlistId == null) {
-                // Reset so the same playlist can be opened again
-                processedPlaylistId = null
+            } else if (BooklistId == null) {
+                // Reset so the same Booklist can be opened again
+                processedBooklistId = null
             }
         }
 
-        // Estado para controlar si el indicador de carga puede mostrarse después de un delay
+        // Estado para controlar si el indicador de carga puede mostrarse despuÃƒÂ©s de un delay
         var canShowLoadingIndicator by remember { mutableStateOf(false) }
         // Track when the loading indicator was first shown for minimum display time
         var loadingShownTimestamp by remember { mutableStateOf(0L) }
@@ -419,11 +419,11 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(shouldPotentiallyShowLoading) {
             if (shouldPotentiallyShowLoading) {
-                // Espera un breve período antes de permitir que se muestre el indicador de carga
-                // Ajusta este valor según sea necesario (por ejemplo, 300-500 ms)
+                // Espera un breve perÃƒÂ­odo antes de permitir que se muestre el indicador de carga
+                // Ajusta este valor segÃƒÂºn sea necesario (por ejemplo, 300-500 ms)
                 delay(300L)
-                // Vuelve a verificar la condición después del delay,
-                // ya que el estado podría haber cambiado.
+                // Vuelve a verificar la condiciÃƒÂ³n despuÃƒÂ©s del delay,
+                // ya que el estado podrÃƒÂ­a haber cambiado.
                 if (mainViewModel.isSyncing.value && mainViewModel.isLibraryEmpty.value) {
                     canShowLoadingIndicator = true
                     loadingShownTimestamp = System.currentTimeMillis()
@@ -462,7 +462,7 @@ class MainActivity : ComponentActivity() {
             persistentListOf(
                 BottomNavItem("Home", R.drawable.rounded_home_24, R.drawable.home_24_rounded_filled, Screen.Home),
                 BottomNavItem("Search", R.drawable.rounded_search_24, R.drawable.rounded_search_24, Screen.Search),
-                BottomNavItem("Library", R.drawable.rounded_library_music_24, R.drawable.round_library_music_24, Screen.Library)
+                BottomNavItem("Library", R.drawable.rounded_library_Audiobook_24, R.drawable.round_library_Audiobook_24, Screen.Library)
             )
         }
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -472,18 +472,18 @@ class MainActivity : ComponentActivity() {
         val routesWithHiddenNavigationBar = remember {
             setOf(
                 Screen.Settings.route,
-                Screen.PlaylistDetail.route,
+                Screen.BooklistDetail.route,
                 Screen.DailyMixScreen.route,
-                Screen.GenreDetail.route,
-                Screen.AlbumDetail.route,
-                Screen.ArtistDetail.route,
+                Screen.CategoryDetail.route,
+                Screen.BookDetail.route,
+                Screen.AuthorDetail.route,
                 Screen.DJSpace.route,
                 Screen.NavBarCrRad.route,
                 Screen.About.route,
                 Screen.Stats.route,
                 Screen.EditTransition.route,
                 Screen.Experimental.route,
-                Screen.ArtistSettings.route,
+                Screen.Authorsettings.route,
                 Screen.Equalizer.route,
                 Screen.SettingsCategory.route,
                 Screen.DelimiterConfig.route
@@ -539,7 +539,7 @@ class MainActivity : ComponentActivity() {
             bottomBar = {
                 if (!shouldHideNavigationBar) {
                     val playerContentExpansionFraction = playerViewModel.playerContentExpansionFraction.value
-                    val showPlayerContentArea = playerViewModel.stablePlayerState.collectAsState().value.currentSong != null
+                    val showPlayerContentArea = playerViewModel.stablePlayerState.collectAsState().value.currentTrack != null
                     val currentSheetContentState by playerViewModel.sheetState.collectAsState()
                     val navBarCornerRadius by playerViewModel.navBarCornerRadius.collectAsState()
                     val navBarElevation = 3.dp
@@ -657,7 +657,7 @@ class MainActivity : ComponentActivity() {
                 val containerHeight = this.maxHeight
 
                 val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-                val showPlayerContentInitially = stablePlayerState.currentSong != null
+                val showPlayerContentInitially = stablePlayerState.currentTrack != null
 
                 val routesWithHiddenMiniPlayer = remember { setOf(Screen.NavBarCrRad.route) }
                 val shouldHideMiniPlayer by remember(currentRoute) {
@@ -707,7 +707,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth()
                             .height(MiniPlayerHeight)
                             .padding(horizontal = 14.dp),
-                        onUndo = { playerViewModel.undoDismissPlaylist() },
+                        onUndo = { playerViewModel.undoDismissBooklist() },
                         onClose = { playerViewModel.hideDismissUndoBar() },
                         durationMillis = playerUiState.undoBarVisibleDuration
                     )
@@ -758,7 +758,7 @@ class MainActivity : ComponentActivity() {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} songs",
+                        text = "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} Tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -778,7 +778,7 @@ class MainActivity : ComponentActivity() {
             // Benchmark mode no longer loads dummy data - uses real library data instead
         }
 
-        val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
+        val sessionToken = SessionToken(this, ComponentName(this, AudiobookService::class.java))
         mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
         mediaControllerFuture?.addListener({
         }, MoreExecutors.directExecutor())

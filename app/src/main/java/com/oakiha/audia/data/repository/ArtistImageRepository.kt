@@ -2,7 +2,7 @@ package com.oakiha.audia.data.repository
 
 import android.util.Log
 import android.util.LruCache
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.network.deezer.DeezerApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -12,36 +12,36 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for fetching and caching artist images from Deezer API.
+ * Repository for fetching and caching Author images from Deezer API.
  * Uses both in-memory LRU cache and Room database for persistent storage.
  */
 @Singleton
-class ArtistImageRepository @Inject constructor(
+class AuthorImageRepository @Inject constructor(
     private val deezerApiService: DeezerApiService,
-    private val musicDao: MusicDao
+    private val AudiobookDao: AudiobookDao
 ) {
     companion object {
-        private const val TAG = "ArtistImageRepository"
-        private const val CACHE_SIZE = 100 // Number of artist images to cache in memory
+        private const val TAG = "AuthorImageRepository"
+        private const val CACHE_SIZE = 100 // Number of Author images to cache in memory
     }
 
     // In-memory LRU cache for quick access
     private val memoryCache = LruCache<String, String>(CACHE_SIZE)
     
-    // Mutex to prevent duplicate API calls for the same artist
+    // Mutex to prevent duplicate API calls for the same Author
     private val fetchMutex = Mutex()
     private val pendingFetches = mutableSetOf<String>()
 
     /**
-     * Get artist image URL, fetching from Deezer if not cached.
-     * @param artistName Name of the artist
-     * @param artistId Room database ID of the artist (for caching)
+     * Get Author image URL, fetching from Deezer if not cached.
+     * @param AuthorName Name of the Author
+     * @param AuthorId Room database ID of the Author (for caching)
      * @return Image URL or null if not found
      */
-    suspend fun getArtistImageUrl(artistName: String, artistId: Long): String? {
-        if (artistName.isBlank()) return null
+    suspend fun getAuthorImageUrl(AuthorName: String, AuthorId: Long): String? {
+        if (AuthorName.isBlank()) return null
 
-        val normalizedName = artistName.trim().lowercase()
+        val normalizedName = AuthorName.trim().lowercase()
 
         // Check memory cache first
         memoryCache.get(normalizedName)?.let { cachedUrl ->
@@ -50,7 +50,7 @@ class ArtistImageRepository @Inject constructor(
 
         // Check database cache
         val dbCachedUrl = withContext(Dispatchers.IO) {
-            musicDao.getArtistImageUrl(artistId)
+            AudiobookDao.getAuthorImageUrl(AuthorId)
         }
         if (!dbCachedUrl.isNullOrEmpty()) {
             memoryCache.put(normalizedName, dbCachedUrl)
@@ -58,31 +58,31 @@ class ArtistImageRepository @Inject constructor(
         }
 
         // Fetch from Deezer API
-        return fetchAndCacheArtistImage(artistName, artistId, normalizedName)
+        return fetchAndCacheAuthorImage(AuthorName, AuthorId, normalizedName)
     }
 
     /**
-     * Prefetch artist images for a list of artists in background.
-     * Useful for batch loading when displaying artist lists.
+     * Prefetch Author images for a list of Authors in background.
+     * Useful for batch loading when displaying Author lists.
      */
-    suspend fun prefetchArtistImages(artists: List<Pair<Long, String>>) {
+    suspend fun prefetchAuthorImages(Authors: List<Pair<Long, String>>) {
         withContext(Dispatchers.IO) {
-            artists.forEach { (artistId, artistName) ->
+            Authors.forEach { (AuthorId, AuthorName) ->
                 try {
-                    getArtistImageUrl(artistName, artistId)
+                    getAuthorImageUrl(AuthorName, AuthorId)
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to prefetch image for $artistName: ${e.message}")
+                    Log.w(TAG, "Failed to prefetch image for $AuthorName: ${e.message}")
                 }
             }
         }
     }
 
-    private suspend fun fetchAndCacheArtistImage(
-        artistName: String,
-        artistId: Long,
+    private suspend fun fetchAndCacheAuthorImage(
+        AuthorName: String,
+        AuthorId: Long,
         normalizedName: String
     ): String? {
-        // Prevent duplicate fetches for the same artist
+        // Prevent duplicate fetches for the same Author
         fetchMutex.withLock {
             if (pendingFetches.contains(normalizedName)) {
                 return null // Already fetching
@@ -92,35 +92,35 @@ class ArtistImageRepository @Inject constructor(
 
         return try {
             withContext(Dispatchers.IO) {
-                val response = deezerApiService.searchArtist(artistName, limit = 1)
-                val deezerArtist = response.data.firstOrNull()
+                val response = deezerApiService.searchAuthor(AuthorName, limit = 1)
+                val deezerAuthor = response.data.firstOrNull()
 
-                if (deezerArtist != null) {
+                if (deezerAuthor != null) {
                     // Use picture_medium for list views, picture_big for detail views
                     // We store the medium size as default, UI can request bigger sizes if needed
-                    val imageUrl = deezerArtist.pictureMedium 
-                        ?: deezerArtist.pictureBig 
-                        ?: deezerArtist.picture
+                    val imageUrl = deezerAuthor.pictureMedium 
+                        ?: deezerAuthor.pictureBig 
+                        ?: deezerAuthor.picture
 
                     if (!imageUrl.isNullOrEmpty()) {
                         // Cache in memory
                         memoryCache.put(normalizedName, imageUrl)
                         
                         // Cache in database
-                        musicDao.updateArtistImageUrl(artistId, imageUrl)
+                        AudiobookDao.updateAuthorImageUrl(AuthorId, imageUrl)
                         
-                        Log.d(TAG, "Fetched and cached image for $artistName: $imageUrl")
+                        Log.d(TAG, "Fetched and cached image for $AuthorName: $imageUrl")
                         imageUrl
                     } else {
                         null
                     }
                 } else {
-                    Log.d(TAG, "No Deezer artist found for: $artistName")
+                    Log.d(TAG, "No Deezer Author found for: $AuthorName")
                     null
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching artist image for $artistName: ${e.message}")
+            Log.e(TAG, "Error fetching Author image for $AuthorName: ${e.message}")
             null
         } finally {
             fetchMutex.withLock {

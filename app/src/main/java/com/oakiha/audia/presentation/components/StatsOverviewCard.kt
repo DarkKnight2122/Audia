@@ -169,7 +169,7 @@ private fun OverviewContent(summary: PlaybackStatsRepository.PlaybackStatsSummar
                 )
             }
         }
-        val topTrack = summary.topSongs.firstOrNull()
+        val topTrack = summary.topTracks.firstOrNull()
         if (topTrack != null) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
@@ -185,7 +185,7 @@ private fun OverviewContent(summary: PlaybackStatsRepository.PlaybackStatsSummar
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${topTrack.artist} • ${topTrack.playCount} plays",
+                    text = "${topTrack.Author} â€¢ ${topTrack.playCount} plays",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.QueueMusic
+import androidx.compose.material.icons.automirrored.filled.QueueAudiobook
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,16 +25,16 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import coil.size.Size
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlin.math.floor
 import kotlin.math.sqrt
 
 @Composable
-fun PlaylistArtCollage(
-    songs: List<Song>,
+fun BooklistArtCollage(
+    Tracks: List<Track>,
     modifier: Modifier = Modifier,
 ) {
-    if (songs.isEmpty()) {
+    if (Tracks.isEmpty()) {
         Box(
             modifier = modifier
                 .aspectRatio(1f)
@@ -43,8 +43,8 @@ fun PlaylistArtCollage(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.QueueMusic,
-                contentDescription = "Playlist",
+                imageVector = Icons.AutoMirrored.Filled.QueueAudiobook,
+                contentDescription = "Booklist",
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp),
@@ -60,11 +60,11 @@ fun PlaylistArtCollage(
         ) {
             val imageModifier = Modifier
 
-            when (songs.size) {
+            when (Tracks.size) {
                 1 -> {
                     SmartImage(
-                        model = songs[0].albumArtUriString,
-                        contentDescription = songs[0].title,
+                        model = Tracks[0].BookArtUriString,
+                        contentDescription = Tracks[0].title,
                         contentScale = ContentScale.Crop,
                         targetSize = Size(256, 256),
                         modifier = imageModifier
@@ -79,8 +79,8 @@ fun PlaylistArtCollage(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SmartImage(
-                            model = songs[0].albumArtUriString,
-                            contentDescription = songs[0].title,
+                            model = Tracks[0].BookArtUriString,
+                            contentDescription = Tracks[0].title,
                             contentScale = ContentScale.Crop,
                             targetSize = Size(128, 128),
                             modifier = imageModifier
@@ -89,8 +89,8 @@ fun PlaylistArtCollage(
                                 .clip(CircleShape)
                         )
                         SmartImage(
-                            model = songs[1].albumArtUriString,
-                            contentDescription = songs[1].title,
+                            model = Tracks[1].BookArtUriString,
+                            contentDescription = Tracks[1].title,
                             contentScale = ContentScale.Crop,
                             targetSize = Size(128, 128),
                             modifier = imageModifier
@@ -103,10 +103,10 @@ fun PlaylistArtCollage(
                 3 -> {
                     Layout(
                         content = {
-                            songs.take(3).forEach { song ->
+                            Tracks.take(3).forEach { Track ->
                                 SmartImage(
-                                    model = song.albumArtUriString,
-                                    contentDescription = song.title,
+                                    model = Track.BookArtUriString,
+                                    contentDescription = Track.title,
                                     contentScale = ContentScale.Crop,
                                     targetSize = Size(128, 128),
                                     modifier = imageModifier.clip(CircleShape)
@@ -170,8 +170,8 @@ fun PlaylistArtCollage(
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             SmartImage(
-                                model = songs[0].albumArtUriString,
-                                contentDescription = songs[0].title,
+                                model = Tracks[0].BookArtUriString,
+                                contentDescription = Tracks[0].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
                                 modifier = imageModifier
@@ -180,8 +180,8 @@ fun PlaylistArtCollage(
                                     .clip(CircleShape)
                             )
                             SmartImage(
-                                model = songs[1].albumArtUriString,
-                                contentDescription = songs[1].title,
+                                model = Tracks[1].BookArtUriString,
+                                contentDescription = Tracks[1].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
                                 modifier = imageModifier
@@ -195,8 +195,8 @@ fun PlaylistArtCollage(
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             SmartImage(
-                                model = songs[2].albumArtUriString,
-                                contentDescription = songs[2].title,
+                                model = Tracks[2].BookArtUriString,
+                                contentDescription = Tracks[2].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
                                 modifier = imageModifier
@@ -205,8 +205,8 @@ fun PlaylistArtCollage(
                                     .clip(CircleShape)
                             )
                             SmartImage(
-                                model = songs[3].albumArtUriString,
-                                contentDescription = songs[3].title,
+                                model = Tracks[3].BookArtUriString,
+                                contentDescription = Tracks[3].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
                                 modifier = imageModifier

@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class Playlist(
+data class Booklist(
     val id: String,
     var name: String,
-    var songIds: List<String>,
+    var TrackIds: List<String>,
     val createdAt: Long = System.currentTimeMillis(),
     var lastModified: Long = System.currentTimeMillis(),
     val isAiGenerated: Boolean = false,
@@ -24,7 +24,7 @@ data class Playlist(
     val coverShapeDetail4: Float? = null // e.g., Star Sides (Int)
 )
 
-enum class PlaylistShapeType {
+enum class BooklistshapeType {
     Circle,
     SmoothRect,
     RotatedPill,

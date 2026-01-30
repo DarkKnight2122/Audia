@@ -74,7 +74,7 @@ fun DismissUndoBar(
             ) {
                 Text(
                     modifier = Modifier.padding(start = 10.dp),
-                    text = "Playlist Dismissed",
+                    text = "Booklist Dismissed",
                     style = MaterialTheme.typography.titleSmall
                         .copy(
                             fontFamily = GoogleSansRounded

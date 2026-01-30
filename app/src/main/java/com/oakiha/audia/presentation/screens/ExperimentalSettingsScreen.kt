@@ -32,7 +32,7 @@ import androidx.compose.material.icons.outlined.LinearScale
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.rounded.LinearScale
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.AudiobookNote
 import androidx.compose.material.icons.rounded.Rectangle
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.ViewCarousel
@@ -199,7 +199,7 @@ fun ExperimentalSettingsScreen(
                             val delayAllEnabled = uiState.fullPlayerLoadingTweaks.delayAll
                             val appearThresholdPercent = uiState.fullPlayerLoadingTweaks.contentAppearThresholdPercent
                             val isAnyDelayEnabled = uiState.fullPlayerLoadingTweaks.let {
-                                it.delayAll || it.delayAlbumCarousel || it.delaySongMetadata || it.delayProgressBar || it.delayControls
+                                it.delayAll || it.delayBookCarousel || it.delayTrackMetadata || it.delayProgressBar || it.delayControls
                             }
 
                             SwitchSettingItem(
@@ -217,10 +217,10 @@ fun ExperimentalSettingsScreen(
                             )
 
                             SwitchSettingItem(
-                                title = "Album carousel",
-                                subtitle = "Delay album art and carousel until the sheet is expanded.",
-                                checked = uiState.fullPlayerLoadingTweaks.delayAlbumCarousel,
-                                onCheckedChange = settingsViewModel::setDelayAlbumCarousel,
+                                title = "Book carousel",
+                                subtitle = "Delay Book art and carousel until the sheet is expanded.",
+                                checked = uiState.fullPlayerLoadingTweaks.delayBookCarousel,
+                                onCheckedChange = settingsViewModel::setDelayBookCarousel,
                                 enabled = !delayAllEnabled,
                                 leadingIcon = {
                                     Icon(
@@ -232,10 +232,10 @@ fun ExperimentalSettingsScreen(
                             )
 
                             SwitchSettingItem(
-                                title = "Song metadata",
-                                subtitle = "Delay title, artist, and lyrics/queue actions.",
-                                checked = uiState.fullPlayerLoadingTweaks.delaySongMetadata,
-                                onCheckedChange = settingsViewModel::setDelaySongMetadata,
+                                title = "Track metadata",
+                                subtitle = "Delay title, Author, and Transcript/queue actions.",
+                                checked = uiState.fullPlayerLoadingTweaks.delayTrackMetadata,
+                                onCheckedChange = settingsViewModel::setDelayTrackMetadata,
                                 enabled = !delayAllEnabled,
                                 leadingIcon = {
                                     Icon(
@@ -384,13 +384,13 @@ fun ExperimentalSettingsScreen(
             }
 
             item(key = "visual_tweaks_section") {
-                val albumArtQuality = uiState.albumArtQuality
+                val BookArtQuality = uiState.BookArtQuality
                 
                  SettingsSection(
-                    title = "Album Art Resolution",
+                    title = "Book Art Resolution",
                     icon = {
                         Icon(
-                            imageVector = Icons.Rounded.MusicNote, // Or Image/Photo icon
+                            imageVector = Icons.Rounded.AudiobookNote, // Or Image/Photo icon
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -410,14 +410,14 @@ fun ExperimentalSettingsScreen(
                            // For simplicity and quick access as requested ("selector or slider"), let's use a segmented style or a simple list of options.
                            
                            // Using a loop to create selectable items for each enum value
-                           com.oakiha.audia.data.preferences.AlbumArtQuality.entries.forEach { quality ->
-                               val isSelected = quality == albumArtQuality
+                           com.oakiha.audia.data.preferences.BookArtQuality.entries.forEach { quality ->
+                               val isSelected = quality == BookArtQuality
                                
                                Surface(
                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
                                    shape = RoundedCornerShape(12.dp),
                                    modifier = Modifier.fillMaxWidth(),
-                                   onClick = { settingsViewModel.setAlbumArtQuality(quality) }
+                                   onClick = { settingsViewModel.setBookArtQuality(quality) }
                                ) {
                                    Row(
                                        modifier = Modifier

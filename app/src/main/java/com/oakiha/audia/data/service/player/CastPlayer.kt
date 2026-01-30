@@ -8,7 +8,7 @@ import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -17,11 +17,11 @@ class CastPlayer(private val castSession: CastSession) {
     private val remoteMediaClient: RemoteMediaClient? = castSession.remoteMediaClient
 
     /**
-     * Load a queue of songs onto the Cast device.
+     * Load a queue of Tracks onto the Cast device.
      * Includes a 15-second timeout to prevent stuck "Connecting..." states.
      */
     fun loadQueue(
-        songs: List<Song>,
+        Tracks: List<Track>,
         startIndex: Int,
         startPosition: Long,
         repeatMode: Int,
@@ -47,8 +47,8 @@ class CastPlayer(private val castSession: CastSession) {
         }
 
         try {
-            val mediaItems = songs.map { song ->
-                song.toMediaQueueItem(serverAddress)
+            val mediaItems = Tracks.map { Track ->
+                Track.toMediaQueueItem(serverAddress)
             }.toTypedArray()
 
             // Start 15-second timeout
@@ -93,14 +93,14 @@ class CastPlayer(private val castSession: CastSession) {
         }
     }
 
-    private fun Song.toMediaQueueItem(serverAddress: String): MediaQueueItem {
-        val mediaMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
+    private fun Track.toMediaQueueItem(serverAddress: String): MediaQueueItem {
+        val mediaMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_Audiobook_TRACK)
         mediaMetadata.putString(MediaMetadata.KEY_TITLE, this.title)
-        mediaMetadata.putString(MediaMetadata.KEY_ARTIST, this.artist)
+        mediaMetadata.putString(MediaMetadata.KEY_Author, this.Author)
         val artUrl = "$serverAddress/art/${this.id}"
         mediaMetadata.addImage(WebImage(Uri.parse(artUrl)))
 
-        val mediaUrl = "$serverAddress/song/${this.id}"
+        val mediaUrl = "$serverAddress/Track/${this.id}"
         val mediaInfo = MediaInfo.Builder(mediaUrl)
             .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
             .setContentType("audio/mpeg")
@@ -109,7 +109,7 @@ class CastPlayer(private val castSession: CastSession) {
             .build()
 
         return MediaQueueItem.Builder(mediaInfo)
-            .setCustomData(JSONObject().put("songId", this.id))
+            .setCustomData(JSONObject().put("TrackId", this.id))
             .build()
     }
 

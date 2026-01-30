@@ -37,25 +37,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.subcomps.LibraryActionRow
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
-import com.oakiha.audia.presentation.viewmodel.PlaylistUiState
-import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
+import com.oakiha.audia.presentation.viewmodel.BooklistUiState
+import com.oakiha.audia.presentation.viewmodel.BooklistViewModel
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PlaylistBottomSheet(
-    playlistUiState: PlaylistUiState,
-    song: Song,
+fun BooklistBottomSheet(
+    BooklistUiState: BooklistUiState,
+    Track: Track,
     onDismiss: () -> Unit,
     bottomBarHeight: Dp,
     playerViewModel: PlayerViewModel,
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
-    currentPlaylistId: String? = null
+    BooklistViewModel: BooklistViewModel = hiltViewModel(),
+    currentBooklistId: String? = null
 ) {
-    var showCreatePlaylistDialog by remember { mutableStateOf(false) }
+    var showCreateBooklistDialog by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
@@ -63,17 +63,17 @@ fun PlaylistBottomSheet(
     )
 
     var searchQuery by remember { mutableStateOf("") }
-    val filteredPlaylists = remember(searchQuery, playlistUiState.playlists) {
-        if (searchQuery.isBlank()) playlistUiState.playlists
-        else playlistUiState.playlists.filter { it.name.contains(searchQuery, true) }
+    val filteredBooklists = remember(searchQuery, BooklistUiState.Booklists) {
+        if (searchQuery.isBlank()) BooklistUiState.Booklists
+        else BooklistUiState.Booklists.filter { it.name.contains(searchQuery, true) }
     }
 
-    val selectedPlaylists = remember {
+    val selectedBooklists = remember {
         mutableStateMapOf<String, Boolean>().apply {
-            filteredPlaylists.forEach {
+            filteredBooklists.forEach {
                 put(
                     it.id,
-                    it.songIds.contains(song.id)
+                    it.TrackIds.contains(Track.id)
                 )
             }
         }
@@ -96,7 +96,7 @@ fun PlaylistBottomSheet(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        "Select Playlists",
+                        "Select Booklists",
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = GoogleSansRounded
                     )
@@ -114,7 +114,7 @@ fun PlaylistBottomSheet(
                         focusedSupportingTextColor = Color.Transparent,
                     ),
                     onValueChange = { searchQuery = it },
-                    label = { Text("Search for playlists...") },
+                    label = { Text("Search for Booklists...") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -138,13 +138,13 @@ fun PlaylistBottomSheet(
                     ),
                     //currentPage = pagerState.currentPage,
                     onMainActionClick = {
-                        showCreatePlaylistDialog = true
+                        showCreateBooklistDialog = true
                     },
                     iconRotation = 0f,
                     showSortButton = false,
                     showGenerateButton = false,
                     onSortClick = { },
-                    isPlaylistTab = true,
+                    isBooklistTab = true,
                     isFoldersTab = false,
                     onGenerateWithAiClick = { },
                     currentFolder = null,
@@ -154,29 +154,29 @@ fun PlaylistBottomSheet(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                PlaylistContainer(
-                    playlistUiState = playlistUiState,
+                BooklistContainer(
+                    BooklistUiState = BooklistUiState,
                     isRefreshing = false,
                     onRefresh = { },
                     bottomBarHeight = bottomBarHeight,
                     navController = null,
                     playerViewModel = playerViewModel,
-                    isAddingToPlaylist = true,
-                    currentSong = song,
-                    filteredPlaylists = filteredPlaylists,
-                    selectedPlaylists = selectedPlaylists
+                    isAddingToBooklist = true,
+                    currentTrack = Track,
+                    filteredBooklists = filteredBooklists,
+                    selectedBooklists = selectedBooklists
                 )
 
-                if (showCreatePlaylistDialog) {
-                    CreatePlaylistDialogRedesigned(
-                        onDismiss = { showCreatePlaylistDialog = false },
+                if (showCreateBooklistDialog) {
+                    CreateBooklistDialogRedesigned(
+                        onDismiss = { showCreateBooklistDialog = false },
                         onCreate = { name ->
-                            playlistViewModel.createPlaylist(name) // Pass the actual name
-                            showCreatePlaylistDialog = false
+                            BooklistViewModel.createBooklist(name) // Pass the actual name
+                            showCreateBooklistDialog = false
                         },
                         onGenerateClick = {
-                            showCreatePlaylistDialog = false
-                            playerViewModel.showAiPlaylistSheet()
+                            showCreateBooklistDialog = false
+                            playerViewModel.showAiBooklistsheet()
                         }
                     )
                 }
@@ -188,10 +188,10 @@ fun PlaylistBottomSheet(
                     .padding(bottom = 18.dp, end = 8.dp),
                 shape = CircleShape,
                 onClick = {
-                    playlistViewModel.addOrRemoveSongFromPlaylists(
-                        song.id,
-                        selectedPlaylists.filter { it.value }.keys.toList(),
-                        currentPlaylistId
+                    BooklistViewModel.addOrRemoveTrackFromBooklists(
+                        Track.id,
+                        selectedBooklists.filter { it.value }.keys.toList(),
+                        currentBooklistId
                     )
                     onDismiss()
                     playerViewModel.sendToast("Saved")

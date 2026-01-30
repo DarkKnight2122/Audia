@@ -2,131 +2,131 @@ package com.oakiha.audia.data.repository
 
 import android.net.Uri
 import androidx.paging.PagingData
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Playlist
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Transcript
+import com.oakiha.audia.data.model.TranscriptSourcePreference
+import com.oakiha.audia.data.model.Booklist
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.SearchHistoryItem
 import com.oakiha.audia.data.model.SearchResultItem
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlinx.coroutines.flow.Flow
 
-interface MusicRepository {
+interface AudiobookRepository {
     /**
      * Obtiene la lista de archivos de audio (canciones) filtrada por directorios permitidos.
-     * @return Flow que emite una lista completa de objetos Song.
+     * @return Flow que emite una lista completa de objetos Track.
      */
-    fun getAudioFiles(): Flow<List<Song>> // Existing Flow for reactive updates
+    fun getAudioFiles(): Flow<List<Track>> // Existing Flow for reactive updates
     
     /**
-     * Returns paginated songs for efficient display of large libraries.
-     * @return Flow of PagingData<Song> for use with LazyPagingItems.
+     * Returns paginated Tracks for efficient display of large libraries.
+     * @return Flow of PagingData<Track> for use with LazyPagingItems.
      */
-    fun getPaginatedSongs(): Flow<PagingData<Song>>
+    fun getPaginatedTracks(): Flow<PagingData<Track>>
 
     /**
-     * Returns the count of songs in the library.
-     * @return Flow emitting the current song count.
+     * Returns the count of Tracks in the library.
+     * @return Flow emitting the current Track count.
      */
-    fun getSongCountFlow(): Flow<Int>
+    fun getTrackCountFlow(): Flow<Int>
 
     /**
-     * Returns a random selection of songs for efficient shuffle.
+     * Returns a random selection of Tracks for efficient shuffle.
      * Uses database-level RANDOM() for performance.
-     * @param limit Maximum number of songs to return.
-     * @return List of randomly selected songs.
+     * @param limit Maximum number of Tracks to return.
+     * @return List of randomly selected Tracks.
      */
-    suspend fun getRandomSongs(limit: Int): List<Song>
+    suspend fun getRandomTracks(limit: Int): List<Track>
 
     /**
-     * Obtiene la lista de álbumes filtrada.
-     * @return Flow que emite una lista completa de objetos Album.
+     * Obtiene la lista de ÃƒÂ¡lbumes filtrada.
+     * @return Flow que emite una lista completa de objetos Book.
      */
-    fun getAlbums(): Flow<List<Album>> // Existing Flow for reactive updates
+    fun getBooks(): Flow<List<Book>> // Existing Flow for reactive updates
 
     /**
-     * Obtiene la lista de artistas filtrada.
-     * @return Flow que emite una lista completa de objetos Artist.
+     * Obtiene la lista de Authoras filtrada.
+     * @return Flow que emite una lista completa de objetos Author.
      */
-    fun getArtists(): Flow<List<Artist>> // Existing Flow for reactive updates
+    fun getAuthors(): Flow<List<Author>> // Existing Flow for reactive updates
 
     /**
      * Obtiene la lista completa de canciones una sola vez.
-     * @return Lista de objetos Song.
+     * @return Lista de objetos Track.
      */
-    suspend fun getAllSongsOnce(): List<Song>
+    suspend fun getAllTracksOnce(): List<Track>
 
     /**
-     * Obtiene la lista completa de álbumes una sola vez.
-     * @return Lista de objetos Album.
+     * Obtiene la lista completa de ÃƒÂ¡lbumes una sola vez.
+     * @return Lista de objetos Book.
      */
-    suspend fun getAllAlbumsOnce(): List<Album>
+    suspend fun getAllBooksOnce(): List<Book>
 
     /**
-     * Obtiene la lista completa de artistas una sola vez.
-     * @return Lista de objetos Artist.
+     * Obtiene la lista completa de Authoras una sola vez.
+     * @return Lista de objetos Author.
      */
-    suspend fun getAllArtistsOnce(): List<Artist>
+    suspend fun getAllAuthorsOnce(): List<Author>
 
     /**
-     * Obtiene un álbum específico por su ID.
-     * @param id El ID del álbum.
-     * @return Flow que emite el objeto Album o null si no se encuentra.
+     * Obtiene un ÃƒÂ¡lbum especÃƒÂ­fico por su ID.
+     * @param id El ID del ÃƒÂ¡lbum.
+     * @return Flow que emite el objeto Book o null si no se encuentra.
      */
-    fun getAlbumById(id: Long): Flow<Album?>
+    fun getBookById(id: Long): Flow<Book?>
 
     /**
-     * Obtiene la lista de artistas filtrada.
-     * @return Flow que emite una lista completa de objetos Artist.
+     * Obtiene la lista de Authoras filtrada.
+     * @return Flow que emite una lista completa de objetos Author.
      */
-    //fun getArtists(): Flow<List<Artist>>
+    //fun getAuthors(): Flow<List<Author>>
 
     /**
-     * Obtiene la lista de canciones para un álbum específico (NO paginada para la cola de reproducción).
-     * @param albumId El ID del álbum.
-     * @return Flow que emite una lista de objetos Song pertenecientes al álbum.
+     * Obtiene la lista de canciones para un ÃƒÂ¡lbum especÃƒÂ­fico (NO paginada para la cola de reproducciÃƒÂ³n).
+     * @param BookId El ID del ÃƒÂ¡lbum.
+     * @return Flow que emite una lista de objetos Track pertenecientes al ÃƒÂ¡lbum.
      */
-    fun getSongsForAlbum(albumId: Long): Flow<List<Song>>
+    fun getTracksForBook(BookId: Long): Flow<List<Track>>
 
     /**
-     * Obtiene la lista de canciones para un artista específico (NO paginada para la cola de reproducción).
-     * @param artistId El ID del artista.
-     * @return Flow que emite una lista de objetos Song pertenecientes al artista.
+     * Obtiene la lista de canciones para un Authora especÃƒÂ­fico (NO paginada para la cola de reproducciÃƒÂ³n).
+     * @param AuthorId El ID del Authora.
+     * @return Flow que emite una lista de objetos Track pertenecientes al Authora.
      */
-    fun getSongsForArtist(artistId: Long): Flow<List<Song>>
+    fun getTracksForAuthor(AuthorId: Long): Flow<List<Track>>
 
     /**
      * Obtiene una lista de canciones por sus IDs.
-     * @param songIds Lista de IDs de canciones.
-     * @return Flow que emite una lista de objetos Song correspondientes a los IDs, en el mismo orden.
+     * @param TrackIds Lista de IDs de canciones.
+     * @return Flow que emite una lista de objetos Track correspondientes a los IDs, en el mismo orden.
      */
-    fun getSongsByIds(songIds: List<String>): Flow<List<Song>>
+    fun getTracksByIds(TrackIds: List<String>): Flow<List<Track>>
 
     /**
-     * Obtiene una canción por su ruta de archivo.
+     * Obtiene una canciÃƒÂ³n por su ruta de archivo.
      * @param path Ruta del archivo.
-     * @return El objeto Song o null si no se encuentra.
+     * @return El objeto Track o null si no se encuentra.
      */
-    suspend fun getSongByPath(path: String): Song?
+    suspend fun getTrackByPath(path: String): Track?
 
     /**
-     * Obtiene todos los directorios únicos que contienen archivos de audio.
-     * Esto se usa principalmente para la configuración inicial de directorios.
-     * También gestiona el guardado inicial de directorios permitidos si es la primera vez.
-     * @return Conjunto de rutas de directorios únicas.
+     * Obtiene todos los directorios ÃƒÂºnicos que contienen archivos de audio.
+     * Esto se usa principalmente para la configuraciÃƒÂ³n inicial de directorios.
+     * TambiÃƒÂ©n gestiona el guardado inicial de directorios permitidos si es la primera vez.
+     * @return Conjunto de rutas de directorios ÃƒÂºnicas.
      */
     suspend fun getAllUniqueAudioDirectories(): Set<String>
 
-    fun getAllUniqueAlbumArtUris(): Flow<List<Uri>> // Nuevo para precarga de temas
+    fun getAllUniqueBookArtUris(): Flow<List<Uri>> // Nuevo para precarga de temas
 
     suspend fun invalidateCachesDependentOnAllowedDirectories() // Nuevo para precarga de temas
 
-    fun searchSongs(query: String): Flow<List<Song>>
-    fun searchAlbums(query: String): Flow<List<Album>>
-    fun searchArtists(query: String): Flow<List<Artist>>
-    suspend fun searchPlaylists(query: String): List<Playlist> // Mantener suspend, ya que no hay Flow aún
+    fun searchTracks(query: String): Flow<List<Track>>
+    fun searchBooks(query: String): Flow<List<Book>>
+    fun searchAuthors(query: String): Flow<List<Author>>
+    suspend fun searchBooklists(query: String): List<Booklist> // Mantener suspend, ya que no hay Flow aÃƒÂºn
     fun searchAll(query: String, filterType: SearchFilterType): Flow<List<SearchResultItem>>
 
     // Search History
@@ -136,63 +136,63 @@ interface MusicRepository {
     suspend fun clearSearchHistory()
 
     /**
-     * Obtiene la lista de canciones para un género específico (placeholder implementation).
-     * @param genreId El ID del género (e.g., "pop", "rock").
-     * @return Flow que emite una lista de objetos Song (simulada para este género).
+     * Obtiene la lista de canciones para un gÃƒÂ©nero especÃƒÂ­fico (placeholder implementation).
+     * @param CategoryId El ID del gÃƒÂ©nero (e.g., "pop", "rock").
+     * @return Flow que emite una lista de objetos Track (simulada para este gÃƒÂ©nero).
      */
-    fun getMusicByGenre(genreId: String): Flow<List<Song>> // Changed to Flow
+    fun getAudiobookByCategory(CategoryId: String): Flow<List<Track>> // Changed to Flow
 
     /**
-     * Cambia el estado de favorito de una canción.
-     * @param songId El ID de la canción.
+     * Cambia el estado de favorito de una canciÃƒÂ³n.
+     * @param TrackId El ID de la canciÃƒÂ³n.
      * @return El nuevo estado de favorito (true si es favorito, false si no).
      */
-    suspend fun toggleFavoriteStatus(songId: String): Boolean
+    suspend fun toggleFavoriteStatus(TrackId: String): Boolean
 
     /**
-     * Obtiene una canción específica por su ID.
-     * @param songId El ID de la canción.
-     * @return Flow que emite el objeto Song o null si no se encuentra.
+     * Obtiene una canciÃƒÂ³n especÃƒÂ­fica por su ID.
+     * @param TrackId El ID de la canciÃƒÂ³n.
+     * @return Flow que emite el objeto Track o null si no se encuentra.
      */
-    fun getSong(songId: String): Flow<Song?>
-    fun getArtistById(artistId: Long): Flow<Artist?>
-    fun getArtistsForSong(songId: Long): Flow<List<Artist>>
+    fun getTrack(TrackId: String): Flow<Track?>
+    fun getAuthorById(AuthorId: Long): Flow<Author?>
+    fun getAuthorsForTrack(TrackId: Long): Flow<List<Author>>
 
     /**
-     * Obtiene la lista de géneros, ya sea mockeados o leídos de los metadatos.
-     * @return Flow que emite una lista de objetos Genre.
+     * Obtiene la lista de gÃƒÂ©neros, ya sea mockeados o leÃƒÂ­dos de los metadatos.
+     * @return Flow que emite una lista de objetos Category.
      */
-    fun getGenres(): Flow<List<com.oakiha.audia.data.model.Genre>>
+    fun getCategories(): Flow<List<com.oakiha.audia.data.model.Category>>
 
-    suspend fun getLyrics(
-        song: Song,
-        sourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
+    suspend fun getTranscript(
+        Track: Track,
+        sourcePreference: TranscriptSourcePreference = TranscriptSourcePreference.EMBEDDED_FIRST,
         forceRefresh: Boolean = false
-    ): Lyrics?
+    ): Transcript?
 
-    suspend fun getLyricsFromRemote(song: Song): Result<Pair<Lyrics, String>>
-
-    /**
-     * Search for lyrics remotely, less specific than `getLyricsFromRemote` but more lenient
-     * @param song The song to search lyrics for
-     * @return The search query and the results
-     */
-    suspend fun searchRemoteLyrics(song: Song): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun getTranscriptFromRemote(Track: Track): Result<Pair<Transcript, String>>
 
     /**
-     * Search for lyrics remotely using query provided, and not use song metadata
-     * @param query The query for searching, typically song title and artist name
+     * Search for Transcript remotely, less specific than `getTranscriptFromRemote` but more lenient
+     * @param Track The Track to search Transcript for
      * @return The search query and the results
      */
-    suspend fun searchRemoteLyricsByQuery(title: String, artist: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemoteTranscript(Track: Track): Result<Pair<String, List<TranscriptSearchResult>>>
 
-    suspend fun updateLyrics(songId: Long, lyrics: String)
+    /**
+     * Search for Transcript remotely using query provided, and not use Track metadata
+     * @param query The query for searching, typically Book title and Author name
+     * @return The search query and the results
+     */
+    suspend fun searchRemoteTranscriptByQuery(title: String, Author: String? = null): Result<Pair<String, List<TranscriptSearchResult>>>
 
-    suspend fun resetLyrics(songId: Long)
+    suspend fun updateTranscript(TrackId: Long, Transcript: String)
 
-    suspend fun resetAllLyrics()
+    suspend fun resetTranscript(TrackId: Long)
 
-    fun getMusicFolders(): Flow<List<com.oakiha.audia.data.model.MusicFolder>>
+    suspend fun resetAllTranscript()
+
+    fun getAudiobookFolders(): Flow<List<com.oakiha.audia.data.model.AudiobookFolder>>
 
     suspend fun deleteById(id: Long)
 }

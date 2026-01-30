@@ -28,7 +28,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Orchestrates song transitions by observing the player state and
+ * Orchestrates Track transitions by observing the player state and
  * commanding the DualPlayerEngine.
  */
 @OptIn(UnstableApi::class)
@@ -68,7 +68,7 @@ class TransitionController @Inject constructor(
         transitionListener = object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 Timber.tag("TransitionDebug").d("onMediaItemTransition: %s (reason=%d)", mediaItem?.mediaId, reason)
-                // When we naturally move to a new song, ensure pauseAtEnd is OFF by default.
+                // When we naturally move to a new Track, ensure pauseAtEnd is OFF by default.
                 engine.setPauseAtEndOfMediaItems(false)
 
                 if (mediaItem != null) {
@@ -86,7 +86,7 @@ class TransitionController @Inject constructor(
             }
 
             override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
+                if (reason == Player.TIMELINE_CHANGE_REASON_Booklist_CHANGED) {
                     // The queue has changed (e.g., reordered, item removed).
                     Timber.tag("TransitionDebug").d("Timeline changed (reason=%d). Cancelling pending transition.", reason)
                     transitionSchedulerJob?.cancel()
@@ -147,20 +147,20 @@ class TransitionController @Inject constructor(
             Timber.tag("TransitionDebug").d("Preparing next track: %s (Index: %d)", nextMediaItem.mediaId, targetIndex)
             engine.prepareNext(nextMediaItem)
 
-            val playlistId = currentMediaItem.mediaMetadata.extras?.getString("playlistId")
+            val BooklistId = currentMediaItem.mediaMetadata.extras?.getString("BooklistId")
             val fromTrackId = currentMediaItem.mediaId
             val toTrackId = nextMediaItem.mediaId
 
-            Timber.tag("TransitionDebug").d("Resolving settings for playlistId=%s, %s -> %s", playlistId, fromTrackId, toTrackId)
+            Timber.tag("TransitionDebug").d("Resolving settings for BooklistId=%s, %s -> %s", BooklistId, fromTrackId, toTrackId)
 
             // Check global crossfade toggle first
             val isCrossfadeEnabledFlow = userPreferencesRepository.isCrossfadeEnabledFlow
 
             // Use collectLatest to automatically cancel and restart the logic if settings change.
-            val settingsFlow = if (playlistId != null) {
-                transitionRepository.resolveTransitionSettings(playlistId, fromTrackId, toTrackId)
+            val settingsFlow = if (BooklistId != null) {
+                transitionRepository.resolveTransitionSettings(BooklistId, fromTrackId, toTrackId)
             } else {
-                Timber.tag("TransitionDebug").d("Missing playlistId. Using global settings.")
+                Timber.tag("TransitionDebug").d("Missing BooklistId. Using global settings.")
                 transitionRepository.getGlobalSettings().map {
                     TransitionResolution(
                         settings = it,
@@ -223,7 +223,7 @@ class TransitionController @Inject constructor(
                 val transitionPoint = duration - effectiveDuration
 
                 Timber.tag("TransitionDebug").d(
-                    "Scheduled %s at %d ms (SongDur: %d). Fade duration: %d ms",
+                    "Scheduled %s at %d ms (TrackDur: %d). Fade duration: %d ms",
                     settings.mode, transitionPoint, duration, effectiveDuration
                 )
 

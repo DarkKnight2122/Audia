@@ -12,8 +12,8 @@ import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Size
-import com.oakiha.audia.data.database.AlbumArtThemeDao
-import com.oakiha.audia.data.database.AlbumArtThemeEntity
+import com.oakiha.audia.data.database.BookArtThemeDao
+import com.oakiha.audia.data.database.BookArtThemeEntity
 import com.oakiha.audia.data.database.StoredColorSchemeValues
 import com.oakiha.audia.data.database.toComposeColor
 import com.oakiha.audia.ui.theme.DarkColorScheme
@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 
 /**
- * Efficient color scheme processor for album art.
+ * Efficient color scheme processor for Book art.
  * 
  * Optimizations:
  * - In-memory LRU cache to avoid disk reads for recently accessed schemes
@@ -47,7 +47,7 @@ import androidx.compose.ui.graphics.toArgb
 @Singleton
 class ColorSchemeProcessor @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val albumArtThemeDao: AlbumArtThemeDao
+    private val BookArtThemeDao: BookArtThemeDao
 ) {
     // In-memory LRU cache for faster access (avoids DB reads for hot paths)
     private val memoryCache = LruCache<String, ColorSchemePair>(20)
@@ -61,54 +61,54 @@ class ColorSchemeProcessor @Inject constructor(
     val requestChannel = Channel<String>(Channel.UNLIMITED)
 
     /**
-     * Gets or generates a color scheme for the given album art URI.
+     * Gets or generates a color scheme for the given Book art URI.
      * Checks memory cache first, then database, then generates new.
      * All heavy operations are performed on appropriate dispatchers.
      */
     /**
-     * Gets or generates a color scheme for the given album art URI.
+     * Gets or generates a color scheme for the given Book art URI.
      * Checks memory cache first, then database, then generates new.
      * @param forceRefresh If true, bypasses caches and forces regeneration from source image.
      */
-    suspend fun getOrGenerateColorScheme(albumArtUri: String, forceRefresh: Boolean = false): ColorSchemePair? {
+    suspend fun getOrGenerateColorScheme(BookArtUri: String, forceRefresh: Boolean = false): ColorSchemePair? {
         Trace.beginSection("ColorSchemeProcessor.getOrGenerate")
         try {
             if (!forceRefresh) {
                 // 1. Check memory cache first (fastest)
-                memoryCache.get(albumArtUri)?.let {
+                memoryCache.get(BookArtUri)?.let {
                     Trace.endSection()
                     return it
                 }
 
                 // 2. Check database cache
                 val cachedEntity = withContext(Dispatchers.IO) {
-                    albumArtThemeDao.getThemeByUri(albumArtUri)
+                    BookArtThemeDao.getThemeByUri(BookArtUri)
                 }
                 if (cachedEntity != null) {
                     val schemePair = mapEntityToColorSchemePair(cachedEntity)
-                    memoryCache.put(albumArtUri, schemePair)
+                    memoryCache.put(BookArtUri, schemePair)
                     Trace.endSection()
                     return schemePair
                 }
             }
 
             // 3. Generate new color scheme
-            return generateAndCacheColorScheme(albumArtUri, forceRefresh)
+            return generateAndCacheColorScheme(BookArtUri, forceRefresh)
         } finally {
             Trace.endSection()
         }
     }
 
     /**
-     * Generates a color scheme from the album art bitmap.
+     * Generates a color scheme from the Book art bitmap.
      * All processing done on Default dispatcher for CPU-bound work.
      */
-    private suspend fun generateAndCacheColorScheme(albumArtUri: String, forceRefresh: Boolean = false): ColorSchemePair? {
+    private suspend fun generateAndCacheColorScheme(BookArtUri: String, forceRefresh: Boolean = false): ColorSchemePair? {
         Trace.beginSection("ColorSchemeProcessor.generate")
         try {
             // Load bitmap on IO dispatcher
             val bitmap = withContext(Dispatchers.IO) {
-                loadBitmapForColorExtraction(albumArtUri, forceRefresh)
+                loadBitmapForColorExtraction(BookArtUri, forceRefresh)
             } ?: return null
 
             // Extract colors on Default dispatcher (CPU-bound)
@@ -118,12 +118,12 @@ class ColorSchemeProcessor @Inject constructor(
             }
 
             // Cache to memory
-            memoryCache.put(albumArtUri, schemePair)
+            memoryCache.put(BookArtUri, schemePair)
 
             // Persist to database (fire and forget on IO)
             withContext(Dispatchers.IO) {
-                albumArtThemeDao.insertTheme(
-                    mapColorSchemePairToEntity(albumArtUri, schemePair)
+                BookArtThemeDao.insertTheme(
+                    mapColorSchemePairToEntity(BookArtUri, schemePair)
                 )
             }
 
@@ -212,12 +212,12 @@ class ColorSchemeProcessor @Inject constructor(
     suspend fun invalidateScheme(uri: String) {
         memoryCache.remove(uri)
         withContext(Dispatchers.IO) {
-            albumArtThemeDao.deleteThemesByUris(listOf(uri))
+            BookArtThemeDao.deleteThemesByUris(listOf(uri))
         }
     }
 
     // Mapping functions
-    private fun mapColorSchemePairToEntity(uri: String, pair: ColorSchemePair): AlbumArtThemeEntity {
+    private fun mapColorSchemePairToEntity(uri: String, pair: ColorSchemePair): BookArtThemeEntity {
         fun mapScheme(cs: ColorScheme) = StoredColorSchemeValues(
             primary = cs.primary.toHexString(),
             onPrimary = cs.onPrimary.toHexString(),
@@ -249,10 +249,10 @@ class ColorSchemeProcessor @Inject constructor(
             outlineVariant = cs.outlineVariant.toHexString(),
             scrim = cs.scrim.toHexString()
         )
-        return AlbumArtThemeEntity(uri, mapScheme(pair.light), mapScheme(pair.dark))
+        return BookArtThemeEntity(uri, mapScheme(pair.light), mapScheme(pair.dark))
     }
 
-    private fun mapEntityToColorSchemePair(entity: AlbumArtThemeEntity): ColorSchemePair {
+    private fun mapEntityToColorSchemePair(entity: BookArtThemeEntity): ColorSchemePair {
         val placeholder = Color.Magenta
         fun mapStored(sv: StoredColorSchemeValues, isDark: Boolean) = ColorScheme(
             primary = sv.primary.toComposeColor(),

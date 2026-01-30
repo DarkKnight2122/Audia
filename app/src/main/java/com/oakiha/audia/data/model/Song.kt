@@ -2,29 +2,29 @@ package com.oakiha.audia.data.model
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
-import com.oakiha.audia.utils.splitArtistsByDelimiters
+import com.oakiha.audia.utils.splitAuthorsByDelimiters
 
 @Immutable
-data class Song(
+data class Track(
     val id: String,
     val title: String,
     /**
-     * Legacy artist display string.
-     * - With multi-artist parsing enabled by default, this typically contains only the primary artist for backward compatibility.
-     * For accurate display of all artists, use the [artists] list and [displayArtist] property.
+     * Legacy Author display string.
+     * - With multi-Author parsing enabled by default, this typically contains only the primary Author for backward compatibility.
+     * For accurate display of all Authors, use the [Authors] list and [displayAuthor] property.
      */
-    val artist: String,
-    val artistId: Long, // Primary artist ID for backward compatibility
-    val artists: List<ArtistRef> = emptyList(), // All artists for multi-artist support
-    val album: String,
-    val albumId: Long,
-    val albumArtist: String? = null, // Album artist from metadata
+    val Author: String,
+    val AuthorId: Long, // Primary Author ID for backward compatibility
+    val Authors: List<AuthorRef> = emptyList(), // All Authors for multi-Author support
+    val Book: String,
+    val BookId: Long,
+    val BookAuthor: String? = null, // Book Author from metadata
     val path: String, // Added for direct file system access
     val contentUriString: String,
-    val albumArtUriString: String?,
+    val BookArtUriString: String?,
     val duration: Long,
-    val genre: String? = null,
-    val lyrics: String? = null,
+    val Category: String? = null,
+    val Transcript: String? = null,
     val isFavorite: Boolean = false,
     val trackNumber: Int = 0,
     val year: Int = 0,
@@ -34,49 +34,49 @@ data class Song(
     val bitrate: Int?,
     val sampleRate: Int?,
 ) {
-    private val defaultArtistDelimiters = listOf("/", ";", ",", "+", "&")
+    private val defaultAuthorDelimiters = listOf("/", ";", ",", "+", "&")
 
     /**
-     * Returns the display string for artists.
-     * If multiple artists exist, joins them with ", ".
-     * Falls back to splitting the legacy artist string using common delimiters,
-     * and finally the raw artist field if nothing else is available.
+     * Returns the display string for Authors.
+     * If multiple Authors exist, joins them with ", ".
+     * Falls back to splitting the legacy Author string using common delimiters,
+     * and finally the raw Author field if nothing else is available.
      */
-    val displayArtist: String
+    val displayAuthor: String
         get() {
-            if (artists.isNotEmpty()) {
-                return artists.sortedByDescending { it.isPrimary }.joinToString(", ") { it.name }
+            if (Authors.isNotEmpty()) {
+                return Authors.sortedByDescending { it.isPrimary }.joinToString(", ") { it.name }
             }
-            val split = artist.splitArtistsByDelimiters(defaultArtistDelimiters)
-            return if (split.isNotEmpty()) split.joinToString(", ") else artist
+            val split = Author.splitAuthorsByDelimiters(defaultAuthorDelimiters)
+            return if (split.isNotEmpty()) split.joinToString(", ") else Author
         }
 
     /**
-     * Returns the primary artist from the artists list,
-     * or creates one from the legacy artist field.
+     * Returns the primary Author from the Authors list,
+     * or creates one from the legacy Author field.
      */
-    val primaryArtist: ArtistRef
-        get() = artists.find { it.isPrimary }
-            ?: artists.firstOrNull()
-            ?: ArtistRef(id = artistId, name = artist, isPrimary = true)
+    val primaryAuthor: AuthorRef
+        get() = Authors.find { it.isPrimary }
+            ?: Authors.firstOrNull()
+            ?: AuthorRef(id = AuthorId, name = Author, isPrimary = true)
 
     companion object {
-        fun emptySong(): Song {
-            return Song(
+        fun emptyTrack(): Track {
+            return Track(
                 id = "-1",
                 title = "",
-                artist = "",
-                artistId = -1L,
-                artists = emptyList(),
-                album = "",
-                albumId = -1L,
-                albumArtist = null,
+                Author = "",
+                AuthorId = -1L,
+                Authors = emptyList(),
+                Book = "",
+                BookId = -1L,
+                BookAuthor = null,
                 path = "",
                 contentUriString = "",
-                albumArtUriString = null,
+                BookArtUriString = null,
                 duration = 0L,
-                genre = null,
-                lyrics = null,
+                Category = null,
+                Transcript = null,
                 isFavorite = false,
                 trackNumber = 0,
                 year = 0,

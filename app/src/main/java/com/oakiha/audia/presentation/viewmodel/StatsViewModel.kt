@@ -2,8 +2,8 @@ package com.oakiha.audia.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository.PlaybackStatsSummary
 import com.oakiha.audia.data.stats.StatsTimeRange
@@ -22,7 +22,7 @@ import timber.log.Timber
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val playbackStatsRepository: PlaybackStatsRepository,
-    private val musicRepository: MusicRepository
+    private val AudiobookRepository: AudiobookRepository
 ) : ViewModel() {
 
     data class StatsUiState(
@@ -39,7 +39,7 @@ class StatsViewModel @Inject constructor(
     val weeklyOverview: StateFlow<PlaybackStatsSummary?> = _weeklyOverview.asStateFlow()
 
     @Volatile
-    private var cachedSongs: List<Song>? = null
+    private var cachedTracks: List<Track>? = null
 
     init {
         refreshWeeklyOverview()
@@ -57,8 +57,8 @@ class StatsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val songs = loadSongs()
-                    playbackStatsRepository.loadSummary(StatsTimeRange.WEEK, songs)
+                    val Tracks = loadTracks()
+                    playbackStatsRepository.loadSummary(StatsTimeRange.WEEK, Tracks)
                 }
             }.onSuccess { summary ->
                 _weeklyOverview.value = summary
@@ -74,8 +74,8 @@ class StatsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, selectedRange = range) }
             val summary = runCatching {
                 withContext(Dispatchers.IO) {
-                    val songs = loadSongs()
-                    playbackStatsRepository.loadSummary(range, songs)
+                    val Tracks = loadTracks()
+                    playbackStatsRepository.loadSummary(range, Tracks)
                 }
             }
             _uiState.update { current ->
@@ -90,17 +90,17 @@ class StatsViewModel @Inject constructor(
     }
 
     fun forceRegenerateStats() {
-        cachedSongs = null
+        cachedTracks = null
         refreshWeeklyOverview()
         refreshRange(_uiState.value.selectedRange)
     }
 
-    private suspend fun loadSongs(): List<Song> {
-        cachedSongs?.let { existing ->
+    private suspend fun loadTracks(): List<Track> {
+        cachedTracks?.let { existing ->
             if (existing.isNotEmpty()) return existing
         }
-        val songs = musicRepository.getAudioFiles().first()
-        cachedSongs = songs
-        return songs
+        val Tracks = AudiobookRepository.getAudioFiles().first()
+        cachedTracks = Tracks
+        return Tracks
     }
 }

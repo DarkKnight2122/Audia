@@ -39,7 +39,7 @@ import com.oakiha.audia.MainActivity
 import com.oakiha.audia.AudioBookApp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.PlayerInfo // Import new data class
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.ui.glancewidget.AudioBookPlayerGlanceWidget
 import com.oakiha.audia.ui.glancewidget.PlayerActions
 import com.oakiha.audia.ui.glancewidget.PlayerInfoStateDefinition
@@ -67,18 +67,18 @@ import javax.inject.Inject
 
 @UnstableApi
 @AndroidEntryPoint
-class MusicService : MediaSessionService() {
+class AudiobookService : MediaSessionService() {
 
     @Inject
     lateinit var engine: DualPlayerEngine
     @Inject
     lateinit var controller: TransitionController
     @Inject
-    lateinit var musicRepository: MusicRepository
+    lateinit var AudiobookRepository: AudiobookRepository
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
-    private var favoriteSongIds = emptySet<String>()
+    private var favoriteTrackIds = emptySet<String>()
     private var mediaSession: MediaSession? = null
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var keepPlayingInBackground = true
@@ -89,10 +89,10 @@ class MusicService : MediaSessionService() {
     private var countedPlayTarget = 0
     private var countedPlayCount = 0
     private var countedOriginalId: String? = null
-    private var countedPlayListener: Player.Listener? = null
+    private var countedBooklistener: Player.Listener? = null
 
     companion object {
-        private const val TAG = "MusicService_AudioBookPlayer"
+        private const val TAG = "AudiobookService_AudioBookPlayer"
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.oakiha.audia.ACTION_SLEEP_TIMER_EXPIRED"
     }
@@ -114,7 +114,7 @@ class MusicService : MediaSessionService() {
                 mediaSession?.player = newPlayer
                 newPlayer.addListener(playerListener)
 
-                Timber.tag("MusicService").d("Swapped MediaSession player to new instance.")
+                Timber.tag("AudiobookService").d("Swapped MediaSession player to new instance.")
                 requestWidgetFullUpdate(force = true)
                 mediaSession?.let { refreshMediaSessionUi(it) }
             }
@@ -149,12 +149,12 @@ class MusicService : MediaSessionService() {
             ): MediaSession.ConnectionResult {
                 val defaultResult = super.onConnect(session, controller)
                 val customCommands = listOf(
-                    MusicNotificationProvider.CUSTOM_COMMAND_LIKE,
-                    MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON,
-                    MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF,
-                    MusicNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE,
-                    MusicNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE,
-                    MusicNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_LIKE,
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON,
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF,
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE,
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE,
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY
                 ).map { SessionCommand(it, Bundle.EMPTY) }
 
                 val sessionCommandsBuilder = SessionCommands.Builder()
@@ -173,34 +173,34 @@ class MusicService : MediaSessionService() {
                 customCommand: SessionCommand,
                 args: Bundle
             ): ListenableFuture<SessionResult> {
-                Timber.tag("MusicService")
+                Timber.tag("AudiobookService")
                     .d("onCustomCommand received: ${customCommand.customAction}")
                 when (customCommand.customAction) {
-                    MusicNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY -> {
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY -> {
                         val count = args.getInt("count", 1)
                         startCountedPlay(count)
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY -> {
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY -> {
                         stopCountedPlay()
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON -> {
-                        Timber.tag("MusicService")
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON -> {
+                        Timber.tag("AudiobookService")
                             .d("Executing SHUFFLE_ON. Current shuffleMode: ${session.player.shuffleModeEnabled}")
                         updateManualShuffleState(session, enabled = true, broadcast = true)
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF -> {
-                        Timber.tag("MusicService")
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF -> {
+                        Timber.tag("AudiobookService")
                             .d("Executing SHUFFLE_OFF. Current shuffleMode: ${session.player.shuffleModeEnabled}")
                         updateManualShuffleState(session, enabled = false, broadcast = true)
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE -> {
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE -> {
                         val enabled = args.getBoolean(
-                            MusicNotificationProvider.EXTRA_SHUFFLE_ENABLED,
+                            AudiobookNotificationProvider.EXTRA_SHUFFLE_ENABLED,
                             false
                         )
                         updateManualShuffleState(session, enabled = enabled, broadcast = false)
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE -> {
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE -> {
                         val currentMode = session.player.repeatMode
                         val newMode = when (currentMode) {
                             Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ONE
@@ -210,23 +210,23 @@ class MusicService : MediaSessionService() {
                         session.player.repeatMode = newMode
                         refreshMediaSessionUi(session)
                     }
-                    MusicNotificationProvider.CUSTOM_COMMAND_LIKE -> {
-                        val songId = session.player.currentMediaItem?.mediaId ?: return@onCustomCommand Futures.immediateFuture(SessionResult(
+                    AudiobookNotificationProvider.CUSTOM_COMMAND_LIKE -> {
+                        val TrackId = session.player.currentMediaItem?.mediaId ?: return@onCustomCommand Futures.immediateFuture(SessionResult(
                             SessionError.ERROR_UNKNOWN))
-                        Timber.tag("MusicService").d("Executing LIKE for songId: $songId")
-                        val isCurrentlyFavorite = favoriteSongIds.contains(songId)
-                        favoriteSongIds = if (isCurrentlyFavorite) {
-                            favoriteSongIds - songId
+                        Timber.tag("AudiobookService").d("Executing LIKE for TrackId: $TrackId")
+                        val isCurrentlyFavorite = favoriteTrackIds.contains(TrackId)
+                        favoriteTrackIds = if (isCurrentlyFavorite) {
+                            favoriteTrackIds - TrackId
                         } else {
-                            favoriteSongIds + songId
+                            favoriteTrackIds + TrackId
                         }
 
                         refreshMediaSessionUi(session)
 
                         serviceScope.launch {
-                            Timber.tag("MusicService").d("Toggling favorite status for $songId")
-                            userPreferencesRepository.toggleFavoriteSong(songId)
-                            Timber.tag("MusicService")
+                            Timber.tag("AudiobookService").d("Toggling favorite status for $TrackId")
+                            userPreferencesRepository.toggleFavoriteTrack(TrackId)
+                            Timber.tag("AudiobookService")
                                 .d("Toggled favorite status. Updating notification.")
                             refreshMediaSessionUi(session)
                         }
@@ -249,18 +249,18 @@ class MusicService : MediaSessionService() {
         mediaSession?.let { refreshMediaSessionUi(it) }
 
         serviceScope.launch {
-            userPreferencesRepository.favoriteSongIdsFlow.collect { ids ->
-                Timber.tag("MusicService")
-                    .d("favoriteSongIdsFlow collected. New ids size: ${ids.size}")
-                val oldIds = favoriteSongIds
-                favoriteSongIds = ids
-                val currentSongId = mediaSession?.player?.currentMediaItem?.mediaId
-                if (currentSongId != null) {
-                    val wasFavorite = oldIds.contains(currentSongId)
-                    val isFavorite = ids.contains(currentSongId)
+            userPreferencesRepository.favoriteTrackIdsFlow.collect { ids ->
+                Timber.tag("AudiobookService")
+                    .d("favoriteTrackIdsFlow collected. New ids size: ${ids.size}")
+                val oldIds = favoriteTrackIds
+                favoriteTrackIds = ids
+                val currentTrackId = mediaSession?.player?.currentMediaItem?.mediaId
+                if (currentTrackId != null) {
+                    val wasFavorite = oldIds.contains(currentTrackId)
+                    val isFavorite = ids.contains(currentTrackId)
                     if (wasFavorite != isFavorite) {
-                        Timber.tag("MusicService")
-                            .d("Favorite status changed for current song. Updating notification.")
+                        Timber.tag("AudiobookService")
+                            .d("Favorite status changed for current Track. Updating notification.")
                         mediaSession?.let { refreshMediaSessionUi(it) }
                     }
                 }
@@ -276,14 +276,14 @@ class MusicService : MediaSessionService() {
                 PlayerActions.NEXT -> player.seekToNext()
                 PlayerActions.PREVIOUS -> player.seekToPrevious()
                 PlayerActions.PLAY_FROM_QUEUE -> {
-                    val songId = intent.getLongExtra("song_id", -1L)
-                    if (songId != -1L) {
+                    val TrackId = intent.getLongExtra("Track_id", -1L)
+                    if (TrackId != -1L) {
                         val timeline = player.currentTimeline
                         if (!timeline.isEmpty) {
                             val window = androidx.media3.common.Timeline.Window()
                             for (i in 0 until timeline.windowCount) {
                                 timeline.getWindow(i, window)
-                                if (window.mediaItem.mediaId.toLongOrNull() == songId) {
+                                if (window.mediaItem.mediaId.toLongOrNull() == TrackId) {
                                     player.seekTo(i, C.TIME_UNSET)
                                     player.play()
                                     break
@@ -318,7 +318,7 @@ class MusicService : MediaSessionService() {
         }
 
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-            Timber.tag("MusicService")
+            Timber.tag("AudiobookService")
                 .d("playerListener.onShuffleModeEnabledChanged: $shuffleModeEnabled")
             mediaSession?.let { refreshMediaSessionUi(it) }
         }
@@ -380,7 +380,7 @@ class MusicService : MediaSessionService() {
         )
     }
 
-    // --- LÓGICA PARA ACTUALIZACIÓN DE WIDGETS Y DATOS ---
+    // --- LÃƒâ€œGICA PARA ACTUALIZACIÃƒâ€œN DE WIDGETS Y DATOS ---
     private var debouncedWidgetUpdateJob: Job? = null
     private val WIDGET_STATE_DEBOUNCE_MS = 300L
 
@@ -407,16 +407,16 @@ class MusicService : MediaSessionService() {
         val totalDuration = withContext(Dispatchers.Main) { player.duration.coerceAtLeast(0) }
 
         val title = currentItem?.mediaMetadata?.title?.toString().orEmpty()
-        val artist = currentItem?.mediaMetadata?.artist?.toString().orEmpty()
+        val Author = currentItem?.mediaMetadata?.Author?.toString().orEmpty()
         val mediaId = currentItem?.mediaId
         val artworkUri = currentItem?.mediaMetadata?.artworkUri
         val artworkData = currentItem?.mediaMetadata?.artworkData
 
-        val (artBytes, artUriString) = getAlbumArtForWidget(artworkData, artworkUri)
+        val (artBytes, artUriString) = getBookArtForWidget(artworkData, artworkUri)
 
         val isFavorite = false
 //        val isFavorite = mediaId?.let {
-//            //musicRepository.getFavoriteSongs().firstOrNull()?.any { song -> song.id.toString() == it }
+//            //AudiobookRepository.getFavoriteTracks().firstOrNull()?.any { Track -> Track.id.toString() == it }
 //        } ?: false
 
         val queueItems = mutableListOf<com.oakiha.audia.data.model.QueueItem>()
@@ -425,24 +425,24 @@ class MusicService : MediaSessionService() {
             val window = androidx.media3.common.Timeline.Window()
             val currentWindowIndex = withContext(Dispatchers.Main) { player.currentMediaItemIndex }
 
-            // Empezar desde la Next canción en la cola
+            // Empezar desde la Next canciÃƒÂ³n en la cola
             val startIndex = if (currentWindowIndex + 1 < timeline.windowCount) currentWindowIndex + 1 else 0
 
-            // Limitar el número de elementos de la cola a 4
+            // Limitar el nÃƒÂºmero de elementos de la cola a 4
             val endIndex = (startIndex + 4).coerceAtMost(timeline.windowCount)
             for (i in startIndex until endIndex) {
                 timeline.getWindow(i, window)
                 val mediaItem = window.mediaItem
-                val songId = mediaItem.mediaId.toLongOrNull()
-                if (songId != null) {
-                    val (artBytes, _) = getAlbumArtForWidget(
+                val TrackId = mediaItem.mediaId.toLongOrNull()
+                if (TrackId != null) {
+                    val (artBytes, _) = getBookArtForWidget(
                         embeddedArt = mediaItem.mediaMetadata?.artworkData,
                         artUri = mediaItem.mediaMetadata?.artworkUri
                     )
                     queueItems.add(
                         com.oakiha.audia.data.model.QueueItem(
-                            id = songId,
-                            albumArtBitmapData = artBytes
+                            id = TrackId,
+                            BookArtBitmapData = artBytes
                         )
                     )
                 }
@@ -450,11 +450,11 @@ class MusicService : MediaSessionService() {
         }
 
         return PlayerInfo(
-            songTitle = title,
-            artistName = artist,
+            TrackTitle = title,
+            AuthorName = Author,
             isPlaying = isPlaying,
-            albumArtUri = artUriString,
-            albumArtBitmapData = artBytes,
+            BookArtUri = artUriString,
+            BookArtBitmapData = artBytes,
             currentPositionMs = currentPosition,
             totalDurationMs = totalDuration,
             isFavorite = isFavorite,
@@ -464,7 +464,7 @@ class MusicService : MediaSessionService() {
 
     private val widgetArtByteArrayCache = LruCache<String, ByteArray>(5)
 
-    private suspend fun getAlbumArtForWidget(embeddedArt: ByteArray?, artUri: Uri?): Pair<ByteArray?, String?> = withContext(Dispatchers.IO) {
+    private suspend fun getBookArtForWidget(embeddedArt: ByteArray?, artUri: Uri?): Pair<ByteArray?, String?> = withContext(Dispatchers.IO) {
         if (embeddedArt != null && embeddedArt.isNotEmpty()) {
             return@withContext embeddedArt to artUri?.toString()
         }
@@ -490,7 +490,7 @@ class MusicService : MediaSessionService() {
                     updateAppWidgetState(applicationContext, PlayerInfoStateDefinition, id) { playerInfo }
                 }
                 AudioBookPlayerGlanceWidget().update(applicationContext, glanceIds.first())
-                Log.d(TAG, "Widget actualizado: ${playerInfo.songTitle}")
+                Log.d(TAG, "Widget actualizado: ${playerInfo.TrackTitle}")
             } else {
                 Log.w(TAG, "No se encontraron widgets para actualizar")
             }
@@ -519,8 +519,8 @@ class MusicService : MediaSessionService() {
         }
     }
 
-    fun isSongFavorite(songId: String?): Boolean {
-        return songId != null && favoriteSongIds.contains(songId)
+    fun isTrackFavorite(TrackId: String?): Boolean {
+        return TrackId != null && favoriteTrackIds.contains(TrackId)
     }
 
     fun isManualShuffleEnabled(): Boolean {
@@ -549,10 +549,10 @@ class MusicService : MediaSessionService() {
 
         if (broadcast && changed) {
             val args = Bundle().apply {
-                putBoolean(MusicNotificationProvider.EXTRA_SHUFFLE_ENABLED, enabled)
+                putBoolean(AudiobookNotificationProvider.EXTRA_SHUFFLE_ENABLED, enabled)
             }
             session.broadcastCustomCommand(
-                SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE, Bundle.EMPTY),
+                SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE, Bundle.EMPTY),
                 args
             )
         }
@@ -561,20 +561,20 @@ class MusicService : MediaSessionService() {
 
     private fun buildMediaButtonPreferences(session: MediaSession): List<CommandButton> {
         val player = session.player
-        val songId = player.currentMediaItem?.mediaId
-        val isFavorite = isSongFavorite(songId)
+        val TrackId = player.currentMediaItem?.mediaId
+        val isFavorite = isTrackFavorite(TrackId)
         val likeIcon = if (isFavorite) R.drawable.round_favorite_24 else R.drawable.round_favorite_border_24
         val likeButton = CommandButton.Builder()
             .setDisplayName("Like")
             .setIconResId(likeIcon)
-            .setSessionCommand(SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_LIKE, Bundle.EMPTY))
+            .setSessionCommand(SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_LIKE, Bundle.EMPTY))
             .build()
 
         val shuffleOn = isManualShuffleEnabled
         val shuffleCommandAction = if (shuffleOn) {
-            MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF
+            AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_OFF
         } else {
-            MusicNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON
+            AudiobookNotificationProvider.CUSTOM_COMMAND_SHUFFLE_ON
         }
         val shuffleIcon = if (shuffleOn) R.drawable.rounded_shuffle_on_24 else R.drawable.rounded_shuffle_24
         val shuffleButton = CommandButton.Builder()
@@ -591,7 +591,7 @@ class MusicService : MediaSessionService() {
         val repeatButton = CommandButton.Builder()
             .setDisplayName("Repeat")
             .setIconResId(repeatIcon)
-            .setSessionCommand(SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE, Bundle.EMPTY))
+            .setSessionCommand(SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_CYCLE_REPEAT_MODE, Bundle.EMPTY))
             .build()
 
         return listOf(likeButton, shuffleButton, repeatButton)
@@ -637,7 +637,7 @@ class MusicService : MediaSessionService() {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 if (!countedPlayActive) return
 
-                // If user manually changes the song -> cancel
+                // If user manually changes the Track -> cancel
                 if (mediaItem?.mediaId != countedOriginalId) {
                     stopCountedPlay()
                 }
@@ -651,7 +651,7 @@ class MusicService : MediaSessionService() {
             }
         }
 
-        countedPlayListener = listener
+        countedBooklistener = listener
         player.addListener(listener)
     }
 
@@ -663,10 +663,10 @@ class MusicService : MediaSessionService() {
         countedPlayCount = 0
         countedOriginalId = null
 
-        countedPlayListener?.let {
+        countedBooklistener?.let {
             engine.masterPlayer.removeListener(it)
         }
-        countedPlayListener = null
+        countedBooklistener = null
 
         // Restore normal repeat mode (OFF)
         engine.masterPlayer.repeatMode = Player.REPEAT_MODE_OFF

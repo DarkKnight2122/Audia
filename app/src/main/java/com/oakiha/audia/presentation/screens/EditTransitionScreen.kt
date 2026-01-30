@@ -98,17 +98,17 @@ fun EditTransitionScreen(
     } else {
         uiState.rule?.settings ?: uiState.globalSettings
     }
-    val isPlaylistScope = uiState.playlistId != null
+    val isBooklistscope = uiState.BooklistId != null
     val hasCustomRule = uiState.rule != null && !uiState.useGlobalDefaults
     val isCrossfadeEnabled = displayedSettings.mode != TransitionMode.NONE
 
-    // Configuración para el comportamiento de la TopBar colapsable (Material 3)
+    // ConfiguraciÃƒÂ³n para el comportamiento de la TopBar colapsable (Material 3)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             snackbarHostState.showSnackbar(
-                message = if (isPlaylistScope && uiState.useGlobalDefaults) {
+                message = if (isBooklistscope && uiState.useGlobalDefaults) {
                     "Using global defaults"
                 } else {
                     "Changes saved successfully"
@@ -125,7 +125,7 @@ fun EditTransitionScreen(
                 title = {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = if (isPlaylistScope) "Playlist rules" else "Global transitions",
+                        text = if (isBooklistscope) "Booklist rules" else "Global transitions",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -186,7 +186,7 @@ fun EditTransitionScreen(
             ) {
                 item {
                     Text(
-                        text = if (isPlaylistScope) "Configure default behavior for this specific playlist." else "This configuration applies to all playback sources unless overridden.",
+                        text = if (isBooklistscope) "Configure default behavior for this specific Booklist." else "This configuration applies to all playback sources unless overridden.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp)
@@ -195,12 +195,12 @@ fun EditTransitionScreen(
 
                 item {
                     TransitionSummaryCard(
-                        isPlaylistScope = isPlaylistScope,
+                        isBooklistscope = isBooklistscope,
                         hasCustomRule = hasCustomRule,
                         followingGlobal = uiState.useGlobalDefaults,
                         onResetToGlobal = { viewModel.useGlobalDefaults() },
-                        onEnableOverride = { viewModel.enablePlaylistOverride() },
-                        enabled = isPlaylistScope
+                        onEnableOverride = { viewModel.enableBooklistOverride() },
+                        enabled = isBooklistscope
                     )
                 }
 
@@ -215,7 +215,7 @@ fun EditTransitionScreen(
                     )
                 }
 
-                // Animación de visibilidad: Oculta controles complejos si no hay transición
+                // AnimaciÃƒÂ³n de visibilidad: Oculta controles complejos si no hay transiciÃƒÂ³n
                 item {
                     AnimatedVisibility(
                         visible = isCrossfadeEnabled,
@@ -243,7 +243,7 @@ fun EditTransitionScreen(
 
 @Composable
 private fun TransitionSummaryCard(
-    isPlaylistScope: Boolean,
+    isBooklistscope: Boolean,
     hasCustomRule: Boolean,
     followingGlobal: Boolean,
     onResetToGlobal: () -> Unit,
@@ -283,17 +283,17 @@ private fun TransitionSummaryCard(
                     )
                     Text(
                         text = when {
-                            !isPlaylistScope -> "Global Default"
+                            !isBooklistscope -> "Global Default"
                             followingGlobal -> "Following Global"
                             hasCustomRule -> "Custom Override"
-                            else -> "Playlist Default"
+                            else -> "Booklist Default"
                         },
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
             }
 
-            AnimatedVisibility(visible = isPlaylistScope) {
+            AnimatedVisibility(visible = isBooklistscope) {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
@@ -311,7 +311,7 @@ private fun TransitionSummaryCard(
                             .padding(end = 16.dp)) {
                             Text("Custom Override", style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = "Enable to set specific rules for this playlist.",
+                                text = "Enable to set specific rules for this Booklist.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -352,7 +352,7 @@ private fun TransitionModeSection(
             }
         }
 
-        // Componente Toggle rediseñado: Plano, simétrico, sin sombras raras
+        // Componente Toggle rediseÃƒÂ±ado: Plano, simÃƒÂ©trico, sin sombras raras
         ExpressiveMorphingToggle(
             options = listOf(TransitionMode.NONE, TransitionMode.OVERLAP),
             selectedOption = selected,
@@ -368,7 +368,7 @@ private fun ExpressiveMorphingToggle(
     onOptionSelected: (TransitionMode) -> Unit
 ) {
     val selectedIndex = if (selectedOption == TransitionMode.OVERLAP) 1 else 0
-    val shape = CircleShape //RoundedCornerShape(16.dp) // Menos redondeado para más estructura, o 50 para capsula
+    val shape = CircleShape //RoundedCornerShape(16.dp) // Menos redondeado para mÃƒÂ¡s estructura, o 50 para capsula
 
     // Contenedor Plano con borde sutil
     BoxWithConstraints(
@@ -389,13 +389,13 @@ private fun ExpressiveMorphingToggle(
             label = "offset"
         )
 
-        // El indicador se mueve detrás del texto
+        // El indicador se mueve detrÃƒÂ¡s del texto
         Box(
             modifier = Modifier
                 .width(indicatorWidth)
                 .fillMaxSize()
                 .offset(x = indicatorOffset)
-                .clip(CircleShape) // Un poco más pequeño que el contenedor
+                .clip(CircleShape) // Un poco mÃƒÂ¡s pequeÃƒÂ±o que el contenedor
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         )
 
@@ -497,7 +497,7 @@ private fun TransitionDurationSection(
 private fun CrossfadeVisualizer(durationMs: Int) {
     val maxDuration = 12000f
     val normalized = durationMs.coerceIn(0, 12000)
-    // Porcentaje de la superposición respecto al máximo
+    // Porcentaje de la superposiciÃƒÂ³n respecto al mÃƒÂ¡ximo
     val overlapFactor by animateFloatAsState(targetValue = normalized / maxDuration, label = "width")
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -507,12 +507,12 @@ private fun CrossfadeVisualizer(durationMs: Int) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Current Song",
+                "Current Track",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.tertiary
             )
             Text(
-                "Next Song",
+                "Next Track",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -528,7 +528,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Barra Canción 1 (Izquierda -> Derecha)
+                // Barra CanciÃƒÂ³n 1 (Izquierda -> Derecha)
                 // Se extiende hasta la mitad + la mitad del overlap
                 Box(
                     modifier = Modifier
@@ -540,11 +540,11 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                             shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
                         )
                 ) {
-                    // Extensión visual de la barra superior (Song 1 Ending)
-                    // Esta lógica es visual para representar el "overlap"
+                    // ExtensiÃƒÂ³n visual de la barra superior (Track 1 Ending)
+                    // Esta lÃƒÂ³gica es visual para representar el "overlap"
                 }
 
-                // Barra Canción 2 (Derecha -> Izquierda)
+                // Barra CanciÃƒÂ³n 2 (Derecha -> Izquierda)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -557,11 +557,11 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                 )
             }
 
-            // Área de superposición dinámica (El "Crossfade")
+            // ÃƒÂrea de superposiciÃƒÂ³n dinÃƒÂ¡mica (El "Crossfade")
             // Representa el tiempo compartido
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.1f + (overlapFactor * 0.4f)) // Mínimo visual + factor
+                    .fillMaxWidth(0.1f + (overlapFactor * 0.4f)) // MÃƒÂ­nimo visual + factor
                     .background(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.surfaceContainerLow//.copy(alpha = 0.8f) // Masking effect
@@ -573,7 +573,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
 //                        RoundedCornerShape(8.dp)
 //                    )
             ) {
-                // Representación interna del cruce
+                // RepresentaciÃƒÂ³n interna del cruce
                 Row(modifier = Modifier.fillMaxSize()) {
                     Box(
                         modifier = Modifier
@@ -625,7 +625,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
             }
         }
 
-        // Explicación textual dinámica
+        // ExplicaciÃƒÂ³n textual dinÃƒÂ¡mica
         Text(
             text = "Tracks will overlap for ${TimeUnit.MILLISECONDS.toSeconds(durationMs.toLong())}s",
             style = MaterialTheme.typography.bodySmall,
@@ -704,7 +704,7 @@ private fun CurveSelectionColumn(
                 Curve.entries.forEach { curve ->
                     val isSelected = selected == curve
 
-                    // Diseño Expressive: La selección es una forma, no solo un check
+                    // DiseÃƒÂ±o Expressive: La selecciÃƒÂ³n es una forma, no solo un check
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

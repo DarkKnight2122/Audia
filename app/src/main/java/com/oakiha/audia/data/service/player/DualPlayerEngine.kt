@@ -155,7 +155,7 @@ class DualPlayerEngine @Inject constructor(
 
         val attributes = android.media.AudioAttributes.Builder()
             .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_Audiobook)
             .build()
 
         val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
@@ -184,7 +184,7 @@ class DualPlayerEngine @Inject constructor(
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
         val audioAttributes = AudioAttributes.Builder()
-            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .setContentType(C.AUDIO_CONTENT_TYPE_Audiobook)
             .setUsage(C.USAGE_MEDIA)
             .build()
 
@@ -298,8 +298,8 @@ class DualPlayerEngine @Inject constructor(
             return
         }
 
-        // 1. Start Player B (Next Song) paused with volume=0 then immediately request play so overlap is audible
-        // NOTE: playerA is currently playing "Old Song". playerB is "Next Song".
+        // 1. Start Player B (Next Track) paused with volume=0 then immediately request play so overlap is audible
+        // NOTE: playerA is currently playing "Old Track". playerB is "Next Track".
         playerB.volume = 0f
         playerA.volume = 1f
         if (!playerA.isPlaying && playerA.playbackState == Player.STATE_READY) {
@@ -332,7 +332,7 @@ class DualPlayerEngine @Inject constructor(
         delay(75)
 
         // --- SWAP PLAYERS EARLY (Before Fade) ---
-        // This ensures the UI updates to show the "Next Song" immediately when the transition starts.
+        // This ensures the UI updates to show the "Next Track" immediately when the transition starts.
 
         // 1. Identify Outgoing (Old A) and Incoming (Old B / New A)
         val outgoingPlayer = playerA
@@ -342,14 +342,14 @@ class DualPlayerEngine @Inject constructor(
 
         val currentOutgoingIndex = outgoingPlayer.currentMediaItemIndex
 
-        // History: All songs up to and including the current one (Old Song)
+        // History: All Tracks up to and including the current one (Old Track)
         val historyToTransfer = mutableListOf<MediaItem>()
         val historyEndIndex = if (isSelfTransition) currentOutgoingIndex else currentOutgoingIndex + 1
         for (i in 0 until historyEndIndex) {
             historyToTransfer.add(outgoingPlayer.getMediaItemAt(i))
         }
 
-        // Future: Songs AFTER the Next Song
+        // Future: Tracks AFTER the Next Track
         // We skip the immediate next one because incomingPlayer already has it.
         val futureToTransfer = mutableListOf<MediaItem>()
         val futureStartIndex = if (isSelfTransition) currentOutgoingIndex + 1 else currentOutgoingIndex + 2
@@ -402,7 +402,7 @@ class DualPlayerEngine @Inject constructor(
         // Update Session ID for Equalizer
         _activeAudioSessionId.value = playerA.audioSessionId
         
-        Timber.tag("TransitionDebug").d("Players swapped EARLY. UI should now show next song.")
+        Timber.tag("TransitionDebug").d("Players swapped EARLY. UI should now show next Track.")
 
         // *** FADE LOOP ***
         // playerA is now the Incoming/New Master.

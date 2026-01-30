@@ -43,15 +43,15 @@ fun DailyMixMenu(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Tu Daily Mix se crea a partir de tus canciones favoritas y las que más escuchas. También añadimos canciones de artistas y géneros que te gustan para que descubras nueva música.",
+                text = "Tu Daily Mix se crea a partir de tus canciones favoritas y las que mÃ¡s escuchas. TambiÃ©n aÃ±adimos canciones de Authoras y gÃ©neros que te gustan para que descubras nueva mÃºsica.",
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = prompt,
                 onValueChange = { prompt = it },
-                label = { Text("Dile a la IA qué quieres escuchar hoy") },
+                label = { Text("Dile a la IA quÃ© quieres escuchar hoy") },
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = { Text("Usamos una muestra pequeña para mantener los costos bajos") }
+                supportingText = { Text("Usamos una muestra pequeÃ±a para mantener los costos bajos") }
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(

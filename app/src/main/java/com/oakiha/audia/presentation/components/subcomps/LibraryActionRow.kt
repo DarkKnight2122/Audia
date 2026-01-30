@@ -32,7 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.BooklistAdd
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -61,7 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import java.io.File
@@ -76,13 +76,13 @@ fun LibraryActionRow(
     onSortClick: () -> Unit,
     showSortButton: Boolean,
     showGenerateButton: Boolean = true,
-    isPlaylistTab: Boolean,
+    isBooklistTab: Boolean,
     onGenerateWithAiClick: () -> Unit,
     onImportM3uClick: () -> Unit = {},
     isFoldersTab: Boolean,
     modifier: Modifier = Modifier,
     // Breadcrumb parameters
-    currentFolder: MusicFolder?,
+    currentFolder: AudiobookFolder?,
     onFolderClick: (String) -> Unit,
     onNavigateBack: () -> Unit,
     isShuffleEnabled: Boolean = false
@@ -116,21 +116,21 @@ fun LibraryActionRow(
                 )
             } else {
                 val newButtonEndCorner by animateDpAsState(
-                    targetValue = if (isPlaylistTab && showGenerateButton) 6.dp else 26.dp,
+                    targetValue = if (isBooklistTab && showGenerateButton) 6.dp else 26.dp,
                     label = "NewButtonEndCorner"
                 )
                 val generateButtonStartCorner by animateDpAsState(
-                    targetValue = if (isPlaylistTab) 6.dp else 26.dp,
+                    targetValue = if (isBooklistTab) 6.dp else 26.dp,
                     label = "GenerateButtonStartCorner"
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Determine button colors based on shuffle state (not for playlist tab)
-                    val buttonContainerColor = if (!isPlaylistTab && isShuffleEnabled) {
+                    // Determine button colors based on shuffle state (not for Booklist tab)
+                    val buttonContainerColor = if (!isBooklistTab && isShuffleEnabled) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.tertiaryContainer
                     }
-                    val buttonContentColor = if (!isPlaylistTab && isShuffleEnabled) {
+                    val buttonContentColor = if (!isBooklistTab && isShuffleEnabled) {
                         MaterialTheme.colorScheme.onPrimary
                     } else {
                         MaterialTheme.colorScheme.onTertiaryContainer
@@ -150,9 +150,9 @@ fun LibraryActionRow(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                         modifier = Modifier.height(genHeight)
                     ) {
-                        val icon = if (isPlaylistTab) Icons.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
-                        val text = if (isPlaylistTab) "New" else if (isShuffleEnabled) "Shuffle On" else "Shuffle"
-                        val contentDesc = if (isPlaylistTab) "Create New Playlist" else "Shuffle Play"
+                        val icon = if (isBooklistTab) Icons.Rounded.BooklistAdd else Icons.Rounded.Shuffle
+                        val text = if (isBooklistTab) "New" else if (isShuffleEnabled) "Shuffle On" else "Shuffle"
+                        val contentDesc = if (isBooklistTab) "Create New Booklist" else "Shuffle Play"
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -174,10 +174,10 @@ fun LibraryActionRow(
                     }
 
                     AnimatedVisibility(
-                        visible = isPlaylistTab,
+                        visible = isBooklistTab,
                         enter = fadeIn() + expandHorizontally(
                             expandFrom = Alignment.Start,
-                            clip = false, // <— evita el “corte” durante la expansión
+                            clip = false, // <â€” evita el â€œcorteâ€ durante la expansiÃ³n
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
                                 stiffness = Spring.StiffnessLow
@@ -185,7 +185,7 @@ fun LibraryActionRow(
                         ),
                         exit = fadeOut() + shrinkHorizontally(
                             shrinkTowards = Alignment.Start,
-                            clip = false, // <— evita el “corte” durante la expansión
+                            clip = false, // <â€” evita el â€œcorteâ€ durante la expansiÃ³n
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioNoBouncy,
                                 stiffness = Spring.StiffnessMedium
@@ -258,7 +258,7 @@ fun LibraryActionRow(
 
 @Composable
 fun Breadcrumbs(
-    currentFolder: MusicFolder?,
+    currentFolder: AudiobookFolder?,
     onFolderClick: (String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -314,10 +314,10 @@ fun Breadcrumbs(
                     // 2. Dibujamos el contenido original (el LazyRow).
                     drawContent()
 
-                    // 3. Dibujamos los gradientes que actúan como "máscaras de borrado".
+                    // 3. Dibujamos los gradientes que actÃºan como "mÃ¡scaras de borrado".
                     val gradientWidth = 24.dp.toPx()
 
-                    // Máscara para el borde IZQUIERDO
+                    // MÃ¡scara para el borde IZQUIERDO
                     if (showStartFade) {
                         drawRect(
                             brush = Brush.horizontalGradient(
@@ -330,7 +330,7 @@ fun Breadcrumbs(
                         )
                     }
 
-                    // Máscara para el borde DERECHO
+                    // MÃ¡scara para el borde DERECHO
                     if (showEndFade) {
                         drawRect(
                             brush = Brush.horizontalGradient(

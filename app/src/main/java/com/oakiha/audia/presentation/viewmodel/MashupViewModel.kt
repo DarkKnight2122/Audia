@@ -5,8 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.presentation.viewmodel.exts.DeckController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class DeckState(
-    val song: Song? = null,
+    val Track: Track? = null,
     val isPlaying: Boolean = false,
     val progress: Float = 0f,
     val volume: Float = 1f,
@@ -31,14 +31,14 @@ data class MashupUiState(
     val deck1: DeckState = DeckState(),
     val deck2: DeckState = DeckState(),
     val crossfaderValue: Float = 0f,
-    val allSongs: List<Song> = emptyList(),
-    val showSongPickerForDeck: Int? = null
+    val allTracks: List<Track> = emptyList(),
+    val showTrackPickerForDeck: Int? = null
 )
 
 @HiltViewModel
 class MashupViewModel @Inject constructor(
     private val application: Application,
-    private val musicRepository: MusicRepository
+    private val AudiobookRepository: AudiobookRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MashupUiState())
@@ -51,7 +51,7 @@ class MashupViewModel @Inject constructor(
 
     init {
         initializeDecks()
-        loadAllSongs()
+        loadAllTracks()
         startProgressUpdater()
     }
 
@@ -60,25 +60,25 @@ class MashupViewModel @Inject constructor(
         deck2Controller = DeckController(application)
     }
 
-    private fun loadAllSongs() {
+    private fun loadAllTracks() {
         viewModelScope.launch {
-            musicRepository.getAudioFiles().collect { songs ->
-                _uiState.update { it.copy(allSongs = songs) }
+            AudiobookRepository.getAudioFiles().collect { Tracks ->
+                _uiState.update { it.copy(allTracks = Tracks) }
             }
         }
     }
 
-    fun loadSong(deck: Int, song: Song) {
-        updateDeckState(deck) { it.copy(song = song) }
-        val songUri = Uri.parse(song.contentUriString)
+    fun loadTrack(deck: Int, Track: Track) {
+        updateDeckState(deck) { it.copy(Track = Track) }
+        val TrackUri = Uri.parse(Track.contentUriString)
         val controller = if (deck == 1) deck1Controller else deck2Controller
-        controller.loadSong(songUri)
+        controller.loadTrack(TrackUri)
         controller.player?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 updateDeckState(deck) { it.copy(isPlaying = isPlaying) }
             }
         })
-        closeSongPicker()
+        closeTrackPicker()
     }
 
     private fun updateDeckState(deck: Int, update: (DeckState) -> DeckState) {
@@ -126,8 +126,8 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    fun openSongPicker(deck: Int) { _uiState.update { it.copy(showSongPickerForDeck = deck) } }
-    fun closeSongPicker() { _uiState.update { it.copy(showSongPickerForDeck = null) } }
+    fun openTrackPicker(deck: Int) { _uiState.update { it.copy(showTrackPickerForDeck = deck) } }
+    fun closeTrackPicker() { _uiState.update { it.copy(showTrackPickerForDeck = null) } }
 
     override fun onCleared() {
         super.onCleared()

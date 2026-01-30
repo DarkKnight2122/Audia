@@ -18,24 +18,24 @@ interface TransitionDao {
     suspend fun setRule(rule: TransitionRuleEntity)
 
     /**
-     * Gets the default transition rule for a given playlist.
+     * Gets the default transition rule for a given Booklist.
      * A default rule is one where fromTrackId and toTrackId are both null.
      */
-    @Query("SELECT * FROM transition_rules WHERE playlistId = :playlistId AND fromTrackId IS NULL AND toTrackId IS NULL")
-    fun getPlaylistDefaultRule(playlistId: String): Flow<TransitionRuleEntity?>
+    @Query("SELECT * FROM transition_rules WHERE BooklistId = :BooklistId AND fromTrackId IS NULL AND toTrackId IS NULL")
+    fun getBooklistDefaultRule(BooklistId: String): Flow<TransitionRuleEntity?>
 
     /**
-     * Gets a specific transition rule between two tracks in a playlist.
+     * Gets a specific transition rule between two tracks in a Booklist.
      */
-    @Query("SELECT * FROM transition_rules WHERE playlistId = :playlistId AND fromTrackId = :fromTrackId AND toTrackId = :toTrackId")
-    fun getSpecificRule(playlistId: String, fromTrackId: String, toTrackId: String): Flow<TransitionRuleEntity?>
+    @Query("SELECT * FROM transition_rules WHERE BooklistId = :BooklistId AND fromTrackId = :fromTrackId AND toTrackId = :toTrackId")
+    fun getSpecificRule(BooklistId: String, fromTrackId: String, toTrackId: String): Flow<TransitionRuleEntity?>
 
     /**
-     * Gets all rules (default and specific) for a given playlist.
+     * Gets all rules (default and specific) for a given Booklist.
      * Useful for a settings screen.
      */
-    @Query("SELECT * FROM transition_rules WHERE playlistId = :playlistId")
-    fun getAllRulesForPlaylist(playlistId: String): Flow<List<TransitionRuleEntity>>
+    @Query("SELECT * FROM transition_rules WHERE BooklistId = :BooklistId")
+    fun getAllRulesForBooklist(BooklistId: String): Flow<List<TransitionRuleEntity>>
 
     /**
      * Deletes a rule by its primary key.
@@ -44,8 +44,8 @@ interface TransitionDao {
     suspend fun deleteRule(ruleId: Long)
 
     /**
-     * Deletes the default rule for a given playlist.
+     * Deletes the default rule for a given Booklist.
      */
-    @Query("DELETE FROM transition_rules WHERE playlistId = :playlistId AND fromTrackId IS NULL AND toTrackId IS NULL")
-    suspend fun deletePlaylistDefaultRule(playlistId: String)
+    @Query("DELETE FROM transition_rules WHERE BooklistId = :BooklistId AND fromTrackId IS NULL AND toTrackId IS NULL")
+    suspend fun deleteBooklistDefaultRule(BooklistId: String)
 }

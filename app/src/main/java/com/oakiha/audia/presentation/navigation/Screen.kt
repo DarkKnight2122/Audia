@@ -14,34 +14,34 @@ sealed class Screen(val route: String) {
     }
     object Experimental : Screen("experimental_settings")
     object NavBarCrRad : Screen("nav_bar_corner_radius")
-    object PlaylistDetail : Screen("playlist_detail/{playlistId}") {
-        fun createRoute(playlistId: String) = "playlist_detail/$playlistId"
+    object BooklistDetail : Screen("Booklist_detail/{BooklistId}") {
+        fun createRoute(BooklistId: String) = "Booklist_detail/$BooklistId"
     }
 
     object  DailyMixScreen : Screen("daily_mix")
     object Stats : Screen("stats")
-    object GenreDetail : Screen("genre_detail/{genreId}") { // New screen
-        fun createRoute(genreId: String) = "genre_detail/$genreId"
+    object CategoryDetail : Screen("Category_detail/{CategoryId}") { // New screen
+        fun createRoute(CategoryId: String) = "Category_detail/$CategoryId"
     }
     object DJSpace : Screen("dj_space")
-    // La ruta base es "album_detail". La ruta completa con el argumento se define en AppNavigation.
-    object AlbumDetail : Screen("album_detail/{albumId}") {
-        // Función de ayuda para construir la ruta de navegación con el ID del álbum.
-        fun createRoute(albumId: Long) = "album_detail/$albumId"
+    // La ruta base es "Book_detail". La ruta completa con el argumento se define en AppNavigation.
+    object BookDetail : Screen("Book_detail/{BookId}") {
+        // FunciÃƒÂ³n de ayuda para construir la ruta de navegaciÃƒÂ³n con el ID del ÃƒÂ¡lbum.
+        fun createRoute(BookId: Long) = "Book_detail/$BookId"
     }
 
-    object ArtistDetail : Screen("artist_detail/{artistId}") {
-        fun createRoute(artistId: Long) = "artist_detail/$artistId"
+    object AuthorDetail : Screen("Author_detail/{AuthorId}") {
+        fun createRoute(AuthorId: Long) = "Author_detail/$AuthorId"
     }
 
-    object EditTransition : Screen("edit_transition?playlistId={playlistId}") {
-        fun createRoute(playlistId: String?) =
-            if (playlistId != null) "edit_transition?playlistId=$playlistId" else "edit_transition"
+    object EditTransition : Screen("edit_transition?BooklistId={BooklistId}") {
+        fun createRoute(BooklistId: String?) =
+            if (BooklistId != null) "edit_transition?BooklistId=$BooklistId" else "edit_transition"
     }
 
     object About : Screen("about")
 
-    object ArtistSettings : Screen("artist_settings")
+    object Authorsettings : Screen("Author_settings")
     object DelimiterConfig : Screen("delimiter_config")
     object Equalizer : Screen("equalizer")
 

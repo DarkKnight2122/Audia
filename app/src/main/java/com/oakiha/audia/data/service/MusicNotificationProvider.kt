@@ -1,6 +1,6 @@
 package com.oakiha.audia.data.service
 
-object MusicNotificationProvider {
+object AudiobookNotificationProvider {
     const val CUSTOM_COMMAND_SHUFFLE_ON = "com.oakiha.audia.SHUFFLE_ON"
     const val CUSTOM_COMMAND_SHUFFLE_OFF = "com.oakiha.audia.SHUFFLE_OFF"
     const val CUSTOM_COMMAND_SET_SHUFFLE_STATE = "com.oakiha.audia.SET_SHUFFLE_STATE"

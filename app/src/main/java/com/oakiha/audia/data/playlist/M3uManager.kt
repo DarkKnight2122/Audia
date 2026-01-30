@@ -1,10 +1,10 @@
-package com.oakiha.audia.data.playlist
+package com.oakiha.audia.data.Booklist
 
 import android.content.Context
 import android.net.Uri
-import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.model.Booklist
+import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import java.io.BufferedReader
@@ -15,20 +15,20 @@ import javax.inject.Singleton
 @Singleton
 class M3uManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository
+    private val AudiobookRepository: AudiobookRepository
 ) {
 
     suspend fun parseM3u(uri: Uri): Pair<String, List<String>> {
-        val songIds = mutableListOf<String>()
-        var playlistName = "Imported Playlist"
+        val TrackIds = mutableListOf<String>()
+        var BooklistName = "Imported Booklist"
 
-        // Pre-load all songs once for efficient lookup (fixes performance issue with large M3U files)
-        val allSongs = musicRepository.getAudioFiles().first()
+        // Pre-load all Tracks once for efficient lookup (fixes performance issue with large M3U files)
+        val allTracks = AudiobookRepository.getAudioFiles().first()
         
         // Build lookup maps for fast matching
-        val songsByPath = allSongs.associateBy { it.path }
-        val songsByFileName = allSongs.groupBy { it.path.substringAfterLast("/") }
-        val songsByContentUriFileName = allSongs.groupBy { it.contentUriString.substringAfterLast("/") }
+        val TracksByPath = allTracks.associateBy { it.path }
+        val TracksByFileName = allTracks.groupBy { it.path.substringAfterLast("/") }
+        val TracksByContentUriFileName = allTracks.groupBy { it.contentUriString.substringAfterLast("/") }
 
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
@@ -41,42 +41,42 @@ class M3uManager @Inject constructor(
                     }
                     
                     // trimmedLine is likely a file path or URI
-                    // We need to find a song in our database that matches this path
+                    // We need to find a Track in our database that matches this path
                     
                     // First try exact path match from pre-loaded map
-                    val songByPath = songsByPath[trimmedLine]
-                    if (songByPath != null) {
-                        songIds.add(songByPath.id)
+                    val TrackByPath = TracksByPath[trimmedLine]
+                    if (TrackByPath != null) {
+                        TrackIds.add(TrackByPath.id)
                     } else {
                         // Try to match by filename if path doesn't match exactly
                         val fileName = trimmedLine.substringAfterLast("/")
-                        val matchedSong = songsByFileName[fileName]?.firstOrNull()
-                            ?: songsByContentUriFileName[fileName]?.firstOrNull()
-                        if (matchedSong != null) {
-                            songIds.add(matchedSong.id)
+                        val matchedTrack = TracksByFileName[fileName]?.firstOrNull()
+                            ?: TracksByContentUriFileName[fileName]?.firstOrNull()
+                        if (matchedTrack != null) {
+                            TrackIds.add(matchedTrack.id)
                         }
                     }
                 }
             }
         }
 
-        // Try to get the filename as playlist name
+        // Try to get the filename as Booklist name
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
             if (nameIndex != -1 && cursor.moveToFirst()) {
-                playlistName = cursor.getString(nameIndex).removeSuffix(".m3u").removeSuffix(".m3u8")
+                BooklistName = cursor.getString(nameIndex).removeSuffix(".m3u").removeSuffix(".m3u8")
             }
         }
 
-        return Pair(playlistName, songIds)
+        return Pair(BooklistName, TrackIds)
     }
 
-    fun generateM3u(playlist: Playlist, songs: List<Song>): String {
+    fun generateM3u(Booklist: Booklist, Tracks: List<Track>): String {
         val sb = StringBuilder()
         sb.append("#EXTM3U\n")
-        for (song in songs) {
-            sb.append("#EXTINF:${song.duration / 1000},${song.artist} - ${song.title}\n")
-            sb.append("${song.path}\n")
+        for (Track in Tracks) {
+            sb.append("#EXTINF:${Track.duration / 1000},${Track.Author} - ${Track.title}\n")
+            sb.append("${Track.path}\n")
         }
         return sb.toString()
     }

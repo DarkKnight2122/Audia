@@ -1,31 +1,31 @@
 package com.oakiha.audia.data.model
 
 /**
- * Preference for lyrics source priority order.
- * Determines which source to try first when fetching lyrics.
+ * Preference for Transcript source priority order.
+ * Determines which source to try first when fetching Transcript.
  */
-enum class LyricsSourcePreference(val displayName: String) {
+enum class TranscriptSourcePreference(val displayName: String) {
     /**
-     * Try online API first, then embedded lyrics, then local .lrc files
+     * Try online API first, then embedded Transcript, then local .lrc files
      */
     API_FIRST("Online First"),
     
     /**
-     * Try embedded lyrics in metadata first, then API, then local .lrc files
+     * Try embedded Transcript in metadata first, then API, then local .lrc files
      */
     EMBEDDED_FIRST("Embedded First"),
     
     /**
-     * Try local .lrc files first, then embedded lyrics, then API
+     * Try local .lrc files first, then embedded Transcript, then API
      */
     LOCAL_FIRST("Local First");
     
     companion object {
-        fun fromOrdinal(ordinal: Int): LyricsSourcePreference {
+        fun fromOrdinal(ordinal: Int): TranscriptSourcePreference {
             return values().getOrElse(ordinal) { EMBEDDED_FIRST }
         }
         
-        fun fromName(name: String?): LyricsSourcePreference {
+        fun fromName(name: String?): TranscriptSourcePreference {
             return values().find { it.name == name } ?: EMBEDDED_FIRST
         }
     }

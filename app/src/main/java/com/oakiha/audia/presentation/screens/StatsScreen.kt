@@ -112,9 +112,9 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.outlined.Book
 import com.oakiha.audia.utils.shapes.RoundedStarShape
-import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.AudiobookNote
 import androidx.compose.material.icons.outlined.PlayCircleOutline
 import com.oakiha.audia.ui.theme.ExpTitleTypography
 
@@ -189,7 +189,7 @@ fun StatsScreen(
     val tabIndicatorExtraSpacing = 8.dp
     val tabContentSpacing = 20.dp
     var selectedTimelineMetric by rememberSaveable { mutableStateOf(TimelineMetric.ListeningTime) }
-    var selectedCategoryDimension by rememberSaveable { mutableStateOf(CategoryDimension.Song) }
+    var selectedCategoryDimension by rememberSaveable { mutableStateOf(CategoryDimension.Track) }
 
     Box(
         modifier = Modifier
@@ -244,19 +244,19 @@ fun StatsScreen(
                     )
                 }
                 item {
-                    TopArtistsCard(
+                    TopAuthorsCard(
                         summary = summary,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
                 item {
-                    TopAlbumsCard(
+                    TopBooksCard(
                         summary = summary,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
                 item {
-                    SongStatsCard(
+                    TrackstatsCard(
                         summary = summary,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -534,7 +534,7 @@ private fun SummaryProgressRow(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
-    val displayLabel = label ?: "—"
+    val displayLabel = label ?: "Ã¢â‚¬â€"
     val progressValue = progress.coerceIn(0f, 1f)
     Column(
         modifier = modifier
@@ -677,7 +677,7 @@ private fun ListeningHabitsCard(
                         value = if (summary.longestSessionDurationMs > 0L) {
                             formatListeningDurationCompact(summary.longestSessionDurationMs)
                         } else {
-                            "—"
+                            "Ã¢â‚¬â€"
                         }
                     )
                     HabitMetric(
@@ -689,7 +689,7 @@ private fun ListeningHabitsCard(
                 Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                 HighlightRow(
                     title = "Most active day",
-                    value = summary.peakDayLabel ?: "—",
+                    value = summary.peakDayLabel ?: "Ã¢â‚¬â€",
                     supporting = if (summary.peakDayDurationMs > 0L) {
                         formatListeningDurationCompact(summary.peakDayDurationMs)
                     } else {
@@ -749,7 +749,7 @@ private fun HabitMetric(
 private fun formatMinutesWindowLabel(startMinute: Int, endMinute: Int): String {
     val safeStart = startMinute.coerceIn(0, 24 * 60)
     val safeEnd = endMinute.coerceIn(0, 24 * 60)
-    return "${formatHourLabel(safeStart)} – ${formatHourLabel(safeEnd)}"
+    return "${formatHourLabel(safeStart)} Ã¢â‚¬â€œ ${formatHourLabel(safeEnd)}"
 }
 
 private fun formatHourLabel(minute: Int): String {
@@ -841,25 +841,25 @@ private enum class CategoryDimension(
     val cardTitle: String,
     val highlightTitle: String
 ) {
-    Genre(
-        displayName = "Genre",
-        cardTitle = "Listening by genre",
-        highlightTitle = "Top genre"
+    Category(
+        displayName = "Category",
+        cardTitle = "Listening by Category",
+        highlightTitle = "Top Category"
     ),
-    Artist(
-        displayName = "Artist",
-        cardTitle = "Listening by artist",
-        highlightTitle = "Top artist"
+    Author(
+        displayName = "Author",
+        cardTitle = "Listening by Author",
+        highlightTitle = "Top Author"
     ),
-    Album(
-        displayName = "Album",
-        cardTitle = "Listening by album",
-        highlightTitle = "Top album"
+    Book(
+        displayName = "Book",
+        cardTitle = "Listening by Book",
+        highlightTitle = "Top Book"
     ),
-    Song(
-        displayName = "Song",
-        cardTitle = "Listening by song",
-        highlightTitle = "Top song"
+    Track(
+        displayName = "Track",
+        cardTitle = "Listening by Track",
+        highlightTitle = "Top Track"
     )
 }
 
@@ -990,7 +990,7 @@ private fun CategoryMetricsSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Compare how you listen across genres, artists, albums, and songs.",
+                text = "Compare how you listen across Categories, Authors, Books, and Tracks.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1031,41 +1031,41 @@ private fun CategoryMetricsSection(
 
         val entries = remember(summary, selectedDimension) {
             val base = when (selectedDimension) {
-                CategoryDimension.Genre -> summary?.topGenres.orEmpty().map {
+                CategoryDimension.Category -> summary?.topCategories.orEmpty().map {
                     CategoryMetricEntry(
-                        label = it.genre,
+                        label = it.Category,
                         durationMs = it.totalDurationMs,
-                        supporting = "${it.playCount} plays • ${it.uniqueArtists} artists"
+                        supporting = "${it.playCount} plays Ã¢â‚¬Â¢ ${it.uniqueAuthors} Authors"
                     )
                 }
 
-                CategoryDimension.Artist -> summary?.topArtists.orEmpty().map {
+                CategoryDimension.Author -> summary?.topAuthors.orEmpty().map {
                     CategoryMetricEntry(
-                        label = it.artist,
+                        label = it.Author,
                         durationMs = it.totalDurationMs,
-                        supporting = "${it.playCount} plays • ${it.uniqueSongs} tracks"
+                        supporting = "${it.playCount} plays Ã¢â‚¬Â¢ ${it.uniqueTracks} tracks"
                     )
                 }
 
-                CategoryDimension.Album -> summary?.topAlbums.orEmpty().map {
+                CategoryDimension.Book -> summary?.topBooks.orEmpty().map {
                     CategoryMetricEntry(
-                        label = it.album,
+                        label = it.Book,
                         durationMs = it.totalDurationMs,
-                        supporting = "${it.playCount} plays • ${it.uniqueSongs} tracks"
+                        supporting = "${it.playCount} plays Ã¢â‚¬Â¢ ${it.uniqueTracks} tracks"
                     )
                 }
 
-                CategoryDimension.Song -> summary?.topSongs.orEmpty().map {
+                CategoryDimension.Track -> summary?.topTracks.orEmpty().map {
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
-                        if (it.artist.isNotBlank()) {
-                            add(it.artist)
+                        if (it.Author.isNotBlank()) {
+                            add(it.Author)
                         }
                     }
                     CategoryMetricEntry(
                         label = it.title,
                         durationMs = it.totalDurationMs,
-                        supporting = supportingParts.joinToString(separator = " • ")
+                        supporting = supportingParts.joinToString(separator = " Ã¢â‚¬Â¢ ")
                     )
                 }
             }
@@ -1074,7 +1074,7 @@ private fun CategoryMetricsSection(
 
         if (entries.isEmpty()) {
             StatsEmptyState(
-                icon = Icons.Outlined.MusicNote,
+                icon = Icons.Outlined.AudiobookNote,
                 title = "No category data yet",
                 subtitle = "Press play to surface your listening highlights"
             )
@@ -1352,7 +1352,7 @@ private fun TimelineBarChart(
 }
 
 @Composable
-private fun TopArtistsCard(
+private fun TopAuthorsCard(
     summary: PlaybackStatsRepository.PlaybackStatsSummary?,
     modifier: Modifier = Modifier
 ) {
@@ -1366,37 +1366,37 @@ private fun TopArtistsCard(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Top artists",
+                text = "Top Authors",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val artists = summary?.topArtists.orEmpty()
-            if (artists.isEmpty()) {
+            val Authors = summary?.topAuthors.orEmpty()
+            if (Authors.isEmpty()) {
                 StatsEmptyState(
-                    icon = Icons.Outlined.MusicNote,
-                    title = "No top artists",
-                    subtitle = "Keep listening and your favorite artists will show up here."
+                    icon = Icons.Outlined.AudiobookNote,
+                    title = "No top Authors",
+                    subtitle = "Keep listening and your favorite Authors will show up here."
                 )
             } else {
-                val maxDuration = artists.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
+                val maxDuration = Authors.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    artists.forEachIndexed { index, artistSummary ->
+                    Authors.forEachIndexed { index, Authorsummary ->
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                ArtistAvatar(name = artistSummary.artist)
+                                AuthorAvatar(name = Authorsummary.Author)
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${index + 1}. ${artistSummary.artist}",
+                                        text = "${index + 1}. ${Authorsummary.Author}",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = "${artistSummary.playCount} plays • ${artistSummary.uniqueSongs} tracks",
+                                        text = "${Authorsummary.playCount} plays Ã¢â‚¬Â¢ ${Authorsummary.uniqueTracks} tracks",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
@@ -1404,13 +1404,13 @@ private fun TopArtistsCard(
                                     )
                                 }
                                 Text(
-                                    text = formatListeningDurationCompact(artistSummary.totalDurationMs),
+                                    text = formatListeningDurationCompact(Authorsummary.totalDurationMs),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             LinearProgressIndicator(
-                                progress = (artistSummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
+                                progress = (Authorsummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
                                 modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -1424,7 +1424,7 @@ private fun TopArtistsCard(
 }
 
 @Composable
-private fun ArtistAvatar(name: String) {
+private fun AuthorAvatar(name: String) {
     val initials = remember(name) {
         name.split(" ")
             .filter { it.isNotBlank() }
@@ -1449,7 +1449,7 @@ private fun ArtistAvatar(name: String) {
 }
 
 @Composable
-private fun TopAlbumsCard(
+private fun TopBooksCard(
     summary: PlaybackStatsRepository.PlaybackStatsSummary?,
     modifier: Modifier = Modifier
 ) {
@@ -1463,29 +1463,29 @@ private fun TopAlbumsCard(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Top albums",
+                text = "Top Books",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val albums = summary?.topAlbums.orEmpty()
-            if (albums.isEmpty()) {
+            val Books = summary?.topBooks.orEmpty()
+            if (Books.isEmpty()) {
                 StatsEmptyState(
-                    icon = Icons.Outlined.Album,
-                    title = "No top albums",
-                    subtitle = "Albums you revisit often will appear here."
+                    icon = Icons.Outlined.Book,
+                    title = "No top Books",
+                    subtitle = "Books you revisit often will appear here."
                 )
             } else {
-                val maxDuration = albums.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
+                val maxDuration = Books.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    albums.forEachIndexed { index, albumSummary ->
+                    Books.forEachIndexed { index, Booksummary ->
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 SmartImage(
-                                    model = albumSummary.albumArtUri,
-                                    contentDescription = albumSummary.album,
+                                    model = Booksummary.BookArtUri,
+                                    contentDescription = Booksummary.Book,
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(16.dp)),
@@ -1493,14 +1493,14 @@ private fun TopAlbumsCard(
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${index + 1}. ${albumSummary.album}",
+                                        text = "${index + 1}. ${Booksummary.Book}",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = "${albumSummary.playCount} plays • ${albumSummary.uniqueSongs} tracks",
+                                        text = "${Booksummary.playCount} plays Ã¢â‚¬Â¢ ${Booksummary.uniqueTracks} tracks",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
@@ -1508,13 +1508,13 @@ private fun TopAlbumsCard(
                                     )
                                 }
                                 Text(
-                                    text = formatListeningDurationCompact(albumSummary.totalDurationMs),
+                                    text = formatListeningDurationCompact(Booksummary.totalDurationMs),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             LinearProgressIndicator(
-                                progress = (albumSummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
+                                progress = (Booksummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
                                 modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -1528,7 +1528,7 @@ private fun TopAlbumsCard(
 }
 
 @Composable
-private fun SongStatsCard(
+private fun TrackstatsCard(
     summary: PlaybackStatsRepository.PlaybackStatsSummary?,
     modifier: Modifier = Modifier
 ) {
@@ -1541,13 +1541,13 @@ private fun SongStatsCard(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val songs = summary?.songs.orEmpty()
-            var showAll by rememberSaveable(songs) { mutableStateOf(songs.size <= 8) }
-            val displayedSongs = remember(songs, showAll) {
-                if (showAll || songs.size <= 8) songs else songs.take(8)
+            val Tracks = summary?.Tracks.orEmpty()
+            var showAll by rememberSaveable(Tracks) { mutableStateOf(Tracks.size <= 8) }
+            val displayedTracks = remember(Tracks, showAll) {
+                if (showAll || Tracks.size <= 8) Tracks else Tracks.take(8)
             }
-            val maxDuration = songs.maxOfOrNull { it.totalDurationMs }?.coerceAtLeast(1L) ?: 1L
-            val positions = remember(songs) { songs.mapIndexed { index, song -> song.songId to index }.toMap() }
+            val maxDuration = Tracks.maxOfOrNull { it.totalDurationMs }?.coerceAtLeast(1L) ?: 1L
+            val positions = remember(Tracks) { Tracks.mapIndexed { index, Track -> Track.TrackId to index }.toMap() }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1559,10 +1559,10 @@ private fun SongStatsCard(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (songs.size > 8) {
+                if (Tracks.size > 8) {
                     TextButton(onClick = { showAll = !showAll }) {
                         Text(
-                            text = if (showAll || songs.size <= 8) "Show top" else "Show all",
+                            text = if (showAll || Tracks.size <= 8) "Show top" else "Show all",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -1570,24 +1570,24 @@ private fun SongStatsCard(
                 }
             }
 
-            if (songs.isEmpty()) {
+            if (Tracks.isEmpty()) {
                 StatsEmptyState(
-                    icon = Icons.Outlined.MusicNote,
+                    icon = Icons.Outlined.AudiobookNote,
                     title = "No top tracks",
                     subtitle = "Listen to your favorites to see them highlighted here."
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    displayedSongs.forEach { songSummary ->
-                        val position = positions[songSummary.songId] ?: songs.indexOf(songSummary)
+                    displayedTracks.forEach { Tracksummary ->
+                        val position = positions[Tracksummary.TrackId] ?: Tracks.indexOf(Tracksummary)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 SmartImage(
-                                    model = songSummary.albumArtUri,
-                                    contentDescription = songSummary.title,
+                                    model = Tracksummary.BookArtUri,
+                                    contentDescription = Tracksummary.title,
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(16.dp)),
@@ -1595,21 +1595,21 @@ private fun SongStatsCard(
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${position + 1}. ${songSummary.title}",
+                                        text = "${position + 1}. ${Tracksummary.title}",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = songSummary.artist,
+                                        text = Tracksummary.Author,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = "${songSummary.playCount} plays • ${formatListeningDurationCompact(songSummary.totalDurationMs)}",
+                                        text = "${Tracksummary.playCount} plays Ã¢â‚¬Â¢ ${formatListeningDurationCompact(Tracksummary.totalDurationMs)}",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
@@ -1618,7 +1618,7 @@ private fun SongStatsCard(
                                 }
                             }
                             LinearProgressIndicator(
-                                progress = (songSummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
+                                progress = (Tracksummary.totalDurationMs.toFloat() / maxDuration.toFloat()).coerceIn(0f, 1f),
                                 modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant

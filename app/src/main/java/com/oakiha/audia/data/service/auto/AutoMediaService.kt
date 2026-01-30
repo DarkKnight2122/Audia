@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import androidx.media.MediaBrowserServiceCompat
 
-class AutoMusicProvider() : MediaBrowserServiceCompat() {
+class AutoAudiobookProvider() : MediaBrowserServiceCompat() {
 
     override fun onGetRoot(
         clientPackageName: String,
