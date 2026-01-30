@@ -1,3 +1,12 @@
+# Audia Release ProGuard Configuration
+
+# Disable obfuscation - keep class/method names readable
+-dontobfuscate
+
+# Preserve line numbers for debugging
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
 # Netty / Ktor / Logging / OkHttp - Ignore all missing optional classes
 -dontwarn io.netty.**
 -dontwarn org.apache.logging.log4j.**
@@ -25,6 +34,12 @@
 # Coil
 -dontwarn coil.util.CoilUtils
 
-# Keep our models and viewmodels to prevent R8 from stripping them
+# [NUEVO] Kotlin Metadata
+-keep class kotlin.Metadata { *; }
+
+# Keep models and viewmodels to prevent R8 from stripping them
 -keep class com.oakiha.audia.data.model.** { *; }
 -keep class com.oakiha.audia.presentation.viewmodel.** { *; }
+
+# TagLib
+-keep class com.kyant.taglib.** { *; }

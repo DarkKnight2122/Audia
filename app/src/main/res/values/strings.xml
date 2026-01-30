@@ -1,23 +1,23 @@
 <resources>
-    <string name="app_name">Audia</string>
+    <string name="app_name">AudioBookPlayer</string>
     <string name="app_name_change_title">App Name Change</string>
-    <string name="app_name_change_message">We have changed our app\'s name from Audia to Audia due to a trademark-related issue. Keep playing!</string>
+    <string name="app_name_change_message">We have changed our app\'s name from AudioBookPlayer to AudioBookPlayer due to a trademark-related issue. Keep playing!</string>
     <string name="do_not_show_again">Do not show again</string>
     <string name="dismiss">Dismiss</string>
     <string name="Transcript">Transcript</string>
     <string name="close_Transcript_sheet">Close Transcript Sheet</string>
-    <string name="loading_Transcript">Loading TranscriptÃ¢â‚¬Â¦</string>
+    <string name="loading_Transcript">Loading TranscriptÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
     <string name="cant_find_Transcript">Couldn\'t find Transcript for this Track.</string>
     <string name="Transcript_provided_by">Transcript provided by</string>
     <string name="lrclib_uri">https://lrclib.net/</string>
     <string name="glance_widget_description">Control your Audiobook from the home screen.</string>
     <string name="all_files_access_title">Permiso Especial Requerido</string>
-    <string name="all_files_access_description">Para poder editar los metadatos de tus canciones (archivos .mp3), Audia necesita un permiso especial de acceso a todos los archivos. Esto nos permitirÃƒÂ¡ modificar las etiquetas de tus pistas directamente. Por favor, concede este permiso en la Next pantalla para habilitar la ediciÃƒÂ³n de metadatos.</string>
+    <string name="all_files_access_description">Para poder editar los metadatos de tus canciones (archivos .mp3), AudioBookPlayer necesita un permiso especial de acceso a todos los archivos. Esto nos permitirÃƒÆ’Ã‚Â¡ modificar las etiquetas de tus pistas directamente. Por favor, concede este permiso en la Next pantalla para habilitar la ediciÃƒÆ’Ã‚Â³n de metadatos.</string>
     <string name="grant_permission_button">Conceder Permiso</string>
     <string name="all_files_access_setting">All Files Access</string>
     <string name="Transcript_not_found">Transcript not found</string>
     <string name="search_Transcript_online_prompt">Would you like to search for Transcript online?</string>
-    <string name="custom_search_hint">We couldnÃ¢â‚¬â„¢t find Transcript automatically. You can edit the title or Author and try searching manually.</string>
+    <string name="custom_search_hint">We couldnÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢t find Transcript automatically. You can edit the title or Author and try searching manually.</string>
     <string name="failed_to_search_for_Transcript">Failed to search for Transcript</string>
     <string name="failed_to_fetch_Transcript_from_remote">Failed to fetch Transcript from remote</string>
     <string name="Transcript_fetch_timeout">Connection timed out. Please check your internet connection.</string>
@@ -26,7 +26,7 @@
     <string name="found_n_matches_format">Found %d match(es)</string>
     <string name="searched_for_x_format">Searched for \"%s\"</string>
     <string name="search">Search</string>
-    <string name="searching_Transcript">Searching for TranscriptÃ¢â‚¬Â¦</string>
+    <string name="searching_Transcript">Searching for TranscriptÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
     <string name="fetch_Transcript_show_options_title">Show lyric options</string>
     <string name="fetch_Transcript_show_options_subtitle">Always open the picker instead of auto-applying the first match</string>
     <string name="error">Error</string>
@@ -35,13 +35,13 @@
     <string name="import_file">Import</string>
 
     <!-- Sync/Progress strings -->
-    <string name="sync_scanning">Scanning Audiobook filesÃ¢â‚¬Â¦</string>
-    <string name="sync_processing">Processing filesÃ¢â‚¬Â¦</string>
+    <string name="sync_scanning">Scanning Audiobook filesÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
+    <string name="sync_processing">Processing filesÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
     <string name="sync_files_progress">%1$d of %2$d files</string>
-    <string name="sync_in_progress">Syncing libraryÃ¢â‚¬Â¦</string>
+    <string name="sync_in_progress">Syncing libraryÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
     <string name="sync_complete">Sync complete</string>
-    <string name="sync_pending">WaitingÃ¢â‚¬Â¦</string>
-    <string name="syncing_library">Syncing libraryÃ¢â‚¬Â¦</string>
+    <string name="sync_pending">WaitingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
+    <string name="syncing_library">Syncing libraryÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</string>
     <string name="unknown_Track_title">Unknown track</string>
     <string name="unknown_Author">Unknown Author</string>
     <string name="unknown_Book">Unknown Book</string>

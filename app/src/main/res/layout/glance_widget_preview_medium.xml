@@ -14,10 +14,10 @@
     <ImageView
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:id="@+id/Book_art_preview"
+        android:id="@+id/book_art_preview"
         android:src="@drawable/rounded_book_24" />
 
-    <!-- TÃƒÂ­tulo y Authora de ejemplo -->
+    <!-- TÃƒÂ­tulo y authora de ejemplo -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Authora"
+            android:text="authora"
             android:textColor="#E0E0E0"
             android:textSize="12sp" />
     </LinearLayout>

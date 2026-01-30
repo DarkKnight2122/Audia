@@ -14,13 +14,13 @@
     <group android:translateX="16" android:translateY="16">
         <!-- Top Section -->
 
-        <!-- Book Art Background (Rounded Rect 16dp) -->
+        <!-- book Art Background (Rounded Rect 16dp) -->
         <!-- Dynamic: Secondary Container (@android:color/system_accent2_100) -->
         <path
             android:pathData="M16,0 h48 a16,16 0 0 1 16,16 v48 a16,16 0 0 1 -16,16 h-48 a16,16 0 0 1 -16,-16 v-48 a16,16 0 0 1 16,-16 z"
             android:fillColor="@android:color/system_accent2_100"/>
 
-        <!-- Book Art Icon (Audiobook Note) centered in 80x80 -->
+        <!-- book Art Icon (Audiobook Note) centered in 80x80 -->
         <!-- Dynamic: On Secondary Container (@android:color/system_accent2_900) -->
         <group android:translateX="28" android:translateY="28" android:scaleX="1" android:scaleY="1">
              <path
@@ -42,7 +42,7 @@
                 android:fillColor="@android:color/system_neutral1_900"
                 android:pathData="M6,16 L64,16 A6,6 0 0 1 64,28 L6,28 A6,6 0 0 1 6,16 z"/>
 
-            <!-- Author Line: 50x10. Radius 5. Y=40 -->
+            <!-- author Line: 50x10. Radius 5. Y=40 -->
             <!-- Dynamic: On Surface Variant (@android:color/system_neutral2_500) -->
             <path
                 android:fillColor="@android:color/system_neutral2_500"
