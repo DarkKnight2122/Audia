@@ -9,7 +9,7 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 /**
- * Junction table for many-to-many relationship between songs and artists.
+ * Junction table for many-to-many relationship between tracks and artists.
  * Enables multi-artist support where a song can have multiple artists
  * and an artist can have multiple songs.
  */

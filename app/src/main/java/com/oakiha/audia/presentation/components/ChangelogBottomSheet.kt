@@ -106,7 +106,7 @@ val changelog = listOf(
                     "New file explorer for choosing source directories",
                     "New Connectivity and casting functionalities",
                     "Seamless continuity between remote devices",
-                    "Gapless transition between songs",
+                    "Gapless transition between tracks",
                     "Crossfade control",
                     "New Custom Transitions feature (only for playlists)",
                     "Keep playing after closed the app",

@@ -62,8 +62,8 @@ fun AlbumArtCollage(
                     .data(it)
                     .dispatcher(Dispatchers.IO)
                     .crossfade(true)
-                    //.placeholder(R.drawable.ic_music_placeholder)
-                    .error(R.drawable.ic_music_placeholder)
+                    //.placeholder(R.drawable.ic_audiobook_placeholder)
+                    .error(R.drawable.ic_audiobook_placeholder)
                     .build()
             }
         }.toImmutableList()

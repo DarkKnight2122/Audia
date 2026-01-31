@@ -441,7 +441,7 @@ fun SettingsCategoryScreen(
                                 ),
                                 selectedKey = uiState.libraryNavigationMode,
                                 onSelectionChanged = { settingsViewModel.setLibraryNavigationMode(it) },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_library_music_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_library_audiobook_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                         }
                         SettingsCategory.PLAYBACK -> {
@@ -465,7 +465,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
                                 label = "Crossfade",
-                                description = "Enable smooth transition between songs.",
+                                description = "Enable smooth transition between tracks.",
                                 options = mapOf("true" to "Enabled", "false" to "Disabled"),
                                 selectedKey = if (uiState.isCrossfadeEnabled) "true" else "false",
                                 onSelectionChanged = { settingsViewModel.setCrossfadeEnabled(it.toBoolean()) },
@@ -492,10 +492,10 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             SwitchSettingItem(
                                 title = "Show queue history",
-                                subtitle = "Show previously played songs in the queue.",
+                                subtitle = "Show previously played tracks in the queue.",
                                 checked = uiState.showQueueHistory,
                                 onCheckedChange = { settingsViewModel.setShowQueueHistory(it) },
-                                leadingIcon = { Icon(painterResource(R.drawable.rounded_queue_music_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(painterResource(R.drawable.rounded_queue_audiobook_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
                             SettingsItem(
@@ -734,7 +734,7 @@ fun SettingsCategoryScreen(
         AlertDialog(
             icon = { Icon(Icons.Outlined.Warning, null, tint = MaterialTheme.colorScheme.error) },
             title = { Text("Rebuild database?") },
-            text = { Text("This will completely rebuild your music library from scratch. All imported lyrics, favorites, and custom metadata will be lost. This action cannot be undone.") },
+            text = { Text("This will completely rebuild your audiobook library from scratch. All imported lyrics, favorites, and custom metadata will be lost. This action cannot be undone.") },
             onDismissRequest = { showRebuildDatabaseWarning = false },
             confirmButton = { 
                 TextButton(

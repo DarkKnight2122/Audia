@@ -1181,7 +1181,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        provider = ImageProvider(R.drawable.ic_music_placeholder),
+                        provider = ImageProvider(R.drawable.ic_audiobook_placeholder),
                         contentDescription = "Album Art Placeholder",
                         modifier = GlanceModifier.size(placeholderSize),
                         contentScale = ContentScale.Fit,

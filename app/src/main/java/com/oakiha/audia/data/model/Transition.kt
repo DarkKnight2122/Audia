@@ -3,7 +3,7 @@ package com.oakiha.audia.data.model
 import androidx.room.Embedded
 
 /**
- * Defines the available transition modes between songs.
+ * Defines the available transition modes between tracks.
  */
 enum class TransitionMode {
     /** No transition, the next song starts after the previous one ends. */

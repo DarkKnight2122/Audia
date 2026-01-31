@@ -791,7 +791,7 @@ fun FullPlayerContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.rounded_queue_music_24),
+                                    painter = painterResource(R.drawable.rounded_queue_audiobook_24),
                                     contentDescription = "Song options",
                                     tint = LocalMaterialTheme.current.primary
                                 )
@@ -983,7 +983,7 @@ private fun SongMetadataDisplaySection(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.rounded_queue_music_24),
+                        painter = painterResource(R.drawable.rounded_queue_audiobook_24),
                         contentDescription = "Queue",
                         tint = LocalMaterialTheme.current.primary
                     )

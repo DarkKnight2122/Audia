@@ -1728,7 +1728,7 @@ fun LibrarySongsTab(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
-                            painter = painterResource(id = R.drawable.rounded_music_off_24),
+                            painter = painterResource(id = R.drawable.rounded_audiobook_off_24),
                             contentDescription = "No songs found",
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1911,7 +1911,7 @@ fun LibrarySongsTabPaginated(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        painter = painterResource(id = R.drawable.rounded_music_off_24),
+                        painter = painterResource(id = R.drawable.rounded_audiobook_off_24),
                         contentDescription = "No songs found",
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant

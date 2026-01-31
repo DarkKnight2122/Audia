@@ -498,7 +498,7 @@ private fun ContributorAvatar(
                     modifier = Modifier.fillMaxSize(),
                     shape = CircleShape,
                     contentScale = ContentScale.Crop,
-                    placeholderResId = iconRes ?: R.drawable.ic_music_placeholder,
+                    placeholderResId = iconRes ?: R.drawable.ic_audiobook_placeholder,
                     errorResId = R.drawable.rounded_broken_image_24,
                     targetSize = Size(96, 96),
                     onState = { state ->

@@ -54,8 +54,8 @@ fun OptimizedAlbumArt(
             else -> ImageRequest.Builder(context)
                 .data(uri)
                 .crossfade(350) // Use Coil's native crossfade
-                .placeholder(R.drawable.ic_music_placeholder)
-                .error(R.drawable.ic_music_placeholder)
+                .placeholder(R.drawable.ic_audiobook_placeholder)
+                .error(R.drawable.ic_audiobook_placeholder)
                 .size(targetSize)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
@@ -85,7 +85,7 @@ private fun PlaceholderContent(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_music_placeholder),
+            painter = painterResource(R.drawable.ic_audiobook_placeholder),
             contentDescription = "$title placeholder",
             contentScale = ContentScale.Fit,
             modifier = Modifier.size(96.dp),
@@ -160,7 +160,7 @@ private fun renderDirectAlbumArt(
 //        model = ImageRequest.Builder(context)
 //            .data(uri)
 //            .crossfade(false)
-//            .placeholder(R.drawable.ic_music_placeholder)
+//            .placeholder(R.drawable.ic_audiobook_placeholder)
 //            .error(R.drawable.rounded_broken_image_24)
 //            .size(targetSize) // Usar el parÃ¡metro targetSize
 //            .memoryCachePolicy(CachePolicy.ENABLED)
@@ -196,7 +196,7 @@ private fun renderDirectAlbumArt(
 //            is AsyncImagePainter.State.Loading,
 //            is AsyncImagePainter.State.Empty -> { // Show static placeholder for Loading and Empty states
 //                Image(
-//                    painter = painterResource(id = R.drawable.ic_music_placeholder),
+//                    painter = painterResource(id = R.drawable.ic_audiobook_placeholder),
 //                    contentDescription = "$title placeholder", // Adjusted content description
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize(),
