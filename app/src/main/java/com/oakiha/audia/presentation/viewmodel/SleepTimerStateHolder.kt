@@ -8,7 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
-import com.oakiha.audia.data.service.MusicNotificationProvider
+import com.oakiha.audia.data.service.AudiobookNotificationProvider
 import com.oakiha.audia.data.service.SleepTimerReceiver
 import com.oakiha.audia.data.EotStateHolder
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -174,7 +174,7 @@ class SleepTimerStateHolder @Inject constructor(
     fun playCounted(count: Int) {
         val args = Bundle().apply { putInt("count", count) }
         mediaControllerProvider?.invoke()?.sendCustomCommand(
-            SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY, Bundle.EMPTY),
+            SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_COUNTED_PLAY, Bundle.EMPTY),
             args
         )
     }
@@ -186,7 +186,7 @@ class SleepTimerStateHolder @Inject constructor(
         val args = Bundle()
         _playCount.value = 1f
         mediaControllerProvider?.invoke()?.sendCustomCommand(
-            SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY, Bundle.EMPTY),
+            SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_CANCEL_COUNTED_PLAY, Bundle.EMPTY),
             args
         )
     }

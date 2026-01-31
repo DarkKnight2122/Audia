@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.service.MusicNotificationProvider
+import com.oakiha.audia.data.service.AudiobookNotificationProvider
 import com.google.android.gms.cast.MediaStatus
 import android.os.Bundle
 import timber.log.Timber

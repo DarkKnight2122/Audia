@@ -59,8 +59,8 @@ import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.preferences.AlbumArtQuality
 import com.oakiha.audia.data.repository.LyricsSearchResult
 import com.oakiha.audia.data.repository.MusicRepository
-import com.oakiha.audia.data.service.MusicNotificationProvider
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookNotificationProvider
+import com.oakiha.audia.data.service.AudiobookService
 import com.oakiha.audia.data.service.player.CastPlayer
 import com.oakiha.audia.data.service.http.MediaFileHttpServerService
 import com.oakiha.audia.data.service.player.DualPlayerEngine
@@ -466,16 +466,16 @@ class PlayerViewModel @Inject constructor(
 
 
     private var mediaController: MediaController? = null
-    private val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
+    private val sessionToken = SessionToken(context, ComponentName(context, AudiobookService::class.java))
     private val mediaControllerListener = object : MediaController.Listener {
         override fun onCustomCommand(
             controller: MediaController,
             command: SessionCommand,
             args: Bundle
         ): ListenableFuture<SessionResult> {
-            if (command.customAction == MusicNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE) {
+            if (command.customAction == AudiobookNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE) {
                 val enabled = args.getBoolean(
-                    MusicNotificationProvider.EXTRA_SHUFFLE_ENABLED,
+                    AudiobookNotificationProvider.EXTRA_SHUFFLE_ENABLED,
                     false
                 )
                 viewModelScope.launch {
@@ -1189,7 +1189,7 @@ class PlayerViewModel @Inject constructor(
                     _isSheetVisible.value = true
                 } else {
                     Log.w("PlayerViewModel", "Artist '${artist.name}' has no playable songs.")
-                    // podrÃ­as emitir un evento Toast
+                    // podrÃƒÂ­as emitir un evento Toast
                 }
             } catch (e: Exception) {
                 Log.e("PlayerViewModel", "Error playing artist ${artist.name}", e)
@@ -1767,10 +1767,10 @@ class PlayerViewModel @Inject constructor(
     private fun syncShuffleStateWithSession(enabled: Boolean) {
         val controller = mediaController ?: return
         val args = Bundle().apply {
-            putBoolean(MusicNotificationProvider.EXTRA_SHUFFLE_ENABLED, enabled)
+            putBoolean(AudiobookNotificationProvider.EXTRA_SHUFFLE_ENABLED, enabled)
         }
         controller.sendCustomCommand(
-            SessionCommand(MusicNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE, Bundle.EMPTY),
+            SessionCommand(AudiobookNotificationProvider.CUSTOM_COMMAND_SET_SHUFFLE_STATE, Bundle.EMPTY),
             args
         )
     }
@@ -2638,10 +2638,10 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
-     * Busca la letra de la canciÃ³n actual en el servicio remoto.
+     * Busca la letra de la canciÃƒÂ³n actual en el servicio remoto.
      */
     /**
-     * Busca la letra de la canciÃ³n actual en el servicio remoto.
+     * Busca la letra de la canciÃƒÂ³n actual en el servicio remoto.
      */
     fun fetchLyricsForCurrentSong(forcePickResults: Boolean = false) {
         val currentSong = stablePlayerState.value.currentSong ?: return
@@ -2675,7 +2675,7 @@ class PlayerViewModel @Inject constructor(
 
     /**
      * Procesa la letra importada de un archivo, la guarda y actualiza la UI.
-     * @param songId El ID de la canciÃ³n para la que se importa la letra.
+     * @param songId El ID de la canciÃƒÂ³n para la que se importa la letra.
      * @param lyricsContent El contenido de la letra como String.
      */
     fun importLyricsFromFile(songId: Long, lyricsContent: String) {
@@ -2691,7 +2691,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
-     * Resetea el estado de la bÃºsqueda de letras a Idle.
+     * Resetea el estado de la bÃƒÂºsqueda de letras a Idle.
      */
     fun resetLyricsSearchState() {
         lyricsStateHolder.resetSearchState()

@@ -56,7 +56,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookService
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.UnifiedPlayerSheet
@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        // LEER SEÃ‘AL DE BENCHMARK
+        // LEER SEÃƒâ€˜AL DE BENCHMARK
         val isBenchmarkMode = intent.getBooleanExtra("is_benchmark", false)
 
         setContent {
@@ -409,7 +409,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Estado para controlar si el indicador de carga puede mostrarse despuÃ©s de un delay
+        // Estado para controlar si el indicador de carga puede mostrarse despuÃƒÂ©s de un delay
         var canShowLoadingIndicator by remember { mutableStateOf(false) }
         // Track when the loading indicator was first shown for minimum display time
         var loadingShownTimestamp by remember { mutableStateOf(0L) }
@@ -419,11 +419,11 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(shouldPotentiallyShowLoading) {
             if (shouldPotentiallyShowLoading) {
-                // Espera un breve perÃ­odo antes de permitir que se muestre el indicador de carga
-                // Ajusta este valor segÃºn sea necesario (por ejemplo, 300-500 ms)
+                // Espera un breve perÃƒÂ­odo antes de permitir que se muestre el indicador de carga
+                // Ajusta este valor segÃƒÂºn sea necesario (por ejemplo, 300-500 ms)
                 delay(300L)
-                // Vuelve a verificar la condiciÃ³n despuÃ©s del delay,
-                // ya que el estado podrÃ­a haber cambiado.
+                // Vuelve a verificar la condiciÃƒÂ³n despuÃƒÂ©s del delay,
+                // ya que el estado podrÃƒÂ­a haber cambiado.
                 if (mainViewModel.isSyncing.value && mainViewModel.isLibraryEmpty.value) {
                     canShowLoadingIndicator = true
                     loadingShownTimestamp = System.currentTimeMillis()
@@ -778,7 +778,7 @@ class MainActivity : ComponentActivity() {
             // Benchmark mode no longer loads dummy data - uses real library data instead
         }
 
-        val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
+        val sessionToken = SessionToken(this, ComponentName(this, AudiobookService::class.java))
         mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
         mediaControllerFuture?.addListener({
         }, MoreExecutors.directExecutor())

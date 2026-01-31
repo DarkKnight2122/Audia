@@ -9,7 +9,7 @@ import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.media3.common.util.UnstableApi
-import com.oakiha.audia.data.service.MusicService
+import com.oakiha.audia.data.service.AudiobookService
 import timber.log.Timber
 
 class PlayerControlActionCallback : ActionCallback {
@@ -29,7 +29,7 @@ class PlayerControlActionCallback : ActionCallback {
             return
         }
 
-        val serviceIntent = Intent(context, MusicService::class.java).apply {
+        val serviceIntent = Intent(context, AudiobookService::class.java).apply {
             this.action = action
             if (action == PlayerActions.PLAY_FROM_QUEUE) {
                 val songId = parameters[PlayerActions.songIdKey]
@@ -37,7 +37,7 @@ class PlayerControlActionCallback : ActionCallback {
                     putExtra("song_id", songId)
                 } else {
                     Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no songId found.")
-                    return // No hacer nada si no hay ID de canciÃ³n
+                    return // No hacer nada si no hay ID de canciÃƒÂ³n
                 }
             }
         }
