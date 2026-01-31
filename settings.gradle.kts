@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AudioBookPlayer"
+rootProject.name = \"Audia\"
 include(":app")
 
