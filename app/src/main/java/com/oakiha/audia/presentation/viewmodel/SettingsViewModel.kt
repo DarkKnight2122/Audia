@@ -3,7 +3,7 @@
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oakiha.audia.data.preferences.AppThemeMode`nimport com.oakiha.audia.data.preferences.AppThemeStyle
+import com.oakiha.audia.data.preferences.AppThemeMode
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.LibraryNavigationMode
 import com.oakiha.audia.data.preferences.ThemePreference
@@ -31,7 +31,7 @@ import java.io.File
 
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
-    val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,`n    val appThemeStyle: String = AppThemeStyle.DEFAULT,
+    val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,
     val playerThemePreference: String = ThemePreference.ALBUM_ART,
     val mockGenresEnabled: Boolean = false,
     val navBarCornerRadius: Int = 32,
@@ -84,7 +84,7 @@ data class LyricsRefreshProgress(
 private sealed interface SettingsUiUpdate {
     data class Group1(
         val appRebrandDialogShown: Boolean,
-        val appThemeMode: String,`n        val appThemeStyle: String,
+        val appThemeMode: String,
         val playerThemePreference: String,
         val mockGenresEnabled: Boolean,
         val navBarCornerRadius: Int,
@@ -164,7 +164,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 userPreferencesRepository.appRebrandDialogShownFlow,
-                userPreferencesRepository.appThemeModeFlow,`n                userPreferencesRepository.appThemeStyleFlow,
+                userPreferencesRepository.appThemeModeFlow,
                 userPreferencesRepository.playerThemePreferenceFlow,
                 userPreferencesRepository.mockGenresEnabledFlow,
                 userPreferencesRepository.navBarCornerRadiusFlow,
@@ -175,20 +175,20 @@ class SettingsViewModel @Inject constructor(
             ) { values ->
                 SettingsUiUpdate.Group1(
                     appRebrandDialogShown = values[0] as Boolean,
-                    appThemeMode = values[1] as String,`n                    appThemeStyle = values[2] as String,
-                    playerThemePreference = values[3] as String,
-                    mockGenresEnabled = values[4] as Boolean,
-                    navBarCornerRadius = values[5] as Int,
-                    navBarStyle = values[6] as String,
-                    libraryNavigationMode = values[7] as String,
-                    carouselStyle = values[8] as String,
-                    launchTab = values[9] as String
+                    appThemeMode = values[1] as String,
+                    playerThemePreference = values[2] as String,
+                    mockGenresEnabled = values[3] as Boolean,
+                    navBarCornerRadius = values[4] as Int,
+                    navBarStyle = values[5] as String,
+                    libraryNavigationMode = values[6] as String,
+                    carouselStyle = values[7] as String,
+                    launchTab = values[8] as String
                 )
             }.collect { update ->
                 _uiState.update { state ->
                     state.copy(
                         appRebrandDialogShown = update.appRebrandDialogShown,
-                        appThemeMode = update.appThemeMode,`n                        appThemeStyle = update.appThemeStyle,
+                        appThemeMode = update.appThemeMode,
                         playerThemePreference = update.playerThemePreference,
                         mockGenresEnabled = update.mockGenresEnabled,
                         navBarCornerRadius = update.navBarCornerRadius,
@@ -317,14 +317,14 @@ class SettingsViewModel @Inject constructor(
 
     fun explorerRoot(): File = fileExplorerStateHolder.rootDirectory()
 
-    // MÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©todo para guardar la preferencia de tema del reproductor
+    // MÃ©todo para guardar la preferencia de tema del reproductor
     fun setPlayerThemePreference(preference: String) {
         viewModelScope.launch {
             userPreferencesRepository.setPlayerThemePreference(preference)
         }
     }
 
-    fun setAppThemeMode(mode: String) {`n        viewModelScope.launch {`n            userPreferencesRepository.setAppThemeMode(mode)`n        }`n    }`n`n    fun setAppThemeStyle(style: String) {`n        viewModelScope.launch {`n            userPreferencesRepository.setAppThemeStyle(style)`n        }`n    }
+    fun setAppThemeMode(mode: String) {
         viewModelScope.launch {
             userPreferencesRepository.setAppThemeMode(mode)
         }

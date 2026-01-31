@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import android.content.Intent
 import android.os.Build
@@ -78,7 +78,7 @@ import androidx.navigation.NavController
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import com.oakiha.audia.R
-import com.oakiha.audia.data.preferences.AppThemeMode`nimport com.oakiha.audia.data.preferences.AppThemeStyle
+import com.oakiha.audia.data.preferences.AppThemeMode
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.LaunchTab
 import com.oakiha.audia.data.preferences.LibraryNavigationMode
@@ -272,7 +272,7 @@ fun SettingsCategoryScreen(
                                 onFullSync = {
                                     if (isSyncing) return@RefreshLibraryItem
                                     refreshRequested = true
-                                    Toast.makeText(context, "Full rescan startedÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Full rescan startedâ€¦", Toast.LENGTH_SHORT).show()
                                     settingsViewModel.fullSyncLibrary()
                                 },
                                 onRebuild = {
@@ -346,7 +346,7 @@ fun SettingsCategoryScreen(
                                 selectedKey = uiState.appThemeMode,
                                 onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
                                 leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
-                            )`n                            Spacer(Modifier.height(4.dp))`n                            ThemeSelectorItem(`n                                label = "Theme Style",`n                                description = "Choose the visual style of the interface.",`n                                options = mapOf(`n                                    AppThemeStyle.DEFAULT to "Default (Material)",`n                                    AppThemeStyle.GLASS to "Glass"`n                                ),`n                                selectedKey = uiState.appThemeStyle,`n                                onSelectionChanged = { settingsViewModel.setAppThemeStyle(it) },`n                                leadingIcon = { Icon(Icons.Outlined.Style, null, tint = MaterialTheme.colorScheme.secondary) }`n                            )
+                            )
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
                                 label = "Player Theme",
@@ -741,7 +741,7 @@ fun SettingsCategoryScreen(
                     onClick = { 
                         showRebuildDatabaseWarning = false
                         refreshRequested = true
-                        Toast.makeText(context, "Rebuilding databaseÃ¢â‚¬Â¦", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Rebuilding databaseâ€¦", Toast.LENGTH_SHORT).show()
                         settingsViewModel.rebuildDatabase() 
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)

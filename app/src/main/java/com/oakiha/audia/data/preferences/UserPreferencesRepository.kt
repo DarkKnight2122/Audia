@@ -38,7 +38,7 @@ object ThemePreference {
     const val GLOBAL = "global"
 }
 
-object AppThemeStyle {`n    const val DEFAULT = \"default\"`n    const val GLASS = \"glass\"`n}`n`nobject AppThemeMode {
+object AppThemeMode {
     const val FOLLOW_SYSTEM = "follow_system"
     const val LIGHT = "light"
     const val DARK = "dark"
@@ -64,7 +64,7 @@ class UserPreferencesRepository
 @Inject
 constructor(
         private val dataStore: DataStore<Preferences>,
-        private val json: Json // Inyectar Json para serializaciÃƒÂ³n
+        private val json: Json // Inyectar Json para serializaciÃ³n
 ) {
 
     private object PreferencesKeys {
@@ -78,7 +78,7 @@ constructor(
         // val GLOBAL_THEME_PREFERENCE = stringPreferencesKey("global_theme_preference_v2") //
         // Removed
         val PLAYER_THEME_PREFERENCE = stringPreferencesKey("player_theme_preference_v2")
-        val APP_THEME_MODE = stringPreferencesKey(\"app_theme_mode\")`n        val APP_THEME_STYLE = stringPreferencesKey(\"app_theme_style\")
+        val APP_THEME_MODE = stringPreferencesKey("app_theme_mode")
         val FAVORITE_SONG_IDS = stringSetPreferencesKey("favorite_song_ids")
         val USER_PLAYLISTS = stringPreferencesKey("user_playlists_json_v1")
         val PLAYLIST_SONG_ORDER_MODES = stringPreferencesKey("playlist_song_order_modes")
@@ -660,7 +660,7 @@ constructor(
                     try {
                         json.decodeFromString<List<Playlist>>(jsonString)
                     } catch (e: Exception) {
-                        // Error al deserializar, devolver lista vacÃƒÂ­a o manejar error
+                        // Error al deserializar, devolver lista vacÃ­a o manejar error
                         emptyList()
                     }
                 } else {
@@ -744,7 +744,7 @@ constructor(
         val index = currentPlaylists.indexOfFirst { it.id == playlistId }
         if (index != -1) {
             val playlist = currentPlaylists[index]
-            // Evitar duplicados, aÃƒÂ±adir solo los nuevos
+            // Evitar duplicados, aÃ±adir solo los nuevos
             val newSongIds = (playlist.songIds + songIdsToAdd).distinct()
             currentPlaylists[index] =
                     playlist.copy(songIds = newSongIds, lastModified = System.currentTimeMillis())
@@ -892,14 +892,14 @@ constructor(
         }
     }
 
-    suspend fun setAppThemeMode(themeMode: String) {`n        dataStore.edit { preferences -> preferences[PreferencesKeys.APP_THEME_MODE] = themeMode }`n    }`n`n    val appThemeStyleFlow: Flow<String> =`n            dataStore.data.map { preferences ->`n                preferences[PreferencesKeys.APP_THEME_STYLE] ?: AppThemeStyle.DEFAULT`n            }`n`n    suspend fun setAppThemeStyle(style: String) {`n        dataStore.edit { preferences -> preferences[PreferencesKeys.APP_THEME_STYLE] = style }`n    }
+    suspend fun setAppThemeMode(themeMode: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.APP_THEME_MODE] = themeMode }
     }
 
     suspend fun toggleFavoriteSong(
             songId: String,
             removing: Boolean = false
-    ) { // Nueva funciÃƒÂ³n para favoritos
+    ) { // Nueva funciÃ³n para favoritos
         dataStore.edit { preferences ->
             val currentFavorites = preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()
             val contains = currentFavorites.contains(songId)
@@ -1273,12 +1273,12 @@ constructor(
                         preferences[PreferencesKeys.LIBRARY_TABS_ORDER] = json.encodeToString(order)
                     }
                 } catch (e: Exception) {
-                    // Si la deserializaciÃƒÂ³n falla, no hacemos nada para evitar sobrescribir los
+                    // Si la deserializaciÃ³n falla, no hacemos nada para evitar sobrescribir los
                     // datos del usuario.
                 }
             }
             // Si orderJson es nulo, significa que el usuario nunca ha reordenado,
-            // por lo que se utilizarÃƒÂ¡ el orden predeterminado que ya incluye FOLDERS.
+            // por lo que se utilizarÃ¡ el orden predeterminado que ya incluye FOLDERS.
         }
     }
 
