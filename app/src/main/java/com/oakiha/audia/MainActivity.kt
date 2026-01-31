@@ -88,7 +88,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
-import com.oakiha.audia.presentation.components.PlayerInternallNavigationBar
+import com.oakiha.audia.presentation.components.PlayerInternalNavigationBar
 import javax.annotation.concurrent.Immutable
 import com.oakiha.audia.presentation.components.DismissUndoBar
 import com.oakiha.audia.presentation.components.NavBarContentHeightFullWidth
@@ -638,7 +638,7 @@ class MainActivity : ComponentActivity() {
                             shape = actualShape,
                             shadowElevation = navBarElevation
                         ) {
-                            PlayerInternallNavigationBar(
+                            PlayerInternalNavigationBar(
                                 navController = navController,
                                 navItems = commonNavItems,
                                 currentRoute = currentRoute,

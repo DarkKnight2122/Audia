@@ -659,7 +659,7 @@ fun UnifiedPlayerSheet(
         queueSheetOffset.snapTo(targetOffset)
     }
 
-    suspend fun animateQueueSheetInternall(targetExpanded: Boolean) {
+    suspend fun animateQueueSheetInternal(targetExpanded: Boolean) {
         if (queueHiddenOffsetPx == 0f) {
             showQueueSheet = targetExpanded
             return
@@ -678,7 +678,7 @@ fun UnifiedPlayerSheet(
 
     fun animateQueueSheet(targetExpanded: Boolean) {
         if (!allowQueueSheetInteraction && targetExpanded) return
-        scope.launch { animateQueueSheetInternall(targetExpanded && allowQueueSheetInteraction) }
+        scope.launch { animateQueueSheetInternal(targetExpanded && allowQueueSheetInteraction) }
     }
 
     fun beginQueueDrag() {
@@ -800,7 +800,7 @@ fun UnifiedPlayerSheet(
     ) {
         if (updatedPendingSaveOverlay.value != null) return
         scope.launch {
-            animateQueueSheetInternall(false)
+            animateQueueSheetInternal(false)
             playerViewModel.collapsePlayerSheet()
             delay(ANIMATION_DURATION_MS.toLong())
             pendingSaveQueueOverlay = SaveQueueOverlayData(songs, defaultName, onConfirm)
@@ -1163,7 +1163,7 @@ fun UnifiedPlayerSheet(
                                     playerViewModel.togglePlayerSheetState()
                                 }
                         ) {
-                                    // MiniPlayerContentInternall
+                                    // MiniPlayerContentInternal
                                     // stablePlayerState.currentSong is already available from the top-level collection
                                     // Use infrequentPlayerState
                                     infrequentPlayerState.currentSong?.let { currentSongNonNull ->
@@ -1185,7 +1185,7 @@ fun UnifiedPlayerSheet(
                                                     }
                                                     .zIndex(miniPlayerZIndex)
                                             ) {
-                                                MiniPlayerContentInternall(
+                                                MiniPlayerContentInternal(
                                                     song = currentSongNonNull, // Use non-null version
                                                     cornerRadiusAlb = (overallSheetTopCornerRadius.value * 0.5).dp,
                                                     isPlaying = infrequentPlayerState.isPlaying, // from top-level stablePlayerState
@@ -1615,7 +1615,7 @@ fun getNavigationBarHeight(): Dp {
 }
 
 @Composable
-private fun MiniPlayerContentInternall(
+private fun MiniPlayerContentInternal(
     song: Song,
     isPlaying: Boolean,
     isCastConnecting: Boolean,

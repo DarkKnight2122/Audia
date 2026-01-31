@@ -120,14 +120,14 @@ fun WavyMusicSlider(
 
     val trackHeightPx = with(LocalDensity.current) { trackHeight.toPx() }
     val thumbRadiusPx = with(LocalDensity.current) { thumbRadius.toPx() }
-    val waveAmplitudePxInternall = with(LocalDensity.current) { animatedWaveAmplitude.toPx() }
+    val waveAmplitudePxInternal = with(LocalDensity.current) { animatedWaveAmplitude.toPx() }
     val waveLengthPx = with(LocalDensity.current) { waveLength.toPx() }
     val waveFrequency = if (waveLengthPx > 0f) {
         ((2 * PI) / waveLengthPx).toFloat()
     } else {
         0f
     }
-    val thumbLineHeightPxInternall = with(LocalDensity.current) { thumbLineHeightWhenInteracting.toPx() }
+    val thumbLineHeightPxInternal = with(LocalDensity.current) { thumbLineHeightWhenInteracting.toPx() }
     val thumbGapPx = with(LocalDensity.current) { 4.dp.toPx() }
 
     val wavePath = remember { Path() }
@@ -212,7 +212,7 @@ fun WavyMusicSlider(
                             val activeTrackVisualEnd =
                                 currentProgressPxEndVisual - (thumbGapPx * thumbInteractionFraction)
 
-                            if (waveAmplitudePxInternall > 0.01f && waveFrequency > 0f) {
+                            if (waveAmplitudePxInternal > 0.01f && waveFrequency > 0f) {
                                 wavePath.reset()
                                 val waveStartDrawX = localTrackStart
                                 val waveEndDrawX = activeTrackVisualEnd.coerceAtLeast(waveStartDrawX)
@@ -225,10 +225,10 @@ fun WavyMusicSlider(
 
                                     fun yAt(x: Float): Float {
                                         val s = sin(waveFrequency * x + phaseShift)
-                                        return (localCenterY + waveAmplitudePxInternall * s)
+                                        return (localCenterY + waveAmplitudePxInternal * s)
                                             .coerceIn(
-                                                localCenterY - waveAmplitudePxInternall - trackHeightPx / 2f,
-                                                localCenterY + waveAmplitudePxInternall + trackHeightPx / 2f
+                                                localCenterY - waveAmplitudePxInternal - trackHeightPx / 2f,
+                                                localCenterY + waveAmplitudePxInternal + trackHeightPx / 2f
                                             )
                                     }
 
@@ -282,7 +282,7 @@ fun WavyMusicSlider(
                             lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, thumbInteractionFraction)
                         val thumbCurrentHeightPx = lerp(
                             thumbRadiusPx * 2f,
-                            thumbLineHeightPxInternall,
+                            thumbLineHeightPxInternal,
                             thumbInteractionFraction
                         )
 
@@ -354,8 +354,8 @@ fun WavyMusicSlider(
 //
 //    val trackHeightPx = with(LocalDensity.current) { trackHeight.toPx() }
 //    val thumbRadiusPx = with(LocalDensity.current) { thumbRadius.toPx() }
-//    val waveAmplitudePxInternall = with(LocalDensity.current) { animatedWaveAmplitude.toPx() }
-//    val thumbLineHeightPxInternall = with(LocalDensity.current) { thumbLineHeightWhenInteracting.toPx() }
+//    val waveAmplitudePxInternal = with(LocalDensity.current) { animatedWaveAmplitude.toPx() }
+//    val thumbLineHeightPxInternal = with(LocalDensity.current) { thumbLineHeightWhenInteracting.toPx() }
 //    val thumbGapPx = with(LocalDensity.current) { 4.dp.toPx() }
 //    val waveLengthPx = with(LocalDensity.current) { waveLength.toPx() }
 //    val waveFrequency = if (waveLengthPx > 0f) ((2 * PI) / waveLengthPx).toFloat() else 0f
@@ -442,7 +442,7 @@ fun WavyMusicSlider(
 //                            val activeTrackVisualEnd =
 //                                currentProgressPxEndVisual - (thumbGapPx * thumbInteractionFraction)
 //
-//                            if (waveAmplitudePxInternall > 0.01f) {
+//                            if (waveAmplitudePxInternal > 0.01f) {
 //                                wavePath.reset()
 //                                val waveStartDrawX = localTrackStart
 //                                val waveEndDrawX =
@@ -451,24 +451,24 @@ fun WavyMusicSlider(
 //                                if (waveEndDrawX > waveStartDrawX) {
 //                                    wavePath.moveTo(
 //                                        waveStartDrawX,
-//                                        localCenterY + waveAmplitudePxInternall * sin(waveFrequency * waveStartDrawX + phaseShift)
+//                                        localCenterY + waveAmplitudePxInternal * sin(waveFrequency * waveStartDrawX + phaseShift)
 //                                    )
 //                                    val waveStep = 2f // Aumentado de 1f a 2f para reducir cÃ¡lculos
 //                                    var x = waveStartDrawX + waveStep
 //                                    while (x < waveEndDrawX) {
 //                                        val wavePhase = waveFrequency * x + phaseShift
 //                                        val waveY =
-//                                            localCenterY + waveAmplitudePxInternall * sin(wavePhase)
+//                                            localCenterY + waveAmplitudePxInternal * sin(wavePhase)
 //                                        val clampedY = waveY.coerceIn(
-//                                            localCenterY - waveAmplitudePxInternall - trackHeightPx / 2f,
-//                                            localCenterY + waveAmplitudePxInternall + trackHeightPx / 2f
+//                                            localCenterY - waveAmplitudePxInternal - trackHeightPx / 2f,
+//                                            localCenterY + waveAmplitudePxInternal + trackHeightPx / 2f
 //                                        )
 //                                        wavePath.lineTo(x, clampedY)
 //                                        x += waveStep
 //                                    }
 //                                    wavePath.lineTo(
 //                                        waveEndDrawX,
-//                                        localCenterY + waveAmplitudePxInternall * sin(waveFrequency * waveEndDrawX + phaseShift)
+//                                        localCenterY + waveAmplitudePxInternal * sin(waveFrequency * waveEndDrawX + phaseShift)
 //                                    )
 //                                    drawPath(
 //                                        path = wavePath,
@@ -496,7 +496,7 @@ fun WavyMusicSlider(
 //                            lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, thumbInteractionFraction)
 //                        val thumbCurrentHeightPx = lerp(
 //                            thumbRadiusPx * 2f,
-//                            thumbLineHeightPxInternall,
+//                            thumbLineHeightPxInternal,
 //                            thumbInteractionFraction
 //                        )
 //

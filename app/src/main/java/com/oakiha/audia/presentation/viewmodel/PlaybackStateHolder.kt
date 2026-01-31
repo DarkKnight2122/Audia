@@ -42,7 +42,7 @@ class PlaybackStateHolder @Inject constructor(
     private val _stablePlayerState = MutableStateFlow(StablePlayerState())
     val stablePlayerState: StateFlow<StablePlayerState> = _stablePlayerState.asStateFlow()
 
-    // Internall State
+    // Internal State
     private var isSeeking = false
 
     fun initialize(coroutineScope: CoroutineScope) {

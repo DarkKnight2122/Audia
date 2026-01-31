@@ -117,7 +117,7 @@ class LibraryStateHolder @Inject constructor(
         .flowOn(Dispatchers.Default)
 
     
-    // Internall state
+    // Internal state
     private var scope: CoroutineScope? = null
 
     // --- Initialization ---

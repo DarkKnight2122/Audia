@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// En un nuevo archivo o junto a PlayerInternallNavigationItemsRow.kt
+// En un nuevo archivo o junto a PlayerInternalNavigationItemsRow.kt
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

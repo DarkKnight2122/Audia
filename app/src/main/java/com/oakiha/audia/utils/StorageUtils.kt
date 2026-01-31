@@ -31,7 +31,7 @@ data class StorageInfo(
 object StorageUtils {
 
     /**
-     * Get all available storage devices (Internall Storage, SD Card, USB OTG)
+     * Get all available storage devices (Internal Storage, SD Card, USB OTG)
      * @param context Application context
      * @return List of available StorageInfo objects
      */
@@ -51,7 +51,7 @@ object StorageUtils {
 
             val storageType = determineStorageType(volume)
             val displayName = when (storageType) {
-                StorageType.INTERNAL -> "Internall Storage"
+                StorageType.INTERNAL -> "Internal Storage"
                 StorageType.SD_CARD -> "SD Card"
                 StorageType.USB -> {
                     usbCounter++
@@ -69,7 +69,7 @@ object StorageUtils {
             )
         }
 
-        // Sort: Internall first, then SD Card, then USB devices
+        // Sort: Internal first, then SD Card, then USB devices
         return storages.sortedBy { it.storageType.ordinal }
     }
 
@@ -140,10 +140,10 @@ object StorageUtils {
     /**
      * Get internal storage only
      */
-    fun getInternallStorage(): StorageInfo {
+    fun getInternalStorage(): StorageInfo {
         return StorageInfo(
             path = Environment.getExternalStorageDirectory(),
-            displayName = "Internall Storage",
+            displayName = "Internal Storage",
             storageType = StorageType.INTERNAL,
             isRemovable = false
         )

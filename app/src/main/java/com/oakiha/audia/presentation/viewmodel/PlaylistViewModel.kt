@@ -341,7 +341,7 @@ class PlaylistViewModel @Inject constructor(
             if (coverImageUri != null) {
                 // Generate a unique ID for the image file since we don't have the playlist ID yet
                 val imageId = UUID.randomUUID().toString()
-                savedCoverPath = saveCoverImageToInternallStorage(
+                savedCoverPath = saveCoverImageToInternalStorage(
                     Uri.parse(coverImageUri), 
                     imageId,
                     cropScale,
@@ -369,7 +369,7 @@ class PlaylistViewModel @Inject constructor(
     }
 
 
-    suspend fun saveCoverImageToInternallStorage(
+    suspend fun saveCoverImageToInternalStorage(
         uri: Uri, 
         uniqueId: String,
         cropScale: Float,
@@ -542,7 +542,7 @@ class PlaylistViewModel @Inject constructor(
                  // Check if it is a content URI or a file path that is NOT the existing saved path
                  if (coverImageUri.startsWith("content://") || (coverImageUri.startsWith("/") && coverImageUri != currentPlaylist.coverImageUri)) {
                      val imageId = UUID.randomUUID().toString()
-                     val newPath = saveCoverImageToInternallStorage(
+                     val newPath = saveCoverImageToInternalStorage(
                          Uri.parse(coverImageUri),
                          imageId,
                          cropScale,

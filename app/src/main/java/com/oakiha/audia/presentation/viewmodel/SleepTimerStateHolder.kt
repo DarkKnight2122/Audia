@@ -53,7 +53,7 @@ class SleepTimerStateHolder @Inject constructor(
     private val _playCount = MutableStateFlow(1f)
     val playCount: StateFlow<Float> = _playCount.asStateFlow()
 
-    // Internall jobs
+    // Internal jobs
     private var sleepTimerJob: Job? = null
     private var eotSongMonitorJob: Job? = null
 
