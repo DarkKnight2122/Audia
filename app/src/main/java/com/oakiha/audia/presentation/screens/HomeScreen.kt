@@ -54,7 +54,7 @@ fun HomeScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     onOpenSidebar: () -> Unit
-) {
+) { scaffoldPadding -> scaffoldPadding ->
     val context = LocalContext.current
     val isBenchmarkMode = remember {
         (context as? android.app.Activity)?.intent?.getBooleanExtra("is_benchmark", false) ?: false
@@ -105,7 +105,7 @@ fun HomeScreen(
                     }
                 )
             }
-        ) {
+        ) { scaffoldPadding ->
             LazyColumn(
                 state = rememberLazyListState(),
                 modifier = Modifier

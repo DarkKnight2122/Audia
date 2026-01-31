@@ -598,7 +598,7 @@ private fun FileExplorerHeader(
 
     val rootLabel = remember(rootDirectory) {
         when (rootDirectory.name) {
-            "0", "" -> "Internal storage"
+            "0", "" -> "Internall storage"
             else -> rootDirectory.name
         }
     }

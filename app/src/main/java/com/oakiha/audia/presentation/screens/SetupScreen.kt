@@ -1131,13 +1131,13 @@ fun LibraryNavigationPillSetupShow(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando está expandido/seleccionado (totalmente redondo)
+    // Radius for when expanded/seleccionado (fully round)
     val expandedRadius = 60.dp
 
-    // Animación Esquina Flecha (Interna):
+    // Arrow Corner Animation (Internal):
     // Depends on 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separándose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al título.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) visually separating.
+    // - false: Stays straight (innerRadius) appearing joined to the title.
     val animatedArrowCorner by animateFloatAsState(
         targetValue = if (isExpanded) pillRadius.value else innerRadius.value,
         label = "ArrowCornerAnimation"
@@ -1212,7 +1212,7 @@ fun LibraryNavigationPillSetupShow(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma según estado) ---
+        // --- PARTE 2: FLECHA (Changes shape based on state) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner.dp, // Anima entre 4.dp y 26.dp
@@ -1247,7 +1247,7 @@ fun LibraryNavigationPillSetupShow(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menú",
+                    contentDescription = "Expand menu",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1261,8 +1261,8 @@ fun LibraryNavigationPillSetupShow(
  *
  * @param modifier Modificador para el Composable.
  * @param pagerState El estado del Pager para mostrar el indicador de página.
- * @param onNextClicked Lambda que se invoca al pulsar el botón "Siguiente".
- * @param onFinishClicked Lambda que se invoca al pulsar el botón "Finalizar".
+ * @param onNextClicked Lambda que se invoca al pulsar el botón "Next".
+ * @param onFinishClicked Lambda que se invoca al pulsar el botón "Finish".
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -1276,14 +1276,14 @@ fun SetupBottomBar(
     onFinishClicked: () -> Unit,
     isFinishButtonEnabled: Boolean
 ) {
-    // --- Animaciones para el Morphing y Rotación ---
+    // --- Animations for Morphing and Rotation ---
     val morphAnimationSpec = tween<Float>(durationMillis = 600, easing = FastOutSlowInEasing)
-    // Animación más lenta y sutil para la rotación
+    // Animación slower and subtler para la rotación
     val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
 
     // 1. Determine corner percentages for the target shape
     val targetShapeValues = when (pagerState.currentPage % 3) {
-        0 -> listOf(50f, 50f, 50f, 50f) // Círculo (50% en todas las esquinas)
+        0 -> listOf(50f, 50f, 50f, 50f) // Circle (50% on all corners)
         1 -> listOf(26f, 26f, 26f, 26f) // Rounded Square
         else -> listOf(18f, 50f, 18f, 50f) // "Leaf" shape
     }
@@ -1294,7 +1294,7 @@ fun SetupBottomBar(
     val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
     val animatedBottomEnd by animateFloatAsState(targetShapeValues[3], morphAnimationSpec, label = "BottomEnd")
 
-    // 3. Anima la rotación del botón para que gire 360 grados en cada cambio de página.
+    // 3. Animate button rotation to spin 360 degrees on each page change.
     val animatedRotation by animateFloatAsState(
         targetValue = pagerState.currentPage * 360f,
         animationSpec = rotationAnimationSpec,
@@ -1378,7 +1378,7 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                // 4. Aplica la forma y rotación animadas al botón
+                // 4. Apply animated shape and rotation to the button
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
                     shape = AbsoluteSmoothCornerShape(
@@ -1398,7 +1398,7 @@ fun SetupBottomBar(
                         .rotate(animatedRotation)
                         .padding(end = 0.dp)
                 ) {
-                    // 5. Aplica una contra-rotación al contenido del botón (el icono)
+                    // 5. Apply a counter-rotation to the button content (the icon)
                     AnimatedContent(
                         modifier = Modifier.rotate(-animatedRotation),
                         targetState = pagerState.currentPage < pagerState.pageCount - 1,

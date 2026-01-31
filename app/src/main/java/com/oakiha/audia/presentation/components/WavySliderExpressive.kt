@@ -182,7 +182,7 @@ fun WavySliderExpressive(
             // Interpolate dimensions
             // WavyMusicSlider logic:
             // val thumbCurrentWidthPx = lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, thumbInteractionFraction)
-            // val thumbCurrentHeightPx = lerp(thumbRadiusPx * 2f, thumbLineHeightPxInternal, thumbInteractionFraction)
+            // val thumbCurrentHeightPx = lerp(thumbRadiusPx * 2f, thumbLineHeightPxInternall, thumbInteractionFraction)
 
             // Manual Lerp for Float
             fun lerp(start: Float, stop: Float, fraction: Float): Float {

@@ -268,9 +268,9 @@ fun Breadcrumbs(
         val path = currentFolder?.path ?: storageRootPath
         val relativePath = path.removePrefix(storageRootPath).removePrefix("/")
         if (relativePath.isEmpty() || path == storageRootPath) {
-            listOf("Internal Storage" to storageRootPath)
+            listOf("Internall Storage" to storageRootPath)
         } else {
-            listOf("Internal Storage" to storageRootPath) + relativePath.split("/").scan("") { acc, segment ->
+            listOf("Internall Storage" to storageRootPath) + relativePath.split("/").scan("") { acc, segment ->
                 "$acc/$segment"
             }.drop(1).map {
                 val file = File(storageRootPath, it)

@@ -991,13 +991,13 @@ fun LibraryNavigationPill(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (fully round)
     val expandedRadius = 60.dp
 
-    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
+    // AnimaciÃƒÂ³n Esquina Flecha (Internal):
     // Depende de 'isExpanded':
     // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
+    // - false: Stays straight (innerRadius) pareciendo unida al tÃƒÂ­tulo.
     val animatedArrowCorner by animateDpAsState(
         targetValue = if (isExpanded) pillRadius else innerRadius,
         label = "ArrowCornerAnimation"

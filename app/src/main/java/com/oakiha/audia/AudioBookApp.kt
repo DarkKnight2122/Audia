@@ -8,7 +8,7 @@ import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.utils.CrashHandler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
-import android.os.StrictMode // Importar StrictMode
+import android.os.StrictMode // Import StrictMode
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import androidx.hilt.work.HiltWorkerFactory

@@ -38,7 +38,7 @@ internal val NavBarContentHeight = 90.dp // Altura del contenido de la barra de 
 internal val NavBarContentHeightFullWidth = NavBarContentHeight // Altura del contenido de la barra de navegaciÃ³n en modo completo
 
 @Composable
-private fun PlayerInternalNavigationItemsRow(
+private fun PlayerInternallNavigationItemsRow(
     navController: NavHostController,
     navItems: ImmutableList<BottomNavItem>,
     currentRoute: String?,
@@ -120,14 +120,14 @@ private fun PlayerInternalNavigationItemsRow(
 }
 
 @Composable
-fun PlayerInternalNavigationBar(
+fun PlayerInternallNavigationBar(
     navController: NavHostController,
     navItems: ImmutableList<BottomNavItem>,
     currentRoute: String?,
     modifier: Modifier = Modifier,
     navBarStyle: String
 ) {
-    PlayerInternalNavigationItemsRow(
+    PlayerInternallNavigationItemsRow(
         navController = navController,
         navItems = navItems,
         currentRoute = currentRoute,

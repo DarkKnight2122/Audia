@@ -197,7 +197,7 @@ class MediaFileHttpServerService : Service() {
                                         call.respond(HttpStatusCode.NotFound, "File not found")
                                     }
                                 } catch (e: Exception) {
-                                    call.respond(HttpStatusCode.InternalServerError, "Error serving file: ${e.message}")
+                                    call.respond(HttpStatusCode.InternallServerError, "Error serving file: ${e.message}")
                                 }
                             }
                             get("/art/{songId}") {
@@ -219,7 +219,7 @@ class MediaFileHttpServerService : Service() {
                                         inputStream.readBytes()
                                     }
                                     call.respondBytes(bytes, ContentType.Image.JPEG)
-                                } ?: call.respond(HttpStatusCode.InternalServerError, "Could not open album art file")
+                                } ?: call.respond(HttpStatusCode.InternallServerError, "Could not open album art file")
                             }
                         }
                     }.start(wait = false)

@@ -148,7 +148,7 @@ fun FetchLyricsDialog(
 }
 
 // --------------------------------------------------------------------------
-// Sub-componentes de Estados (Internal)
+// Sub-componentes de Estados (Internall)
 // --------------------------------------------------------------------------
 
 @Composable

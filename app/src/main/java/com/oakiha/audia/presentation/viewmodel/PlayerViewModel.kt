@@ -920,7 +920,7 @@ class PlayerViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            libraryStateHolder.musicFolders.collect { folders ->
+            libraryStateHolder.audiobookFolders.collect { folders ->
                 _playerUiState.update { it.copy(musicFolders = folders) }
             }
         }

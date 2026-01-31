@@ -49,7 +49,7 @@ class LibraryStateHolder @Inject constructor(
     val artists = _artists.asStateFlow()
 
     private val _audiobookFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
-    val audiobookFolders = _musicFolders.asStateFlow()
+    val audiobookFolders = _audiobookFolders.asStateFlow()
 
     private val _isLoadingLibrary = MutableStateFlow(false)
     val isLoadingLibrary = _isLoadingLibrary.asStateFlow()
@@ -117,7 +117,7 @@ class LibraryStateHolder @Inject constructor(
         .flowOn(Dispatchers.Default)
 
     
-    // Internal state
+    // Internall state
     private var scope: CoroutineScope? = null
 
     // --- Initialization ---
@@ -193,8 +193,8 @@ class LibraryStateHolder @Inject constructor(
         }
         
         foldersJob = scope?.launch {
-            musicRepository.getAudiobookFolders().collect { folders ->
-                 _musicFolders.value = folders.toImmutableList()
+            audiobookRepository.getAudiobookFolders().collect { folders ->
+                 _audiobookFolders.value = folders.toImmutableList()
                  sortFolders(_currentFolderSortOption.value)
             }
         }
@@ -310,11 +310,11 @@ class LibraryStateHolder @Inject constructor(
             _currentFolderSortOption.value = sortOption
             
             val sorted = when (sortOption) {
-                SortOption.FolderNameAZ -> _musicFolders.value.sortedBy { it.name.lowercase() }
-                SortOption.FolderNameZA -> _musicFolders.value.sortedByDescending { it.name.lowercase() }
-                else -> _musicFolders.value
+                SortOption.FolderNameAZ -> _audiobookFolders.value.sortedBy { it.name.lowercase() }
+                SortOption.FolderNameZA -> _audiobookFolders.value.sortedByDescending { it.name.lowercase() }
+                else -> _audiobookFolders.value
             }
-            _musicFolders.value = sorted.toImmutableList()
+            _audiobookFolders.value = sorted.toImmutableList()
         }
     }
 

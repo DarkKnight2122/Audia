@@ -513,7 +513,7 @@ private fun ExpressiveDailyMixHeader(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${songs.size} Songs Ã¢â‚¬Â¢ ${formatDuration(totalDuration)}",
+                    text = "${songs.size} Songs • ${formatDuration(totalDuration)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )

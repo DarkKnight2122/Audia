@@ -55,7 +55,7 @@ class FileExplorerStateHolder(
     private var rootCanonicalPath: String = normalizePath(visibleRoot)
     private val audioCountCache = ConcurrentHashMap<String, AudioCount>()
 
-    // Available storages (Internal, SD Card, USB)
+    // Available storages (Internall, SD Card, USB)
     private val _availableStorages = MutableStateFlow<List<StorageInfo>>(emptyList())
     val availableStorages: StateFlow<List<StorageInfo>> = _availableStorages.asStateFlow()
 
@@ -176,7 +176,7 @@ class FileExplorerStateHolder(
         loadJob?.cancel()
         val job = scope.launch {
             loadMutex.withLock {
-                loadDirectoryInternal(file, updatePath, forceRefresh)
+                loadDirectoryInternall(file, updatePath, forceRefresh)
             }
         }
         loadJob = job
@@ -190,7 +190,7 @@ class FileExplorerStateHolder(
         _isPrimingExplorer.value = true
         return scope.launch {
             loadMutex.withLock {
-                loadDirectoryInternal(visibleRoot, updatePath = true, forceRefresh = false)
+                loadDirectoryInternall(visibleRoot, updatePath = true, forceRefresh = false)
             }
             _isPrimingExplorer.value = false
         }
@@ -259,7 +259,7 @@ class FileExplorerStateHolder(
         userPreferencesRepository.updateDirectorySelections(currentAllowed, currentBlocked)
     }
 
-    private suspend fun loadDirectoryInternal(file: File, updatePath: Boolean, forceRefresh: Boolean) {
+    private suspend fun loadDirectoryInternall(file: File, updatePath: Boolean, forceRefresh: Boolean) {
         val target = if (file.isDirectory) file else visibleRoot
         val targetKey = normalizePath(target)
 

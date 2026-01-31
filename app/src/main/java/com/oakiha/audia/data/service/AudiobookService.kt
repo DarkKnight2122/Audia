@@ -390,11 +390,11 @@ class AudiobookService : MediaSessionService() {
             if (!force) {
                 delay(WIDGET_STATE_DEBOUNCE_MS)
             }
-            processWidgetUpdateInternal()
+            processWidgetUpdateInternall()
         }
     }
 
-    private suspend fun processWidgetUpdateInternal() {
+    private suspend fun processWidgetUpdateInternall() {
         val playerInfo = buildPlayerInfo()
         updateGlanceWidgets(playerInfo)
     }

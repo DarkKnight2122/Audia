@@ -1278,7 +1278,7 @@ private fun CastDeviceRow(
         tonalElevation = 2.dp
     ) {
         // Usamos Row con IntrinsicSize.Min para que la altura se adapte al contenido de texto
-        // pero permita que el icono se centre verticalmente de forma real.
+        // pero permita que the icon se centre verticalmente de forma real.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1479,7 +1479,7 @@ private fun QuickSettingTile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // El contenedor del icono es el que lleva el color primario ahora
+            // El contenedor dthe icon es el que lleva el color primario ahora
             Box(
                 modifier = Modifier
                     .size(40.dp) // Un poco mÃ¡s grande para lucir la forma y el color
