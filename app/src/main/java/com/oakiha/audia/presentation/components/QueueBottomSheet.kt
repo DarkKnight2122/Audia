@@ -734,7 +734,7 @@ fun QueueBottomSheet(
                         ),
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevaciÃ³n flat
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevaciÃƒÂ³n flat
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
@@ -1524,9 +1524,9 @@ private fun QueueMiniPlayer(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SmartImage(
-                model = song.albumArtUriString ?: R.drawable.rounded_album_24,
+                model = song.albumArtUriString ?: R.drawable.rounded_book_24,
                 shape = albumShape,
-                contentDescription = "CarÃ¡tula",
+                contentDescription = "CarÃƒÂ¡tula",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(albumShape),
@@ -1817,7 +1817,7 @@ fun QueuePlaylistSongItem(
                     SmartImage(
                         model = song.albumArtUriString,
                         shape = albumShape,
-                        contentDescription = "CarÃ¡tula",
+                        contentDescription = "CarÃƒÂ¡tula",
                         modifier = Modifier
                             .size(42.dp)
                             .clip(albumShape),

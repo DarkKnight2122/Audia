@@ -242,11 +242,11 @@ fun FullPlayerContent(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 
-    // LÃ³gica para el botÃ³n de Lyrics en el reproductor expandido
+    // LÃƒÂ³gica para el botÃƒÂ³n de Lyrics en el reproductor expandido
     val onLyricsClick = {
         val lyrics = lyricsProvider()
         if (lyrics?.synced.isNullOrEmpty() && lyrics?.plain.isNullOrEmpty()) {
-            // Si no hay letra, mostramos el diÃ¡logo para buscar
+            // Si no hay letra, mostramos el diÃƒÂ¡logo para buscar
             showFetchLyricsDialog = true
         } else {
             // Si hay letra, mostramos el sheet directamente
@@ -259,7 +259,7 @@ fun FullPlayerContent(
             uiState = lyricsSearchUiState,
             currentSong = song, // Use 'song' which is derived from args/retained
             onConfirm = { forcePick ->
-                // El usuario confirma, iniciamos la bÃºsqueda
+                // El usuario confirma, iniciamos la bÃƒÂºsqueda
                 playerViewModel.fetchLyricsForCurrentSong(forcePick)
             },
             onPickResult = { result ->
@@ -269,7 +269,7 @@ fun FullPlayerContent(
                 playerViewModel.searchLyricsManually(title, artist)
             },
             onDismiss = {
-                // El usuario cancela o cierra el diÃ¡logo
+                // El usuario cancela o cierra el diÃƒÂ¡logo
                 showFetchLyricsDialog = false
                 playerViewModel.resetLyricsSearchState()
             },
@@ -279,7 +279,7 @@ fun FullPlayerContent(
         )
     }
 
-    // Observador para reaccionar al resultado de la bÃºsqueda de letras
+    // Observador para reaccionar al resultado de la bÃƒÂºsqueda de letras
     LaunchedEffect(lyricsSearchUiState) {
         when (val state = lyricsSearchUiState) {
             is LyricsSearchUiState.Success -> {
@@ -616,13 +616,13 @@ fun FullPlayerContent(
                     navigationIcon = {
                         Box(
                             modifier = Modifier
-                                // Ancho total = 14dp de padding + 42dp del botÃ³n
+                                // Ancho total = 14dp de padding + 42dp del botÃƒÂ³n
                                 .width(56.dp)
                                 .height(42.dp),
-                            // 2. Alinea el contenido (el botÃ³n) al final (derecha) y centrado verticalmente
+                            // 2. Alinea el contenido (el botÃƒÂ³n) al final (derecha) y centrado verticalmente
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            // 3. Tu botÃ³n circular original, sin cambios
+                            // 3. Tu botÃƒÂ³n circular original, sin cambios
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -726,7 +726,7 @@ fun FullPlayerContent(
                                             Spacer(Modifier.width(8.dp))
                                             AnimatedContent(
                                                 targetState = when {
-                                                    isCastConnecting -> "Connectingâ€¦"
+                                                    isCastConnecting -> "ConnectingÃ¢â‚¬Â¦"
                                                     isRemotePlaybackActive && selectedRouteName != null -> selectedRouteName ?: ""
                                                     else -> ""
                                                 },
@@ -1424,7 +1424,7 @@ private fun AlbumPlaceholder(height: Dp, color: Color, onColor: Color) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Icon(
                 modifier = Modifier.size(86.dp),
-                painter = painterResource(R.drawable.audiobookplayer_base_monochrome),
+                painter = painterResource(R.drawable.audia_base_monochrome),
                 contentDescription = null,
                 tint = onColor
             )

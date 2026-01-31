@@ -196,10 +196,10 @@ fun LibraryScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     playlistViewModel: PlaylistViewModel = hiltViewModel()
 ) {
-    // La recolecciÃ³n de estados de alto nivel se mantiene mÃ­nima.
+    // La recolecciÃƒÂ³n de estados de alto nivel se mantiene mÃƒÂ­nima.
     val context = LocalContext.current // Added context
     val lastTabIndex by playerViewModel.lastLibraryTabIndexFlow.collectAsState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState() // Reintroducir favoriteIds aquÃ­
+    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState() // Reintroducir favoriteIds aquÃƒÂ­
     val scope = rememberCoroutineScope() // Mantener si se usa para acciones de UI
     val syncManager = playerViewModel.syncManager
     var isRefreshing by remember { mutableStateOf(false) }
@@ -273,7 +273,7 @@ fun LibraryScreen(
             }
         }
     }
-    // La lÃ³gica de carga diferida (lazy loading) se mantiene.
+    // La lÃƒÂ³gica de carga diferida (lazy loading) se mantiene.
     LaunchedEffect(Unit) {
         Trace.beginSection("LibraryScreen.InitialTabLoad")
         playerViewModel.onLibraryTabSelected(lastTabIndex)
@@ -399,14 +399,14 @@ fun LibraryScreen(
             )
         }
     ) { innerScaffoldPadding ->
-        Box( // Box para permitir superposiciÃ³n del indicador de carga
+        Box( // Box para permitir superposiciÃƒÂ³n del indicador de carga
             modifier = Modifier
                 .padding(top = innerScaffoldPadding.calculateTopPadding())
                 .fillMaxSize()
         ) {
             Column(
                 modifier = Modifier
-                    // .padding(innerScaffoldPadding) // El padding ya estÃ¡ en el Box contenedor
+                    // .padding(innerScaffoldPadding) // El padding ya estÃƒÂ¡ en el Box contenedor
                     .background(brush = Brush.verticalGradient(gradientColors))
                     .fillMaxSize()
             ) {
@@ -477,7 +477,7 @@ fun LibraryScreen(
                     // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        // OPTIMIZACIÃ“N: La lÃ³gica de ordenamiento ahora es mÃ¡s eficiente.
+                        // OPTIMIZACIÃƒâ€œN: La lÃƒÂ³gica de ordenamiento ahora es mÃƒÂ¡s eficiente.
                         val availableSortOptions by playerViewModel.availableSortOptions.collectAsState()
                         val sanitizedSortOptions = remember(availableSortOptions, currentTabId) {
                             val cleaned = availableSortOptions.filterIsInstance<SortOption>()
@@ -991,13 +991,13 @@ fun LibraryNavigationPill(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃ¡ expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
     val expandedRadius = 60.dp
 
-    // AnimaciÃ³n Esquina Flecha (Interna):
+    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃ¡ndose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃ­tulo.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
+    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
     val animatedArrowCorner by animateDpAsState(
         targetValue = if (isExpanded) pillRadius else innerRadius,
         label = "ArrowCornerAnimation"
@@ -1072,7 +1072,7 @@ fun LibraryNavigationPill(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma segÃºn estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner, // Anima entre 4.dp y 26.dp
@@ -1107,7 +1107,7 @@ fun LibraryNavigationPill(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menÃº",
+                    contentDescription = "Expandir menÃƒÂº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1248,9 +1248,9 @@ private fun LibraryTabGridItem(
 }
 
 private fun LibraryTabId.iconRes(): Int = when (this) {
-    LibraryTabId.SONGS -> R.drawable.rounded_music_note_24
-    LibraryTabId.ALBUMS -> R.drawable.rounded_album_24
-    LibraryTabId.ARTISTS -> R.drawable.rounded_artist_24
+    LibraryTabId.SONGS -> R.drawable.rounded_audiobook_note_24
+    LibraryTabId.ALBUMS -> R.drawable.rounded_book_24
+    LibraryTabId.ARTISTS -> R.drawable.rounded_author_24
     LibraryTabId.PLAYLISTS -> R.drawable.rounded_playlist_play_24
     LibraryTabId.FOLDERS -> R.drawable.rounded_folder_24
     LibraryTabId.LIKED -> R.drawable.rounded_favorite_24
@@ -1525,7 +1525,7 @@ private fun MusicFolder.collectAllSongs(): List<Song> {
     return songs + subFolders.flatMap { it.collectAllSongs() }
 }
 
-// NUEVA PestaÃ±a para Favoritos
+// NUEVA PestaÃƒÂ±a para Favoritos
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryFavoritesTab(
@@ -1677,7 +1677,7 @@ fun LibrarySongsTab(
     } else {
         // Determine content based on loading state and data availability
         when {
-            isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃ¡ cubierto arriba, pero es bueno para claridad
+            isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃƒÂ¡ cubierto arriba, pero es bueno para claridad
                 val allSongsPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -1784,8 +1784,8 @@ fun LibrarySongsTab(
                                 // Estabilizar lambdas
                                 val rememberedOnMoreOptionsClick: (Song) -> Unit =
                                     remember(onMoreOptionsClick) {
-                                        // Esta es la lambda que `remember` ejecutarÃ¡ para producir el valor recordado.
-                                        // El valor recordado es la propia funciÃ³n `onMoreOptionsClick` (o una lambda que la llama).
+                                        // Esta es la lambda que `remember` ejecutarÃƒÂ¡ para producir el valor recordado.
+                                        // El valor recordado es la propia funciÃƒÂ³n `onMoreOptionsClick` (o una lambda que la llama).
                                         { songFromListItem -> // Esta es la lambda (Song) -> Unit que se recuerda
                                             onMoreOptionsClick(songFromListItem)
                                         }
@@ -2042,7 +2042,7 @@ fun EnhancedSongListItem(
     onMoreOptionsClick: (Song) -> Unit,
     onClick: () -> Unit
 ) {
-    // Animamos el radio de las esquinas basÃ¡ndonos en si la canciÃ³n es la actual.
+    // Animamos el radio de las esquinas basÃƒÂ¡ndonos en si la canciÃƒÂ³n es la actual.
     val animatedCornerRadius by animateDpAsState(
         targetValue = if (isCurrentSong && !isLoading) 50.dp else 22.dp,
         animationSpec = tween(durationMillis = 400),
@@ -2380,7 +2380,7 @@ fun LibraryAlbumsTab(
                             album = album,
                             albumColorSchemePairFlow = albumSpecificColorSchemeFlow,
                             onClick = rememberedOnClick,
-                            isLoading = isLoading && albums.isEmpty() // Shimmer solo si estÃ¡ cargando Y la lista estÃ¡ vacÃ­a
+                            isLoading = isLoading && albums.isEmpty() // Shimmer solo si estÃƒÂ¡ cargando Y la lista estÃƒÂ¡ vacÃƒÂ­a
                         )
                     }
                 }
@@ -2410,7 +2410,7 @@ fun AlbumGridItemRedesigned(
     val albumColorSchemePair by albumColorSchemePairFlow.collectAsState()
     val systemIsDark = LocalAudioBookPlayerDarkTheme.current
 
-    // 1. ObtÃ©n el colorScheme del tema actual aquÃ­, en el scope Composable.
+    // 1. ObtÃƒÂ©n el colorScheme del tema actual aquÃƒÂ­, en el scope Composable.
     val currentMaterialColorScheme = MaterialTheme.colorScheme
 
     val itemDesignColorScheme = remember(albumColorSchemePair, systemIsDark, currentMaterialColorScheme) {
@@ -2487,10 +2487,10 @@ fun AlbumGridItemRedesigned(
                     var isLoadingImage by remember { mutableStateOf(true) }
                     SmartImage(
                         model = album.albumArtUriString,
-                        contentDescription = "CarÃ¡tula de ${album.title}",
+                        contentDescription = "CarÃƒÂ¡tula de ${album.title}",
                         contentScale = ContentScale.Crop,
-                            // Reducido el tamaÃ±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
-                            // ContentScale.Crop se encargarÃ¡ de ajustar la imagen al aspect ratio.
+                            // Reducido el tamaÃƒÂ±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
+                            // ContentScale.Crop se encargarÃƒÂ¡ de ajustar la imagen al aspect ratio.
                             targetSize = Size(256, 256),
                         modifier = Modifier
                             .aspectRatio(3f / 2f)
@@ -2699,7 +2699,7 @@ fun ArtistListItem(artist: Artist, onClick: () -> Unit, isLoading: Boolean = fal
                         )
                     } else {
                         Icon(
-                            painter = painterResource(R.drawable.rounded_artist_24),
+                            painter = painterResource(R.drawable.rounded_author_24),
                             contentDescription = "Artista",
                             modifier = Modifier.padding(8.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer

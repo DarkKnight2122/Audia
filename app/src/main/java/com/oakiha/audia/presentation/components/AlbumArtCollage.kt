@@ -37,9 +37,9 @@ data class Config(val size: Dp, val width: Dp, val height: Dp, val align: Alignm
 
 /**
  * Muestra hasta 6 portadas en un layout de collage con formas simplificadas y redondeadas.
- * Las formas se dividen en dos grupos (superior e inferior) para evitar superposiciÃ³n.
- * Incluye una pÃ­ldora central, cÃ­rculo, squircle y estrella, con disposiciÃ³n ajustada.
- * Ajusta tamaÃ±os, rotaciones y posiciones para crear un look dinÃ¡mico.
+ * Las formas se dividen en dos grupos (superior e inferior) para evitar superposiciÃƒÂ³n.
+ * Incluye una pÃƒÂ­ldora central, cÃƒÂ­rculo, squircle y estrella, con disposiciÃƒÂ³n ajustada.
+ * Ajusta tamaÃƒÂ±os, rotaciones y posiciones para crear un look dinÃƒÂ¡mico.
  * Utiliza BoxWithConstraints para adaptar las dimensiones al contenedor.
  */
 @Composable
@@ -142,7 +142,7 @@ fun AlbumArtCollage(
         if (songs.isEmpty()) {
             Box(Modifier.matchParentSize(), contentAlignment = Alignment.Center) {
                 Icon(
-                    painter = painterResource(R.drawable.rounded_music_note_24),
+                    painter = painterResource(R.drawable.rounded_audiobook_note_24),
                     contentDescription = null,
                     modifier = Modifier.size(100.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)

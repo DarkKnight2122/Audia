@@ -1160,7 +1160,7 @@ private fun LyricsTrackInfo(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SmartImage(
-            model = song.albumArtUriString ?: R.drawable.rounded_album_24,
+            model = song.albumArtUriString ?: R.drawable.rounded_book_24,
             shape = albumShape,
             contentDescription = "Cover Art",
             modifier = Modifier

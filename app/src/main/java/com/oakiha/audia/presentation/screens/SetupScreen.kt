@@ -362,7 +362,7 @@ fun DirectorySelectionPage(
         },
         icons = persistentListOf(
             R.drawable.rounded_folder_24,
-            R.drawable.rounded_music_note_24,
+            R.drawable.rounded_audiobook_note_24,
             R.drawable.rounded_create_new_folder_24,
             R.drawable.rounded_folder_open_24,
             R.drawable.rounded_audio_file_24
@@ -458,7 +458,7 @@ fun WelcomePage() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "Î²",
+                    text = "ÃŽÂ²",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Black
                 )
@@ -539,10 +539,10 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     }
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
     val mediaIcons = persistentListOf(
-        R.drawable.rounded_music_note_24,
-        R.drawable.rounded_album_24,
+        R.drawable.rounded_audiobook_note_24,
+        R.drawable.rounded_book_24,
         R.drawable.rounded_library_music_24,
-        R.drawable.rounded_artist_24,
+        R.drawable.rounded_author_24,
         R.drawable.rounded_playlist_play_24
     )
 
@@ -809,7 +809,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                             LibraryNavigationPillSetupShow(
                                 title = "Songs",
                                 isExpanded = false,
-                                iconRes = R.drawable.rounded_music_note_24,
+                                iconRes = R.drawable.rounded_audiobook_note_24,
                                 pageIndex = 0,
                                 onClick = {},
                                 onArrowClick = {}
@@ -956,7 +956,7 @@ fun BatteryOptimizationPage(
     }
     
     val batteryIcons = persistentListOf(
-        R.drawable.rounded_music_note_24,
+        R.drawable.rounded_audiobook_note_24,
         R.drawable.rounded_play_arrow_24,
         R.drawable.rounded_all_inclusive_24,
         R.drawable.rounded_pause_24,
@@ -1119,13 +1119,13 @@ fun LibraryNavigationPillSetupShow(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃ¡ expandido/seleccionado (totalmente redondo)
+    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (totalmente redondo)
     val expandedRadius = 60.dp
 
-    // AnimaciÃ³n Esquina Flecha (Interna):
+    // AnimaciÃƒÂ³n Esquina Flecha (Interna):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃ¡ndose visualmente.
-    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃ­tulo.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
+    // - false: Se mantiene recta (innerRadius) pareciendo unida al tÃƒÂ­tulo.
     val animatedArrowCorner by animateFloatAsState(
         targetValue = if (isExpanded) pillRadius.value else innerRadius.value,
         label = "ArrowCornerAnimation"
@@ -1200,7 +1200,7 @@ fun LibraryNavigationPillSetupShow(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma segÃºn estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner.dp, // Anima entre 4.dp y 26.dp
@@ -1235,7 +1235,7 @@ fun LibraryNavigationPillSetupShow(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menÃº",
+                    contentDescription = "Expandir menÃƒÂº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1244,13 +1244,13 @@ fun LibraryNavigationPillSetupShow(
 }
 
 /**
- * Una Bottom Bar flotante con un diseÃ±o expresivo inspirado en Material 3,
+ * Una Bottom Bar flotante con un diseÃƒÂ±o expresivo inspirado en Material 3,
  * que incluye una onda sinusoidal animada en la parte superior.
  *
  * @param modifier Modificador para el Composable.
- * @param pagerState El estado del Pager para mostrar el indicador de pÃ¡gina.
- * @param onNextClicked Lambda que se invoca al pulsar el botÃ³n "Next".
- * @param onFinishClicked Lambda que se invoca al pulsar el botÃ³n "Finalizar".
+ * @param pagerState El estado del Pager para mostrar el indicador de pÃƒÂ¡gina.
+ * @param onNextClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Next".
+ * @param onFinishClicked Lambda que se invoca al pulsar el botÃƒÂ³n "Finalizar".
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -1264,14 +1264,14 @@ fun SetupBottomBar(
     onFinishClicked: () -> Unit,
     isFinishButtonEnabled: Boolean
 ) {
-    // --- Animaciones para el Morphing y RotaciÃ³n ---
+    // --- Animaciones para el Morphing y RotaciÃƒÂ³n ---
     val morphAnimationSpec = tween<Float>(durationMillis = 600, easing = FastOutSlowInEasing)
-    // AnimaciÃ³n mÃ¡s lenta y sutil para la rotaciÃ³n
+    // AnimaciÃƒÂ³n mÃƒÂ¡s lenta y sutil para la rotaciÃƒÂ³n
     val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
 
     // 1. Determina los porcentajes de las esquinas para la forma objetivo
     val targetShapeValues = when (pagerState.currentPage % 3) {
-        0 -> listOf(50f, 50f, 50f, 50f) // CÃ­rculo (50% en todas las esquinas)
+        0 -> listOf(50f, 50f, 50f, 50f) // CÃƒÂ­rculo (50% en todas las esquinas)
         1 -> listOf(26f, 26f, 26f, 26f) // Cuadrado Redondeado
         else -> listOf(18f, 50f, 18f, 50f) // Forma de "Hoja"
     }
@@ -1282,7 +1282,7 @@ fun SetupBottomBar(
     val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
     val animatedBottomEnd by animateFloatAsState(targetShapeValues[3], morphAnimationSpec, label = "BottomEnd")
 
-    // 3. Anima la rotaciÃ³n del botÃ³n para que gire 360 grados en cada cambio de pÃ¡gina.
+    // 3. Anima la rotaciÃƒÂ³n del botÃƒÂ³n para que gire 360 grados en cada cambio de pÃƒÂ¡gina.
     val animatedRotation by animateFloatAsState(
         targetValue = pagerState.currentPage * 360f,
         animationSpec = rotationAnimationSpec,
@@ -1366,7 +1366,7 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                // 4. Aplica la forma y rotaciÃ³n animadas al botÃ³n
+                // 4. Aplica la forma y rotaciÃƒÂ³n animadas al botÃƒÂ³n
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
                     shape = AbsoluteSmoothCornerShape(
@@ -1386,7 +1386,7 @@ fun SetupBottomBar(
                         .rotate(animatedRotation)
                         .padding(end = 0.dp)
                 ) {
-                    // 5. Aplica una contra-rotaciÃ³n al contenido del botÃ³n (el icono)
+                    // 5. Aplica una contra-rotaciÃƒÂ³n al contenido del botÃƒÂ³n (el icono)
                     AnimatedContent(
                         modifier = Modifier.rotate(-animatedRotation),
                         targetState = pagerState.currentPage < pagerState.pageCount - 1,

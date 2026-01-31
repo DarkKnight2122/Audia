@@ -216,7 +216,7 @@ private fun EditSongContent(
         )
     }
 
-    // DefiniciÃ³n de colores para los TextFields
+    // DefiniciÃƒÂ³n de colores para los TextFields
     val textFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -226,7 +226,7 @@ private fun EditSongContent(
         disabledIndicatorColor = Color.Transparent,
     )
 
-    // DefiniciÃ³n de la forma para los TextFields
+    // DefiniciÃƒÂ³n de la forma para los TextFields
     val textFieldShape = AbsoluteSmoothCornerShape(
         cornerRadiusTL = 10.dp,
         smoothnessAsPercentBL = 60,
@@ -242,7 +242,7 @@ private fun EditSongContent(
         exitDirection = FloatingToolbarExitDirection.Bottom
     )
 
-    // --- DiÃ¡logo de InformaciÃ³n ---
+    // --- DiÃƒÂ¡logo de InformaciÃƒÂ³n ---
     if (showInfoDialog) {
         AlertDialog(
             onDismissRequest = { showInfoDialog = false },
@@ -348,7 +348,7 @@ private fun EditSongContent(
                 )
             }
 
-            // --- Campo de TÃ­tulo ---
+            // --- Campo de TÃƒÂ­tulo ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -420,7 +420,7 @@ private fun EditSongContent(
                 }
             }
 
-            // --- Campo de Ãlbum ---
+            // --- Campo de ÃƒÂlbum ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -444,7 +444,7 @@ private fun EditSongContent(
                 }
             }
 
-            // --- Campo de GÃ©nero ---
+            // --- Campo de GÃƒÂ©nero ---
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -632,14 +632,14 @@ private fun CoverArtEditorCard(
                                 contentDescription = "Current song cover art",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
-                                placeholderResId = R.drawable.rounded_album_24,
+                                placeholderResId = R.drawable.rounded_book_24,
                                 errorResId = R.drawable.rounded_broken_image_24
                             )
                         }
 
                         else -> {
                             Icon(
-                                painter = painterResource(id = R.drawable.rounded_album_24),
+                                painter = painterResource(id = R.drawable.rounded_book_24),
                                 contentDescription = null,
                                 modifier = Modifier.size(72.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant

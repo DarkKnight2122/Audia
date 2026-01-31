@@ -421,9 +421,9 @@ private fun ExpressiveDailyMixHeader(
                     }
                     val shape = threeShapeSwitch(index, thirdShapeCornerRadius = 30.dp)
 
-                    // --- INICIO DE LA CORRECCIÃ“N ---
+                    // --- INICIO DE LA CORRECCIÃƒâ€œN ---
                     if (index == 2) {
-                        // Para la 3ra imagen, usamos Modifier.layout para controlar la mediciÃ³n y el posicionamiento.
+                        // Para la 3ra imagen, usamos Modifier.layout para controlar la mediciÃƒÂ³n y el posicionamiento.
                         Box(
                             modifier = Modifier.layout { measurable, constraints ->
                                 // 1. Medimos el contenido (la imagen) para que sea un cuadrado perfecto de `size` x `size`,
@@ -432,8 +432,8 @@ private fun ExpressiveDailyMixHeader(
                                     Constraints.fixed(width = size.roundToPx(), height = size.roundToPx())
                                 )
 
-                                // 2. Le decimos al Row que nuestro layout ocuparÃ¡ el ancho que Ã©l nos dio (`constraints.maxWidth`),
-                                // de esta forma no empujamos a los otros elementos. La altura serÃ¡ la de nuestro cuadrado.
+                                // 2. Le decimos al Row que nuestro layout ocuparÃƒÂ¡ el ancho que ÃƒÂ©l nos dio (`constraints.maxWidth`),
+                                // de esta forma no empujamos a los otros elementos. La altura serÃƒÂ¡ la de nuestro cuadrado.
                                 layout(constraints.maxWidth, placeable.height) {
                                     // 3. Colocamos nuestro contenido cuadrado (`placeable`) dentro del espacio asignado.
                                     // Lo centramos horizontalmente para que se desborde por ambos lados si es necesario.
@@ -449,15 +449,15 @@ private fun ExpressiveDailyMixHeader(
                                     .clip(shape)
                             ) {
                                 SmartImage(
-                                    model = artUrl ?: R.drawable.rounded_album_24,
+                                    model = artUrl ?: R.drawable.rounded_book_24,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize() // Llena el tamaÃ±o cuadrado que le dimos.
+                                    modifier = Modifier.fillMaxSize() // Llena el tamaÃƒÂ±o cuadrado que le dimos.
                                 )
                             }
                         }
                     } else {
-                        // LÃ³gica original para las otras dos imÃ¡genes
+                        // LÃƒÂ³gica original para las otras dos imÃƒÂ¡genes
                         Box(
                             modifier = Modifier
                                 .size(size)
@@ -465,14 +465,14 @@ private fun ExpressiveDailyMixHeader(
                                 .clip(shape)
                         ) {
                             SmartImage(
-                                model = artUrl ?: R.drawable.rounded_album_24,
+                                model = artUrl ?: R.drawable.rounded_book_24,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
-                    // --- FIN DE LA CORRECCIÃ“N ---
+                    // --- FIN DE LA CORRECCIÃƒâ€œN ---
                 }
             }
         }
@@ -513,7 +513,7 @@ private fun ExpressiveDailyMixHeader(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${songs.size} Songs â€¢ ${formatDuration(totalDuration)}",
+                    text = "${songs.size} Songs Ã¢â‚¬Â¢ ${formatDuration(totalDuration)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )

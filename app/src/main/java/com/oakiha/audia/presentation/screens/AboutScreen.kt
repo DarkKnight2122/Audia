@@ -253,7 +253,7 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 32.dp, bottom = 24.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.audiobookplayer_base_monochrome),
+                        painter = painterResource(id = R.drawable.audia_base_monochrome),
                         contentDescription = "App Icon",
                         colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
                         modifier = Modifier

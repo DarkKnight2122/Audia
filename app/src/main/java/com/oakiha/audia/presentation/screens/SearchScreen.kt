@@ -200,7 +200,7 @@ fun SearchScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // CORREGIDO: Agregamos un padding mÃ­nimo para evitar crashes
+            // CORREGIDO: Agregamos un padding mÃƒÂ­nimo para evitar crashes
             val safePadding = maxOf(0.dp, searchbarHorizontalPadding)
 
             Box(
@@ -927,7 +927,7 @@ fun SearchResultArtistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.rounded_artist_24),
+                painter = painterResource(id = R.drawable.rounded_author_24),
                 contentDescription = "Artist",
                 modifier = Modifier
                     .size(56.dp)
@@ -1037,14 +1037,14 @@ fun SearchResultPlaylistItem(
 @Composable
 fun SearchFilterChip(
     filterType: SearchFilterType,
-    currentFilter: SearchFilterType, // Este valor deberÃ­a provenir del estado de tu PlayerViewModel
+    currentFilter: SearchFilterType, // Este valor deberÃƒÂ­a provenir del estado de tu PlayerViewModel
     playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
     val selected = filterType == currentFilter
 
     FilterChip(
-        selected = selected, // FilterChip tiene un parÃ¡metro 'selected'
+        selected = selected, // FilterChip tiene un parÃƒÂ¡metro 'selected'
         onClick = { playerViewModel.updateSearchFilter(filterType) },
         label = { Text(filterType.name.lowercase().replaceFirstChar { it.titlecase() }) },
         modifier = modifier,

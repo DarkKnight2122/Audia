@@ -244,7 +244,7 @@ class MusicService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider.Builder(this)
                 .build()
-                .also { it.setSmallIcon(R.drawable.audiobookplayer_base_monochrome) }
+                .also { it.setSmallIcon(R.drawable.audia_base_monochrome) }
         )
         mediaSession?.let { refreshMediaSessionUi(it) }
 
@@ -380,7 +380,7 @@ class MusicService : MediaSessionService() {
         )
     }
 
-    // --- LÃ“GICA PARA ACTUALIZACIÃ“N DE WIDGETS Y DATOS ---
+    // --- LÃƒâ€œGICA PARA ACTUALIZACIÃƒâ€œN DE WIDGETS Y DATOS ---
     private var debouncedWidgetUpdateJob: Job? = null
     private val WIDGET_STATE_DEBOUNCE_MS = 300L
 
@@ -425,10 +425,10 @@ class MusicService : MediaSessionService() {
             val window = androidx.media3.common.Timeline.Window()
             val currentWindowIndex = withContext(Dispatchers.Main) { player.currentMediaItemIndex }
 
-            // Empezar desde la Next canciÃ³n en la cola
+            // Empezar desde la Next canciÃƒÂ³n en la cola
             val startIndex = if (currentWindowIndex + 1 < timeline.windowCount) currentWindowIndex + 1 else 0
 
-            // Limitar el nÃºmero de elementos de la cola a 4
+            // Limitar el nÃƒÂºmero de elementos de la cola a 4
             val endIndex = (startIndex + 4).coerceAtMost(timeline.windowCount)
             for (i in startIndex until endIndex) {
                 timeline.getWindow(i, window)
