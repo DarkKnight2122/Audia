@@ -62,7 +62,7 @@ import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.AudiobooksNote
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -196,7 +196,7 @@ fun SetupScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == directorySelectionPageIndex) {
-            setupViewModel.loadAudiobooksDirectories()
+            setupViewModel.loadDirectory()
         }
     }
     BackHandler {
@@ -362,7 +362,7 @@ fun DirectorySelectionPage(
         },
         icons = persistentListOf(
             R.drawable.rounded_folder_24,
-            R.drawable.rounded_audiobooks_note_24,
+            R.drawable.rounded_audiobook_note_24,
             R.drawable.rounded_create_new_folder_24,
             R.drawable.rounded_folder_open_24,
             R.drawable.rounded_audio_file_24
@@ -551,9 +551,9 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     }
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
     val mediaIcons = persistentListOf(
-        R.drawable.rounded_audiobooks_note_24,
+        R.drawable.rounded_audiobook_note_24,
         R.drawable.rounded_book_24,
-        R.drawable.rounded_library_audiobooks_24,
+        R.drawable.rounded_book_24,
         R.drawable.rounded_author_24,
         R.drawable.rounded_playlist_play_24
     )
@@ -821,7 +821,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                             LibraryNavigationPillSetupShow(
                                 title = "Songs",
                                 isExpanded = false,
-                                iconRes = R.drawable.rounded_audiobooks_note_24,
+                                iconRes = R.drawable.rounded_audiobook_note_24,
                                 pageIndex = 0,
                                 onClick = {},
                                 onArrowClick = {}
@@ -968,7 +968,7 @@ fun BatteryOptimizationPage(
     }
     
     val batteryIcons = persistentListOf(
-        R.drawable.rounded_audiobooks_note_24,
+        R.drawable.rounded_audiobook_note_24,
         R.drawable.rounded_play_arrow_24,
         R.drawable.rounded_all_inclusive_24,
         R.drawable.rounded_pause_24,
@@ -1635,7 +1635,7 @@ fun NavBarPreview(isDefault: Boolean) {
                             ) {
                                 Icon(painterResource(R.drawable.rounded_home_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Icon(painterResource(R.drawable.rounded_search_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Icon(painterResource(R.drawable.rounded_library_audiobooks_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painterResource(R.drawable.rounded_book_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     } else {
@@ -1665,7 +1665,7 @@ fun NavBarPreview(isDefault: Boolean) {
                             ) {
                                 Icon(painterResource(R.drawable.rounded_home_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Icon(painterResource(R.drawable.rounded_search_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Icon(painterResource(R.drawable.rounded_library_audiobooks_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painterResource(R.drawable.rounded_book_24), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
