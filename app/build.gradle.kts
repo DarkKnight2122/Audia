@@ -1,1 +1,281 @@
-plugins {`n    alias(libs.plugins.android.application)`n    id(""com.google.devtools.ksp"") version ""2.1.0-1.0.29""`n    alias(libs.plugins.compose.compiler)`n    alias(libs.plugins.dagger.hilt.android)`n    kotlin(""plugin.serialization"") version ""2.1.0""`n    alias(libs.plugins.jetbrains.kotlin.android)`n    alias(libs.plugins.baselineprofile)`n}`n`nandroid {`n    namespace = ""com.oakiha.audia""`n    compileSdk = 36`n`n    androidResources {`n        noCompress.add(""tflite"")`n    }`n`n    packaging {`n        resources {`n            excludes += ""META-INF/INDEX.LIST""`n            excludes += ""META-INF/DEPENDENCIES""`n            excludes += ""/META-INF/io.netty.versions.properties""`n            excludes += ""/META-INF/{AL2.0,LGPL2.1}""`n        }`n    }`n`n    defaultConfig {`n        applicationId = ""com.oakiha.audia""`n        minSdk = 29`n        targetSdk = 36`n        `n        val tagName = project.findProperty(""tag_name"") as String?`n        versionName = tagName ?: ""0.1.0-beta""`n        `n        val appVersionCode = project.findProperty(""APP_VERSION_CODE"") as String?`n        versionCode = appVersionCode?.toInt() ?: 3`n`n        testInstrumentationRunner = ""androidx.test.runner.AndroidJUnitRunner""`n    }`n`n    signingConfigs {`n        create(""release"") {`n            storeFile = file(""release.keystore"")`n            storePassword = System.getenv(""ANDROID_KEYSTORE_PASSWORD"")`n            keyAlias = System.getenv(""ANDROID_KEY_ALIAS"")`n            keyPassword = System.getenv(""ANDROID_KEY_PASSWORD"")`n        }`n    }`n`n    buildTypes {`n        debug {`n            signingConfig = signingConfigs.getByName(""debug"")`n            applicationIdSuffix = "".debug""`n        }`n        release {`n            isMinifyEnabled = true`n            isShrinkResources = true`n            proguardFiles(`n                getDefaultProguardFile(""proguard-android-optimize.txt""),`n                ""proguard-rules.pro""`n            )`n            signingConfig = signingConfigs.getByName(""release"")`n        }`n        create(""benchmark"") {`n            initWith(getByName(""release""))`n            signingConfig = signingConfigs.getByName(""debug"")`n            matchingFallbacks += listOf(""release"")`n            isDebuggable = false`n        }`n    }`n`n    splits {`n        abi {`n            isEnable = true`n            reset()`n            include(""armeabi-v7a"", ""arm64-v8a"", ""x86"", ""x86_64"")`n            isUniversalApk = true`n        }`n    }`n`n    compileOptions {`n        isCoreLibraryDesugaringEnabled = true`n        sourceCompatibility = JavaVersion.VERSION_17`n        targetCompatibility = JavaVersion.VERSION_17`n    }`n    `n    kotlinOptions {`n        jvmTarget = ""17""`n    }`n`n    buildFeatures {`n        compose = true`n        buildConfig = true`n    }`n`n    applicationVariants.all {`n        outputs.all {`n            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl`n            val abiRaw = output.filters.find { it.filterType == ""ABI"" }?.identifier ?: ""universal""`n            val abi = when(abiRaw) {`n                ""arm64-v8a"" -> ""armv8""`n                ""armeabi-v7a"" -> ""armv7""`n                ""x86_64"" -> ""x64""`n                ""x86"" -> ""x86""`n                else -> ""univ""`n            }`n            val type = buildType.name`n            val version = versionName`n            output.outputFileName = ""Audia-${version}-${abi}-${type}.apk""`n        }`n    }`n}`n`ndependencies {`n    implementation(libs.androidx.profileinstaller)`n    implementation(libs.androidx.paging.common)`n    coreLibraryDesugaring(libs.desugar.jdk.libs)`n`n    implementation(libs.androidx.core.ktx)`n    implementation(libs.androidx.lifecycle.runtime.ktx)`n    implementation(libs.androidx.activity.compose)`n    implementation(platform(libs.androidx.compose.bom))`n    implementation(libs.androidx.ui)`n    implementation(libs.androidx.ui.graphics)`n    implementation(libs.androidx.ui.tooling.preview)`n    implementation(libs.androidx.material3)`n    implementation(libs.generativeai)`n    implementation(libs.androidx.mediarouter)`n    implementation(libs.play.services.cast.framework)`n    implementation(libs.androidx.navigation.runtime.ktx)`n    implementation(libs.androidx.compose.material3)`n    `n    testImplementation(libs.junit)`n    androidTestImplementation(libs.androidx.junit)`n    androidTestImplementation(libs.androidx.espresso.core)`n    androidTestImplementation(platform(libs.androidx.compose.bom))`n    androidTestImplementation(libs.androidx.ui.test.junit4)`n    debugImplementation(libs.androidx.ui.tooling)`n    debugImplementation(libs.androidx.ui.test.manifest)`n`n    // Hilt`n    implementation(libs.hilt.android)`n    ksp(libs.hilt.android.compiler)`n    implementation(libs.androidx.hilt.navigation.compose)`n    implementation(libs.androidx.hilt.work)`n    ksp(libs.androidx.hilt.compiler)`n`n    // Room`n    implementation(libs.androidx.room.runtime)`n    ksp(libs.androidx.room.compiler)`n    implementation(libs.androidx.room.ktx)`n    implementation(libs.androidx.room.paging)`n    `n    // Paging 3`n    implementation(libs.androidx.paging.runtime)`n    implementation(libs.androidx.paging.compose)`n`n    // Glance`n    implementation(libs.androidx.glance)`n    implementation(libs.androidx.glance.appwidget)`n    implementation(libs.androidx.glance.material3)`n`n    //Gson`n    implementation(libs.gson)`n`n    //Serialization`n    implementation(libs.kotlinx.serialization.json)`n`n    //Work`n    implementation(libs.androidx.work.runtime.ktx)`n`n    //Duktape`n    implementation(libs.duktape.android)`n`n    //Smooth corners shape`n    implementation(libs.smooth.corner.rect.android.compose)`n    implementation(libs.androidx.graphics.shapes)`n`n    //Navigation`n    implementation(libs.androidx.navigation.compose)`n`n    //Animations`n    implementation(libs.androidx.animation)`n`n    //Material3`n    implementation(libs.material3)`n    implementation(""androidx.compose.material3:material3-window-size-class:1.3.1"")`n`n    //Coil`n    implementation(libs.coil.compose)`n`n    //Capturable`n    implementation(libs.capturable)`n`n    //Reorderable List/Drag and Drop`n    implementation(libs.compose.dnd)`n    implementation(libs.reorderables)`n`n    //CodeView`n    implementation(libs.codeview)`n`n    //AppCompat`n    implementation(libs.androidx.appcompat)`n`n    // Media3 ExoPlayer`n    implementation(libs.androidx.media3.exoplayer)`n    implementation(libs.androidx.media3.ui)`n    implementation(libs.androidx.media3.session)`n    implementation(libs.androidx.media.router)`n    implementation(libs.google.play.services.cast.framework)`n    implementation(libs.androidx.media3.exoplayer.ffmpeg)`n`n    // Palette API`n    implementation(libs.androidx.palette.ktx)`n`n    // ConstraintLayout`n    implementation(libs.androidx.constraintlayout.compose)`n`n    // Foundation`n    implementation(libs.androidx.foundation)`n    `n    // Wavy slider`n    implementation(libs.wavy.slider)`n`n    // Splash Screen API`n    implementation(libs.androidx.core.splashscreen)`n`n    // Icons`n    implementation(libs.androidx.material.icons.core)`n    implementation(libs.androidx.material.icons.extended)`n`n    // Material library`n    implementation(libs.material)`n`n    // Kotlin Collections`n    implementation(libs.kotlinx.collections.immutable)`n`n    // Gemini`n    implementation(libs.google.genai)`n`n    // Permissions`n    implementation(libs.accompanist.permissions)`n`n    // Audio processing`n    implementation(libs.amplituda)`n    implementation(libs.compose.audiowaveform)`n    implementation(libs.androidx.media3.transformer)`n`n    // Checker framework`n    implementation(libs.checker.qual)`n`n    // Timber`n    implementation(libs.timber)`n`n    // TagLib & Metadata`n    implementation(libs.taglib)`n    implementation(libs.vorbisjava.core)`n`n    // Retrofit & OkHttp`n    implementation(libs.retrofit)`n    implementation(libs.converter.gson)`n    implementation(libs.okhttp)`n    implementation(libs.logging.interceptor)`n`n    // Ktor`n    implementation(libs.ktor.server.core)`n    implementation(libs.ktor.server.netty)`n    implementation(libs.kotlinx.coroutines.core)`n`n    implementation(libs.androidx.ui.text.google.fonts)`n    implementation(libs.accompanist.drawablepainter)`n    implementation(kotlin(""test""))`n`n    // Android Auto`n    implementation(libs.androidx.media)`n    implementation(libs.androidx.app)`n    implementation(libs.androidx.app.projected)`n}
+﻿plugins {
+    alias(libs.plugins.android.application)
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.dagger.hilt.android)
+    kotlin("plugin.serialization") version "2.1.0"
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.baselineprofile)
+}
+
+android {
+    namespace = "com.oakiha.audia"
+    compileSdk = 36
+
+    androidResources {
+        noCompress.add("tflite")
+    }
+
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "/META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    defaultConfig {
+        applicationId = "com.oakiha.audia"
+        minSdk = 29 // Bumped to match PixelPlayer requirements
+        targetSdk = 36
+        
+        // Use tag_name from project property if available (e.g. from GitHub Actions)
+        val tagName = project.findProperty("tag_name") as String?
+        versionName = tagName ?: "0.1.0-beta"
+        
+        val appVersionCode = project.findProperty("APP_VERSION_CODE") as String?
+        versionCode = appVersionCode?.toInt() ?: 3
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("release.keystore")
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    applicationVariants.all {
+        outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            val abiRaw = output.filters.find { it.filterType == "ABI" }?.identifier ?: "universal"
+            val abi = when(abiRaw) {
+                "arm64-v8a" -> "armv8"
+                "armeabi-v7a" -> "armv7"
+                "x86_64" -> "x64"
+                "x86" -> "x86"
+                else -> "univ"
+            }
+            val type = buildType.name
+            val version = versionName
+            output.outputFileName = "Audia-${version}-${abi}-${type}.apk"
+        }
+    }
+}
+
+dependencies {
+    implementation(libs.androidx.profileinstaller)
+    implementation(libs.androidx.paging.common)
+    // "baselineProfile"(project(":baselineprofile")) // Module not present yet
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.generativeai)
+    implementation(libs.androidx.mediarouter)
+    implementation(libs.play.services.cast.framework)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.compose.material3)
+    
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+    
+    // Paging 3
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+
+    // Glance
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
+    //Gson
+    implementation(libs.gson)
+
+    //Serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    //Work
+    implementation(libs.androidx.work.runtime.ktx)
+
+    //Duktape
+    implementation(libs.duktape.android)
+
+    //Smooth corners shape
+    implementation(libs.smooth.corner.rect.android.compose)
+    implementation(libs.androidx.graphics.shapes)
+
+    //Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    //Animations
+    implementation(libs.androidx.animation)
+
+    //Material3
+    implementation(libs.material3)
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+
+    //Coil
+    implementation(libs.coil.compose)
+
+    //Capturable
+    implementation(libs.capturable)
+
+    //Reorderable List/Drag and Drop
+    implementation(libs.compose.dnd)
+    implementation(libs.reorderables)
+
+    //CodeView
+    implementation(libs.codeview)
+
+    //AppCompat
+    implementation(libs.androidx.appcompat)
+
+    // Media3 ExoPlayer
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.media.router)
+    implementation(libs.google.play.services.cast.framework)
+    implementation(libs.androidx.media3.exoplayer.ffmpeg)
+
+    // Palette API
+    implementation(libs.androidx.palette.ktx)
+
+    // ConstraintLayout
+    implementation(libs.androidx.constraintlayout.compose)
+
+    // Foundation
+    implementation(libs.androidx.foundation)
+    
+    // Wavy slider
+    implementation(libs.wavy.slider)
+
+    // Splash Screen API
+    implementation(libs.androidx.core.splashscreen)
+
+    // Icons
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
+
+    // Material library
+    implementation(libs.material)
+
+    // Kotlin Collections
+    implementation(libs.kotlinx.collections.immutable)
+
+    // Gemini
+    implementation(libs.google.genai)
+
+    // Permissions
+    implementation(libs.accompanist.permissions)
+
+    // Audio processing
+    implementation(libs.amplituda)
+    implementation(libs.compose.audiowaveform)
+    implementation(libs.androidx.media3.transformer)
+
+    // Checker framework
+    implementation(libs.checker.qual)
+
+    // Timber
+    implementation(libs.timber)
+
+    // TagLib & Metadata
+    implementation(libs.taglib)
+    implementation(libs.vorbisjava.core)
+
+    // Retrofit & OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    // Ktor
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.kotlinx.coroutines.core)
+
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.accompanist.drawablepainter)
+    implementation(kotlin("test"))
+
+    // Android Auto
+    implementation(libs.androidx.media)
+    implementation(libs.androidx.app)
+    implementation(libs.androidx.app.projected)
+}
