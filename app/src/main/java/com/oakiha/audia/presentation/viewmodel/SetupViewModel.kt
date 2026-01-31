@@ -143,7 +143,7 @@ class SetupViewModel @Inject constructor(
         }
     }
 
-    fun loadMusicDirectories() {
+    fun loadAudiobooksDirectories() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDirectories = true) }
             if (!userPreferencesRepository.initialSetupDoneFlow.first()) {

@@ -196,7 +196,7 @@ fun SetupScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == directorySelectionPageIndex) {
-            setupViewModel.loadDirectory()
+            setupViewModel.loadAudiobooksDirectories()
         }
     }
     BackHandler {
