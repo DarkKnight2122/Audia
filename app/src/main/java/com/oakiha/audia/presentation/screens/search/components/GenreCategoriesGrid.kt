@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens.search.components
+﻿package com.oakiha.audia.presentation.screens.search.components
 
 import android.util.Log
 import androidx.annotation.OptIn
@@ -105,7 +105,7 @@ fun GenreCategoriesGrid(
             )
         }
         items(genres, key = { it.id }) { genre ->
-            // CORREGIDO: Obtener las URIs de manera mÃ¡s robusta
+            // CORREGIDO: Obtener las URIs de manera mÃƒÂ¡s robusta
             GenreCard(
                 genre = genre,
                 onClick = { onGenreClick(genre) }
@@ -159,7 +159,7 @@ private fun GenreCard(
                 .clip(RoundedCornerShape(24.dp))
                 .background(backgroundColor)
         ) {
-            // Imagen del gÃ©nero en esquina inferior derecha
+            // Imagen del gÃƒÂ©nero en esquina inferior derecha
             Box(
                 modifier = Modifier
                     .size(108.dp)
@@ -177,7 +177,7 @@ private fun GenreCard(
                 )
             }
 
-            // Nombre del gÃ©nero en esquina superior izquierda
+            // Nombre del gÃƒÂ©nero en esquina superior izquierda
             Text(
                 text = genre.name,
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -219,6 +219,6 @@ private fun getGenreImageResource(genreId: String): Any {
         "bachata" -> R.drawable.bongos
         "merengue" -> R.drawable.drum
         "unknown" -> R.drawable.rounded_question_mark_24 // Add icon for unknown genre
-        else -> R.drawable.genre_default
+        else -> R.drawable.category_default
     }
 }
