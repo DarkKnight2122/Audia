@@ -205,7 +205,7 @@ class SleepTimerStateHolder @Inject constructor(
 
             _activeTimerValueDisplay.value = "End of Track"
             _isEndOfTrackTimerActive.value = true
-            EotStateHolder.setEotTargetSong(currentSongId)
+            EotStateHolder.setEotTargetTrack(currentSongId)
 
             sleepTimerJob?.cancel()
             _sleepTimerEndTimeMillis.value = null
@@ -215,10 +215,10 @@ class SleepTimerStateHolder @Inject constructor(
             eotSongMonitorJob = scope.launch {
                 currentSongIdProvider?.invoke()?.collect { newSongId ->
                     if (_isEndOfTrackTimerActive.value &&
-                        EotStateHolder.eotTargetSongId.value != null &&
-                        newSongId != EotStateHolder.eotTargetSongId.value) {
+                        EotStateHolder.eotTargetTrackId.value != null &&
+                        newSongId != EotStateHolder.eotTargetTrackId.value) {
 
-                        val oldSongTitle = songTitleResolver?.invoke(EotStateHolder.eotTargetSongId.value) ?: "Previous track"
+                        val oldSongTitle = songTitleResolver?.invoke(EotStateHolder.eotTargetTrackId.value) ?: "Previous track"
                         val newSongTitle = songTitleResolver?.invoke(newSongId) ?: "Current track"
 
                         toastEmitter?.invoke("End of Track timer deactivated: song changed from $oldSongTitle to $newSongTitle.")
@@ -233,7 +233,7 @@ class SleepTimerStateHolder @Inject constructor(
             scope.launch { toastEmitter?.invoke("Playback will stop at end of track.") }
         } else {
             eotSongMonitorJob?.cancel()
-            if (_isEndOfTrackTimerActive.value && EotStateHolder.eotTargetSongId.value != null) {
+            if (_isEndOfTrackTimerActive.value && EotStateHolder.eotTargetTrackId.value != null) {
                 cancelSleepTimer()
             }
         }
@@ -265,7 +265,7 @@ class SleepTimerStateHolder @Inject constructor(
         eotSongMonitorJob?.cancel()
         eotSongMonitorJob = null
         _isEndOfTrackTimerActive.value = false
-        EotStateHolder.setEotTargetSong(null)
+        EotStateHolder.setEotTargetTrack(null)
 
         // Clear display
         _activeTimerValueDisplay.value = null

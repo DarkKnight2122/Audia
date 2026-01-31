@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 class MetadataEditStateHolder @Inject constructor(
     private val songMetadataEditor: SongMetadataEditor,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val imageCacheManager: ImageCacheManager,
     private val themeStateHolder: ThemeStateHolder,
     @ApplicationContext private val context: Context
@@ -107,9 +107,9 @@ class MetadataEditStateHolder @Inject constructor(
             
             // Update Repository (Lyrics)
             if (normalizedLyrics != null) {
-                musicRepository.updateLyrics(song.id.toLong(), normalizedLyrics)
+                audiobookRepository.updateLyrics(song.id.toLong(), normalizedLyrics)
             } else {
-                musicRepository.resetLyrics(song.id.toLong())
+                audiobookRepository.resetLyrics(song.id.toLong())
             }
 
             val updatedSong = song.copy(
@@ -127,7 +127,7 @@ class MetadataEditStateHolder @Inject constructor(
             // and assign it a NEW album ID, resulting in a NEW albumArtUri.
             // Using the 'updatedSong' copy above might retain a STALE albumArtUri.
             val freshSong = try {
-                musicRepository.getSong(song.id).first() ?: updatedSong
+                audiobookRepository.getTrack(song.id).first() ?: updatedSong
             } catch (e: Exception) {
                 updatedSong
             }
@@ -170,7 +170,7 @@ class MetadataEditStateHolder @Inject constructor(
                 // FileDeletionUtils deletes the physical file. The MediaScanner should eventually pick it up, 
                 // but for immediate UI responsiveness, manual update is good.
                 // Also, AudiobookRepository.deleteById(id) exists.
-                // ViewModel did NOT call musicRepository.deleteById(). It relied on "removeSong" which is UI state only? 
+                // ViewModel did NOT call audiobookRepository.deleteById(). It relied on "removeSong" which is UI state only? 
                 // Wait, removeSong updates UI state. Does it update DB?
                 // Line 3698: toggleFavoriteSpecificSong(song, true)?? Wait.
                 

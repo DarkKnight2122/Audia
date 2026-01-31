@@ -59,7 +59,7 @@ class SyncWorker
 constructor(
         @Assisted appContext: Context,
         @Assisted workerParams: WorkerParameters,
-        private val musicDao: MusicDao,
+        private val audiobookDao: MusicDao,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val lyricsRepository: LyricsRepository
 ) : CoroutineWorker(appContext, workerParams) {
@@ -106,7 +106,7 @@ constructor(
                     // Detect and remove deleted songs efficiently using ID comparison
                     // We do this for INCREMENTAL and FULL modes. REBUILD clears everything anyway.
                     if (syncMode != SyncMode.REBUILD) {
-                        val localSongIds = musicDao.getAllSongIds().toHashSet()
+                        val localSongIds = audiobookDao.getAllSongIds().toHashSet()
                         val mediaStoreIds = fetchMediaStoreIds(directoryResolver)
 
                         // Identify IDs that are in local DB but not in MediaStore
@@ -118,8 +118,8 @@ constructor(
                             // Chunk deletions to avoid SQLite variable limit (default 999)
                             val batchSize = 500
                             deletedIds.chunked(batchSize).forEach { chunk ->
-                                musicDao.deleteSongsByIds(chunk.toList())
-                                musicDao.deleteCrossRefsBySongIds(chunk.toList())
+                                audiobookDao.deleteSongsByIds(chunk.toList())
+                                audiobookDao.deleteCrossRefsBySongIds(chunk.toList())
                             }
                         } else {
                             Timber.tag(TAG).d("No deleted songs found.")
@@ -128,7 +128,7 @@ constructor(
 
                     // --- FETCH PHASE ---
                     // Determine what to fetch based on mode
-                    val isFreshInstall = musicDao.getSongCount().first() == 0
+                    val isFreshInstall = audiobookDao.getTrackCount().first() == 0
 
                     // If REBUILD or FULL or RescanRequired or Fresh Install -> Fetch EVERYTHING
                     // (timestamp = 0)
@@ -176,14 +176,14 @@ constructor(
                         if (syncMode == SyncMode.REBUILD) {
                             Timber.tag(TAG)
                                 .i("Rebuild mode: Clearing all music data before insert.")
-                            musicDao.clearAllMusicDataWithCrossRefs()
+                            audiobookDao.clearAllMusicDataWithCrossRefs()
                         }
 
                         val allExistingArtists =
                                 if (syncMode == SyncMode.REBUILD) {
                                     emptyList()
                                 } else {
-                                    musicDao.getAllArtistsListRaw()
+                                    audiobookDao.getAllArtistsListRaw()
                                 }
 
                         val existingArtistImageUrls =
@@ -191,13 +191,13 @@ constructor(
                         
                         // Load all existing artist IDs to ensure stability across incremental syncs
                         val existingArtistIdMap = allExistingArtists.associate { it.name to it.id }.toMutableMap()
-                        val maxArtistId = musicDao.getMaxArtistId() ?: 0L
+                        val maxArtistId = audiobookDao.getMaxArtistId() ?: 0L
 
                         // Prepare list of existing songs to preserve user edits
                         // We only need to check against existing songs if we are updating them
                         val localSongsMap =
                                 if (syncMode != SyncMode.REBUILD) {
-                                    musicDao.getAllSongsList().associateBy { it.id }
+                                    audiobookDao.getAllTracksList().associateBy { it.id }
                                 } else {
                                     emptyMap()
                                 }
@@ -291,7 +291,7 @@ constructor(
                         // Use incrementalSyncMusicData for all modes except REBUILD
                         // Even for FULL sync, we can just upsert the values
                         if (syncMode == SyncMode.REBUILD) {
-                            musicDao.insertMusicDataWithCrossRefs(
+                            audiobookDao.insertMusicDataWithCrossRefs(
                                     correctedSongs,
                                     albums,
                                     artists,
@@ -300,7 +300,7 @@ constructor(
                         } else {
                             // incrementalSyncMusicData handles upserts efficiently
                             // processing deleted songs was already handled at the start
-                            musicDao.incrementalSyncMusicData(
+                            audiobookDao.incrementalSyncMusicData(
                                     songs = correctedSongs,
                                     albums = albums,
                                     artists = artists,
@@ -318,14 +318,14 @@ constructor(
                         userPreferencesRepository.setLastSyncTimestamp(System.currentTimeMillis())
 
                         // Count total songs for the output
-                        val totalSongs = musicDao.getSongCount().first()
+                        val totalSongs = audiobookDao.getTrackCount().first()
 
                         // --- LRC SCANNING PHASE ---
                         val autoScanLrc = userPreferencesRepository.autoScanLrcFilesFlow.first()
                         if (autoScanLrc) {
                             Timber.tag(TAG).i("Auto-scan LRC files enabled. Starting scan phase...")
 
-                            val allTracksEntities = musicDao.getAllSongsList()
+                            val allTracksEntities = audiobookDao.getAllTracksList()
                             val allTracks =
                                     allTracksEntities.map { entity ->
                                         Song(
@@ -368,7 +368,7 @@ constructor(
                         }
                         
                         // Clean orphaned album art cache files
-                        val allSongIds = musicDao.getAllSongIds().toSet()
+                        val allSongIds = audiobookDao.getAllSongIds().toSet()
                         AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
 
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
@@ -379,7 +379,7 @@ constructor(
                         if ((syncMode == SyncMode.REBUILD || isFreshInstall) &&
                                         mediaStoreSongs.isEmpty()
                         ) {
-                            musicDao.clearAllMusicDataWithCrossRefs()
+                            audiobookDao.clearAllMusicDataWithCrossRefs()
                             Log.w(
                                     TAG,
                                     "MediaStore fetch resulted in empty list. Local music data cleared."
@@ -393,10 +393,10 @@ constructor(
                         )
                         userPreferencesRepository.setLastSyncTimestamp(System.currentTimeMillis())
 
-                        val totalSongs = musicDao.getSongCount().first()
+                        val totalSongs = audiobookDao.getTrackCount().first()
                         
                         // Clean orphaned album art cache files
-                        val allSongIds = musicDao.getAllSongIds().toSet()
+                        val allSongIds = audiobookDao.getAllSongIds().toSet()
                         AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
                         
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
@@ -938,7 +938,7 @@ constructor(
             albumArtUriString =
                     AlbumArtUtils.getAlbumArtUri(
                             applicationContext,
-                            musicDao,
+                            audiobookDao,
                             raw.filePath,
                             raw.albumId,
                             raw.id,
@@ -947,7 +947,7 @@ constructor(
                             ?: albumArtUriString
         }
         val audioMetadata =
-                if (deepScan) getAudioMetadata(musicDao, raw.id, raw.filePath, true) else null
+                if (deepScan) getAudioMetadata(audiobookDao, raw.id, raw.filePath, true) else null
 
         var title = raw.title
         var artist = raw.artist

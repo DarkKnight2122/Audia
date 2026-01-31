@@ -299,7 +299,7 @@ fun DailyMixScreen(
                 }
 
                 items(dailyMixSongs, key = { it.id }) { song ->
-                    EnhancedSongListItem(
+                    EnhancedTrackListItem(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         song = song,

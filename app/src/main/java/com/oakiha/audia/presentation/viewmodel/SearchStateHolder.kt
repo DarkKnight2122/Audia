@@ -29,7 +29,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class SearchStateHolder @Inject constructor(
-    private val musicRepository: AudiobookRepository
+    private val audiobookRepository: AudiobookRepository
 ) {
     // Search State
     private val _searchResults = MutableStateFlow<ImmutableList<SearchResultItem>>(persistentListOf())
@@ -58,7 +58,7 @@ class SearchStateHolder @Inject constructor(
         scope?.launch {
             try {
                 val history = withContext(Dispatchers.IO) {
-                    musicRepository.getRecentSearchHistory(limit)
+                    audiobookRepository.getRecentSearchHistory(limit)
                 }
                 _searchHistory.value = history.toImmutableList()
             } catch (e: Exception) {
@@ -72,7 +72,7 @@ class SearchStateHolder @Inject constructor(
             if (query.isNotBlank()) {
                 try {
                     withContext(Dispatchers.IO) {
-                        musicRepository.addSearchHistoryItem(query)
+                        audiobookRepository.addSearchHistoryItem(query)
                     }
                     loadSearchHistory()
                 } catch (e: Exception) {
@@ -92,7 +92,7 @@ class SearchStateHolder @Inject constructor(
 
                 val currentFilter = _selectedSearchFilter.value
                 val resultsList = withContext(Dispatchers.IO) {
-                    musicRepository.searchAll(query, currentFilter).first()
+                    audiobookRepository.searchAll(query, currentFilter).first()
                 }
 
                 _searchResults.value = resultsList.toImmutableList()
@@ -108,7 +108,7 @@ class SearchStateHolder @Inject constructor(
         scope?.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    musicRepository.deleteSearchHistoryItemByQuery(query)
+                    audiobookRepository.deleteSearchHistoryItemByQuery(query)
                 }
                 loadSearchHistory()
             } catch (e: Exception) {
@@ -121,7 +121,7 @@ class SearchStateHolder @Inject constructor(
         scope?.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    musicRepository.clearSearchHistory()
+                    audiobookRepository.clearSearchHistory()
                 }
                 _searchHistory.value = persistentListOf()
             } catch (e: Exception) {

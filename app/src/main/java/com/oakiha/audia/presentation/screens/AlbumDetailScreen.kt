@@ -241,7 +241,7 @@ fun AlbumDetailScreen(
                         .padding(horizontal = 16.dp)
                 ) {
                     items(songs, key = { song -> "album_song_${song.id}" }) { song ->
-                        EnhancedSongListItem(
+                        EnhancedTrackListItem(
                             song = song,
                             isCurrentSong = stablePlayerState.currentSong?.id == song.id,
                             isPlaying = stablePlayerState.isPlaying,

@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
  * and structured querying.
  */
 @Entity(tableName = "song_engagements")
-data class SongEngagementEntity(
+data class TrackEngagementEntity(
     @PrimaryKey
     @ColumnInfo(name = "song_id")
     val songId: String,

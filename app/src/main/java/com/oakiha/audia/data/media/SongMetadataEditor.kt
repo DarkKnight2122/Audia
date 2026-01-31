@@ -40,7 +40,7 @@ enum class MetadataEditError {
 }
 
 
-class SongMetadataEditor(private val context: Context, private val musicDao: MusicDao) {
+class SongMetadataEditor(private val context: Context, private val audiobookDao: MusicDao) {
 
     // File extensions that require VorbisJava (TagLib has issues with these via file descriptors)
     private val opusExtensions = setOf("opus", "ogg")
@@ -194,7 +194,7 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
             // 3. Update local database and save cover art preview
             var storedCoverArtUri: String? = null
             runBlocking {
-                musicDao.updateSongMetadata(
+                audiobookDao.updateSongMetadata(
                     songId,
                     newTitle,
                     newArtist,
@@ -207,7 +207,7 @@ class SongMetadataEditor(private val context: Context, private val musicDao: Mus
                 coverArtUpdate?.let { update ->
                     storedCoverArtUri = saveCoverArtPreview(songId, update)
                     storedCoverArtUri?.let { coverUri ->
-                        musicDao.updateSongAlbumArt(songId, coverUri)
+                        audiobookDao.updateSongAlbumArt(songId, coverUri)
                     }
                 }
             }

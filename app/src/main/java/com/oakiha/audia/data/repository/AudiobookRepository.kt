@@ -30,7 +30,7 @@ interface AudiobookRepository {
      * Returns the count of songs in the library.
      * @return Flow emitting the current song count.
      */
-    fun getSongCountFlow(): Flow<Int>
+    fun getTrackCountFlow(): Flow<Int>
 
     /**
      * Returns a random selection of songs for efficient shuffle.
@@ -56,7 +56,7 @@ interface AudiobookRepository {
      * Obtiene la lista completa de canciones una sola vez.
      * @return Lista de objetos Song.
      */
-    suspend fun getAllSongsOnce(): List<Song>
+    suspend fun getAllTracksOnce(): List<Song>
 
     /**
      * Obtiene la lista completa de Ã¡lbumes una sola vez.
@@ -88,28 +88,28 @@ interface AudiobookRepository {
      * @param albumId El ID del Ã¡lbum.
      * @return Flow que emite una lista de objetos Song pertenecientes al Ã¡lbum.
      */
-    fun getSongsForAlbum(albumId: Long): Flow<List<Song>>
+    fun getTracksForAlbum(albumId: Long): Flow<List<Song>>
 
     /**
      * Obtiene la lista de canciones para un artista especÃ­fico (NO paginada para la cola de reproducciÃ³n).
      * @param artistId El ID del artista.
      * @return Flow que emite una lista de objetos Song pertenecientes al artista.
      */
-    fun getSongsForArtist(artistId: Long): Flow<List<Song>>
+    fun getTracksForArtist(artistId: Long): Flow<List<Song>>
 
     /**
      * Obtiene una lista de canciones por sus IDs.
      * @param songIds Lista de IDs de canciones.
      * @return Flow que emite una lista de objetos Song correspondientes a los IDs, en el mismo orden.
      */
-    fun getSongsByIds(songIds: List<String>): Flow<List<Song>>
+    fun getTracksByIds(songIds: List<String>): Flow<List<Song>>
 
     /**
      * Obtiene una canciÃ³n por su ruta de archivo.
      * @param path Ruta del archivo.
      * @return El objeto Song o null si no se encuentra.
      */
-    suspend fun getSongByPath(path: String): Song?
+    suspend fun getTrackByPath(path: String): Song?
 
     /**
      * Obtiene todos los directorios Ãºnicos que contienen archivos de audio.
@@ -154,7 +154,7 @@ interface AudiobookRepository {
      * @param songId El ID de la canciÃ³n.
      * @return Flow que emite el objeto Song o null si no se encuentra.
      */
-    fun getSong(songId: String): Flow<Song?>
+    fun getTrack(songId: String): Flow<Song?>
     fun getArtistById(artistId: Long): Flow<Artist?>
     fun getArtistsForSong(songId: Long): Flow<List<Artist>>
 

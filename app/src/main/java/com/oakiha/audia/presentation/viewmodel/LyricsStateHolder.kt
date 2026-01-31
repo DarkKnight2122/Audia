@@ -38,7 +38,7 @@ interface LyricsLoadCallback {
  */
 @Singleton
 class LyricsStateHolder @Inject constructor(
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
     private var scope: CoroutineScope? = null
@@ -85,14 +85,14 @@ class LyricsStateHolder @Inject constructor(
      */
     fun loadLyricsForSong(song: Song, sourcePreference: LyricsSourcePreference) {
         loadingJob?.cancel()
-        val targetSongId = song.id
+        val targetTrackId = song.id
 
         loadingJob = scope?.launch {
-            loadCallback?.onLoadingStarted(targetSongId)
+            loadCallback?.onLoadingStarted(targetTrackId)
 
             val fetchedLyrics = try {
                 withContext(Dispatchers.IO) {
-                    musicRepository.getLyrics(
+                    audiobookRepository.getLyrics(
                         song = song,
                         sourcePreference = sourcePreference
                     )
@@ -103,7 +103,7 @@ class LyricsStateHolder @Inject constructor(
                 null
             }
 
-            loadCallback?.onLyricsLoaded(targetSongId, fetchedLyrics)
+            loadCallback?.onLyricsLoaded(targetTrackId, fetchedLyrics)
         }
     }
 
@@ -172,7 +172,7 @@ class LyricsStateHolder @Inject constructor(
         loadingJob = scope?.launch {
             _searchUiState.value = LyricsSearchUiState.Loading
             if (forcePickResults) {
-                musicRepository.searchRemoteLyrics(song)
+                audiobookRepository.searchRemoteLyrics(song)
                     .onSuccess { (query, results) ->
                         _searchUiState.value = LyricsSearchUiState.PickResult(query, results)
                     }
@@ -180,7 +180,7 @@ class LyricsStateHolder @Inject constructor(
                         handleError(error)
                     }
             } else {
-                musicRepository.getLyricsFromRemote(song)
+                audiobookRepository.getLyricsFromRemote(song)
                     .onSuccess { (lyrics, rawLyrics) ->
                         _searchUiState.value = LyricsSearchUiState.Success(lyrics)
                         val updatedSong = song.copy(lyrics = rawLyrics)
@@ -189,7 +189,7 @@ class LyricsStateHolder @Inject constructor(
                     .onFailure { error ->
                         if (error is NoLyricsFoundException) {
                             // Fallback to search
-                             musicRepository.searchRemoteLyrics(song)
+                             audiobookRepository.searchRemoteLyrics(song)
                                 .onSuccess { (query, results) ->
                                     _searchUiState.value = LyricsSearchUiState.PickResult(query, results)
                                 }
@@ -210,7 +210,7 @@ class LyricsStateHolder @Inject constructor(
         loadingJob?.cancel()
         loadingJob = scope?.launch {
             _searchUiState.value = LyricsSearchUiState.Loading
-            musicRepository.searchRemoteLyricsByQuery(title, artist)
+            audiobookRepository.searchRemoteLyricsByQuery(title, artist)
                 .onSuccess { (q, results) ->
                     _searchUiState.value = LyricsSearchUiState.PickResult(q, results)
                 }
@@ -227,7 +227,7 @@ class LyricsStateHolder @Inject constructor(
             val updatedSong = currentSong.copy(lyrics = result.rawLyrics)
             
             // 1. Update DB
-            musicRepository.updateLyrics(currentSong.id.toLong(), result.rawLyrics)
+            audiobookRepository.updateLyrics(currentSong.id.toLong(), result.rawLyrics)
             
             // 2. Notify
             _songUpdates.emit(updatedSong to result.lyrics)
@@ -239,7 +239,7 @@ class LyricsStateHolder @Inject constructor(
      */
     fun importLyricsFromFile(songId: Long, lyricsContent: String, currentSong: Song?) {
         scope?.launch {
-            musicRepository.updateLyrics(songId, lyricsContent)
+            audiobookRepository.updateLyrics(songId, lyricsContent)
             if (currentSong != null && currentSong.id.toLong() == songId) {
                 val updatedSong = currentSong.copy(lyrics = lyricsContent)
                 
@@ -277,7 +277,7 @@ class LyricsStateHolder @Inject constructor(
     fun resetLyrics(songId: Long) {
         resetSearchState()
         scope?.launch {
-             musicRepository.resetLyrics(songId)
+             audiobookRepository.resetLyrics(songId)
              _songUpdates.emit(Song.emptySong().copy(id=songId.toString()) to null) 
         }
     }
@@ -285,7 +285,7 @@ class LyricsStateHolder @Inject constructor(
     fun resetAllLyrics() {
         resetSearchState()
         scope?.launch {
-            musicRepository.resetAllLyrics()
+            audiobookRepository.resetAllLyrics()
         }
     }
 

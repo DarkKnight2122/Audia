@@ -14,19 +14,19 @@ import kotlinx.coroutines.flow.Flow
 interface EngagementDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertEngagement(engagement: SongEngagementEntity)
+    suspend fun upsertEngagement(engagement: TrackEngagementEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertEngagements(engagements: List<SongEngagementEntity>)
+    suspend fun upsertEngagements(engagements: List<TrackEngagementEntity>)
 
     @Query("SELECT * FROM song_engagements WHERE song_id = :songId")
-    suspend fun getEngagement(songId: String): SongEngagementEntity?
+    suspend fun getEngagement(songId: String): TrackEngagementEntity?
 
     @Query("SELECT * FROM song_engagements")
-    suspend fun getAllEngagements(): List<SongEngagementEntity>
+    suspend fun getAllEngagements(): List<TrackEngagementEntity>
 
     @Query("SELECT * FROM song_engagements")
-    fun getAllEngagementsFlow(): Flow<List<SongEngagementEntity>>
+    fun getAllEngagementsFlow(): Flow<List<TrackEngagementEntity>>
 
     @Query("SELECT play_count FROM song_engagements WHERE song_id = :songId")
     suspend fun getPlayCount(songId: String): Int?
@@ -58,5 +58,5 @@ interface EngagementDao {
      * Get top songs by play count for quick access.
      */
     @Query("SELECT * FROM song_engagements ORDER BY play_count DESC LIMIT :limit")
-    suspend fun getTopPlayedSongs(limit: Int): List<SongEngagementEntity>
+    suspend fun getTopPlayedSongs(limit: Int): List<TrackEngagementEntity>
 }

@@ -29,7 +29,7 @@ data class AlbumDetailUiState(
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,8 +54,8 @@ class AlbumDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val albumDetailsFlow = musicRepository.getAlbumById(id)
-                val albumSongsFlow = musicRepository.getSongsForAlbum(id)
+                val albumDetailsFlow = audiobookRepository.getAlbumById(id)
+                val albumSongsFlow = audiobookRepository.getTracksForAlbum(id)
 
                 combine(albumDetailsFlow, albumSongsFlow) { album, songs ->
                     if (album != null) {

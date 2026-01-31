@@ -74,7 +74,7 @@ class AudiobookService : MediaSessionService() {
     @Inject
     lateinit var controller: TransitionController
     @Inject
-    lateinit var musicRepository: AudiobookRepository
+    lateinit var audiobookRepository: AudiobookRepository
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
@@ -416,7 +416,7 @@ class AudiobookService : MediaSessionService() {
 
         val isFavorite = false
 //        val isFavorite = mediaId?.let {
-//            //musicRepository.getFavoriteSongs().firstOrNull()?.any { song -> song.id.toString() == it }
+//            //audiobookRepository.getFavoriteTracks().firstOrNull()?.any { song -> song.id.toString() == it }
 //        } ?: false
 
         val queueItems = mutableListOf<com.oakiha.audia.data.model.QueueItem>()

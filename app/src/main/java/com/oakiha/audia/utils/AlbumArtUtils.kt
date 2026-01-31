@@ -19,7 +19,7 @@ object AlbumArtUtils {
      */
     fun getAlbumArtUri(
         appContext: Context,
-        musicDao: MusicDao,
+        audiobookDao: MusicDao,
         path: String,
         albumId: Long,
         songId: Long,
@@ -31,7 +31,7 @@ object AlbumArtUtils {
         // Method 2: Try embedded art from file
         getEmbeddedAlbumArtUri(appContext, path, songId, deepScan)?.let { return it.toString() }
         // Method 3: try from db
-//        musicDao.getAlbumArtUriById(songId)?.let {
+//        audiobookDao.getAlbumArtUriById(songId)?.let {
 //            return it
 //        }
         // Method 4: Try external album art files in directory

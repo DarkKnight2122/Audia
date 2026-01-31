@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.presentation.screens.SongListItemFavsWrapper
+import com.oakiha.audia.presentation.screens.TrackListItemFavsWrapper
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
@@ -214,7 +214,7 @@ private fun DailyMixSongList(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         songs.forEach { song ->
-            SongListItemFavsWrapper(
+            TrackListItemFavsWrapper(
                 song = song,
                 playerViewModel = playerViewModel,
                 onClick = {

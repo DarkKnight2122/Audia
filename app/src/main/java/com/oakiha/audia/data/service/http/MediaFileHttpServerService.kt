@@ -31,7 +31,7 @@ import timber.log.Timber
 class MediaFileHttpServerService : Service() {
 
     @Inject
-    lateinit var musicRepository: AudiobookRepository
+    lateinit var audiobookRepository: AudiobookRepository
 
     private var server: NettyApplicationEngine? = null
     private val serviceJob = SupervisorJob()
@@ -122,7 +122,7 @@ class MediaFileHttpServerService : Service() {
                                     return@get
                                 }
 
-                                val song = musicRepository.getSong(songId).firstOrNull()
+                                val song = audiobookRepository.getTrack(songId).firstOrNull()
                                 if (song == null) {
                                     call.respond(HttpStatusCode.NotFound, "Song not found")
                                     return@get
@@ -207,7 +207,7 @@ class MediaFileHttpServerService : Service() {
                                     return@get
                                 }
 
-                                val song = musicRepository.getSong(songId).firstOrNull()
+                                val song = audiobookRepository.getTrack(songId).firstOrNull()
                                 if (song?.albumArtUriString == null) {
                                     call.respond(HttpStatusCode.NotFound, "Album art not found")
                                     return@get

@@ -112,7 +112,7 @@ private const val CAST_LOG_TAG = "PlayerCastTransfer"
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val albumArtThemeDao: BookArtThemeDao,
     val syncManager: SyncManager, // Inyectar SyncManager
@@ -169,7 +169,7 @@ class PlayerViewModel @Inject constructor(
         .flatMapLatest { songId ->
             val idLong = songId?.toLongOrNull()
             if (idLong == null) flowOf(emptyList())
-            else musicRepository.getArtistsForSong(idLong)
+            else audiobookRepository.getArtistsForSong(idLong)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -1155,7 +1155,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songsList: List<Song> = withContext(Dispatchers.IO) {
-                    musicRepository.getSongsForAlbum(album.id).first()
+                    audiobookRepository.getTracksForAlbum(album.id).first()
                 }
 
                 if (songsList.isNotEmpty()) {
@@ -1181,7 +1181,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songsList: List<Song> = withContext(Dispatchers.IO) {
-                    musicRepository.getSongsForArtist(artist.id).first()
+                    audiobookRepository.getTracksForArtist(artist.id).first()
                 }
 
                 if (songsList.isNotEmpty()) {
@@ -1414,7 +1414,7 @@ class PlayerViewModel @Inject constructor(
                 lyricsStateHolder.cancelLoading()
                 transitionSchedulerJob = viewModelScope.launch {
                     if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-                        val activeEotSongId = EotStateHolder.eotTargetSongId.value
+                        val activeEotSongId = EotStateHolder.eotTargetTrackId.value
                         val previousSongId = playerCtrl.run { if (previousMediaItemIndex != C.INDEX_UNSET) getMediaItemAt(previousMediaItemIndex).mediaId else null }
 
                         if (isEndOfTrackTimerActive.value && activeEotSongId != null && previousSongId != null && previousSongId == activeEotSongId) {
@@ -1934,7 +1934,7 @@ class PlayerViewModel @Inject constructor(
         }
         _masterAllSongs.value = _masterAllSongs.value.filter { it.id != song.id }.toImmutableList()
         _isSheetVisible.value = false
-        musicRepository.deleteById(song.id.toLong())
+        audiobookRepository.deleteById(song.id.toLong())
         userPreferencesRepository.removeSongFromAllPlaylists(song.id)
     }
 
@@ -2038,8 +2038,8 @@ class PlayerViewModel @Inject constructor(
         playbackStateHolder.stopProgressUpdates()
     }
 
-    suspend fun getSongs(songIds: List<String>) : List<Song>{
-        return musicRepository.getSongsByIds(songIds).first()
+    suspend fun getTracks(songIds: List<String>) : List<Song>{
+        return audiobookRepository.getTracksByIds(songIds).first()
     }
 
     //Sorting
@@ -2410,8 +2410,8 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun getSongUrisForGenre(genreId: String): Flow<List<String>> {
-        return musicRepository.getMusicByGenre(genreId).map { songs ->
+    fun getTrackUrisForGenre(genreId: String): Flow<List<String>> {
+        return audiobookRepository.getMusicByGenre(genreId).map { songs ->
             songs.take(4).mapNotNull { it.albumArtUriString }
         }
     }
@@ -2699,7 +2699,7 @@ class PlayerViewModel @Inject constructor(
 
     private fun onBlockedDirectoriesChanged() {
         viewModelScope.launch {
-            musicRepository.invalidateCachesDependentOnAllowedDirectories()
+            audiobookRepository.invalidateCachesDependentOnAllowedDirectories()
             resetAndLoadInitialData("Blocked directories changed")
         }
     }

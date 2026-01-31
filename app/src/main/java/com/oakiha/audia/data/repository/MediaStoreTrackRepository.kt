@@ -57,7 +57,7 @@ class MediaStoreTrackRepository @Inject constructor(
         return emptySet() 
     }
 
-    override fun getSongs(): Flow<List<Song>> = combine(
+    override fun getTracks(): Flow<List<Song>> = combine(
         mediaStoreObserver.mediaStoreChanges.onStart { emit(Unit) },
         favoritesDao.getFavoriteSongIds(),
         userPreferencesRepository.allowedDirectoriesFlow,
@@ -96,7 +96,7 @@ class MediaStoreTrackRepository @Inject constructor(
         
         val selection = getBaseSelection()
 
-        val songIdToGenreMap = getSongIdToGenreMap(context.contentResolver)
+        val songIdToGenreMap = getTrackIdToGenreMap(context.contentResolver)
 
         try {
             context.contentResolver.query(
@@ -177,7 +177,7 @@ class MediaStoreTrackRepository @Inject constructor(
         songs
     }
 
-    private fun getSongIdToGenreMap(contentResolver: android.content.ContentResolver): Map<Long, String> {
+    private fun getTrackIdToGenreMap(contentResolver: android.content.ContentResolver): Map<Long, String> {
         val genreMap = mutableMapOf<Long, String>()
         try {
             val genresUri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
@@ -222,30 +222,30 @@ class MediaStoreTrackRepository @Inject constructor(
         return genreMap
     }
 
-    override fun getSongsByAlbum(albumId: Long): Flow<List<Song>> {
-         // Reusing getSongs() and filtering might be inefficient for one album, 
+    override fun getTracksByAlbum(albumId: Long): Flow<List<Song>> {
+         // Reusing getTracks() and filtering might be inefficient for one album, 
          // but consistent with the reactive source of truth.
          // Optimization: Create specific query flow if needed.
-         return getSongs().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(albumId)) { songs, id ->
+         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(albumId)) { songs, id ->
              songs.filter { it.albumId == id }
          }
     }
 
-    override fun getSongsByArtist(artistId: Long): Flow<List<Song>> {
-        return getSongs().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(artistId)) { songs, id ->
+    override fun getTracksByArtist(artistId: Long): Flow<List<Song>> {
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(artistId)) { songs, id ->
             songs.filter { it.artistId == id }
         }
     }
 
     override suspend fun searchSongs(query: String): List<Song> {
-        val allTracks = getSongs().first() // Snapshot
+        val allTracks = getTracks().first() // Snapshot
         return allTracks.filter { 
             it.title.contains(query, true) || it.artist.contains(query, true) 
         }
     }
 
-    override fun getSongById(songId: Long): Flow<Song?> {
-        return getSongs().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(songId)) { songs, id ->
+    override fun getTrackById(songId: Long): Flow<Song?> {
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(songId)) { songs, id ->
             songs.find { it.id == id.toString() }
         }
     }
@@ -260,7 +260,7 @@ class MediaStoreTrackRepository @Inject constructor(
             Triple(allowedDirs, blockedDirs, Unit)
         }.flatMapLatest { (allowedDirs, blockedDirs, _) ->
              val musicIds = getFilteredSongIds(allowedDirs.toList(), blockedDirs.toList())
-             val genreMap = getSongIdToGenreMap(context.contentResolver) // Potentially expensive, optimize if needed
+             val genreMap = getTrackIdToGenreMap(context.contentResolver) // Potentially expensive, optimize if needed
              
              androidx.paging.Pager(
                  config = androidx.paging.PagingConfig(

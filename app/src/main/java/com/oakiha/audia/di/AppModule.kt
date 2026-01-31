@@ -107,7 +107,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideMusicDao(database: AudioBookDatabase): MusicDao { // Proveer MusicDao
-        return database.musicDao()
+        return database.audiobookDao()
     }
 
     @Singleton
@@ -162,13 +162,13 @@ object AppModule {
     fun provideLyricsRepository(
         @ApplicationContext context: Context,
         lrcLibApiService: LrcLibApiService,
-        musicDao: MusicDao,
+        audiobookDao: MusicDao,
         lyricsDao: LyricsDao
     ): LyricsRepository {
         return LyricsRepositoryImpl(
             context = context,
             lrcLibApiService = lrcLibApiService,
-            //musicDao = musicDao,
+            //audiobookDao = audiobookDao,
             lyricsDao = lyricsDao
         )
     }
@@ -195,7 +195,7 @@ object AppModule {
         @ApplicationContext context: Context,
         userPreferencesRepository: UserPreferencesRepository,
         searchHistoryDao: SearchHistoryDao,
-        musicDao: MusicDao,
+        audiobookDao: MusicDao,
         lyricsRepository: LyricsRepository,
         songRepository: com.oakiha.audia.data.repository.TrackRepository,
         favoritesDao: FavoritesDao
@@ -204,7 +204,7 @@ object AppModule {
             context = context,
             userPreferencesRepository = userPreferencesRepository,
             searchHistoryDao = searchHistoryDao,
-            musicDao = musicDao,
+            audiobookDao = audiobookDao,
             lyricsRepository = lyricsRepository,
             songRepository = songRepository,
             favoritesDao = favoritesDao
@@ -221,8 +221,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSongMetadataEditor(@ApplicationContext context: Context, musicDao: MusicDao): SongMetadataEditor {
-        return SongMetadataEditor(context, musicDao)
+    fun provideSongMetadataEditor(@ApplicationContext context: Context, audiobookDao: MusicDao): SongMetadataEditor {
+        return SongMetadataEditor(context, audiobookDao)
     }
 
     /**
@@ -395,8 +395,8 @@ object AppModule {
     @Singleton
     fun provideArtistImageRepository(
         deezerApiService: DeezerApiService,
-        musicDao: MusicDao
+        audiobookDao: MusicDao
     ): ArtistImageRepository {
-        return ArtistImageRepository(deezerApiService, musicDao)
+        return ArtistImageRepository(deezerApiService, audiobookDao)
     }
 }

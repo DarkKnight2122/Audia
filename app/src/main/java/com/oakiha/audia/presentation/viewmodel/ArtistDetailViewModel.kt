@@ -42,7 +42,7 @@ data class ArtistAlbumSection(
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val artistImageRepository: ArtistImageRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -69,8 +69,8 @@ class ArtistDetailViewModel @Inject constructor(
             Log.d("ArtistDebug", "loadArtistData: id=$id")
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val artistDetailsFlow = musicRepository.getArtistById(id)
-                val artistSongsFlow = musicRepository.getSongsForArtist(id)
+                val artistDetailsFlow = audiobookRepository.getArtistById(id)
+                val artistSongsFlow = audiobookRepository.getTracksForArtist(id)
 
                 combine(artistDetailsFlow, artistSongsFlow) { artist, songs ->
                     Log.d("ArtistDebug", "loadArtistData: id=$id found=${artist != null} songs=${songs.size}")

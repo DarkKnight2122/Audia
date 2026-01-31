@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class ArtistImageRepository @Inject constructor(
     private val deezerApiService: DeezerApiService,
-    private val musicDao: MusicDao
+    private val audiobookDao: MusicDao
 ) {
     companion object {
         private const val TAG = "ArtistImageRepository"
@@ -50,7 +50,7 @@ class ArtistImageRepository @Inject constructor(
 
         // Check database cache
         val dbCachedUrl = withContext(Dispatchers.IO) {
-            musicDao.getArtistImageUrl(artistId)
+            audiobookDao.getArtistImageUrl(artistId)
         }
         if (!dbCachedUrl.isNullOrEmpty()) {
             memoryCache.put(normalizedName, dbCachedUrl)
@@ -107,7 +107,7 @@ class ArtistImageRepository @Inject constructor(
                         memoryCache.put(normalizedName, imageUrl)
                         
                         // Cache in database
-                        musicDao.updateArtistImageUrl(artistId, imageUrl)
+                        audiobookDao.updateArtistImageUrl(artistId, imageUrl)
                         
                         Log.d(TAG, "Fetched and cached image for $artistName: $imageUrl")
                         imageUrl

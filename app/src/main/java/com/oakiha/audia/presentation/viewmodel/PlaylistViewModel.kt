@@ -63,7 +63,7 @@ sealed class PlaylistSongsOrderMode {
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val m3uManager: M3uManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -173,7 +173,7 @@ class PlaylistViewModel @Inject constructor(
                 // Colectar la lista de canciones del Flow en un hilo de IO
                 val actualNewSongsList: List<Song> =
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        musicRepository.getAudioFiles().first()
+                        audiobookRepository.getAudioFiles().first()
                     }
                 Log.d("PlaylistVM", "Loaded ${actualNewSongsList.size} songs for selection.")
 
@@ -228,7 +228,7 @@ class PlaylistViewModel @Inject constructor(
             try {
                 if (isFolderPlaylistId(playlistId)) {
                     val folderPath = Uri.decode(playlistId.removePrefix(FOLDER_PLAYLIST_PREFIX))
-                    val folders = musicRepository.getAudiobookFolders().first()
+                    val folders = audiobookRepository.getAudiobookFolders().first()
                     val folder = findFolder(folderPath, folders)
 
                     if (folder != null) {
@@ -270,7 +270,7 @@ class PlaylistViewModel @Inject constructor(
 
                         // Colectar la lista de canciones del Flow devuelto por el repositorio en un hilo de IO
                         val songsList: List<Song> = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            musicRepository.getSongsByIds(playlist.songIds).first()
+                            audiobookRepository.getTracksByIds(playlist.songIds).first()
                         }
 
                         val orderedSongs = when (orderMode) {
@@ -480,7 +480,7 @@ class PlaylistViewModel @Inject constructor(
     fun exportM3u(playlist: Playlist, uri: Uri, context: android.content.Context) {
         viewModelScope.launch {
             try {
-                val songs = musicRepository.getSongsByIds(playlist.songIds).first()
+                val songs = audiobookRepository.getTracksByIds(playlist.songIds).first()
                 val m3uContent = m3uManager.generateM3u(playlist, songs)
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     OutputStreamWriter(outputStream).use { writer ->

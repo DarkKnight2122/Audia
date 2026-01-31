@@ -22,7 +22,7 @@ import timber.log.Timber
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val playbackStatsRepository: PlaybackStatsRepository,
-    private val musicRepository: AudiobookRepository
+    private val audiobookRepository: AudiobookRepository
 ) : ViewModel() {
 
     data class StatsUiState(
@@ -99,7 +99,7 @@ class StatsViewModel @Inject constructor(
         cachedSongs?.let { existing ->
             if (existing.isNotEmpty()) return existing
         }
-        val songs = musicRepository.getAudioFiles().first()
+        val songs = audiobookRepository.getAudioFiles().first()
         cachedSongs = songs
         return songs
     }

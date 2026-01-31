@@ -115,7 +115,7 @@ class SettingsViewModel @Inject constructor(
     private val syncManager: SyncManager,
     private val geminiModelService: GeminiModelService,
     private val lyricsRepository: LyricsRepository,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 

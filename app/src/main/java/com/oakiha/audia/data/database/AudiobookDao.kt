@@ -33,14 +33,14 @@ interface MusicDao {
 
     @Transaction
     suspend fun clearAllMusicData() {
-        clearAllSongs()
+        clearAllTracks()
         clearAllAlbums()
         clearAllArtists()
     }
 
     // --- Clear Operations ---
     @Query("DELETE FROM songs")
-    suspend fun clearAllSongs()
+    suspend fun clearAllTracks()
 
     @Query("DELETE FROM albums")
     suspend fun clearAllAlbums()
@@ -102,22 +102,22 @@ interface MusicDao {
     }
 
     // --- Song Queries ---
-    // Updated getSongs to potentially filter by parent_directory_path
+    // Updated getTracks to potentially filter by parent_directory_path
     @Query("""
         SELECT * FROM songs
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
         ORDER BY title ASC
     """)
-    fun getSongs(
+    fun getTracks(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE id = :songId")
-    fun getSongById(songId: Long): Flow<TrackEntity?>
+    fun getTrackById(songId: Long): Flow<TrackEntity?>
 
     @Query("SELECT * FROM songs WHERE file_path = :path LIMIT 1")
-    suspend fun getSongByPath(path: String): TrackEntity?
+    suspend fun getTrackByPath(path: String): TrackEntity?
 
     //@Query("SELECT * FROM songs WHERE id IN (:songIds)")
     @Query("""
@@ -125,17 +125,17 @@ interface MusicDao {
         WHERE id IN (:songIds)
         AND (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
     """)
-    fun getSongsByIds(
+    fun getTracksByIds(
         songIds: List<Long>,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY title ASC")
-    fun getSongsByAlbumId(albumId: Long): Flow<List<TrackEntity>>
+    fun getTracksByAlbumId(albumId: Long): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getSongsByArtistId(artistId: Long): Flow<List<TrackEntity>>
+    fun getTracksByArtistId(artistId: Long): Flow<List<TrackEntity>>
 
     @Query("""
         SELECT * FROM songs
@@ -150,10 +150,10 @@ interface MusicDao {
     ): Flow<List<TrackEntity>>
 
     @Query("SELECT COUNT(*) FROM songs")
-    fun getSongCount(): Flow<Int>
+    fun getTrackCount(): Flow<Int>
 
     @Query("SELECT COUNT(*) FROM songs")
-    suspend fun getSongCountOnce(): Int
+    suspend fun getTrackCountOnce(): Int
 
     /**
      * Returns random songs for efficient shuffle without loading all songs into memory.
@@ -175,7 +175,7 @@ interface MusicDao {
         SELECT * FROM songs
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
     """)
-    fun getAllSongs(
+    fun getAllTracks(
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
     ): Flow<List<TrackEntity>>
@@ -190,7 +190,7 @@ interface MusicDao {
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
         ORDER BY title ASC
     """)
-    fun getSongsPaginated(
+    fun getTracksPaginated(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
     ): PagingSource<Int, TrackEntity>
@@ -323,7 +323,7 @@ interface MusicDao {
         AND genre LIKE :genreName
         ORDER BY title ASC
     """)
-    fun getSongsByGenre(
+    fun getTracksByGenre(
         genreName: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
@@ -335,7 +335,7 @@ interface MusicDao {
         AND (genre IS NULL OR genre = '')
         ORDER BY title ASC
     """)
-    fun getSongsWithNullGenre(
+    fun getTracksWithNullGenre(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
@@ -395,7 +395,7 @@ interface MusicDao {
     suspend fun resetAllLyrics()
 
     @Query("SELECT * FROM songs")
-    suspend fun getAllSongsList(): List<TrackEntity>
+    suspend fun getAllTracksList(): List<TrackEntity>
 
     @Query("SELECT album_art_uri_string FROM songs WHERE id=:id")
     suspend fun getAlbumArtUriById(id: Long) : String?
@@ -463,7 +463,7 @@ interface MusicDao {
         WHERE song_artist_cross_ref.artist_id = :artistId
         ORDER BY songs.title ASC
     """)
-    fun getSongsForArtist(artistId: Long): Flow<List<TrackEntity>>
+    fun getTracksForArtist(artistId: Long): Flow<List<TrackEntity>>
 
     /**
      * Get all songs for a specific artist (one-shot).
@@ -474,7 +474,7 @@ interface MusicDao {
         WHERE song_artist_cross_ref.artist_id = :artistId
         ORDER BY songs.title ASC
     """)
-    suspend fun getSongsForArtistList(artistId: Long): List<TrackEntity>
+    suspend fun getTracksForArtistList(artistId: Long): List<TrackEntity>
 
     /**
      * Get the cross-references for a specific song.
@@ -497,7 +497,7 @@ interface MusicDao {
      * Get song count for an artist from the junction table.
      */
     @Query("SELECT COUNT(*) FROM song_artist_cross_ref WHERE artist_id = :artistId")
-    suspend fun getSongCountForArtist(artistId: Long): Int
+    suspend fun getTrackCountForArtist(artistId: Long): Int
 
     /**
      * Get all artists with their song counts computed from the junction table.
@@ -536,7 +536,7 @@ interface MusicDao {
     @Transaction
     suspend fun clearAllMusicDataWithCrossRefs() {
         clearAllTrackAuthorCrossRefs()
-        clearAllSongs()
+        clearAllTracks()
         clearAllAlbums()
         clearAllArtists()
     }

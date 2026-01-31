@@ -15,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class M3uManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: AudiobookRepository
+    private val audiobookRepository: AudiobookRepository
 ) {
 
     suspend fun parseM3u(uri: Uri): Pair<String, List<String>> {
@@ -23,7 +23,7 @@ class M3uManager @Inject constructor(
         var playlistName = "Imported Playlist"
 
         // Pre-load all songs once for efficient lookup (fixes performance issue with large M3U files)
-        val allTracks = musicRepository.getAudioFiles().first()
+        val allTracks = audiobookRepository.getAudioFiles().first()
         
         // Build lookup maps for fast matching
         val songsByPath = allTracks.associateBy { it.path }

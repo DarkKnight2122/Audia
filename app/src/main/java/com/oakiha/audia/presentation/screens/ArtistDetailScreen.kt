@@ -227,7 +227,7 @@ fun ArtistDetailScreen(
                                 items = section.songs,
                                 key = { _, song -> "artist_album_${section.albumId}_song_${song.id}" }
                             ) { songIndex, song ->
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     song = song,
                                     isCurrentSong = stablePlayerState.currentSong?.id == song.id,

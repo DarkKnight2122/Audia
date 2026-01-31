@@ -61,7 +61,7 @@ data class TrackEntity(
     @ColumnInfo(name = "sample_rate") val sampleRate: Int? = null // Hz
 )
 
-fun TrackEntity.toSong(): Song {
+fun TrackEntity.toTrack(): Song {
     return Song(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
@@ -90,7 +90,7 @@ fun TrackEntity.toSong(): Song {
 /**
  * Converts a TrackEntity to Song with artists from the junction table.
  */
-fun TrackEntity.toSongWithArtistRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Song {
+fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Song {
     val crossRefByArtistId = crossRefs.associateBy { it.artistId }
     val artistRefs = artists.map { artist ->
         val crossRef = crossRefByArtistId[artist.id]
@@ -126,8 +126,8 @@ fun TrackEntity.toSongWithArtistRefs(artists: List<AuthorEntity>, crossRefs: Lis
     )
 }
 
-fun List<TrackEntity>.toSongs(): List<Song> {
-    return this.map { it.toSong() }
+fun List<TrackEntity>.toTracks(): List<Song> {
+    return this.map { it.toTrack() }
 }
 
 // El modelo Song usa id como String, pero la entidad lo necesita como Long (de MediaStore)

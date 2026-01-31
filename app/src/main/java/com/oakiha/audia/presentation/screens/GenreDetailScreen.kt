@@ -62,12 +62,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import com.oakiha.audia.data.model.Song // Import Song
 import com.oakiha.audia.presentation.components.GenreGradientTopBar
-// Attempt to import ExpressiveSongListItem. If this fails, a local one will be used.
-// import com.oakiha.audia.presentation.screens.ExpressiveSongListItem // Path might vary
+// Attempt to import ExpressiveTrackListItem. If this fails, a local one will be used.
+// import com.oakiha.audia.presentation.screens.ExpressiveTrackListItem // Path might vary
 import com.oakiha.audia.presentation.components.MiniPlayerHeight // For MiniPlayerHeight if needed for padding
 import com.oakiha.audia.presentation.components.SmartImage // For a simple song item
 import com.oakiha.audia.presentation.viewmodel.GenreDetailViewModel
-import com.oakiha.audia.presentation.viewmodel.GroupedSongListItem // Import the new sealed interface
+import com.oakiha.audia.presentation.viewmodel.GroupedTrackListItem // Import the new sealed interface
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel // Assuming PlayerViewModel might be needed
 import com.oakiha.audia.utils.formatDuration
@@ -254,7 +254,7 @@ private data class AlbumData(
 )
 
 // Helper function to build sections from grouped songs
-private fun buildSections(groupedSongs: List<GroupedSongListItem>): List<SectionData> {
+private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<SectionData> {
     val sections = mutableListOf<SectionData>()
     var currentArtist: String? = null
     var currentAlbums = mutableListOf<AlbumData>()
@@ -264,7 +264,7 @@ private fun buildSections(groupedSongs: List<GroupedSongListItem>): List<Section
 
     for (item in groupedSongs) {
         when (item) {
-            is GroupedSongListItem.ArtistHeader -> {
+            is GroupedTrackListItem.ArtistHeader -> {
                 // Save previous artist section if exists
                 if (currentArtist != null) {
                     // Save current album if exists
@@ -290,7 +290,7 @@ private fun buildSections(groupedSongs: List<GroupedSongListItem>): List<Section
                 currentAlbumArt = null
             }
 
-            is GroupedSongListItem.AlbumHeader -> {
+            is GroupedTrackListItem.AlbumHeader -> {
                 // Save previous album if exists
                 if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                     currentAlbums.add(
@@ -304,7 +304,7 @@ private fun buildSections(groupedSongs: List<GroupedSongListItem>): List<Section
                 currentAlbumSongs.clear()
             }
 
-            is GroupedSongListItem.SongItem -> {
+            is GroupedTrackListItem.SongItem -> {
                 currentAlbumSongs.add(item.song)
             }
         }

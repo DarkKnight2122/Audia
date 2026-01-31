@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val syncManager: SyncManager,
-    musicRepository: AudiobookRepository,
+    audiobookRepository: AudiobookRepository,
     userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
@@ -54,7 +54,7 @@ class MainViewModel @Inject constructor(
      * Un Flow que emite `true` si la base de datos de Room no tiene canciones.
      * Nos ayuda a saber si es la primera vez que se abre la app.
      */
-    val isLibraryEmpty: StateFlow<Boolean> = musicRepository
+    val isLibraryEmpty: StateFlow<Boolean> = audiobookRepository
         .getAudioFiles()
         .map { it.isEmpty() }
         .stateIn(

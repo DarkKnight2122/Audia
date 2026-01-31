@@ -147,7 +147,7 @@ fun HomeScreen(
 
                     val recentSubset = allTracks.take(10)
                     items(items = recentSubset, key = { "recent_${it.id}" }) { song ->
-                        SongListItemFavsWrapper(
+                        TrackListItemFavsWrapper(
                             song = song,
                             playerViewModel = playerViewModel,
                             onClick = {
@@ -270,7 +270,7 @@ fun ContinueListeningHeader(
 }
 
 @Composable
-fun SongListItemFavs(
+fun TrackListItemFavs(
     modifier: Modifier = Modifier,
     cardCorners: Dp = 12.dp,
     title: String,
@@ -344,7 +344,7 @@ fun SongListItemFavs(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun SongListItemFavsWrapper(
+fun TrackListItemFavsWrapper(
     song: Song,
     playerViewModel: PlayerViewModel,
     onClick: () -> Unit,
@@ -352,7 +352,7 @@ fun SongListItemFavsWrapper(
 ) {
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
 
-    SongListItemFavs(
+    TrackListItemFavs(
         modifier = modifier,
         cardCorners = 0.dp,
         title = song.title,

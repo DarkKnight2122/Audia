@@ -47,7 +47,7 @@ data class SetupUiState(
 class SetupViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val syncManager: SyncManager,
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 

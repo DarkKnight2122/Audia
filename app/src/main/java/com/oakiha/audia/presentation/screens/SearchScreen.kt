@@ -716,7 +716,7 @@ fun SearchResultsList(
                                         onItemSelected()
                                     }
                                 }
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     song = item.song,
                                     isPlaying = isPlaying,
                                     isCurrentSong = currentPlayingSongId == item.song.id,
@@ -777,7 +777,7 @@ fun SearchResultsList(
                                 var songsInPlaylist by remember { mutableStateOf<List<Song>>(emptyList()) }
                                 var fetchSongs by remember { mutableStateOf(false) }
                                 LaunchedEffect(fetchSongs) {
-                                    songsInPlaylist = playerViewModel.getSongs( item.playlist.songIds)
+                                    songsInPlaylist = playerViewModel.getTracks( item.playlist.songIds)
                                 }
                                 val onPlayClick = remember(item.playlist, playerViewModel, onItemSelected) {
                                     {

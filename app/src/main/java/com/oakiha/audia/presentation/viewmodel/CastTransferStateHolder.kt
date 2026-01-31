@@ -440,17 +440,17 @@ class CastTransferStateHolder @Inject constructor(
              val songMap = getMasterAllSongs?.invoke()?.associateBy { it.id } ?: emptyMap()
             val finalQueue = chosenQueue.mapNotNull { song -> songMap[song.id] }
             
-            val targetSongId = transferSnapshot.lastKnownStatus?.getQueueItemById(lastItemId ?: 0)?.customData?.optString("songId")
+            val targetTrackId = transferSnapshot.lastKnownStatus?.getQueueItemById(lastItemId ?: 0)?.customData?.optString("songId")
                 ?: transferSnapshot.lastRemoteSongId
                 
             QueueTransferData(
                 finalQueue = finalQueue,
-                targetSongId = targetSongId,
+                targetTrackId = targetTrackId,
                 isShuffleEnabled = transferSnapshot.isShuffleEnabled
             )
         }
         
-        if (queueData.finalQueue.isNotEmpty() && queueData.targetSongId != null) {
+        if (queueData.finalQueue.isNotEmpty() && queueData.targetTrackId != null) {
              val desiredRepeatMode = when (lastRepeatMode) {
                 MediaStatus.REPEAT_MODE_REPEAT_SINGLE -> Player.REPEAT_MODE_ONE
                 MediaStatus.REPEAT_MODE_REPEAT_ALL, MediaStatus.REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE -> Player.REPEAT_MODE_ALL
@@ -459,7 +459,7 @@ class CastTransferStateHolder @Inject constructor(
             
             // Reusing local queue logic simplification: always rebuild for safety/completeness
             val rebuildResult = withContext(Dispatchers.Default) {
-                val startIndex = queueData.finalQueue.indexOfFirst { it.id == queueData.targetSongId }.coerceAtLeast(0)
+                val startIndex = queueData.finalQueue.indexOfFirst { it.id == queueData.targetTrackId }.coerceAtLeast(0)
                 val mediaItems = queueData.finalQueue.map { song -> MediaItemBuilder.build(song) }
                 RebuildArtifacts(startIndex, mediaItems, queueData.finalQueue.getOrNull(startIndex))
             }
@@ -478,9 +478,9 @@ class CastTransferStateHolder @Inject constructor(
             updateQueue?.invoke(queueData.finalQueue)
             playbackStateHolder.updateStablePlayerState {
                 it.copy(
-                    currentSong = rebuildResult.targetSong,
+                    currentSong = rebuildResult.targetTrack,
                     isPlaying = wasPlaying,
-                    totalDuration = rebuildResult.targetSong?.duration ?: it.totalDuration,
+                    totalDuration = rebuildResult.targetTrack?.duration ?: it.totalDuration,
                     isShuffleEnabled = queueData.isShuffleEnabled,
                     repeatMode = desiredRepeatMode
                 )
@@ -637,13 +637,13 @@ class CastTransferStateHolder @Inject constructor(
     
      private data class QueueTransferData(
         val finalQueue: List<Song>,
-        val targetSongId: String?,
+        val targetTrackId: String?,
         val isShuffleEnabled: Boolean
     )
 
     private data class RebuildArtifacts(
         val startIndex: Int,
         val mediaItems: List<MediaItem>,
-        val targetSong: Song?
+        val targetTrack: Song?
     )
 }

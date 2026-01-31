@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AuthorEntity::class,
         TransitionRuleEntity::class,
         TrackAuthorCrossRef::class,
-        SongEngagementEntity::class,
+        TrackEngagementEntity::class,
         FavoritesEntity::class,
         LyricsEntity::class
     ],
@@ -25,7 +25,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 abstract class AudioBookDatabase : RoomDatabase() {
     abstract fun albumArtThemeDao(): BookArtThemeDao
     abstract fun searchHistoryDao(): SearchHistoryDao
-    abstract fun musicDao(): MusicDao
+    abstract fun audiobookDao(): MusicDao
     abstract fun transitionDao(): TransitionDao
     abstract fun engagementDao(): EngagementDao
     abstract fun favoritesDao(): FavoritesDao

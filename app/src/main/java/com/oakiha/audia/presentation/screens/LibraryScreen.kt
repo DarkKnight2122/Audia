@@ -1421,7 +1421,7 @@ fun LibraryFoldersTab(
                             }
 
                             items(songsToShow, key = { "song_${it.id}" }) { song ->
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     song = song,
                                     isPlaying = stablePlayerState.currentSong?.id == song.id && stablePlayerState.isPlaying,
                                     isCurrentSong = stablePlayerState.currentSong?.id == song.id,
@@ -1601,7 +1601,7 @@ fun LibraryFavoritesTab(
                     items(favoriteSongs, key = { "fav_${it.id}" }) { song ->
                         val isPlayingThisSong =
                             song.id == stablePlayerState.currentSong?.id && stablePlayerState.isPlaying
-                        EnhancedSongListItem(
+                        EnhancedTrackListItem(
                             song = song,
                             isCurrentSong = stablePlayerState.currentSong?.id == song.id,
                             isPlaying = isPlayingThisSong,
@@ -1660,7 +1660,7 @@ fun LibrarySongsTab(
                             song?.albumArtUriString?.let { uri ->
                                 val request = ImageRequest.Builder(context)
                                     .data(uri)
-                                    .size(Size(168, 168)) // Same size as in EnhancedSongListItem
+                                    .size(Size(168, 168)) // Same size as in EnhancedTrackListItem
                                     .build()
                                 imageLoader.enqueue(request)
                             }
@@ -1709,7 +1709,7 @@ fun LibrarySongsTab(
                         contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
                     ) {
                         items(15) {
-                            EnhancedSongListItem(
+                            EnhancedTrackListItem(
                                 song = Song.emptySong(), isPlaying = false, isLoading = true,
                                 isCurrentSong = songs.isNotEmpty() && stablePlayerState.currentSong == Song.emptySong(),
                                 onMoreOptionsClick = {}, onClick = {}
@@ -1794,7 +1794,7 @@ fun LibrarySongsTab(
                                     { playerViewModel.showAndPlaySong(song) }
                                 }
 
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     song = song,
                                     isPlaying = isPlayingThisSong,
                                     isCurrentSong = stablePlayerState.currentSong?.id == song.id,
@@ -1871,7 +1871,7 @@ fun LibrarySongsTabPaginated(
                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
             ) {
                 items(12) { // Show 12 skeleton items to fill the screen
-                    EnhancedSongListItem(
+                    EnhancedTrackListItem(
                         song = Song.emptySong(),
                         isPlaying = false,
                         isLoading = true,
@@ -1979,7 +1979,7 @@ fun LibrarySongsTabPaginated(
                                     { playerViewModel.showAndPlaySong(song) }
                                 }
                                 
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     song = song,
                                     isPlaying = isPlayingThisSong,
                                     isCurrentSong = stablePlayerState.currentSong?.id == song.id,
@@ -1989,7 +1989,7 @@ fun LibrarySongsTabPaginated(
                                 )
                             } else {
                                 // Placeholder while loading
-                                EnhancedSongListItem(
+                                EnhancedTrackListItem(
                                     song = Song.emptySong(),
                                     isPlaying = false,
                                     isLoading = true,
@@ -2033,7 +2033,7 @@ fun LibrarySongsTabPaginated(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnhancedSongListItem(
+fun EnhancedTrackListItem(
     modifier: Modifier = Modifier,
     song: Song,
     isPlaying: Boolean,

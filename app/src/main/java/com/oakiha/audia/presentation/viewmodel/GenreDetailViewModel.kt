@@ -15,16 +15,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // Define Item Types for LazyColumn
-sealed interface GroupedSongListItem {
-    data class ArtistHeader(val name: String) : GroupedSongListItem
-    data class AlbumHeader(val name: String, val artistName: String, val albumArtUri: String?) : GroupedSongListItem
-    data class SongItem(val song: Song) : GroupedSongListItem
+sealed interface GroupedTrackListItem {
+    data class ArtistHeader(val name: String) : GroupedTrackListItem
+    data class AlbumHeader(val name: String, val artistName: String, val albumArtUri: String?) : GroupedTrackListItem
+    data class SongItem(val song: Song) : GroupedTrackListItem
 }
 
 data class GenreDetailUiState(
     val genre: Genre? = null,
     val songs: List<Song> = emptyList(),
-    val groupedSongs: List<GroupedSongListItem> = emptyList(),
+    val groupedSongs: List<GroupedTrackListItem> = emptyList(),
     val isLoadingGenreName: Boolean = false,
     val isLoadingSongs: Boolean = false,
     val error: String? = null
@@ -32,7 +32,7 @@ data class GenreDetailUiState(
 
 @HiltViewModel
 class GenreDetailViewModel @Inject constructor(
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,7 +54,7 @@ class GenreDetailViewModel @Inject constructor(
 
             try {
                 // Step 1: Find the genre object by its ID.
-                val genres = musicRepository.getGenres().first()
+                val genres = audiobookRepository.getGenres().first()
                 val foundGenre = genres.find { it.id.equals(genreId, ignoreCase = true) }
                     ?: Genre(
                         id = genreId,
@@ -66,7 +66,7 @@ class GenreDetailViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(genre = foundGenre, isLoadingGenreName = false, isLoadingSongs = true)
 
                 // Step 2: Fetch songs using the genre's NAME.
-                val listOfSongs = musicRepository.getMusicByGenre(foundGenre.name).first()
+                val listOfSongs = audiobookRepository.getMusicByGenre(foundGenre.name).first()
 
                 // Step 3: Group the songs for display.
                 val groupedSongs = groupSongs(listOfSongs)
@@ -86,17 +86,17 @@ class GenreDetailViewModel @Inject constructor(
         }
     }
 
-    private fun groupSongs(songs: List<Song>): List<GroupedSongListItem> {
-        val newGroupedList = mutableListOf<GroupedSongListItem>()
+    private fun groupSongs(songs: List<Song>): List<GroupedTrackListItem> {
+        val newGroupedList = mutableListOf<GroupedTrackListItem>()
         songs.groupBy { it.artist }
             .forEach { (artistName, artistSongs) ->
-                newGroupedList.add(GroupedSongListItem.ArtistHeader(artistName))
+                newGroupedList.add(GroupedTrackListItem.ArtistHeader(artistName))
                 artistSongs.groupBy { it.album }
                     .forEach { (albumName, albumSongs) ->
                         val albumArtUri = albumSongs.firstOrNull()?.albumArtUriString
-                        newGroupedList.add(GroupedSongListItem.AlbumHeader(albumName, artistName, albumArtUri))
+                        newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, albumArtUri))
                         albumSongs.forEach { song ->
-                            newGroupedList.add(GroupedSongListItem.SongItem(song))
+                            newGroupedList.add(GroupedTrackListItem.SongItem(song))
                         }
                     }
             }

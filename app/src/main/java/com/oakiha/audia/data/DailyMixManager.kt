@@ -7,7 +7,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.oakiha.audia.data.database.EngagementDao
-import com.oakiha.audia.data.database.SongEngagementEntity
+import com.oakiha.audia.data.database.TrackEngagementEntity
 import com.oakiha.audia.data.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
@@ -27,12 +27,12 @@ class DailyMixManager @Inject constructor(
     private val gson = Gson()
     private val legacyScoresFile = File(context.filesDir, "song_scores.json")
     private val fileLock = Any()
-    private val statsType = object : TypeToken<MutableMap<String, SongEngagementStats>>() {}.type
+    private val statsType = object : TypeToken<MutableMap<String, TrackEngagementStats>>() {}.type
 
     // Flag to track if we've migrated legacy data
     private var legacyMigrationComplete = false
 
-    data class SongEngagementStats(
+    data class TrackEngagementStats(
         val playCount: Int = 0,
         val totalPlayDurationMs: Long = 0L,
         val lastPlayedTimestamp: Long = 0L
@@ -60,7 +60,7 @@ class DailyMixManager @Inject constructor(
                 val legacyData = readLegacyEngagementsLocked()
                 if (legacyData.isNotEmpty()) {
                     val entities = legacyData.map { (songId, stats) ->
-                        SongEngagementEntity(
+                        TrackEngagementEntity(
                             songId = songId,
                             playCount = stats.playCount.coerceAtLeast(0),
                             totalPlayDurationMs = stats.totalPlayDurationMs.coerceAtLeast(0L),
@@ -88,10 +88,10 @@ class DailyMixManager @Inject constructor(
     /**
      * Reads engagements from Room database (blocking version for compatibility).
      */
-    private fun readEngagements(): Map<String, SongEngagementStats> {
+    private fun readEngagements(): Map<String, TrackEngagementStats> {
         return runBlocking {
             engagementDao.getAllEngagements().associate { entity ->
-                entity.songId to SongEngagementStats(
+                entity.songId to TrackEngagementStats(
                     playCount = entity.playCount,
                     totalPlayDurationMs = entity.totalPlayDurationMs,
                     lastPlayedTimestamp = entity.lastPlayedTimestamp
@@ -103,7 +103,7 @@ class DailyMixManager @Inject constructor(
     /**
      * Legacy method to read from JSON file during migration.
      */
-    private fun readLegacyEngagementsLocked(): MutableMap<String, SongEngagementStats> {
+    private fun readLegacyEngagementsLocked(): MutableMap<String, TrackEngagementStats> {
         if (!legacyScoresFile.exists()) {
             return mutableMapOf()
         }
@@ -123,7 +123,7 @@ class DailyMixManager @Inject constructor(
         }
     }
 
-    private fun parseEngagementElement(element: JsonElement?): MutableMap<String, SongEngagementStats> {
+    private fun parseEngagementElement(element: JsonElement?): MutableMap<String, TrackEngagementStats> {
         if (element == null || element.isJsonNull) {
             return mutableMapOf()
         }
@@ -133,7 +133,7 @@ class DailyMixManager @Inject constructor(
         }
 
         return runCatching {
-            val parsed: MutableMap<String, SongEngagementStats> = gson.fromJson(element, statsType)
+            val parsed: MutableMap<String, TrackEngagementStats> = gson.fromJson(element, statsType)
             parsed.mapValuesTo(mutableMapOf()) { (_, stats) -> sanitizeStats(stats) }
         }.getOrElse {
             Log.w(TAG, "Unsupported song engagement format, ignoring it")
@@ -141,8 +141,8 @@ class DailyMixManager @Inject constructor(
         }
     }
 
-    private fun parseEngagementObject(obj: JsonObject): MutableMap<String, SongEngagementStats> {
-        val result = mutableMapOf<String, SongEngagementStats>()
+    private fun parseEngagementObject(obj: JsonObject): MutableMap<String, TrackEngagementStats> {
+        val result = mutableMapOf<String, TrackEngagementStats>()
         for ((key, value) in obj.entrySet()) {
             val stats = parseStatsValue(key, value)
             if (stats != null) {
@@ -154,10 +154,10 @@ class DailyMixManager @Inject constructor(
         return result
     }
 
-    private fun parseStatsValue(key: String, value: JsonElement): SongEngagementStats? {
+    private fun parseStatsValue(key: String, value: JsonElement): TrackEngagementStats? {
         if (value.isJsonObject) {
             val parsedStats = runCatching {
-                gson.fromJson(value, SongEngagementStats::class.java)
+                gson.fromJson(value, TrackEngagementStats::class.java)
             }.getOrNull()
 
             if (parsedStats != null) {
@@ -166,12 +166,12 @@ class DailyMixManager @Inject constructor(
 
             val extracted = extractScore(value)
             if (extracted != null) {
-                return SongEngagementStats(playCount = extracted)
+                return TrackEngagementStats(playCount = extracted)
             }
         } else {
             val extracted = extractScore(value)
             if (extracted != null) {
-                return SongEngagementStats(playCount = extracted)
+                return TrackEngagementStats(playCount = extracted)
             }
         }
 
@@ -210,7 +210,7 @@ class DailyMixManager @Inject constructor(
         return null
     }
 
-    private fun sanitizeStats(stats: SongEngagementStats): SongEngagementStats {
+    private fun sanitizeStats(stats: TrackEngagementStats): TrackEngagementStats {
         return stats.copy(
             playCount = stats.playCount.coerceAtLeast(0),
             totalPlayDurationMs = stats.totalPlayDurationMs.coerceAtLeast(0L),
@@ -246,10 +246,10 @@ class DailyMixManager @Inject constructor(
         }
     }
 
-    fun getEngagementStats(songId: String): SongEngagementStats? {
+    fun getEngagementStats(songId: String): TrackEngagementStats? {
         return runBlocking {
             engagementDao.getEngagement(songId)?.let { entity ->
-                SongEngagementStats(
+                TrackEngagementStats(
                     playCount = entity.playCount,
                     totalPlayDurationMs = entity.totalPlayDurationMs,
                     lastPlayedTimestamp = entity.lastPlayedTimestamp
@@ -258,7 +258,7 @@ class DailyMixManager @Inject constructor(
         }
     }
 
-    fun getAllEngagementStats(): Map<String, SongEngagementStats> {
+    fun getAllEngagementStats(): Map<String, TrackEngagementStats> {
         return readEngagements()
     }
 

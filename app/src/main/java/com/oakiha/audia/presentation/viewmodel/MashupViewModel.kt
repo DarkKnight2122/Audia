@@ -38,7 +38,7 @@ data class MashupUiState(
 @HiltViewModel
 class MashupViewModel @Inject constructor(
     private val application: Application,
-    private val musicRepository: AudiobookRepository
+    private val audiobookRepository: AudiobookRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MashupUiState())
@@ -62,7 +62,7 @@ class MashupViewModel @Inject constructor(
 
     private fun loadAllSongs() {
         viewModelScope.launch {
-            musicRepository.getAudioFiles().collect { songs ->
+            audiobookRepository.getAudioFiles().collect { songs ->
                 _uiState.update { it.copy(allTracks = songs) }
             }
         }
