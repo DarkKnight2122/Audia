@@ -97,7 +97,7 @@ fun AudioBookPlayerTheme(
             val statusBarElevation = if (darkTheme) 4.dp else 12.dp
             val elevatedSurface = finalColorScheme.surfaceColorAtElevation(statusBarElevation)
             val statusBarColor = Color(ColorUtils.blendARGB(finalColorScheme.background.toArgb(), elevatedSurface.toArgb(), 0.35f))
-            window.statusBarColor = statusBarColor.toArgb()
+            // window.statusBarColor = statusBarColor.toArgb()
             val isLightStatusBar = ColorUtils.calculateLuminance(statusBarColor.toArgb()) > 0.55
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = isLightStatusBar
         }

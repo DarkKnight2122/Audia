@@ -1,3 +1,6 @@
+import coil.annotation.ExperimentalCoilApi
+@file:OptIn(ExperimentalCoilApi::class)
+
 package com.oakiha.audia.data.media
 
 import android.content.Context

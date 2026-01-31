@@ -383,7 +383,7 @@ fun ChangelogCategory(section: ChangelogSection) {
                 }
 
                 if (index != section.items.lastIndex) {
-                    HorizontalHorizontalDivider(
+                    HorizontalDivider(
                         modifier = Modifier.padding(vertical = 10.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                     )

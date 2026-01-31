@@ -1,3 +1,6 @@
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.oakiha.audia.presentation.viewmodel
 
 import android.content.Context

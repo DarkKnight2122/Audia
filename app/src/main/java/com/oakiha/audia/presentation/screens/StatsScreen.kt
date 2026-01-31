@@ -1185,7 +1185,7 @@ private fun CategoryVerticalBarChart(
             }
         }
 
-        HorizontalHorizontalDivider(
+        HorizontalDivider(
             modifier = Modifier
                 .height(2.dp)
                 .clip(shape = CircleShape),

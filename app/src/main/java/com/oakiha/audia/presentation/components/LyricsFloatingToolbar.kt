@@ -196,7 +196,7 @@ fun LyricsFloatingToolbar(
                         }
                     )
 
-                    HorizontalHorizontalDivider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .clip(CircleShape),

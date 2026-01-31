@@ -93,7 +93,7 @@ private fun DrawerContent(
             )
         }
         
-        HorizontalHorizontalDivider(
+        HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
@@ -157,7 +157,7 @@ private fun DrawerContent(
         
         Spacer(modifier = Modifier.weight(1f))
         
-        HorizontalHorizontalDivider(
+        HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )

@@ -93,7 +93,7 @@ fun CustomPresetsSheet(
                             onPinClick = { onPinToggled(preset) },
                             onDeleteClick = { onDelete(preset) }
                         )
-                        HorizontalHorizontalDivider(
+                        HorizontalDivider(
                             modifier = Modifier.padding(start = 72.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                         )
