@@ -1,4 +1,4 @@
-﻿
+
 package com.oakiha.audia.presentation.screens
 
 import android.Manifest
@@ -421,9 +421,14 @@ fun WelcomePage() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth().padding(horizontal = 8.dp)
+                .padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
-                text = "Welcome to",
+                text = "Welcome to", textAlign = TextAlign.Center,
                 style = ExpTitleTypography.displayLarge.copy(
                     fontSize = 42.sp,
                     lineHeight = 1.1.em
@@ -431,11 +436,26 @@ fun WelcomePage() {
             )
             Text(
                 text = "Audia",
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontFamily = GoogleSansRounded,
-                    fontSize = 46.sp,
+                    fontSize = 64.sp,
                     color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 1.1.em                ),            )            Text(                text = "An Audiobook Player",                textAlign = TextAlign.Center,                modifier = Modifier.graphicsLayer { alpha = 0.6f },                style = MaterialTheme.typography.labelLarge.copy(                    fontFamily = GoogleSansRounded,                    fontSize = 16.sp,                    letterSpacing = 0.1.em,                    fontWeight = FontWeight.Medium                ),            )        }
+                    fontWeight = FontWeight.Bold
+                ),
+            )
+            Text(
+                text = "An Audiobook Player",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.graphicsLayer { alpha = 0.6f },
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontFamily = GoogleSansRounded,
+                    fontSize = 16.sp,
+                    letterSpacing = 0.1.em,
+                    fontWeight = FontWeight.Medium
+                ),
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         Surface(
             shape = CircleShape,
@@ -479,7 +499,7 @@ fun WelcomePage() {
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .height(32.dp)
-                .padding(horizontal = 8.dp)
+                .fillMaxWidth().padding(horizontal = 8.dp)
                 .padding(bottom = 4.dp),
                 animate = true,
                 color = MaterialTheme.colorScheme.surface,
@@ -495,7 +515,7 @@ fun WelcomePage() {
                     .align(Alignment.BottomCenter)
                     .height(22.dp)
                     .background(color = MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth().padding(horizontal = 8.dp)
                     .padding(bottom = 4.dp)
             ){
 
@@ -505,7 +525,7 @@ fun WelcomePage() {
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .height(32.dp)
-                .padding(horizontal = 8.dp)
+                .fillMaxWidth().padding(horizontal = 8.dp)
                 .padding(bottom = 4.dp),
                 animate = true,
                 color = MaterialTheme.colorScheme.primary, //Container.copy(alpha = 0.9f),
@@ -532,9 +552,9 @@ fun MediaPermissionPage(uiState: SetupUiState) {
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
     val mediaIcons = persistentListOf(
         R.drawable.rounded_audiobooks_note_24,
-        R.drawable.rounded_album_24,
+        R.drawable.rounded_book_24,
         R.drawable.rounded_library_audiobooks_24,
-        R.drawable.rounded_artist_24,
+        R.drawable.rounded_author_24,
         R.drawable.rounded_playlist_play_24
     )
 
@@ -799,7 +819,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             LibraryNavigationPillSetupShow(
-                                title = \"Tracks\",
+                                title = "Songs",
                                 isExpanded = false,
                                 iconRes = R.drawable.rounded_audiobooks_note_24,
                                 pageIndex = 0,
@@ -1551,7 +1571,7 @@ fun NavBarPreview(isDefault: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp) // Taller to show bottom part clearly
-            .padding(horizontal = 8.dp)
+            .fillMaxWidth().padding(horizontal = 8.dp)
     ) {
         Box(
             modifier = Modifier
