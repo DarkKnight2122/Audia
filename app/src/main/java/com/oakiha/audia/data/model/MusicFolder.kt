@@ -3,11 +3,11 @@ package com.oakiha.audia.data.model
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-data class MusicFolder(
+data class AudiobookFolder(
     val path: String,
     val name: String,
     val songs: ImmutableList<Song> = persistentListOf(),
-    val subFolders: ImmutableList<MusicFolder> = persistentListOf()
+    val subFolders: ImmutableList<AudiobookFolder> = persistentListOf()
 ) {
     val totalSongCount: Int by lazy {
         songs.size + subFolders.sumOf { it.totalSongCount }

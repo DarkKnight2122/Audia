@@ -63,23 +63,23 @@ class DailyMixStateHolder @Inject constructor(
 
     /**
      * Update the daily mix with new songs.
-     * @param allSongsFlow Flow of all available songs
+     * @param allTracksFlow Flow of all available songs
      * @param favoriteSongIdsFlow Flow of favorite song IDs
      */
-    fun updateDailyMix(allSongsFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun updateDailyMix(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         updateJob?.cancel()
         updateJob = scope?.launch(Dispatchers.IO) {
-            val allSongs = allSongsFlow.first()
-            if (allSongs.isNotEmpty()) {
+            val allTracks = allTracksFlow.first()
+            if (allTracks.isNotEmpty()) {
                 val favoriteIds = favoriteSongIdsFlow.first()
                 
                 // Generate daily mix
-                val mix = dailyMixManager.generateDailyMix(allSongs, favoriteIds)
+                val mix = dailyMixManager.generateDailyMix(allTracks, favoriteIds)
                 _dailyMixSongs.value = mix.toImmutableList()
                 userPreferencesRepository.saveDailyMixSongIds(mix.map { it.id })
 
                 // Generate your mix
-                val yourMix = dailyMixManager.generateYourMix(allSongs, favoriteIds)
+                val yourMix = dailyMixManager.generateYourMix(allTracks, favoriteIds)
                 _yourMixSongs.value = yourMix.toImmutableList()
                 userPreferencesRepository.saveYourMixSongIds(yourMix.map { it.id })
             } else {
@@ -91,13 +91,13 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Load persisted daily mix from storage.
      */
-    fun loadPersistedDailyMix(allSongsFlow: Flow<List<Song>>) {
+    fun loadPersistedDailyMix(allTracksFlow: Flow<List<Song>>) {
         // Load Daily Mix
         scope?.launch {
             userPreferencesRepository.dailyMixSongIdsFlow
-                .combine(allSongsFlow) { ids, allSongs ->
-                    if (ids.isNotEmpty() && allSongs.isNotEmpty()) {
-                        val songMap = allSongs.associateBy { it.id }
+                .combine(allTracksFlow) { ids, allTracks ->
+                    if (ids.isNotEmpty() && allTracks.isNotEmpty()) {
+                        val songMap = allTracks.associateBy { it.id }
                         ids.mapNotNull { songMap[it] }.toImmutableList()
                     } else {
                         persistentListOf()
@@ -115,9 +115,9 @@ class DailyMixStateHolder @Inject constructor(
         // Load Your Mix
         scope?.launch {
             userPreferencesRepository.yourMixSongIdsFlow
-                .combine(allSongsFlow) { ids, allSongs ->
-                    if (ids.isNotEmpty() && allSongs.isNotEmpty()) {
-                        val songMap = allSongs.associateBy { it.id }
+                .combine(allTracksFlow) { ids, allTracks ->
+                    if (ids.isNotEmpty() && allTracks.isNotEmpty()) {
+                        val songMap = allTracks.associateBy { it.id }
                         ids.mapNotNull { songMap[it] }.toImmutableList()
                     } else {
                         persistentListOf()
@@ -136,9 +136,9 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Force update the daily mix regardless of day.
      */
-    fun forceUpdate(allSongsFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun forceUpdate(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         scope?.launch {
-            updateDailyMix(allSongsFlow, favoriteSongIdsFlow)
+            updateDailyMix(allTracksFlow, favoriteSongIdsFlow)
             userPreferencesRepository.saveLastDailyMixUpdateTimestamp(System.currentTimeMillis())
         }
     }
@@ -146,7 +146,7 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Check if daily mix needs updating (new day) and update if so.
      */
-    fun checkAndUpdateIfNeeded(allSongsFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun checkAndUpdateIfNeeded(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         scope?.launch {
             val lastUpdate = userPreferencesRepository.lastDailyMixUpdateFlow.first()
             val today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
@@ -155,7 +155,7 @@ class DailyMixStateHolder @Inject constructor(
             }.get(Calendar.DAY_OF_YEAR)
 
             if (today != lastUpdateDay) {
-                updateDailyMix(allSongsFlow, favoriteSongIdsFlow)
+                updateDailyMix(allTracksFlow, favoriteSongIdsFlow)
                 userPreferencesRepository.saveLastDailyMixUpdateTimestamp(System.currentTimeMillis())
             }
         }
@@ -175,11 +175,11 @@ class DailyMixStateHolder @Inject constructor(
      * Get a candidate pool for AI playlist generation.
      */
     suspend fun getCandidatePool(
-        allSongs: List<Song>, 
+        allTracks: List<Song>, 
         favoriteIds: Set<String>,
         maxSize: Int = 100
     ): List<Song> {
-        return dailyMixManager.generateDailyMix(allSongs, favoriteIds, maxSize)
+        return dailyMixManager.generateDailyMix(allTracks, favoriteIds, maxSize)
     }
 
     fun onCleared() {

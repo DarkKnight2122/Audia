@@ -60,10 +60,10 @@ fun HomeScreen(
         (context as? android.app.Activity)?.intent?.getBooleanExtra("is_benchmark", false) ?: false
     }
     val statsViewModel: StatsViewModel = hiltViewModel()
-    val allSongs by playerViewModel.allSongsFlow.collectAsState(initial = emptyList())
+    val allTracks by playerViewModel.allTracksFlow.collectAsState(initial = emptyList())
 
     ReportDrawnWhen {
-        allSongs.isNotEmpty() || isBenchmarkMode
+        allTracks.isNotEmpty() || isBenchmarkMode
     }
 
     val currentSong by remember(playerViewModel.stablePlayerState) {
@@ -118,23 +118,40 @@ fun HomeScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                item(key = "continue_listening_header") {
-                    val songToResume = currentSong ?: allSongs.firstOrNull()
-                    ContinueListeningHeader(
-                        song = songToResume?.title ?: "No books found",
-                        author = songToResume?.displayArtist ?: "Scan your library",
-                        onPlayPressed = {
-                            songToResume?.let {
-                                playerViewModel.showAndPlaySong(it, allSongs, "Library")
+                if (allTracks.isNotEmpty()) {
+                
+                if (currentSong != null) {
+                                    if (currentSong != null) {
+                    
+                if (currentSong != null) {
+                    item(key = "continue_listening_header") {
+                        ContinueListeningHeader(
+                            song = currentSong?.title ?: "",
+                            author = currentSong?.displayArtist ?: "",
+                            onPlayPressed = {
+                                currentSong?.let {
+                                    playerViewModel.showAndPlaySong(it, allTracks, "Library")
+                                }
                             }
+                        )
+                    }
+                }
+                            }
+                        )
+                    }
+                }
+                            }
+                        )
+                    }
+                }
                         }
                     )
                 }
 
-                if (allSongs.isNotEmpty()) {
+                if (allTracks.isNotEmpty()) {
                     item(key = "recently_added_label") {
                         Text(
-                            text = "Recently Added",
+                            text = "Recently Added Audiobooks",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -142,13 +159,13 @@ fun HomeScreen(
                         )
                     }
 
-                    val recentSubset = allSongs.take(10)
+                    val recentSubset = allTracks.take(10)
                     items(items = recentSubset, key = { "recent_${it.id}" }) { song ->
                         SongListItemFavsWrapper(
                             song = song,
                             playerViewModel = playerViewModel,
                             onClick = {
-                                playerViewModel.showAndPlaySong(song, allSongs, "Library")
+                                playerViewModel.showAndPlaySong(song, allTracks, "Library")
                             },
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )

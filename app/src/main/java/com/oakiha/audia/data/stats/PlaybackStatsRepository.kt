@@ -229,7 +229,7 @@ class PlaybackStatsRepository @Inject constructor(
         val totalPlays = segmentsBySong.values.sumOf { it.size }
         val uniqueSongs = segmentsBySong.keys.size
 
-        val allSongs = segmentsBySong
+        val allTracks = segmentsBySong
             .mapNotNull { (songId, segmentsForSong) ->
                 val song = songMap[songId] ?: return@mapNotNull null
                 val title = song.title.takeIf { it.isNotBlank() }
@@ -248,7 +248,7 @@ class PlaybackStatsRepository @Inject constructor(
                 compareByDescending<SongPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
-        val topSongs = allSongs.take(5)
+        val topSongs = allTracks.take(5)
 
         val topGenres = segmentsBySong.entries
             .groupBy { (songId, _) ->
@@ -397,7 +397,7 @@ class PlaybackStatsRepository @Inject constructor(
             totalPlayCount = totalPlays,
             uniqueSongs = uniqueSongs,
             averageDailyDurationMs = averageDailyDuration,
-            songs = allSongs,
+            songs = allTracks,
             topSongs = topSongs,
             timeline = timelineEntries,
             topGenres = topGenres,

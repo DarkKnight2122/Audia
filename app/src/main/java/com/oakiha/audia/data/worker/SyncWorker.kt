@@ -325,9 +325,9 @@ constructor(
                         if (autoScanLrc) {
                             Timber.tag(TAG).i("Auto-scan LRC files enabled. Starting scan phase...")
 
-                            val allSongsEntities = musicDao.getAllSongsList()
-                            val allSongs =
-                                    allSongsEntities.map { entity ->
+                            val allTracksEntities = musicDao.getAllSongsList()
+                            val allTracks =
+                                    allTracksEntities.map { entity ->
                                         Song(
                                                 id = entity.id.toString(),
                                                 title = entity.title,
@@ -350,7 +350,7 @@ constructor(
                                     }
 
                             val scannedCount =
-                                    lyricsRepository.scanAndAssignLocalLrcFiles(allSongs) {
+                                    lyricsRepository.scanAndAssignLocalLrcFiles(allTracks) {
                                             current,
                                             total ->
                                         setProgress(

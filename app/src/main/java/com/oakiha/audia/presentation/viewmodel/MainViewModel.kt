@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.data.worker.SyncProgress
 import com.oakiha.audia.utils.LogUtils
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val syncManager: SyncManager,
-    musicRepository: MusicRepository,
+    musicRepository: AudiobookRepository,
     userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 

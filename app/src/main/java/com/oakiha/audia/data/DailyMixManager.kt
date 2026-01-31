@@ -263,14 +263,14 @@ class DailyMixManager @Inject constructor(
     }
 
     private fun computeRankedSongs(
-        allSongs: List<Song>,
+        allTracks: List<Song>,
         favoriteSongIds: Set<String>,
         random: java.util.Random
     ): List<RankedSong> {
-        if (allSongs.isEmpty()) return emptyList()
+        if (allTracks.isEmpty()) return emptyList()
 
         val engagements = readEngagements()
-        val songById = allSongs.associateBy { it.id }
+        val songById = allTracks.associateBy { it.id }
         val now = System.currentTimeMillis()
 
         val artistAffinity = mutableMapOf<Long, Double>()
@@ -296,7 +296,7 @@ class DailyMixManager @Inject constructor(
         val maxGenreAffinity = genreAffinity.values.maxOrNull()?.takeIf { it > 0 } ?: 1.0
         val maxFavoriteArtist = favoriteArtistWeights.values.maxOrNull()?.takeIf { it > 0 } ?: 1
 
-        return allSongs.map { song ->
+        return allTracks.map { song ->
             val stats = engagements[song.id]
             val playCountScore = (stats?.playCount?.toDouble() ?: 0.0) / maxPlayCount
             val durationScore = (stats?.totalPlayDurationMs?.toDouble() ?: 0.0) / maxDuration
@@ -340,11 +340,11 @@ class DailyMixManager @Inject constructor(
     }
 
     fun generateDailyMix(
-        allSongs: List<Song>,
+        allTracks: List<Song>,
         favoriteSongIds: Set<String> = emptySet(),
         limit: Int = 30
     ): List<Song> {
-        if (allSongs.isEmpty()) {
+        if (allTracks.isEmpty()) {
             return emptyList()
         }
 
@@ -352,9 +352,9 @@ class DailyMixManager @Inject constructor(
         val seed = calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR)
         val random = java.util.Random(seed.toLong())
 
-        val rankedSongs = computeRankedSongs(allSongs, favoriteSongIds, random)
+        val rankedSongs = computeRankedSongs(allTracks, favoriteSongIds, random)
         if (rankedSongs.isEmpty()) {
-            return allSongs.shuffled(random).take(limit.coerceAtMost(allSongs.size))
+            return allTracks.shuffled(random).take(limit.coerceAtMost(allTracks.size))
         }
 
         val selected = pickWithDiversity(rankedSongs, favoriteSongIds, limit)
@@ -362,7 +362,7 @@ class DailyMixManager @Inject constructor(
             return selected
         }
 
-        val remaining = allSongs
+        val remaining = allTracks
             .filterNot { song -> selected.any { it.id == song.id } }
             .shuffled(random)
 
@@ -371,21 +371,21 @@ class DailyMixManager @Inject constructor(
     }
 
     fun generateYourMix(
-        allSongs: List<Song>,
+        allTracks: List<Song>,
         favoriteSongIds: Set<String> = emptySet(),
         limit: Int = 60
     ): List<Song> {
-        if (allSongs.isEmpty()) {
+        if (allTracks.isEmpty()) {
             return emptyList()
         }
 
         val calendar = Calendar.getInstance()
         val seed = calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR) + 17
         val random = java.util.Random(seed.toLong())
-        val rankedSongs = computeRankedSongs(allSongs, favoriteSongIds, random)
+        val rankedSongs = computeRankedSongs(allTracks, favoriteSongIds, random)
 
         if (rankedSongs.isEmpty()) {
-            return allSongs.shuffled(random).take(limit.coerceAtMost(allSongs.size))
+            return allTracks.shuffled(random).take(limit.coerceAtMost(allTracks.size))
         }
 
         val favoriteSectionSize = (limit * 0.3).toInt().coerceAtLeast(5).coerceAtMost(limit)
@@ -420,7 +420,7 @@ class DailyMixManager @Inject constructor(
         orderedResult.addAll(discoverySection)
 
         if (orderedResult.size < limit) {
-            val filler = allSongs
+            val filler = allTracks
                 .filterNot { orderedResult.any { selected -> selected.id == it.id } }
                 .shuffled(random)
             for (song in filler) {

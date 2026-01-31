@@ -10,7 +10,7 @@ import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Artist
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.repository.ArtistImageRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +42,7 @@ data class ArtistAlbumSection(
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val artistImageRepository: ArtistImageRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {

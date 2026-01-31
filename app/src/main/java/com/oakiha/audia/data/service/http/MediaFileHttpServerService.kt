@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.IBinder
 import androidx.core.net.toUri
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.AndroidEntryPoint
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -31,7 +31,7 @@ import timber.log.Timber
 class MediaFileHttpServerService : Service() {
 
     @Inject
-    lateinit var musicRepository: MusicRepository
+    lateinit var musicRepository: AudiobookRepository
 
     private var server: NettyApplicationEngine? = null
     private val serviceJob = SupervisorJob()

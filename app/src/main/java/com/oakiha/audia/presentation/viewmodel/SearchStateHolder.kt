@@ -4,7 +4,7 @@ import android.util.Log
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.SearchHistoryItem
 import com.oakiha.audia.data.model.SearchResultItem
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -29,7 +29,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class SearchStateHolder @Inject constructor(
-    private val musicRepository: MusicRepository
+    private val musicRepository: AudiobookRepository
 ) {
     // Search State
     private val _searchResults = MutableStateFlow<ImmutableList<SearchResultItem>>(persistentListOf())

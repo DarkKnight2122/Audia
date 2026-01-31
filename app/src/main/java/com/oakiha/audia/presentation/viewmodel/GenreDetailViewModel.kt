@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.model.Genre
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +32,7 @@ data class GenreDetailUiState(
 
 @HiltViewModel
 class GenreDetailViewModel @Inject constructor(
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 

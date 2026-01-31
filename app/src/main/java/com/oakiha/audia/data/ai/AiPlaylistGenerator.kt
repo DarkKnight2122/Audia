@@ -20,7 +20,7 @@ class AiPlaylistGenerator @Inject constructor(
 
     suspend fun generate(
         userPrompt: String,
-        allSongs: List<Song>,
+        allTracks: List<Song>,
         minLength: Int,
         maxLength: Int,
         candidateSongs: List<Song>? = null
@@ -33,7 +33,7 @@ class AiPlaylistGenerator @Inject constructor(
 
             val normalizedPrompt = userPrompt.trim().lowercase()
             promptCache[normalizedPrompt]?.let { cachedIds ->
-                val songMap = allSongs.associateBy { it.id }
+                val songMap = allTracks.associateBy { it.id }
                 val cachedSongs = cachedIds.mapNotNull { songMap[it] }
                 if (cachedSongs.isNotEmpty()) {
                     return Result.success(cachedSongs)
@@ -49,15 +49,15 @@ class AiPlaylistGenerator @Inject constructor(
             )
 
             val samplingPool = when {
-                candidateSongs.isNullOrEmpty().not() -> candidateSongs ?: allSongs
+                candidateSongs.isNullOrEmpty().not() -> candidateSongs ?: allTracks
                 else -> {
                     // Prefer a cost-aware ranked list before falling back to the whole library
                     val rankedForPrompt = dailyMixManager.generateDailyMix(
-                        allSongs = allSongs,
+                        allTracks = allTracks,
                         favoriteSongIds = emptySet(),
                         limit = 200
                     )
-                    if (rankedForPrompt.isNotEmpty()) rankedForPrompt else allSongs
+                    if (rankedForPrompt.isNotEmpty()) rankedForPrompt else allTracks
                 }
             }
 
@@ -119,7 +119,7 @@ class AiPlaylistGenerator @Inject constructor(
             val songIds = extractPlaylistSongIds(responseText)
 
             // Map the returned IDs to the actual Song objects
-            val songMap = allSongs.associateBy { it.id }
+            val songMap = allTracks.associateBy { it.id }
             val generatedPlaylist = songIds.mapNotNull { songMap[it] }
 
             if (generatedPlaylist.isNotEmpty()) {

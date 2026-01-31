@@ -5,7 +5,7 @@ import com.oakiha.audia.data.model.LyricsSourcePreference
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.repository.LyricsSearchResult
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.repository.NoLyricsFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ interface LyricsLoadCallback {
  */
 @Singleton
 class LyricsStateHolder @Inject constructor(
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
     private var scope: CoroutineScope? = null

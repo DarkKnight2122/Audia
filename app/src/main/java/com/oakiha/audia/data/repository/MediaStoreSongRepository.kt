@@ -238,8 +238,8 @@ class MediaStoreSongRepository @Inject constructor(
     }
 
     override suspend fun searchSongs(query: String): List<Song> {
-        val allSongs = getSongs().first() // Snapshot
-        return allSongs.filter { 
+        val allTracks = getSongs().first() // Snapshot
+        return allTracks.filter { 
             it.title.contains(query, true) || it.artist.contains(query, true) 
         }
     }

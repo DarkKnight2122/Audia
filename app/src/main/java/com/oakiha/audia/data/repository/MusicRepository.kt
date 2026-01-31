@@ -13,7 +13,7 @@ import com.oakiha.audia.data.model.SearchResultItem
 import com.oakiha.audia.data.model.Song
 import kotlinx.coroutines.flow.Flow
 
-interface MusicRepository {
+interface AudiobookRepository {
     /**
      * Obtiene la lista de archivos de audio (canciones) filtrada por directorios permitidos.
      * @return Flow que emite una lista completa de objetos Song.
@@ -192,7 +192,7 @@ interface MusicRepository {
 
     suspend fun resetAllLyrics()
 
-    fun getMusicFolders(): Flow<List<com.oakiha.audia.data.model.MusicFolder>>
+    fun getAudiobookFolders(): Flow<List<com.oakiha.audia.data.model.AudiobookFolder>>
 
     suspend fun deleteById(id: Long)
 }

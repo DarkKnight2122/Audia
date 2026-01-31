@@ -8,7 +8,7 @@ import com.oakiha.audia.data.media.MetadataEditError
 import com.oakiha.audia.data.media.SongMetadataEditor
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.utils.FileDeletionUtils
 import com.oakiha.audia.utils.LyricsUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 class MetadataEditStateHolder @Inject constructor(
     private val songMetadataEditor: SongMetadataEditor,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val imageCacheManager: ImageCacheManager,
     private val themeStateHolder: ThemeStateHolder,
     @ApplicationContext private val context: Context
@@ -169,7 +169,7 @@ class MetadataEditStateHolder @Inject constructor(
                 // removeSong(3698) toggles favorites and updates _masterAllSongs. It implies memory update.
                 // FileDeletionUtils deletes the physical file. The MediaScanner should eventually pick it up, 
                 // but for immediate UI responsiveness, manual update is good.
-                // Also, MusicRepository.deleteById(id) exists.
+                // Also, AudiobookRepository.deleteById(id) exists.
                 // ViewModel did NOT call musicRepository.deleteById(). It relied on "removeSong" which is UI state only? 
                 // Wait, removeSong updates UI state. Does it update DB?
                 // Line 3698: toggleFavoriteSpecificSong(song, true)?? Wait.

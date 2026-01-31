@@ -46,7 +46,7 @@ import com.oakiha.audia.data.model.Artist
 import com.oakiha.audia.data.model.Genre
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.model.SortOption
@@ -58,7 +58,7 @@ import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.preferences.AlbumArtQuality
 import com.oakiha.audia.data.repository.LyricsSearchResult
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.service.AudiobookNotificationProvider
 import com.oakiha.audia.data.service.AudiobookService
 import com.oakiha.audia.data.service.player.CastPlayer
@@ -112,7 +112,7 @@ private const val CAST_LOG_TAG = "PlayerCastTransfer"
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val albumArtThemeDao: AlbumArtThemeDao,
     val syncManager: SyncManager, // Inyectar SyncManager
@@ -451,7 +451,7 @@ class PlayerViewModel @Inject constructor(
 
     // Public read-only access to all songs (using _masterAllSongs declared at class level)
     // Library State - delegated to LibraryStateHolder
-    val allSongsFlow: StateFlow<ImmutableList<Song>> = libraryStateHolder.allSongs
+    val allTracksFlow: StateFlow<ImmutableList<Song>> = libraryStateHolder.allTracks
 
     // Genres StateFlow - delegated to LibraryStateHolder
     val genres: StateFlow<ImmutableList<Genre>> = libraryStateHolder.genres
@@ -511,8 +511,8 @@ class PlayerViewModel @Inject constructor(
         favoriteSongIds,
         _masterAllSongs,
         libraryStateHolder.currentFavoriteSortOption
-    ) { ids: Set<String>, allSongsList: List<Song>, sortOption: SortOption ->
-        val favoriteSongsList = allSongsList.filter { song -> ids.contains(song.id) }
+    ) { ids: Set<String>, allTracksList: List<Song>, sortOption: SortOption ->
+        val favoriteSongsList = allTracksList.filter { song -> ids.contains(song.id) }
         when (sortOption) {
             SortOption.LikedSongTitleAZ -> favoriteSongsList.sortedBy { it.title.lowercase() }
             SortOption.LikedSongTitleZA -> favoriteSongsList.sortedByDescending { it.title.lowercase() }
@@ -534,13 +534,13 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
-     * Observes a song by ID, combining the latest metadata from [allSongsFlow]
+     * Observes a song by ID, combining the latest metadata from [allTracksFlow]
      * with the latest favorite status from [favoriteSongIds].
      * Returns null if the song is not found in the library.
      */
     fun observeSong(songId: String?): Flow<Song?> {
         if (songId == null) return flowOf(null)
-        return combine(allSongsFlow, favoriteSongIds) { songs, favorites ->
+        return combine(allTracksFlow, favoriteSongIds) { songs, favorites ->
             songs.find { it.id == songId }?.copy(isFavorite = favorites.contains(songId))
         }.distinctUntilChanged()
     }
@@ -548,13 +548,13 @@ class PlayerViewModel @Inject constructor(
     private fun updateDailyMix() {
         // Delegate to DailyMixStateHolder
         dailyMixStateHolder.updateDailyMix(
-            allSongsFlow = allSongsFlow,
+            allTracksFlow = allTracksFlow,
             favoriteSongIdsFlow = userPreferencesRepository.favoriteSongIdsFlow
         )
     }
 
-    fun shuffleAllSongs() {
-        Log.d("ShuffleDebug", "shuffleAllSongs called.")
+    fun shuffleAllTracks() {
+        Log.d("ShuffleDebug", "shuffleAllTracks called.")
         // Don't use ExoPlayer's shuffle mode - we manually shuffle instead
         val currentSong = playbackStateHolder.stablePlayerState.value.currentSong
         val isPlaying = playbackStateHolder.stablePlayerState.value.isPlaying
@@ -568,16 +568,16 @@ class PlayerViewModel @Inject constructor(
         }
         
         // Otherwise start a new shuffled queue
-        val allSongs = _masterAllSongs.value
-        if (allSongs.isNotEmpty()) {
-            playSongsShuffled(allSongs, "All Songs (Shuffled)")
+        val allTracks = _masterAllSongs.value
+        if (allTracks.isNotEmpty()) {
+            playSongsShuffled(allTracks, "All Songs (Shuffled)")
         }
     }
 
-    fun playRandomSong() {
-        val allSongs = _masterAllSongs.value
-        if (allSongs.isNotEmpty()) {
-            playSongsShuffled(allSongs, "All Songs (Shuffled)")
+    fun playRandomTrack() {
+        val allTracks = _masterAllSongs.value
+        if (allTracks.isNotEmpty()) {
+            playSongsShuffled(allTracks, "All Songs (Shuffled)")
         }
     }
 
@@ -627,13 +627,13 @@ class PlayerViewModel @Inject constructor(
 
     private fun loadPersistedDailyMix() {
         // Delegate to DailyMixStateHolder
-        dailyMixStateHolder.loadPersistedDailyMix(allSongsFlow)
+        dailyMixStateHolder.loadPersistedDailyMix(allTracksFlow)
     }
 
     fun forceUpdateDailyMix() {
         // Delegate to DailyMixStateHolder
         dailyMixStateHolder.forceUpdate(
-            allSongsFlow = allSongsFlow,
+            allTracksFlow = allTracksFlow,
             favoriteSongIdsFlow = userPreferencesRepository.favoriteSongIdsFlow
         )
     }
@@ -863,7 +863,7 @@ class PlayerViewModel @Inject constructor(
         // Initialize AiStateHolder
         aiStateHolder.initialize(
             scope = viewModelScope,
-            allSongsProvider = { _masterAllSongs.value },
+            allTracksProvider = { _masterAllSongs.value },
             favoriteSongIdsProvider = { favoriteSongIds.value },
             toastEmitter = { msg -> viewModelScope.launch { _toastEvents.emit(msg) } },
             playSongsCallback = { songs, startSong, queueName -> playSongs(songs, startSong, queueName) },
@@ -903,8 +903,8 @@ class PlayerViewModel @Inject constructor(
 
         // Collect LibraryStateHolder flows to sync with UI State
         viewModelScope.launch {
-            libraryStateHolder.allSongs.collect { songs ->
-                _playerUiState.update { it.copy(allSongs = songs, songCount = songs.size) }
+            libraryStateHolder.allTracks.collect { songs ->
+                _playerUiState.update { it.copy(allTracks = songs, songCount = songs.size) }
                 // Update master songs for Cast usage if needed
                 _masterAllSongs.value = songs
             }
@@ -1020,7 +1020,7 @@ class PlayerViewModel @Inject constructor(
     private fun checkAndUpdateDailyMixIfNeeded() {
         // Delegate to DailyMixStateHolder
         dailyMixStateHolder.checkAndUpdateIfNeeded(
-            allSongsFlow = allSongsFlow,
+            allTracksFlow = allTracksFlow,
             favoriteSongIdsFlow = userPreferencesRepository.favoriteSongIdsFlow
         )
     }
@@ -1139,10 +1139,10 @@ class PlayerViewModel @Inject constructor(
 
     fun showAndPlaySong(song: Song) {
         Log.d("ShuffleDebug", "showAndPlaySong (single song overload) called for '${song.title}'")
-        val allSongs = _masterAllSongs.value.toList()
-        // Look up the current version of the song in allSongs to get the most up-to-date metadata
-        val currentSong = allSongs.find { it.id == song.id } ?: song
-        showAndPlaySong(currentSong, allSongs, "Library")
+        val allTracks = _masterAllSongs.value.toList()
+        // Look up the current version of the song in allTracks to get the most up-to-date metadata
+        val currentSong = allTracks.find { it.id == song.id } ?: song
+        showAndPlaySong(currentSong, allTracks, "Library")
     }
 
     private fun List<Song>.matchesSongOrder(contextSongs: List<Song>): Boolean {
@@ -2109,7 +2109,7 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    private fun findFolder(path: String?, folders: List<MusicFolder>): MusicFolder? {
+    private fun findFolder(path: String?, folders: List<AudiobookFolder>): AudiobookFolder? {
         if (path == null) {
             return null
         }

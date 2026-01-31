@@ -11,7 +11,7 @@ import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.preferences.AlbumArtQuality
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.data.repository.LyricsRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.model.LyricsSourcePreference
 import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.data.worker.SyncProgress
@@ -115,7 +115,7 @@ class SettingsViewModel @Inject constructor(
     private val syncManager: SyncManager,
     private val geminiModelService: GeminiModelService,
     private val lyricsRepository: LyricsRepository,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 

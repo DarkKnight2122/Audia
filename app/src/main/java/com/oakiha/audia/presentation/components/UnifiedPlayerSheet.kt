@@ -1591,7 +1591,7 @@ private fun CastConnectingDialog() {
                 CircularProgressIndicator()
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "MantÃ©n la app abierta",
+                        text = "Keep the app open",
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
@@ -1639,7 +1639,7 @@ private fun MiniPlayerContentInternal(
         Box(contentAlignment = Alignment.Center) {
             SmartImage(
                 model = song.albumArtUriString,
-                contentDescription = "CarÃ¡tula de ${song.title}",
+                contentDescription = "Cover of ${song.title}",
                 shape = CircleShape,
                 targetSize = Size(150, 150),
                 modifier = Modifier

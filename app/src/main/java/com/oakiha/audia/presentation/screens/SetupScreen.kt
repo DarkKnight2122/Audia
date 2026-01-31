@@ -819,7 +819,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             LibraryNavigationPillSetupShow(
-                                title = "Songs",
+                                title = "Tracks",
                                 isExpanded = false,
                                 iconRes = R.drawable.rounded_audiobook_note_24,
                                 pageIndex = 0,
@@ -1135,7 +1135,7 @@ fun LibraryNavigationPillSetupShow(
     val expandedRadius = 60.dp
 
     // Animación Esquina Flecha (Interna):
-    // Depende de 'isExpanded':
+    // Depends on 'isExpanded':
     // - true: Se vuelve redonda (expandedRadius/pillRadius) separándose visualmente.
     // - false: Se mantiene recta (innerRadius) pareciendo unida al título.
     val animatedArrowCorner by animateFloatAsState(
@@ -1148,7 +1148,7 @@ fun LibraryNavigationPillSetupShow(
         label = "ArrowRotation"
     )
 
-    // IntrinsicSize.Min en el Row + fillMaxHeight en los hijos asegura misma altura
+    // IntrinsicSize.Min on the Row + fillMaxHeight on children ensures same height
     Row(
         modifier = Modifier
             .padding(start = 4.dp)
@@ -1281,14 +1281,14 @@ fun SetupBottomBar(
     // Animación más lenta y sutil para la rotación
     val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
 
-    // 1. Determina los porcentajes de las esquinas para la forma objetivo
+    // 1. Determine corner percentages for the target shape
     val targetShapeValues = when (pagerState.currentPage % 3) {
         0 -> listOf(50f, 50f, 50f, 50f) // Círculo (50% en todas las esquinas)
-        1 -> listOf(26f, 26f, 26f, 26f) // Cuadrado Redondeado
-        else -> listOf(18f, 50f, 18f, 50f) // Forma de "Hoja"
+        1 -> listOf(26f, 26f, 26f, 26f) // Rounded Square
+        else -> listOf(18f, 50f, 18f, 50f) // "Leaf" shape
     }
 
-    // 2. Anima cada esquina individualmente hacia el valor objetivo
+    // 2. Animate each corner individually towards the target value
     val animatedTopStart by animateFloatAsState(targetShapeValues[0], morphAnimationSpec, label = "TopStart")
     val animatedTopEnd by animateFloatAsState(targetShapeValues[1], morphAnimationSpec, label = "TopEnd")
     val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
@@ -1335,7 +1335,7 @@ fun SetupBottomBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // --- CAMBIO CLAVE: Texto animado ---
+                // --- KEY CHANGE: Animated text ---
                 AnimatedContent(
                     targetState = pagerState.currentPage,
                     modifier = Modifier
@@ -1411,12 +1411,12 @@ fun SetupBottomBar(
                         label = "AnimatedFabIcon"
                     ) { isNextPage ->
                         if (isNextPage) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Siguiente")
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Next")
                         } else {
                             if (isFinishButtonEnabled) {
-                                Icon(Icons.Rounded.Check, contentDescription = "Finalizar")
+                                Icon(Icons.Rounded.Check, contentDescription = "Finish")
                             } else {
-                                Icon(Icons.Rounded.Close, contentDescription = "Finalizar")
+                                Icon(Icons.Rounded.Close, contentDescription = "Finish")
                             }
                         }
                     }

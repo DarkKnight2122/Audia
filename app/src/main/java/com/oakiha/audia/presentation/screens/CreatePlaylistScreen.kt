@@ -147,7 +147,7 @@ data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val 
 @Composable
 fun CreatePlaylistDialog(
     visible: Boolean,
-    allSongs: List<Song>,
+    allTracks: List<Song>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit // ... d4
 ) {
@@ -169,7 +169,7 @@ fun CreatePlaylistDialog(
                 label = "create_playlist_dialog"
             ) {
                 CreatePlaylistContent(
-                    allSongs = allSongs,
+                    allTracks = allTracks,
                     onDismiss = onDismiss,
                     onCreate = onCreate
                 )
@@ -232,7 +232,7 @@ fun EditPlaylistDialog(
 
 @Composable
 private fun CreatePlaylistContent(
-    allSongs: List<Song>,
+    allTracks: List<Song>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit
 ) {
@@ -457,9 +457,9 @@ private fun CreatePlaylistContent(
                      onStarScaleChange = { starScale = it }
                  )
             } else {
-                 val filteredSongs = remember(searchQuery, allSongs) {
-                      if (searchQuery.isBlank()) allSongs 
-                      else allSongs.filter { 
+                 val filteredSongs = remember(searchQuery, allTracks) {
+                      if (searchQuery.isBlank()) allTracks 
+                      else allTracks.filter { 
                           it.title.contains(searchQuery, ignoreCase = true) || 
                           it.artist.contains(searchQuery, ignoreCase = true) 
                       }

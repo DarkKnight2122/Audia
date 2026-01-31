@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.viewmodel
 import androidx.compose.runtime.Immutable
 import com.oakiha.audia.data.model.Album
 import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.model.SearchResultItem
 import com.oakiha.audia.data.model.SortOption
@@ -14,14 +14,14 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class PlayerUiState(
-    val allSongs: ImmutableList<Song> = persistentListOf(),
+    val allTracks: ImmutableList<Song> = persistentListOf(),
     val currentPosition: Long = 0L,
     val currentPlaybackQueue: ImmutableList<Song> = persistentListOf(),
     val currentQueueSourceName: String = "All Songs",
     val albums: ImmutableList<Album> = persistentListOf(),
     val artists: ImmutableList<Artist> = persistentListOf(),
     val searchResults: ImmutableList<SearchResultItem> = persistentListOf(),
-    val musicFolders: ImmutableList<MusicFolder> = persistentListOf(),
+    val musicFolders: ImmutableList<AudiobookFolder> = persistentListOf(),
     val sortOption: SortOption = SortOption.SongDefaultOrder,
     val isLoadingInitialSongs: Boolean = true,
     val isLoadingLibrary: Boolean = true,
@@ -32,7 +32,7 @@ data class PlayerUiState(
     val dismissedQueue: ImmutableList<Song> = persistentListOf(),
     val dismissedQueueName: String = "",
     val dismissedPosition: Long = 0L,
-    val currentFolder: MusicFolder? = null,
+    val currentFolder: AudiobookFolder? = null,
     val currentFolderPath: String? = null,
     val lavaLampColors: ImmutableList<androidx.compose.ui.graphics.Color> = persistentListOf(),
     val undoBarVisibleDuration: Long = 4000L,

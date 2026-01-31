@@ -98,7 +98,7 @@ import com.oakiha.audia.R
 import com.oakiha.audia.presentation.components.ShimmerBox
 import com.oakiha.audia.data.model.Album
 import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
@@ -539,7 +539,7 @@ fun LibraryScreen(
                                     LibraryTabId.LIKED -> playerViewModel.shuffleFavoriteSongs()
                                     LibraryTabId.ALBUMS -> playerViewModel.shuffleRandomAlbum()
                                     LibraryTabId.ARTISTS -> playerViewModel.shuffleRandomArtist()
-                                    else -> playerViewModel.shuffleAllSongs()
+                                    else -> playerViewModel.shuffleAllTracks()
                                 }
                             },
                             iconRotation = iconRotation,
@@ -594,14 +594,14 @@ fun LibraryScreen(
                         ) { page ->
                             when (tabTitles.getOrNull(page)?.toLibraryTabIdOrNull()) {
                                 LibraryTabId.SONGS -> {
-                                    // Use sorted allSongs from LibraryStateHolder
+                                    // Use sorted allTracks from LibraryStateHolder
                                     val playerUiState by playerViewModel.playerUiState.collectAsState()
-                                    val allSongs = playerUiState.allSongs
+                                    val allTracks = playerUiState.allTracks
                                     val isLoading = playerUiState.isLoadingInitialSongs
                                     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
                                     
                                     LibrarySongsTab(
-                                        songs = allSongs,
+                                        songs = allTracks,
                                         isLoading = isLoading,
                                         stablePlayerState = stablePlayerState,
                                         playerViewModel = playerViewModel,
@@ -833,12 +833,12 @@ fun LibraryScreen(
         }
     }
 
-    val allSongs by playerViewModel.allSongsFlow.collectAsState(initial = emptyList())
+    val allTracks by playerViewModel.allTracksFlow.collectAsState(initial = emptyList())
 
 
     CreatePlaylistDialog(
         visible = showCreatePlaylistDialog,
-        allSongs = allSongs,
+        allTracks = allTracks,
         onDismiss = { showCreatePlaylistDialog = false },
         onCreate = { name, imageUri, color, icon, songIds, cropScale, cropPanX, cropPanY, shapeType, d1, d2, d3, d4 ->
             playlistViewModel.createPlaylist(
@@ -1264,12 +1264,12 @@ private fun LibraryTabId.displayTitle(): String =
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LibraryFoldersTab(
-    folders: ImmutableList<MusicFolder>,
-    currentFolder: MusicFolder?,
+    folders: ImmutableList<AudiobookFolder>,
+    currentFolder: AudiobookFolder?,
     isLoading: Boolean,
     onNavigateBack: () -> Unit,
     onFolderClick: (String) -> Unit,
-    onFolderAsPlaylistClick: (MusicFolder) -> Unit,
+    onFolderAsPlaylistClick: (AudiobookFolder) -> Unit,
     onPlaySong: (Song, List<Song>) -> Unit,
     stablePlayerState: StablePlayerState,
     bottomBarHeight: Dp,
@@ -1447,7 +1447,7 @@ fun LibraryFoldersTab(
 }
 
 @Composable
-fun FolderPlaylistItem(folder: MusicFolder, onClick: () -> Unit) {
+fun FolderPlaylistItem(folder: AudiobookFolder, onClick: () -> Unit) {
     val previewSongs = remember(folder) { folder.collectAllSongs().take(9) }
 
     Card(
@@ -1487,7 +1487,7 @@ fun FolderPlaylistItem(folder: MusicFolder, onClick: () -> Unit) {
 }
 
 @Composable
-fun FolderListItem(folder: MusicFolder, onClick: () -> Unit) {
+fun FolderListItem(folder: AudiobookFolder, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -1514,14 +1514,14 @@ fun FolderListItem(folder: MusicFolder, onClick: () -> Unit) {
     }
 }
 
-private fun flattenFolders(folders: List<MusicFolder>): List<MusicFolder> {
+private fun flattenFolders(folders: List<AudiobookFolder>): List<AudiobookFolder> {
     return folders.flatMap { folder ->
         val current = if (folder.songs.isNotEmpty()) listOf(folder) else emptyList()
         current + flattenFolders(folder.subFolders)
     }
 }
 
-private fun MusicFolder.collectAllSongs(): List<Song> {
+private fun AudiobookFolder.collectAllSongs(): List<Song> {
     return songs + subFolders.flatMap { it.collectAllSongs() }
 }
 
@@ -1678,15 +1678,15 @@ fun LibrarySongsTab(
         // Determine content based on loading state and data availability
         when {
             isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃƒÂ¡ cubierto arriba, pero es bueno para claridad
-                val allSongsPullToRefreshState = rememberPullToRefreshState()
+                val allTracksPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = onRefresh,
-                    state = allSongsPullToRefreshState,
+                    state = allTracksPullToRefreshState,
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
                         PullToRefreshDefaults.LoadingIndicator(
-                            state = allSongsPullToRefreshState,
+                            state = allTracksPullToRefreshState,
                             isRefreshing = isRefreshing,
                             modifier = Modifier.align(Alignment.TopCenter)
                         )

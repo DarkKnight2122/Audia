@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.model.Album
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository // Importar MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository // Importar AudiobookRepository
 import com.oakiha.audia.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -29,7 +29,7 @@ data class AlbumDetailUiState(
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 

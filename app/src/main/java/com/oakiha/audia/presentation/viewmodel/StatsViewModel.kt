@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository.PlaybackStatsSummary
 import com.oakiha.audia.data.stats.StatsTimeRange
@@ -22,7 +22,7 @@ import timber.log.Timber
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val playbackStatsRepository: PlaybackStatsRepository,
-    private val musicRepository: MusicRepository
+    private val musicRepository: AudiobookRepository
 ) : ViewModel() {
 
     data class StatsUiState(

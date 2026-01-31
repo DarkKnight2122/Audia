@@ -43,7 +43,7 @@ class AiStateHolder @Inject constructor(
     val isGeneratingMetadata = _isGeneratingMetadata.asStateFlow()
 
     private var scope: CoroutineScope? = null
-    private var allSongsProvider: (() -> List<Song>)? = null
+    private var allTracksProvider: (() -> List<Song>)? = null
     private var favoriteSongIdsProvider: (() -> Set<String>)? = null
     
     // Callbacks to interact with PlayerViewModel/UI
@@ -53,14 +53,14 @@ class AiStateHolder @Inject constructor(
 
     fun initialize(
         scope: CoroutineScope,
-        allSongsProvider: () -> List<Song>,
+        allTracksProvider: () -> List<Song>,
         favoriteSongIdsProvider: () -> Set<String>,
         toastEmitter: (String) -> Unit,
         playSongsCallback: (List<Song>, Song, String) -> Unit,
         openPlayerSheetCallback: () -> Unit
     ) {
         this.scope = scope
-        this.allSongsProvider = allSongsProvider
+        this.allTracksProvider = allTracksProvider
         this.favoriteSongIdsProvider = favoriteSongIdsProvider
         this.toastEmitter = toastEmitter
         this.playSongsCallback = playSongsCallback
@@ -79,7 +79,7 @@ class AiStateHolder @Inject constructor(
 
     fun generateAiPlaylist(prompt: String, minLength: Int, maxLength: Int, saveAsPlaylist: Boolean = false) {
         val scope = this.scope ?: return
-        val allSongs = allSongsProvider?.invoke() ?: emptyList()
+        val allTracks = allTracksProvider?.invoke() ?: emptyList()
         val favoriteIds = favoriteSongIdsProvider?.invoke() ?: emptySet()
 
         scope.launch {
@@ -89,14 +89,14 @@ class AiStateHolder @Inject constructor(
             try {
                 // Generate candidate pool using DailyMixManager logic
                 val candidatePool = dailyMixManager.generateDailyMix(
-                    allSongs = allSongs,
+                    allTracks = allTracks,
                     favoriteSongIds = favoriteIds,
                     limit = 120
                 )
 
                 val result = aiPlaylistGenerator.generate(
                     userPrompt = prompt,
-                    allSongs = allSongs,
+                    allTracks = allTracks,
                     minLength = minLength,
                     maxLength = maxLength,
                     candidateSongs = candidatePool
@@ -139,7 +139,7 @@ class AiStateHolder @Inject constructor(
 
     fun regenerateDailyMixWithPrompt(prompt: String) {
         val scope = this.scope ?: return
-        val allSongs = allSongsProvider?.invoke() ?: emptyList()
+        val allTracks = allTracksProvider?.invoke() ?: emptyList()
         val favoriteIds = favoriteSongIdsProvider?.invoke() ?: emptySet()
         val currentDailyMixSongs = dailyMixStateHolder.dailyMixSongs.value
 
@@ -158,14 +158,14 @@ class AiStateHolder @Inject constructor(
                 val maxLength = desiredSize.coerceAtLeast(20)
                 
                 val candidatePool = dailyMixManager.generateDailyMix(
-                    allSongs = allSongs,
+                    allTracks = allTracks,
                     favoriteSongIds = favoriteIds,
                     limit = 100
                 )
 
                 val result = aiPlaylistGenerator.generate(
                     userPrompt = prompt,
-                    allSongs = allSongs,
+                    allTracks = allTracks,
                     minLength = minLength,
                     maxLength = maxLength,
                     candidateSongs = candidatePool

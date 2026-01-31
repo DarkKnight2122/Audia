@@ -55,7 +55,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongPickerBottomSheet(
-    allSongs: List<Song>,
+    allTracks: List<Song>,
     isLoading: Boolean,
     initiallySelectedSongIds: Set<String>,
     onDismiss: () -> Unit,
@@ -68,9 +68,9 @@ fun SongPickerBottomSheet(
         }
     }
     var searchQuery by remember { mutableStateOf("") }
-    val filteredSongs = remember(searchQuery, allSongs) {
-        if (searchQuery.isBlank()) allSongs
-        else allSongs.filter {
+    val filteredSongs = remember(searchQuery, allTracks) {
+        if (searchQuery.isBlank()) allTracks
+        else allTracks.filter {
             it.title.contains(searchQuery, true) || it.artist.contains(
                 searchQuery,
                 true

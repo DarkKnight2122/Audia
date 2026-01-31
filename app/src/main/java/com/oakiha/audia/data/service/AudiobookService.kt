@@ -39,7 +39,7 @@ import com.oakiha.audia.MainActivity
 import com.oakiha.audia.AudioBookApp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.PlayerInfo // Import new data class
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.ui.glancewidget.AudioBookPlayerGlanceWidget
 import com.oakiha.audia.ui.glancewidget.PlayerActions
 import com.oakiha.audia.ui.glancewidget.PlayerInfoStateDefinition
@@ -74,7 +74,7 @@ class AudiobookService : MediaSessionService() {
     @Inject
     lateinit var controller: TransitionController
     @Inject
-    lateinit var musicRepository: MusicRepository
+    lateinit var musicRepository: AudiobookRepository
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 

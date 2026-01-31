@@ -145,7 +145,7 @@ fun AboutScreen(
 
     val authors = remember {
         listOf(
-            Contributor(name = "The AudioBookPlayer Team", role = "Developers")
+            Contributor(name = "The Audia Team", role = "Developers")
         )
     }
 
@@ -265,7 +265,7 @@ fun AboutScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "AudioBookPlayer",
+                            text = "Audia",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -309,7 +309,7 @@ fun AboutScreen(
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)
                     ) {
                         Text(
-                            text = "Thanks for using AudioBookPlayer!",
+                            text = "Thanks for using Audia!",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -356,7 +356,7 @@ fun AboutScreen(
             BackHandler { showBrickBreaker = false }
             BrickBreakerOverlay(
                 isMiniPlayerVisible = currentSong != null,
-                onPlayRandom = { viewModel.playRandomSong() },
+                onPlayRandom = { viewModel.playRandomTrack() },
                 onClose = { showBrickBreaker = false }
             )
         }
@@ -483,7 +483,7 @@ private fun ContributorAvatar(
             cachedBitmap != null -> {
                 Image(
                     bitmap = cachedBitmap!!,
-                    contentDescription = "Avatar de $name",
+                    contentDescription = "Avatar of $name",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -494,7 +494,7 @@ private fun ContributorAvatar(
                         .data(avatarUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Avatar de $name",
+                    contentDescription = "Avatar of $name",
                     modifier = Modifier.fillMaxSize(),
                     shape = CircleShape,
                     contentScale = ContentScale.Crop,
@@ -521,7 +521,7 @@ private fun ContributorAvatar(
                 ) {
                     Icon(
                         painter = painterResource(iconRes),
-                        contentDescription = "Icono de $name",
+                        contentDescription = "Icon of $name",
                         tint = iconTint,
                         modifier = Modifier.size(28.dp)
                     )

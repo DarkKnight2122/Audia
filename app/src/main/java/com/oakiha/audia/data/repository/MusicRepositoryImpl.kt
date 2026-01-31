@@ -47,7 +47,7 @@ import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
 import com.oakiha.audia.data.model.SyncedLine
 import com.oakiha.audia.utils.LogUtils
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.utils.LyricsUtils
 import com.oakiha.audia.utils.DirectoryRuleResolver
 import kotlinx.coroutines.flow.conflate
@@ -73,7 +73,7 @@ import androidx.paging.filter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
-class MusicRepositoryImpl @Inject constructor(
+class AudiobookRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val searchHistoryDao: SearchHistoryDao,
@@ -81,7 +81,7 @@ class MusicRepositoryImpl @Inject constructor(
     private val lyricsRepository: LyricsRepository,
     private val songRepository: SongRepository,
     private val favoritesDao: FavoritesDao
-) : MusicRepository {
+) : AudiobookRepository {
 
     private val directoryScanMutex = Mutex()
 
@@ -443,7 +443,7 @@ class MusicRepositoryImpl @Inject constructor(
         lyricsRepository.resetAllLyrics()
     }
 
-    override fun getMusicFolders(): Flow<List<MusicFolder>> {
+    override fun getAudiobookFolders(): Flow<List<AudiobookFolder>> {
         return combine(
             getAudioFiles(),
             userPreferencesRepository.allowedDirectoriesFlow,
@@ -507,7 +507,7 @@ class MusicRepositoryImpl @Inject constructor(
                 }
             }
 
-            fun buildImmutableFolder(path: String, visited: MutableSet<String>): MusicFolder? {
+            fun buildImmutableFolder(path: String, visited: MutableSet<String>): AudiobookFolder? {
                 if (path in visited) return null
                 visited.add(path)
                 val tempFolder = tempFolders[path] ?: return null
@@ -515,7 +515,7 @@ class MusicRepositoryImpl @Inject constructor(
                     .mapNotNull { subPath -> buildImmutableFolder(subPath, visited.toMutableSet()) }
                     .sortedBy { it.name.lowercase() }
                     .toImmutableList()
-                return MusicFolder(
+                return AudiobookFolder(
                     path = tempFolder.path,
                     name = tempFolder.name,
                     songs = tempFolder.songs

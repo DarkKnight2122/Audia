@@ -8,11 +8,11 @@ import android.util.Log
 import com.oakiha.audia.data.model.Album
 import com.oakiha.audia.data.model.Artist
 import com.oakiha.audia.data.model.LibraryTabId
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -34,13 +34,13 @@ import javax.inject.Singleton
  */
 @Singleton
 class LibraryStateHolder @Inject constructor(
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
 
     // --- State ---
-    private val _allSongs = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
-    val allSongs = _allSongs.asStateFlow()
+    private val _allTracks = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
+    val allTracks = _allTracks.asStateFlow()
 
     private val _albums = MutableStateFlow<ImmutableList<Album>>(persistentListOf())
     val albums = _albums.asStateFlow()
@@ -48,7 +48,7 @@ class LibraryStateHolder @Inject constructor(
     private val _artists = MutableStateFlow<ImmutableList<Artist>>(persistentListOf())
     val artists = _artists.asStateFlow()
 
-    private val _musicFolders = MutableStateFlow<ImmutableList<MusicFolder>>(persistentListOf())
+    private val _musicFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
     val musicFolders = _musicFolders.asStateFlow()
 
     private val _isLoadingLibrary = MutableStateFlow(false)
@@ -76,7 +76,7 @@ class LibraryStateHolder @Inject constructor(
 
 
     @OptIn(ExperimentalStdlibApi::class)
-    val genres: kotlinx.coroutines.flow.Flow<ImmutableList<com.oakiha.audia.data.model.Genre>> = _allSongs
+    val genres: kotlinx.coroutines.flow.Flow<ImmutableList<com.oakiha.audia.data.model.Genre>> = _allTracks
         .map { songs ->
             val genreMap = mutableMapOf<String, MutableList<Song>>()
             val unknownGenreName = "Unknown Genre"
@@ -167,7 +167,7 @@ class LibraryStateHolder @Inject constructor(
             musicRepository.getAudioFiles().collect { songs ->
                  // When the repository emits a new list (triggered by directory changes),
                  // we update our state and re-apply current sorting.
-                 _allSongs.value = songs.toImmutableList()
+                 _allTracks.value = songs.toImmutableList()
                  // Apply sort to the new data
                  sortSongs(_currentSongSortOption.value, persist = false)
                  _isLoadingLibrary.value = false
@@ -193,7 +193,7 @@ class LibraryStateHolder @Inject constructor(
         }
         
         foldersJob = scope?.launch {
-            musicRepository.getMusicFolders().collect { folders ->
+            musicRepository.getAudiobookFolders().collect { folders ->
                  _musicFolders.value = folders.toImmutableList()
                  sortFolders(_currentFolderSortOption.value)
             }
@@ -246,15 +246,15 @@ class LibraryStateHolder @Inject constructor(
             _currentSongSortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.SongTitleAZ -> _allSongs.value.sortedBy { it.title.lowercase() }
-                SortOption.SongTitleZA -> _allSongs.value.sortedByDescending { it.title.lowercase() }
-                SortOption.SongArtist -> _allSongs.value.sortedBy { it.artist.lowercase() }
-                SortOption.SongAlbum -> _allSongs.value.sortedBy { it.album.lowercase() }
-                SortOption.SongDateAdded -> _allSongs.value.sortedByDescending { it.dateAdded }
-                SortOption.SongDuration -> _allSongs.value.sortedBy { it.duration }
-                else -> _allSongs.value // Default or unhandled
+                SortOption.SongTitleAZ -> _allTracks.value.sortedBy { it.title.lowercase() }
+                SortOption.SongTitleZA -> _allTracks.value.sortedByDescending { it.title.lowercase() }
+                SortOption.SongArtist -> _allTracks.value.sortedBy { it.artist.lowercase() }
+                SortOption.SongAlbum -> _allTracks.value.sortedBy { it.album.lowercase() }
+                SortOption.SongDateAdded -> _allTracks.value.sortedByDescending { it.dateAdded }
+                SortOption.SongDuration -> _allTracks.value.sortedBy { it.duration }
+                else -> _allTracks.value // Default or unhandled
             }
-            _allSongs.value = sorted.toImmutableList()
+            _allTracks.value = sorted.toImmutableList()
         }
     }
 
@@ -333,7 +333,7 @@ class LibraryStateHolder @Inject constructor(
      * Used effectively after metadata edits to reflect changes immediately.
      */
     fun updateSong(updatedSong: Song) {
-        _allSongs.update { currentList ->
+        _allTracks.update { currentList ->
             currentList.map { if (it.id == updatedSong.id) updatedSong else it }.toImmutableList()
         }
     }

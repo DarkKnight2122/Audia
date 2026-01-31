@@ -140,7 +140,7 @@ fun MashupScreen(
                     sheetState = sheetState
                 ) {
                     SongPickerSheet(
-                        songs = mashupUiState.allSongs,
+                        songs = mashupUiState.allTracks,
                         onSongSelected = { song ->
                             scope.launch {
                                 val deck = mashupUiState.showSongPickerForDeck ?: return@launch

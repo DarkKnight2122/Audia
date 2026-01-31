@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.oakiha.audia.data.model.Playlist
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import java.io.BufferedReader
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class M3uManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val musicRepository: MusicRepository
+    private val musicRepository: AudiobookRepository
 ) {
 
     suspend fun parseM3u(uri: Uri): Pair<String, List<String>> {
@@ -23,12 +23,12 @@ class M3uManager @Inject constructor(
         var playlistName = "Imported Playlist"
 
         // Pre-load all songs once for efficient lookup (fixes performance issue with large M3U files)
-        val allSongs = musicRepository.getAudioFiles().first()
+        val allTracks = musicRepository.getAudioFiles().first()
         
         // Build lookup maps for fast matching
-        val songsByPath = allSongs.associateBy { it.path }
-        val songsByFileName = allSongs.groupBy { it.path.substringAfterLast("/") }
-        val songsByContentUriFileName = allSongs.groupBy { it.contentUriString.substringAfterLast("/") }
+        val songsByPath = allTracks.associateBy { it.path }
+        val songsByFileName = allTracks.groupBy { it.path.substringAfterLast("/") }
+        val songsByContentUriFileName = allTracks.groupBy { it.contentUriString.substringAfterLast("/") }
 
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { reader ->

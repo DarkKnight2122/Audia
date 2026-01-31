@@ -4,32 +4,14 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,8 +32,8 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val issuesUrl = "https://github.com/theovilardo/AudioBookPlayer/issues"
-    val reportUrl = "https://github.com/theovilardo/AudioBookPlayer/issues/new/choose"
+    val issuesUrl = "https://github.com/DarkKnight2122/Audia/issues"
+    val reportUrl = "https://github.com/DarkKnight2122/Audia/issues/new"
 
     val fabCornerRadius = 18.dp
 
@@ -69,7 +51,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
             item(key = "header") {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Beta 0.5.0",
+                        text = "Beta 0.1.0",
                         fontFamily = GoogleSansRounded,
                         style = ExpTitleTypography.displaySmall,
                         color = MaterialTheme.colorScheme.onSurface
@@ -104,7 +86,6 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                         smoothnessAsPercentBL = 60,
                         smoothnessAsPercentBR = 60
                     ),
-                    //tonalElevation = 2.dp,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Row(
@@ -129,7 +110,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Î²",
+                                text = "β",
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black
@@ -139,12 +120,12 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "Welcome to the first 0.5.0 beta!",
+                                text = "Welcome to the Audia Beta!",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "This huge update brings a complete UI overhaul, 10-band Equalizer, and AI powers.",
+                                text = "This version is a complete technical rebrand focused on an ultra-premium experience.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -189,22 +170,22 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             )
                         }
                         Text(
-                            text = "Material 3 Expressive UI refresh across Settings, Player, and Bottom Sheets.",
+                            text = "A clean, modern technical foundation rebranded project-wide to Audia.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "New 10-band Equalizer with effects, plus AI integration for smarter playlists.",
+                            text = "New terminology (Tracks, Books, Authors) synced across the entire UI.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Rebuilt Library Sync for reliability and linear progress reporting.",
+                            text = "Highly optimized Library Sync and high-performance playback service.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Major fixes for Casting, Queue stability, and lyrics synchronization.",
+                            text = "Material 3 Expressive UI components with upcoming Liquid Glass effects.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -248,7 +229,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             )
                         }
                         Text(
-                            text = "Share steps to reproduce, what you expected, what happened, and your device/OS. A quick clip or screenshot helps a ton.",
+                            text = "Found a bug or have a suggestion? Open an issue on our GitHub repository.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -259,7 +240,6 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                         ) {
                             Button(
                                 onClick = { launchUrl(context, issuesUrl) },
-                                // Eliminamos height fija y usamos contentPadding
                                 modifier = Modifier.fillMaxWidth(),
                                 contentPadding = PaddingValues(vertical = 16.dp),
                                 shape = AbsoluteSmoothCornerShape(
@@ -285,30 +265,6 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(text = "Open GitHub issues")
                             }
-                            FilledTonalButton(
-                                onClick = { launchUrl(context, reportUrl) },
-                                // Eliminamos height fija y usamos contentPadding
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(vertical = 16.dp),
-                                shape = AbsoluteSmoothCornerShape(
-                                    cornerRadiusTR = fabCornerRadius,
-                                    cornerRadiusTL = fabCornerRadius,
-                                    cornerRadiusBL = fabCornerRadius,
-                                    cornerRadiusBR = fabCornerRadius,
-                                    smoothnessAsPercentTR = 60,
-                                    smoothnessAsPercentTL = 60,
-                                    smoothnessAsPercentBL = 60,
-                                    smoothnessAsPercentBR = 60
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = "Report a bug")
-                            }
                         }
                     }
                 }
@@ -317,22 +273,6 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
             item {
                 Spacer(modifier = Modifier.height(38.dp))
             }
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(30.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-                    )
-                )
-        ) {
-
         }
     }
 }
@@ -344,6 +284,5 @@ private fun launchUrl(context: Context, url: String) {
     try {
         context.startActivity(intent)
     } catch (_: ActivityNotFoundException) {
-        // Swallow the error; caller does not need to handle it here.
     }
 }

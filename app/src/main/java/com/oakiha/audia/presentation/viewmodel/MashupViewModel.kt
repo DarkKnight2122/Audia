@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import com.oakiha.audia.data.model.Song
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.presentation.viewmodel.exts.DeckController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -31,14 +31,14 @@ data class MashupUiState(
     val deck1: DeckState = DeckState(),
     val deck2: DeckState = DeckState(),
     val crossfaderValue: Float = 0f,
-    val allSongs: List<Song> = emptyList(),
+    val allTracks: List<Song> = emptyList(),
     val showSongPickerForDeck: Int? = null
 )
 
 @HiltViewModel
 class MashupViewModel @Inject constructor(
     private val application: Application,
-    private val musicRepository: MusicRepository
+    private val musicRepository: AudiobookRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MashupUiState())
@@ -63,7 +63,7 @@ class MashupViewModel @Inject constructor(
     private fun loadAllSongs() {
         viewModelScope.launch {
             musicRepository.getAudioFiles().collect { songs ->
-                _uiState.update { it.copy(allSongs = songs) }
+                _uiState.update { it.copy(allTracks = songs) }
             }
         }
     }

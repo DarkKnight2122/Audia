@@ -27,8 +27,8 @@ import com.oakiha.audia.data.network.lyrics.LrcLibApiService
 import com.oakiha.audia.data.repository.ArtistImageRepository
 import com.oakiha.audia.data.repository.LyricsRepository
 import com.oakiha.audia.data.repository.LyricsRepositoryImpl
-import com.oakiha.audia.data.repository.MusicRepository
-import com.oakiha.audia.data.repository.MusicRepositoryImpl
+import com.oakiha.audia.data.repository.AudiobookRepository
+import com.oakiha.audia.data.repository.AudiobookRepositoryImpl
 import com.oakiha.audia.data.repository.TransitionRepository
 import com.oakiha.audia.data.repository.TransitionRepositoryImpl
 import dagger.Module
@@ -191,7 +191,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMusicRepository(
+    fun provideAudiobookRepository(
         @ApplicationContext context: Context,
         userPreferencesRepository: UserPreferencesRepository,
         searchHistoryDao: SearchHistoryDao,
@@ -199,8 +199,8 @@ object AppModule {
         lyricsRepository: LyricsRepository,
         songRepository: com.oakiha.audia.data.repository.SongRepository,
         favoritesDao: FavoritesDao
-    ): MusicRepository {
-        return MusicRepositoryImpl(
+    ): AudiobookRepository {
+        return AudiobookRepositoryImpl(
             context = context,
             userPreferencesRepository = userPreferencesRepository,
             searchHistoryDao = searchHistoryDao,

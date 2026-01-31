@@ -9,7 +9,7 @@ import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.playlist.M3uManager
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.repository.MusicRepository
+import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +63,7 @@ sealed class PlaylistSongsOrderMode {
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val musicRepository: MusicRepository,
+    private val musicRepository: AudiobookRepository,
     private val m3uManager: M3uManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -228,7 +228,7 @@ class PlaylistViewModel @Inject constructor(
             try {
                 if (isFolderPlaylistId(playlistId)) {
                     val folderPath = Uri.decode(playlistId.removePrefix(FOLDER_PLAYLIST_PREFIX))
-                    val folders = musicRepository.getMusicFolders().first()
+                    val folders = musicRepository.getAudiobookFolders().first()
                     val folder = findFolder(folderPath, folders)
 
                     if (folder != null) {
@@ -744,9 +744,9 @@ class PlaylistViewModel @Inject constructor(
 
     private fun findFolder(
         targetPath: String,
-        folders: List<com.oakiha.audia.data.model.MusicFolder>
-    ): com.oakiha.audia.data.model.MusicFolder? {
-        val queue: ArrayDeque<com.oakiha.audia.data.model.MusicFolder> = ArrayDeque(folders)
+        folders: List<com.oakiha.audia.data.model.AudiobookFolder>
+    ): com.oakiha.audia.data.model.AudiobookFolder? {
+        val queue: ArrayDeque<com.oakiha.audia.data.model.AudiobookFolder> = ArrayDeque(folders)
         while (queue.isNotEmpty()) {
             val folder = queue.removeFirst()
             if (folder.path == targetPath) {
@@ -757,7 +757,7 @@ class PlaylistViewModel @Inject constructor(
         return null
     }
 
-    private fun com.oakiha.audia.data.model.MusicFolder.collectAllSongs(): List<Song> {
+    private fun com.oakiha.audia.data.model.AudiobookFolder.collectAllSongs(): List<Song> {
         return songs + subFolders.flatMap { it.collectAllSongs() }
     }
 

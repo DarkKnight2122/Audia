@@ -61,7 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.MusicFolder
+import com.oakiha.audia.data.model.AudiobookFolder
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import java.io.File
@@ -82,7 +82,7 @@ fun LibraryActionRow(
     isFoldersTab: Boolean,
     modifier: Modifier = Modifier,
     // Breadcrumb parameters
-    currentFolder: MusicFolder?,
+    currentFolder: AudiobookFolder?,
     onFolderClick: (String) -> Unit,
     onNavigateBack: () -> Unit,
     isShuffleEnabled: Boolean = false
@@ -258,7 +258,7 @@ fun LibraryActionRow(
 
 @Composable
 fun Breadcrumbs(
-    currentFolder: MusicFolder?,
+    currentFolder: AudiobookFolder?,
     onFolderClick: (String) -> Unit,
     onNavigateBack: () -> Unit
 ) {

@@ -374,7 +374,7 @@ class MainActivity : ComponentActivity() {
                 processedShuffle = true
                 // Wait a bit for the library to be ready
                 kotlinx.coroutines.delay(500)
-                playerViewModel.shuffleAllSongs()
+                playerViewModel.shuffleAllTracks()
                 _pendingShuffleAll.value = false
             } else if (!pendingShuffleAll) {
                 processedShuffle = false

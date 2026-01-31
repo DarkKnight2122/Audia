@@ -94,7 +94,7 @@ fun HomeGradientTopBar(
     onBetaClick: () -> Unit,
     onMenuClick: () -> Unit = {},
 ) {
-    // 1) Pinta la status bar con el color surface
+    // 1) Paint the status bar with the surface color
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     val gradientColors = listOf(
@@ -102,14 +102,14 @@ fun HomeGradientTopBar(
         Color.Transparent
     ).toImmutableList()
 
-    // Recordar el Brush basado en la lista de colores recordada
+    // Remember the Brush based on the remembered color list
     val gradientBrush = remember(gradientColors) {
         Brush.verticalGradient(colors = gradientColors)
     }
 
 
 
-    // 3) TopAppBar con fondo degradado
+    // 3) TopAppBar with gradient background
     TopAppBar(
         modifier = Modifier
             .background(brush = gradientBrush),
@@ -197,7 +197,7 @@ fun HomeGradientTopBar(
             }
         },
         colors = topAppBarColors(
-            containerColor = Color.Transparent // ya pintamos el fondo con el Brush
+            containerColor = Color.Transparent // background is already painted with the Brush
         )
     )
 }
