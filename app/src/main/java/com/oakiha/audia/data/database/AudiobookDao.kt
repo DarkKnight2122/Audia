@@ -198,7 +198,7 @@ interface AudiobookDao {
     // --- Album Queries ---
     @Query("""
         SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
+        INNER JOIN songs ON albums.id = songs.book_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         ORDER BY albums.title ASC
     """)
@@ -219,7 +219,7 @@ interface AudiobookDao {
     // Version of getAlbums that returns a List for one-shot reads
     @Query("""
         SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
+        INNER JOIN songs ON albums.id = songs.book_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         ORDER BY albums.title ASC
     """)
@@ -233,9 +233,9 @@ interface AudiobookDao {
 
     @Query("""
         SELECT DISTINCT albums.* FROM albums
-        INNER JOIN songs ON albums.id = songs.album_id
+        INNER JOIN songs ON albums.id = songs.book_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
-        AND (albums.title LIKE '%' || :query || '%' OR albums.artist_name LIKE '%' || :query || '%')
+        AND (albums.title LIKE '%' || :query || '%' OR albums.author_name LIKE '%' || :query || '%')
         ORDER BY albums.title ASC
     """)
     fun searchAlbums(
@@ -247,7 +247,7 @@ interface AudiobookDao {
     // --- Artist Queries ---
     @Query("""
         SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
+        INNER JOIN songs ON artists.id = songs.author_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         ORDER BY artists.name ASC
     """)
@@ -274,7 +274,7 @@ interface AudiobookDao {
     // Version of getArtists that returns a List for one-shot reads
     @Query("""
         SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
+        INNER JOIN songs ON artists.id = songs.author_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         ORDER BY artists.name ASC
     """)
@@ -291,7 +291,7 @@ interface AudiobookDao {
 
     @Query("""
         SELECT DISTINCT artists.* FROM artists
-        INNER JOIN songs ON artists.id = songs.artist_id
+        INNER JOIN songs ON artists.id = songs.author_id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND artists.name LIKE '%' || :query || '%'
         ORDER BY artists.name ASC
@@ -437,8 +437,8 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT artists.* FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :trackId
+        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.author_id
+        WHERE song_artist_cross_ref.track_id = :trackId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
     fun getArtistsForSong(trackId: Long): Flow<List<AuthorEntity>>
@@ -448,8 +448,8 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT artists.* FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :trackId
+        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.author_id
+        WHERE song_artist_cross_ref.track_id = :trackId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
     suspend fun getArtistsForSongList(trackId: Long): List<AuthorEntity>
@@ -459,8 +459,8 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT songs.* FROM songs
-        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :authorId
+        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.track_id
+        WHERE song_artist_cross_ref.author_id = :authorId
         ORDER BY songs.title ASC
     """)
     fun getTracksForArtist(authorId: Long): Flow<List<TrackEntity>>
@@ -470,8 +470,8 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT songs.* FROM songs
-        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :authorId
+        INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.track_id
+        WHERE song_artist_cross_ref.author_id = :authorId
         ORDER BY songs.title ASC
     """)
     suspend fun getTracksForArtistList(authorId: Long): List<TrackEntity>
@@ -487,8 +487,8 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT artists.id AS artist_id, artists.name FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :trackId AND song_artist_cross_ref.is_primary = 1
+        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.author_id
+        WHERE song_artist_cross_ref.track_id = :trackId AND song_artist_cross_ref.is_primary = 1
         LIMIT 1
     """)
     suspend fun getPrimaryArtistForSong(trackId: Long): PrimaryArtistInfo?
@@ -504,7 +504,7 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT artists.id, artists.name, artists.image_url,
-               (SELECT COUNT(*) FROM song_artist_cross_ref WHERE song_artist_cross_ref.artist_id = artists.id) AS track_count
+               (SELECT COUNT(*) FROM song_artist_cross_ref WHERE song_artist_cross_ref.author_id = artists.id) AS track_count
         FROM artists
         ORDER BY artists.name ASC
     """)
@@ -516,12 +516,12 @@ interface AudiobookDao {
     @Query("""
         SELECT DISTINCT artists.id, artists.name, artists.image_url,
                (SELECT COUNT(*) FROM song_artist_cross_ref 
-                INNER JOIN songs ON song_artist_cross_ref.song_id = songs.id
-                WHERE song_artist_cross_ref.artist_id = artists.id
+                INNER JOIN songs ON song_artist_cross_ref.track_id = songs.id
+                WHERE song_artist_cross_ref.author_id = artists.id
                 AND (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))) AS track_count
         FROM artists
-        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        INNER JOIN songs ON song_artist_cross_ref.song_id = songs.id
+        INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.author_id
+        INNER JOIN songs ON song_artist_cross_ref.track_id = songs.id
         WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         ORDER BY artists.name ASC
     """)

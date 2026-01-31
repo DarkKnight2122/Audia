@@ -125,7 +125,7 @@ fun SearchScreen(
     val searchHistory = uiState.searchHistory
     val genres by playerViewModel.genres.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-    val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsState()
+    val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState()
     var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) }
 
@@ -138,7 +138,7 @@ fun SearchScreen(
         }
     }
     val searchResults = uiState.searchResults
-    val handleSongMoreOptionsClick: (Song) -> Unit = { song ->
+    val handleSongMoreOptionsClick: (Track) -> Unit = { song ->
         selectedTrackForInfo = song
         playerViewModel.selectSongForInfo(song)
         showTrackInfoBottomSheet = true
@@ -419,9 +419,9 @@ fun SearchScreen(
 
     if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
         val currentTrack = selectedTrackForInfo
-        val isFavorite = remember(currentTrack?.id, favoriteSongIds) {
+        val isFavorite = remember(currentTrack?.id, favoriteTrackIds) {
             derivedStateOf {
-                currentTrack?.let { favoriteSongIds.contains(it.id) }
+                currentTrack?.let { favoriteTrackIds.contains(it.id) }
             }
         }.value ?: false
         val removeFromListTrigger = remember(currentTrack) {
@@ -456,11 +456,11 @@ fun SearchScreen(
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.bookId))
                     showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.authorId))
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
@@ -634,7 +634,7 @@ fun SearchResultsList(
     onItemSelected: () -> Unit,
     currentPlayingSongId: String?,
     isPlaying: Boolean,
-    onSongMoreOptionsClick: (Song) -> Unit,
+    onSongMoreOptionsClick: (Track) -> Unit,
     navController: NavHostController
 ) {
     val localDensity = LocalDensity.current
@@ -699,9 +699,9 @@ fun SearchResultsList(
                     key = { index ->
                         val item = itemsForSection[index]
                         when (item) {
-                            is SearchResultItem.SongItem -> "song_${item.song.id}"
-                            is SearchResultItem.AlbumItem -> "album_${item.album.id}"
-                            is SearchResultItem.ArtistItem -> "artist_${item.artist.id}"
+                            is SearchResultItem.SongItem -> "song_${item.track.id}"
+                            is SearchResultItem.AlbumItem -> "album_${item.book.id}"
+                            is SearchResultItem.ArtistItem -> "artist_${item.author.id}"
                             is SearchResultItem.PlaylistItem -> "playlist_${item.playlist.id}_${index}"
                         }
                     }
@@ -710,64 +710,64 @@ fun SearchResultsList(
                     Box(modifier = Modifier.padding(bottom = 12.dp)) {
                         when (item) {
                             is SearchResultItem.SongItem -> {
-                                val rememberedOnClick = remember(item.song, playerViewModel, onItemSelected) {
+                                val rememberedOnClick = remember(item.track, playerViewModel, onItemSelected) {
                                     {
-                                        playerViewModel.showAndPlaySong(item.song)
+                                        playerViewModel.showAndPlaySong(item.track)
                                         onItemSelected()
                                     }
                                 }
                                 EnhancedTrackListItem(
-                                    song = item.song,
+                                    song = item.track,
                                     isPlaying = isPlaying,
-                                    isCurrentSong = currentPlayingSongId == item.song.id,
+                                    isCurrentSong = currentPlayingSongId == item.track.id,
                                     onMoreOptionsClick = onSongMoreOptionsClick,
                                     onClick = rememberedOnClick
                                 )
                             }
 
                             is SearchResultItem.AlbumItem -> {
-                                val onPlayClick = remember(item.album, playerViewModel, onItemSelected) {
+                                val onPlayClick = remember(item.book, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Album clicked: ${item.album.title}")
-                                        playerViewModel.playAlbum(item.album)
+                                            .d("Album clicked: ${item.book.title}")
+                                        playerViewModel.playAlbum(item.book)
                                         onItemSelected()
                                     }
                                 }
                                 val onOpenClick = remember (
-                                    item.album,
+                                    item.book,
                                     playerViewModel, onItemSelected ) {
                                     {
-                                        navController.navigate(Screen.AlbumDetail.createRoute(item.album.id))
+                                        navController.navigate(Screen.BookDetail.createRoute(item.book.id))
                                         onItemSelected()
                                     }
                                 }
                                 SearchResultAlbumItem(
-                                    album = item.album,
+                                    album = item.book,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
                             }
 
                             is SearchResultItem.ArtistItem -> {
-                                val onPlayClick = remember(item.artist, playerViewModel, onItemSelected) {
+                                val onPlayClick = remember(item.author, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Artist clicked: ${item.artist.name}")
-                                        playerViewModel.playArtist(item.artist)
+                                            .d("Artist clicked: ${item.author.name}")
+                                        playerViewModel.playArtist(item.author)
                                         onItemSelected()
                                     }
                                 }
                                 val onOpenClick = remember (
-                                    item.artist,
+                                    item.author,
                                     playerViewModel, onItemSelected ) {
                                     {
-                                        navController.navigate(Screen.ArtistDetail.createRoute(item.artist.id))
+                                        navController.navigate(Screen.AuthorDetail.createRoute(item.author.id))
                                         onItemSelected()
                                     }
                                 }
                                 SearchResultArtistItem(
-                                    artist = item.artist,
+                                    artist = item.author,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
@@ -870,7 +870,7 @@ fun SearchResultAlbumItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = album.artist,
+                    text = album.author,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

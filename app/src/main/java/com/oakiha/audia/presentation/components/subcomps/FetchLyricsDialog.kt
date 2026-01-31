@@ -433,7 +433,7 @@ private fun ResultItemCard(
                     }
                 }
                 Text(
-                    text = "${result.record.artistName} â€¢ ${result.record.albumName}",
+                    text = "${result.record.authorName} â€¢ ${result.record.bookName}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -743,7 +743,7 @@ private fun ErrorContent(
 //                                            )
 //                                            Spacer(modifier = Modifier.height(4.dp))
 //                                            Text(
-//                                                text = "${result.record.artistName} - ${result.record.albumName}",
+//                                                text = "${result.record.authorName} - ${result.record.bookName}",
 //                                                style = MaterialTheme.typography.bodyMedium,
 //                                                color = MaterialTheme.colorScheme.onSurfaceVariant
 //                                            )
@@ -832,8 +832,8 @@ private fun ErrorContent(
 //@Composable
 //private fun DialogHeader(currentTrack: Track?) {
 //    val title = currentTrack?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_song_title)
-//    val artist = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
-//    val album = currentTrack?.album.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
+//    val author = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
+//    val book = currentTrack?.book.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
 //
 //    Row(
 //        modifier = Modifier

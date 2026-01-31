@@ -1070,7 +1070,7 @@ internal suspend fun animateToSnapIndex(
  */
 private fun saveLyricsToFile(
     context: android.content.Context,
-    song: Track,
+    track: Track,
     lyrics: Lyrics,
     preferSynced: Boolean
 ) {
@@ -1124,7 +1124,7 @@ private fun saveLyricsToFile(
 
 @Composable
 private fun LyricsTrackInfo(
-    song: Track?,
+    track: Track?,
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     contentColor: Color

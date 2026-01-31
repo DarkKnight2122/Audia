@@ -144,7 +144,7 @@ fun GenreDetailScreen(
             )
         },
         floatingActionButton = {
-            if (uiState.songs.isNotEmpty()) {
+            if (uiState.tracks.isNotEmpty()) {
                 MediumExtendedFloatingActionButton(
                     modifier = Modifier
                         .padding(
@@ -153,9 +153,9 @@ fun GenreDetailScreen(
                         ),
                     shape = fabShape,
                     onClick = {
-                        if (uiState.songs.isNotEmpty()) {
-                            val randomSong = uiState.songs.random()
-                            playerViewModel.showAndPlaySong(randomSong, uiState.songs, uiState.genre?.name ?: "Genre Shuffle")
+                        if (uiState.tracks.isNotEmpty()) {
+                            val randomSong = uiState.tracks.random()
+                            playerViewModel.showAndPlaySong(randomSong, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -183,9 +183,9 @@ fun GenreDetailScreen(
             } else {
                 if (uiState.isLoadingSongs) {
                     ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                } else if (uiState.songs.isEmpty()) {
+                } else if (uiState.tracks.isEmpty()) {
                     Text(
-                        if (uiState.error != null) "Error loading songs: ${uiState.error}" else "No songs found for this genre.",
+                        if (uiState.error != null) "Error loading songs: ${uiState.error}" else "No tracks found for this genre.",
                         modifier = Modifier.align(Alignment.Center).padding(16.dp)
                     )
                 } else {
@@ -214,12 +214,12 @@ fun GenreDetailScreen(
                             when (section) {
                                 is SectionData.ArtistSection -> {
                                     ArtistSectionCard(
-                                        artistName = section.artistName,
-                                        albums = section.albums,
+                                        artistName = section.authorName,
+                                        albums = section.books,
                                         onSongClick = { song ->
                                             playerViewModel.showAndPlaySong(
                                                 song,
-                                                uiState.songs,
+                                                uiState.tracks,
                                                 uiState.genre?.name ?: "Genre"
                                             )
                                         }
@@ -305,7 +305,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
             }
 
             is GroupedTrackListItem.SongItem -> {
-                currentAlbumSongs.add(item.song)
+                currentAlbumSongs.add(item.track)
             }
         }
     }
@@ -334,7 +334,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 private fun ArtistSectionCard(
     artistName: String,
     albums: List<AlbumData>,
-    onSongClick: (Song) -> Unit
+    onSongClick: (Track) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -418,7 +418,7 @@ private fun ArtistSectionCard(
 @Composable
 private fun AlbumSection(
     album: BookData,
-    onSongClick: (Song) -> Unit
+    onSongClick: (Track) -> Unit
 ) {
     Column {
         // Album Header
@@ -462,7 +462,7 @@ private fun AlbumSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             //contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            items(album.songs, key = { it.id }) { song ->
+            items(album.tracks, key = { it.id }) { song ->
                 SquareSongCard(
                     song = song,
                     onClick = { onSongClick(song) }
@@ -474,7 +474,7 @@ private fun AlbumSection(
 
 @Composable
 private fun SquareSongCard(
-    song: Track,
+    track: Track,
     onClick: () -> Unit
 ) {
     Card(

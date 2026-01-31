@@ -71,7 +71,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TrackInfoBottomSheet(
-    song: Track,
+    track: Track,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onDismiss: () -> Unit,
@@ -79,7 +79,7 @@ fun TrackInfoBottomSheet(
     onAddToQueue: () -> Unit,
     onAddNextToQueue: () -> Unit,
     onAddToPlayList: () -> Unit,
-    onDeleteFromDevice: (activity: Activity, song: Track, onResult: (Boolean) -> Unit) -> Unit,
+    onDeleteFromDevice: (activity: Activity, track: Track, onResult: (Boolean) -> Unit) -> Unit,
     onNavigateToAlbum: () -> Unit,
     onNavigateToArtist: () -> Unit,
     onEditSong: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
@@ -403,7 +403,7 @@ fun TrackInfoBottomSheet(
                             .clip(shape = listItemShape)
                             .clickable(onClick = onNavigateToAlbum),
                         headlineContent = { Text("Album") },
-                        supportingContent = { Text(song.album) },
+                        supportingContent = { Text(song.book) },
                         leadingContent = { Icon(Icons.Rounded.Album, contentDescription = "Album icon") }
                     )
 

@@ -71,7 +71,7 @@ fun TrackPickerBottomSheet(
     val filteredSongs = remember(searchQuery, allTracks) {
         if (searchQuery.isBlank()) allTracks
         else allTracks.filter {
-            it.title.contains(searchQuery, true) || it.artist.contains(
+            it.title.contains(searchQuery, true) || it.author.contains(
                 searchQuery,
                 true
             )

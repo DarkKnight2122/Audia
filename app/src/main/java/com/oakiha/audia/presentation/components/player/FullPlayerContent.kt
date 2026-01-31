@@ -185,7 +185,7 @@ fun FullPlayerContent(
         }
     }
 
-    val song = currentTrack ?: retainedSong ?: return // Keep the player visible while transitioning
+    val track = currentTrack ?: retainedSong ?: return // Keep the player visible while transitioning
     var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
@@ -874,7 +874,7 @@ fun FullPlayerContent(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.artist_picker_title), // short label; keep UI minimal
+                    text = stringResource(R.string.author_picker_title), // short label; keep UI minimal
                     style = MaterialTheme.typography.titleMedium,
                     color = LocalMaterialTheme.current.onPrimaryContainer,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -906,7 +906,7 @@ fun FullPlayerContent(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SongMetadataDisplaySection(
-    song: Track?,
+    track: Track?,
     currentTrackArtists: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,

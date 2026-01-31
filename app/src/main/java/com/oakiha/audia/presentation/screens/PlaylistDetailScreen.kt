@@ -177,8 +177,8 @@ fun PlaylistDetailScreen(
     }
 
     val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState() // Reintroducir favoriteIds aquÃ­
-    val stableOnMoreOptionsClick: (Song) -> Unit = remember {
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃ­
+    val stableOnMoreOptionsClick: (Track) -> Unit = remember {
         { song ->
             playerViewModel.selectSongForInfo(song)
             showTrackInfoBottomSheet = true
@@ -633,7 +633,7 @@ fun PlaylistDetailScreen(
 
     if (showAddSongsSheet && currentPlaylist != null && !isFolderPlaylist) {
         TrackPickerBottomSheet(
-            allTracks = uiState.songSelectionForPlaylist,
+            allTracks = uiState.trackSelectionForPlaylist,
             isLoading = uiState.isLoadingSongSelection,
             initiallySelectedSongIds = currentPlaylist.trackIds.toSet(),
             onDismiss = { showAddSongsSheet = false },
@@ -822,11 +822,11 @@ fun PlaylistDetailScreen(
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.bookId))
                     showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.authorId))
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->

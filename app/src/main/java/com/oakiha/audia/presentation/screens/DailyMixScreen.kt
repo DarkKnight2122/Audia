@@ -102,7 +102,7 @@ fun DailyMixScreen(
     var showPlaylistBottomSheet by remember { mutableStateOf(false) }
     val playerSheetState by playerViewModel.sheetState.collectAsState() // This is a simple enum, less critical but fine
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-    val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsState()
+    val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState()
 
     val showAiSheet by playerViewModel.showAiPlaylistSheet.collectAsState()
     val isGeneratingAiPlaylist by playerViewModel.isGeneratingAiPlaylist.collectAsState()
@@ -153,7 +153,7 @@ fun DailyMixScreen(
     }
 
     if (showSongInfoSheet && selectedTrackForInfo != null) {
-        val song = selectedTrackForInfo!!
+        val track = selectedTrackForInfo!!
         val removeFromListTrigger = remember(dailyMixSongs) {
             {
                 playerViewModel.removeFromDailyMix(song.id)
@@ -161,7 +161,7 @@ fun DailyMixScreen(
         }
         TrackInfoBottomSheet(
             song = song,
-            isFavorite = favoriteSongIds.contains(song.id),
+            isFavorite = favoriteTrackIds.contains(song.id),
             onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(song) },
             onDismiss = { showSongInfoSheet = false },
             onPlaySong = {
@@ -182,7 +182,7 @@ fun DailyMixScreen(
             onDeleteFromDevice = playerViewModel::deleteFromDevice,
             onNavigateToAlbum = {
                 // Assuming Screen object has a method to create a route
-                navController.navigate(Screen.AlbumDetail.createRoute(song.bookId))
+                navController.navigate(Screen.BookDetail.createRoute(song.bookId))
                 showSongInfoSheet = false
             },
             onNavigateToArtist = {

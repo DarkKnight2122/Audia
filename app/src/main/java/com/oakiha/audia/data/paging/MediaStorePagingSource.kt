@@ -22,16 +22,16 @@ class MediaStorePagingSource(
     private val context: Context,
     private val filteredIds: List<Long>,
     private val trackIdToGenreMap: Map<Long, String>
-) : PagingSource<Int, Song>() {
+) : PagingSource<Int, Track>() {
 
-    override fun getRefreshKey(state: PagingState<Int, Song>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Track>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             val anchorPage = state.closestPageToPosition(anchorPosition)
             anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Song> = withContext(Dispatchers.IO) {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Track> = withContext(Dispatchers.IO) {
         val pageIndex = params.key ?: 0
         
         if (filteredIds.isEmpty()) {
@@ -120,7 +120,7 @@ class MediaStorePagingSource(
                     val bookId = cursor.getLong(bookIdCol)
                     val path = cursor.getString(pathCol)
 
-                    val song = Track(
+                    val track = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
                         artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),

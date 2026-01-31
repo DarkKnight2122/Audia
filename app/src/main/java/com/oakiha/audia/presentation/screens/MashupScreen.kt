@@ -96,8 +96,8 @@ fun MashupScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    val isLoading1 = mashupUiState.deck1.song == null && mashupUiState.showSongPickerForDeck == 1
-                    val isLoading2 = mashupUiState.deck2.song == null && mashupUiState.showSongPickerForDeck == 2
+                    val isLoading1 = mashupUiState.deck1.track == null && mashupUiState.showSongPickerForDeck == 1
+                    val isLoading2 = mashupUiState.deck2.track == null && mashupUiState.showSongPickerForDeck == 2
 
                     // El resto de la UI (DeckUi, Crossfader) permanece igual
                     DeckUi(
@@ -199,9 +199,9 @@ private fun DeckUi(
                             .clickable(enabled = !isLoading) { onSelectSong() },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (deckState.song != null) {
+                        if (deckState.track != null) {
                             SmartImage(
-                                model = deckState.song.bookArtUriString,
+                                model = deckState.track.bookArtUriString,
                                 contentDescription = "Song Cover",
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -210,8 +210,8 @@ private fun DeckUi(
                         }
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(deckState.song?.title ?: "No song loaded", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(deckState.song?.artist ?: "...", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(deckState.track?.title ?: "No song loaded", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(deckState.track?.author ?: "...", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Spacer(Modifier.height(8.dp))
                         AudioWaveform(
                             amplitudes = deckState.stemWaveforms["main"] ?: emptyList(),
@@ -226,7 +226,7 @@ private fun DeckUi(
                     }
                 }
 
-                AnimatedVisibility(deckState.song != null && !isLoading) {
+                AnimatedVisibility(deckState.track != null && !isLoading) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -246,16 +246,16 @@ private fun DeckUi(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedButton(onClick = { onNudge(-100) }, enabled = deckState.song != null) { Text("<<") }
-                    IconButton(onClick = onPlayPause, enabled = deckState.song != null, modifier = Modifier.size(56.dp)) {
+                    OutlinedButton(onClick = { onNudge(-100) }, enabled = deckState.track != null) { Text("<<") }
+                    IconButton(onClick = onPlayPause, enabled = deckState.track != null, modifier = Modifier.size(56.dp)) {
                         Icon(painter = painterResource(if (deckState.isPlaying) R.drawable.rounded_pause_24 else R.drawable.rounded_play_arrow_24), contentDescription = "Play/Pause", modifier = Modifier.fillMaxSize())
                     }
-                    OutlinedButton(onClick = { onNudge(100) }, enabled = deckState.song != null) { Text(">>") }
+                    OutlinedButton(onClick = { onNudge(100) }, enabled = deckState.track != null) { Text(">>") }
                 }
 
                 Column(modifier = Modifier.padding(top = 8.dp)) {
-                    SliderControl(label = "Volume", value = deckState.volume, onValueChange = onVolumeChange, valueRange = 0f..1f, enabled = deckState.song != null)
-                    SliderControl(label = "Speed", value = deckState.speed, onValueChange = onSpeedChange, valueRange = 0.5f..2f, steps = 14, enabled = deckState.song != null) {
+                    SliderControl(label = "Volume", value = deckState.volume, onValueChange = onVolumeChange, valueRange = 0f..1f, enabled = deckState.track != null)
+                    SliderControl(label = "Speed", value = deckState.speed, onValueChange = onSpeedChange, valueRange = 0.5f..2f, steps = 14, enabled = deckState.track != null) {
                         Text(text = "x${"%.2f".format(deckState.speed)}", style = MaterialTheme.typography.labelSmall)
                     }
                 }
@@ -307,7 +307,7 @@ private fun Crossfader(value: Float, onValueChange: (Float) -> Unit, modifier: M
 }
 
 @Composable
-private fun SongPickerSheet(songs: List<Track>, onSongSelected: (Song) -> Unit) {
+private fun SongPickerSheet(songs: List<Track>, onSongSelected: (Track) -> Unit) {
     Column(modifier = Modifier.navigationBarsPadding()) {
         Text("Select a Song", style = MaterialTheme.typography.titleLarge, modifier = Modifier
             .fillMaxWidth()
@@ -324,7 +324,7 @@ private fun SongPickerSheet(songs: List<Track>, onSongSelected: (Song) -> Unit) 
 }
 
 @Composable
-private fun SongPickerItem(song: Track, onClick: () -> Unit) {
+private fun SongPickerItem(track: Track, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

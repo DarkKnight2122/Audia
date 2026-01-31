@@ -78,7 +78,7 @@ class AudiobookService : MediaSessionService() {
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
-    private var favoriteSongIds = emptySet<String>()
+    private var favoriteTrackIds = emptySet<String>()
     private var mediaSession: MediaSession? = null
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var keepPlayingInBackground = true
@@ -214,11 +214,11 @@ class AudiobookService : MediaSessionService() {
                         val trackId = session.player.currentMediaItem?.mediaId ?: return@onCustomCommand Futures.immediateFuture(SessionResult(
                             SessionError.ERROR_UNKNOWN))
                         Timber.tag("AudiobookService").d("Executing LIKE for trackId: $trackId")
-                        val isCurrentlyFavorite = favoriteSongIds.contains(trackId)
-                        favoriteSongIds = if (isCurrentlyFavorite) {
-                            favoriteSongIds - trackId
+                        val isCurrentlyFavorite = favoriteTrackIds.contains(trackId)
+                        favoriteTrackIds = if (isCurrentlyFavorite) {
+                            favoriteTrackIds - trackId
                         } else {
-                            favoriteSongIds + trackId
+                            favoriteTrackIds + trackId
                         }
 
                         refreshMediaSessionUi(session)
@@ -249,11 +249,11 @@ class AudiobookService : MediaSessionService() {
         mediaSession?.let { refreshMediaSessionUi(it) }
 
         serviceScope.launch {
-            userPreferencesRepository.favoriteSongIdsFlow.collect { ids ->
+            userPreferencesRepository.favoriteTrackIdsFlow.collect { ids ->
                 Timber.tag("AudiobookService")
-                    .d("favoriteSongIdsFlow collected. New ids size: ${ids.size}")
-                val oldIds = favoriteSongIds
-                favoriteSongIds = ids
+                    .d("favoriteTrackIdsFlow collected. New ids size: ${ids.size}")
+                val oldIds = favoriteTrackIds
+                favoriteTrackIds = ids
                 val currentTrackId = mediaSession?.player?.currentMediaItem?.mediaId
                 if (currentTrackId != null) {
                     val wasFavorite = oldIds.contains(currentTrackId)
@@ -407,7 +407,7 @@ class AudiobookService : MediaSessionService() {
         val totalDuration = withContext(Dispatchers.Main) { player.duration.coerceAtLeast(0) }
 
         val title = currentItem?.mediaMetadata?.title?.toString().orEmpty()
-        val artist = currentItem?.mediaMetadata?.artist?.toString().orEmpty()
+        val author = currentItem?.mediaMetadata?.author?.toString().orEmpty()
         val mediaId = currentItem?.mediaId
         val artworkUri = currentItem?.mediaMetadata?.artworkUri
         val artworkData = currentItem?.mediaMetadata?.artworkData
@@ -490,7 +490,7 @@ class AudiobookService : MediaSessionService() {
                     updateAppWidgetState(applicationContext, PlayerInfoStateDefinition, id) { playerInfo }
                 }
                 AudioBookPlayerGlanceWidget().update(applicationContext, glanceIds.first())
-                Log.d(TAG, "Widget actualizado: ${playerInfo.songTitle}")
+                Log.d(TAG, "Widget actualizado: ${playerInfo.trackTitle}")
             } else {
                 Log.w(TAG, "No se encontraron widgets para actualizar")
             }
@@ -520,7 +520,7 @@ class AudiobookService : MediaSessionService() {
     }
 
     fun isSongFavorite(trackId: String?): Boolean {
-        return trackId != null && favoriteSongIds.contains(trackId)
+        return trackId != null && favoriteTrackIds.contains(trackId)
     }
 
     fun isManualShuffleEnabled(): Boolean {

@@ -89,7 +89,7 @@ import java.io.ByteArrayOutputStream
 
 fun EditTrackSheet(
     visible: Boolean,
-    song: Track,
+    track: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
@@ -124,14 +124,14 @@ fun EditTrackSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EditSongContent(
-    song: Track,
+    track: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
 ) {
     var title by remember { mutableStateOf(song.title) }
     var artist by remember { mutableStateOf(song.displayAuthor) }
-    var album by remember { mutableStateOf(song.album) }
+    var album by remember { mutableStateOf(song.book) }
     var genre by remember { mutableStateOf(song.genre ?: "") }
     var lyrics by remember { mutableStateOf(song.lyrics ?: "") }
     var trackNumber by remember { mutableStateOf(song.trackNumber.toString()) }
@@ -155,7 +155,7 @@ private fun EditSongContent(
     LaunchedEffect(song) {
         title = song.title
         artist = song.displayAuthor
-        album = song.album
+        album = song.book
         genre = song.genre ?: ""
         lyrics = song.lyrics ?: ""
         trackNumber = song.trackNumber.toString()
@@ -187,8 +187,8 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        artist = metadata.artist ?: artist
-                        album = metadata.album ?: album
+                        artist = metadata.author ?: artist
+                        album = metadata.book ?: album
                         genre = metadata.genre ?: genre
                     }.onFailure { error ->
                         Timber.e(error, "Failed to generate AI metadata")

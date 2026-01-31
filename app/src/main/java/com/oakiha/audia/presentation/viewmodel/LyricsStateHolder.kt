@@ -83,7 +83,7 @@ class LyricsStateHolder @Inject constructor(
      * @param song The song to load lyrics for
      * @param sourcePreference The preferred source for lyrics
      */
-    fun loadLyricsForSong(song: Track, sourcePreference: LyricsSourcePreference) {
+    fun loadLyricsForSong(track: Track, sourcePreference: LyricsSourcePreference) {
         loadingJob?.cancel()
         val targetTrackId = song.id
 
@@ -158,7 +158,7 @@ class LyricsStateHolder @Inject constructor(
      * Fetch lyrics for the given song from the remote service.
      */
     fun fetchLyricsForSong(
-        song: Track,
+        track: Track,
         forcePickResults: Boolean,
         contextHelper: (Int) -> String // temporary helper for strings? Or we pass string.
         // Actually, let's keep it simple and pass strings or standard errors.
@@ -278,7 +278,7 @@ class LyricsStateHolder @Inject constructor(
         resetSearchState()
         scope?.launch {
              audiobookRepository.resetLyrics(trackId)
-             _songUpdates.emit(Song.emptySong().copy(id=trackId.toString()) to null) 
+             _songUpdates.emit(Track.emptyTrack().copy(id=trackId.toString()) to null) 
         }
     }
     

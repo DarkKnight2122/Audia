@@ -79,11 +79,11 @@ constructor(
                         .i("Starting MediaStore synchronization (Mode: $syncMode, ForceMetadata: $forceMetadata)...")
                     val startTime = System.currentTimeMillis()
 
-                    val artistDelimiters = userPreferencesRepository.artistDelimitersFlow.first()
+                    val artistDelimiters = userPreferencesRepository.authorDelimitersFlow.first()
                     val groupByAlbumArtist =
                             userPreferencesRepository.groupByAlbumArtistFlow.first()
                     val rescanRequired =
-                            userPreferencesRepository.artistSettingsRescanRequiredFlow.first()
+                            userPreferencesRepository.authorSettingsRescanRequiredFlow.first()
 
                     // Feature: Directory Filtering
                     val allowedDirs = userPreferencesRepository.allowedDirectoriesFlow.first()
@@ -214,14 +214,14 @@ constructor(
                                         // Preserve user-edited fields
                                         val needsArtistCompare =
                                                 !rescanRequired &&
-                                                        localSong.artistName.isNotBlank() &&
-                                                        localSong.artistName !=
-                                                                mediaStoreSong.artistName
+                                                        localSong.authorName.isNotBlank() &&
+                                                        localSong.authorName !=
+                                                                mediaStoreSong.authorName
 
                                         val shouldPreserveArtistName =
                                                 if (needsArtistCompare) {
                                                     val mediaStoreArtists =
-                                                            mediaStoreSong.artistName
+                                                            mediaStoreSong.authorName
                                                                     .splitArtistsByDelimiters(
                                                                             artistDelimiters
                                                                     )
@@ -231,7 +231,7 @@ constructor(
                                                             mediaStoreArtists.size > 1
                                                     !(mediaStoreHasMultipleArtists &&
                                                             mediaStorePrimaryArtist != null &&
-                                                            localSong.artistName.trim() ==
+                                                            localSong.authorName.trim() ==
                                                                     mediaStorePrimaryArtist)
                                                 } else {
                                                     false
@@ -251,16 +251,16 @@ constructor(
                                                         else mediaStoreSong.title,
                                                 artistName =
                                                         if (shouldPreserveArtistName)
-                                                                localSong.artistName
-                                                        else mediaStoreSong.artistName,
+                                                                localSong.authorName
+                                                        else mediaStoreSong.authorName,
                                                 albumName =
-                                                        if (localSong.albumName !=
-                                                                        mediaStoreSong.albumName &&
-                                                                        localSong.albumName
+                                                        if (localSong.bookName !=
+                                                                        mediaStoreSong.bookName &&
+                                                                        localSong.bookName
                                                                                 .isNotBlank()
                                                         )
-                                                                localSong.albumName
-                                                        else mediaStoreSong.albumName,
+                                                                localSong.bookName
+                                                        else mediaStoreSong.bookName,
                                                 genre = localSong.genre ?: mediaStoreSong.genre,
                                                 trackNumber =
                                                         if (localSong.trackNumber != 0 &&
@@ -310,7 +310,7 @@ constructor(
                         }
 
                         // Clear the rescan required flag
-                        userPreferencesRepository.clearArtistSettingsRescanRequired()
+                        userPreferencesRepository.clearAuthorSettingsRescanRequired()
 
                         val endTime = System.currentTimeMillis()
                         Timber.tag(TAG)
@@ -331,9 +331,9 @@ constructor(
                                         Track(
                                                 id = entity.id.toString(),
                                                 title = entity.title,
-                                                artist = entity.artistName,
+                                                artist = entity.authorName,
                                                 authorId = entity.authorId,
-                                                album = entity.albumName,
+                                                album = entity.bookName,
                                                 bookId = entity.bookId,
                                                 path = entity.filePath,
                                                 contentUriString = entity.contentUriString,
@@ -496,7 +496,7 @@ constructor(
         val correctedSongs = ArrayList<TrackEntity>(songs.size)
 
         songs.forEach { song ->
-            val rawArtistName = song.artistName
+            val rawArtistName = song.authorName
             val songArtistNameTrimmed = rawArtistName.trim()
             val artistsForSong =
                     artistSplitCache.getOrPut(rawArtistName) {
@@ -535,7 +535,7 @@ constructor(
             }
 
             // --- Album Logic ---
-            val rawAlbumName = song.albumName.trim()
+            val rawAlbumName = song.bookName.trim()
             val bookIdentityArtist = if (groupByAlbumArtist) {
                 song.bookArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
             } else {
@@ -575,14 +575,14 @@ constructor(
              val firstSong = songsInAlbum.first()
              // Determine Album Artist Name
              val determinedAlbumArtist = firstSong.bookArtist?.takeIf { it.isNotBlank() } 
-                 ?: firstSong.artistName
+                 ?: firstSong.authorName
                  
              // Determine Album Artist ID (best effort lookup)
              val determinedAlbumArtistId = artistNameToId[determinedAlbumArtist] ?: 0L
 
              BookEntity(
                  id = catAlbumId,
-                 title = firstSong.albumName,
+                 title = firstSong.bookName,
                  artistName = determinedAlbumArtist,
                  authorId = determinedAlbumArtistId,
                  bookArtUriString = firstSong.bookArtUriString,
@@ -894,7 +894,7 @@ constructor(
                     .map { raw ->
                         async {
                             semaphore.withPermit {
-                                val song =
+                                val track =
                                         processSongData(raw, bookArtByAlbumId, genreMap, deepScan)
 
                                 // Report progress
@@ -950,8 +950,8 @@ constructor(
                 if (deepScan) getAudioMetadata(audiobookDao, raw.id, raw.filePath, true) else null
 
         var title = raw.title
-        var artist = raw.artist
-        var album = raw.album
+        var artist = raw.author
+        var album = raw.book
         var trackNumber = raw.trackNumber
         var year = raw.year
         var genre: String? = genreMap[raw.id] // Use mapped genre as default
@@ -970,8 +970,8 @@ constructor(
                 try {
                     AudioMetadataReader.read(file)?.let { meta ->
                         if (!meta.title.isNullOrBlank()) title = meta.title
-                        if (!meta.artist.isNullOrBlank()) artist = meta.artist
-                        if (!meta.album.isNullOrBlank()) album = meta.album
+                        if (!meta.author.isNullOrBlank()) artist = meta.author
+                        if (!meta.book.isNullOrBlank()) album = meta.book
                         if (!meta.genre.isNullOrBlank()) genre = meta.genre
                         if (meta.trackNumber != null) trackNumber = meta.trackNumber
                         if (meta.year != null) year = meta.year

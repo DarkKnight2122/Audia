@@ -12,7 +12,7 @@ import com.oakiha.audia.data.model.Track
 
 @Composable
 fun AiMetadataDialog(
-    song: Track,
+    track: Track,
     onDismiss: () -> Unit,
     onGenerate: (List<String>) -> Unit
 ) {
@@ -20,7 +20,7 @@ fun AiMetadataDialog(
         val fields = mutableListOf<String>()
         if (song.title.isBlank()) fields.add("Title")
         if (song.displayAuthor.isBlank()) fields.add("Artist")
-        if (song.album.isBlank()) fields.add("Album")
+        if (song.book.isBlank()) fields.add("Album")
         if (song.genre.isNullOrBlank()) fields.add("Genre")
         fields
     }

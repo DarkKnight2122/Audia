@@ -51,7 +51,7 @@ fun LibraryTracksTab(
     stablePlayerState: StablePlayerState,
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
-    onMoreOptionsClick: (Song) -> Unit,
+    onMoreOptionsClick: (Track) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
@@ -80,7 +80,7 @@ fun LibraryTracksTab(
             ) {
                 items(12) { // Show 12 skeleton items
                     EnhancedTrackListItem(
-                        song = Song.emptySong(),
+                        song = Track.emptyTrack(),
                         isPlaying = false,
                         isLoading = true,
                         isCurrentSong = false,
@@ -99,14 +99,14 @@ fun LibraryTracksTab(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         painter = painterResource(id = R.drawable.rounded_audiobook_off_24),
-                        contentDescription = "No songs found",
+                        contentDescription = "No tracks found",
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text("No songs found in your library.", style = MaterialTheme.typography.titleMedium)
+                    Text("No tracks found in your library.", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Try rescanning your library in settings if you have music on your device.",
+                        "Try rescanning your library in settings if you have audiobooks on your device.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -154,8 +154,8 @@ fun LibraryTracksTab(
                         ) { song ->
                             val isPlayingThisSong = song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                             
-                            val rememberedOnMoreOptionsClick: (Song) -> Unit = remember(onMoreOptionsClick) {
-                                { songFromListItem -> onMoreOptionsClick(songFromListItem) }
+                            val rememberedOnMoreOptionsClick: (Track) -> Unit = remember(onMoreOptionsClick) {
+                                { trackFromListItem -> onMoreOptionsClick(trackFromListItem) }
                             }
                             val rememberedOnClick: () -> Unit = remember(song) {
                                 { 

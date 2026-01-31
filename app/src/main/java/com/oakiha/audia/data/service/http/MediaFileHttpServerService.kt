@@ -122,7 +122,7 @@ class MediaFileHttpServerService : Service() {
                                     return@get
                                 }
 
-                                val song = audiobookRepository.getTrack(trackId).firstOrNull()
+                                val track = audiobookRepository.getTrack(trackId).firstOrNull()
                                 if (song == null) {
                                     call.respond(HttpStatusCode.NotFound, "Song not found")
                                     return@get
@@ -207,7 +207,7 @@ class MediaFileHttpServerService : Service() {
                                     return@get
                                 }
 
-                                val song = audiobookRepository.getTrack(trackId).firstOrNull()
+                                val track = audiobookRepository.getTrack(trackId).firstOrNull()
                                 if (song?.bookArtUriString == null) {
                                     call.respond(HttpStatusCode.NotFound, "Album art not found")
                                     return@get

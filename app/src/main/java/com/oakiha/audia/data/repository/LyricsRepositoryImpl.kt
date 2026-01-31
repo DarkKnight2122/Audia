@@ -140,7 +140,7 @@ class LyricsRepositoryImpl @Inject constructor(
      * Main lyrics fetching method with source preference support (matching Rhythm)
      */
     override suspend fun getLyrics(
-        song: Track,
+        track: Track,
         sourcePreference: LyricsSourcePreference,
         forceRefresh: Boolean
     ): Lyrics? = withContext(Dispatchers.IO) {
@@ -231,7 +231,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Fetches lyrics from LRCLIB API with rate limiting (matching Rhythm)
      */
-    private suspend fun fetchLyricsFromAPI(song: Track): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun fetchLyricsFromAPI(track: Track): Lyrics? = withContext(Dispatchers.IO) {
         // Check JSON disk cache first (matching Rhythm)
         val cachedJson = loadLocalLyricsJson(song)
         if (cachedJson != null) {
@@ -282,8 +282,8 @@ class LyricsRepositoryImpl @Inject constructor(
             // Find best match - prioritize exact matches, then synced lyrics (matching Rhythm)
             val songDurationSeconds = song.duration / 1000
             val bestMatch = results.firstOrNull { result ->
-                val artistMatch = result.artistName.lowercase().contains(cleanArtist.lowercase()) ||
-                        cleanArtist.lowercase().contains(result.artistName.lowercase())
+                val artistMatch = result.authorName.lowercase().contains(cleanArtist.lowercase()) ||
+                        cleanArtist.lowercase().contains(result.authorName.lowercase())
                 val titleMatch = result.name.lowercase().contains(cleanTitle.lowercase()) ||
                         cleanTitle.lowercase().contains(result.name.lowercase())
                 val durationDiff = abs(result.duration - songDurationSeconds)
@@ -331,7 +331,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Find local .lrc file next to the music file (matching Rhythm)
      */
-    private suspend fun findLocalLrcFile(song: Track): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun findLocalLrcFile(track: Track): Lyrics? = withContext(Dispatchers.IO) {
         try {
             val songFile = File(song.path)
             val directory = songFile.parentFile ?: return@withContext null
@@ -382,7 +382,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Save lyrics to JSON disk cache (matching Rhythm)
      */
-    private fun saveLocalLyricsJson(song: Track, lyrics: Lyrics) {
+    private fun saveLocalLyricsJson(track: Track, lyrics: Lyrics) {
         try {
             val fileName = "${song.id}.json"
             val lyricsDir = File(context.filesDir, "lyrics")
@@ -405,7 +405,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Load lyrics from JSON disk cache (matching Rhythm)
      */
-    private fun loadLocalLyricsJson(song: Track): Lyrics? {
+    private fun loadLocalLyricsJson(track: Track): Lyrics? {
         try {
             val fileName = "${song.id}.json"
             val file = File(context.filesDir, "lyrics/$fileName")
@@ -438,7 +438,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Load embedded lyrics from audio file metadata
      */
-    private suspend fun loadLyricsFromStorage(song: Track): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun loadLyricsFromStorage(track: Track): Lyrics? = withContext(Dispatchers.IO) {
         // First check database for persisted lyrics (was user-imported or cached)
         val persisted = lyricsDao.getLyrics(song.id.toLong())
         if (persisted != null && !persisted.content.isBlank()) {
@@ -486,7 +486,7 @@ class LyricsRepositoryImpl @Inject constructor(
 
     // ========== Original methods (kept for backward compatibility) ==========
 
-    override suspend fun fetchFromRemote(song: Track): Result<Pair<Lyrics, String>> = withContext(Dispatchers.IO) {
+    override suspend fun fetchFromRemote(track: Track): Result<Pair<Lyrics, String>> = withContext(Dispatchers.IO) {
         try {
             LogUtils.d(this@LyricsRepositoryImpl, "Fetching lyrics from remote for: ${song.title}")
 
@@ -524,7 +524,7 @@ class LyricsRepositoryImpl @Inject constructor(
             val response = lrcLibApiService.getLyrics(
                 trackName = song.title,
                 artistName = song.displayAuthor,
-                albumName = song.album,
+                albumName = song.book,
                 duration = (song.duration / 1000).toInt()
             )
 
@@ -569,7 +569,7 @@ class LyricsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchRemote(song: Track): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
+    override suspend fun searchRemote(track: Track): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
         try {
             LogUtils.d(this@LyricsRepositoryImpl, "Searching remote for lyrics for: ${song.title} by ${song.displayAuthor}")
 
@@ -613,7 +613,7 @@ class LyricsRepositoryImpl @Inject constructor(
                         return@mapNotNull null
                     }
                     val hasSynced = !response.syncedLyrics.isNullOrEmpty()
-                    LogUtils.d(this@LyricsRepositoryImpl, "  Found: ${response.name} by ${response.artistName} (synced: $hasSynced)")
+                    LogUtils.d(this@LyricsRepositoryImpl, "  Found: ${response.name} by ${response.authorName} (synced: $hasSynced)")
                     LyricsSearchResult(response, parsedLyrics, rawLyrics)
                 }
                     .sortedByDescending { !it.record.syncedLyrics.isNullOrEmpty() }

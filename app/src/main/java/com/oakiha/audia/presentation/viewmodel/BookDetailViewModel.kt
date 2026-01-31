@@ -33,8 +33,8 @@ class BookDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AlbumDetailUiState())
-    val uiState: StateFlow<AlbumDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(BookDetailUiState())
+    val uiState: StateFlow<BookDetailUiState> = _uiState.asStateFlow()
 
     init {
         val bookIdString: String? = savedStateHandle.get("bookId")
@@ -46,7 +46,7 @@ class BookDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(error = context.getString(R.string.invalid_album_id), isLoading = false) }
             }
         } else {
-            _uiState.update { it.copy(error = context.getString(R.string.album_id_not_found), isLoading = false) }
+            _uiState.update { it.copy(error = context.getString(R.string.book_id_not_found), isLoading = false) }
         }
     }
 
@@ -59,21 +59,21 @@ class BookDetailViewModel @Inject constructor(
 
                 combine(albumDetailsFlow, albumSongsFlow) { album, songs ->
                     if (album != null) {
-                        AlbumDetailUiState(
+                        BookDetailUiState(
                             album = album,
                             songs = songs.sortedBy { it.trackNumber },
                             isLoading = false
                         )
                     } else {
-                        AlbumDetailUiState(
-                            error = context.getString(R.string.album_not_found),
+                        BookDetailUiState(
+                            error = context.getString(R.string.book_not_found),
                             isLoading = false
                         )
                     }
                 }
                     .catch { e ->
                         emit(
-                            AlbumDetailUiState(
+                            BookDetailUiState(
                                 error = context.getString(R.string.error_loading_album, e.localizedMessage ?: ""),
                                 isLoading = false
                             )

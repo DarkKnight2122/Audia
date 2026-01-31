@@ -118,8 +118,8 @@ class AudiobookRepositoryImpl @Inject constructor(
                     val first = songs.first()
                     Book(
                         id = bookId,
-                        title = first.album,
-                        artist = first.artist, // Or bookArtist if available
+                        title = first.book,
+                        artist = first.author, // Or bookArtist if available
                         bookArtUriString = first.bookArtUriString,
                         trackCount = songs.size,
                         year = first.year
@@ -142,7 +142,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     val first = songs.first()
                     Author(
                         id = authorId,
-                        name = first.artist,
+                        name = first.author,
                         trackCount = songs.size
                     )
                 }
@@ -167,9 +167,9 @@ class AudiobookRepositoryImpl @Inject constructor(
         // Simple implementation assuming single artist per song as per MediaStore
         // For multi-artist, we would parse the separator/delimiter here.
         return getAudioFiles().map { songs ->
-            val song = songs.find { it.id == trackId.toString() }
+            val track = songs.find { it.id == trackId.toString() }
             if (song != null) {
-                listOf(Artist(id = song.authorId, name = song.artist, trackCount = 1, imageUrl = null))
+                listOf(Artist(id = song.authorId, name = song.author, trackCount = 1, imageUrl = null))
             } else {
                 emptyList()
             }
@@ -405,7 +405,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getLyrics(
-        song: Track,
+        track: Track,
         sourcePreference: LyricsSourcePreference,
         forceRefresh: Boolean
     ): Lyrics? {
@@ -419,11 +419,11 @@ class AudiobookRepositoryImpl @Inject constructor(
      * @param song La canciÃ³n para la cual se buscarÃ¡ la letra.
      * @return Un objeto Result que contiene el objeto Lyrics si se encontrÃ³, o un error.
      */
-    override suspend fun getLyricsFromRemote(song: Track): Result<Pair<Lyrics, String>> {
+    override suspend fun getLyricsFromRemote(track: Track): Result<Pair<Lyrics, String>> {
         return lyricsRepository.fetchFromRemote(song)
     }
 
-    override suspend fun searchRemoteLyrics(song: Track): Result<Pair<String, List<LyricsSearchResult>>> {
+    override suspend fun searchRemoteLyrics(track: Track): Result<Pair<String, List<LyricsSearchResult>>> {
         return lyricsRepository.searchRemote(song)
     }
 
@@ -483,7 +483,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     val folderFile = File(folderPath)
                     // Create or get the leaf folder
                     val leafFolder = tempFolders.getOrPut(folderPath) { TempFolder(folderPath, folderFile.name) }
-                    leafFolder.songs.addAll(songsInFolder)
+                    leafFolder.tracks.addAll(songsInFolder)
 
                     // Build hierarchy upwards
                     var currentPath = folderPath
@@ -518,7 +518,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                 return AudiobookFolder(
                     path = tempFolder.path,
                     name = tempFolder.name,
-                    songs = tempFolder.songs
+                    songs = tempFolder.tracks
                         .sortedWith(
                             compareBy<Track> { if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE }
                                 .thenBy { it.title.lowercase() }

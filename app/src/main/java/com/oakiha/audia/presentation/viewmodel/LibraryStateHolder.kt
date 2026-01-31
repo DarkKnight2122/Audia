@@ -126,13 +126,13 @@ class LibraryStateHolder @Inject constructor(
         this.scope = scope
         // Initial load of sort preferences
         scope.launch {
-            val songSortKey = userPreferencesRepository.songsSortOptionFlow.first()
+            val songSortKey = userPreferencesRepository.tracksSortOptionFlow.first()
             _currentTrackSortOption.value = SortOption.SONGS.find { it.storageKey == songSortKey } ?: SortOption.SongDefaultOrder
 
-            val albumSortKey = userPreferencesRepository.albumsSortOptionFlow.first()
+            val albumSortKey = userPreferencesRepository.booksSortOptionFlow.first()
             _currentAlbumSortOption.value = SortOption.ALBUMS.find { it.storageKey == albumSortKey } ?: SortOption.AlbumTitleAZ
             
-            val artistSortKey = userPreferencesRepository.artistsSortOptionFlow.first()
+            val artistSortKey = userPreferencesRepository.authorsSortOptionFlow.first()
             _currentArtistSortOption.value = SortOption.ARTISTS.find { it.storageKey == artistSortKey } ?: SortOption.ArtistNameAZ
             
             
@@ -248,8 +248,8 @@ class LibraryStateHolder @Inject constructor(
             val sorted = when (sortOption) {
                 SortOption.SongTitleAZ -> _allTracks.value.sortedBy { it.title.lowercase() }
                 SortOption.SongTitleZA -> _allTracks.value.sortedByDescending { it.title.lowercase() }
-                SortOption.SongArtist -> _allTracks.value.sortedBy { it.artist.lowercase() }
-                SortOption.SongAlbum -> _allTracks.value.sortedBy { it.album.lowercase() }
+                SortOption.SongArtist -> _allTracks.value.sortedBy { it.author.lowercase() }
+                SortOption.SongAlbum -> _allTracks.value.sortedBy { it.book.lowercase() }
                 SortOption.SongDateAdded -> _allTracks.value.sortedByDescending { it.dateAdded }
                 SortOption.SongDuration -> _allTracks.value.sortedBy { it.duration }
                 else -> _allTracks.value // Default or unhandled
@@ -268,7 +268,7 @@ class LibraryStateHolder @Inject constructor(
             val sorted = when (sortOption) {
                 SortOption.AlbumTitleAZ -> _albums.value.sortedBy { it.title.lowercase() }
                 SortOption.AlbumTitleZA -> _albums.value.sortedByDescending { it.title.lowercase() }
-                SortOption.AlbumArtist -> _albums.value.sortedBy { it.artist.lowercase() }
+                SortOption.AlbumArtist -> _albums.value.sortedBy { it.author.lowercase() }
                 SortOption.AlbumReleaseYear -> _albums.value.sortedByDescending { it.year }
                 SortOption.AlbumSizeAsc -> _albums.value.sortedWith(compareBy<Book> { it.trackCount }.thenBy { it.title.lowercase() })
                 SortOption.AlbumSizeDesc -> _albums.value.sortedWith(compareByDescending<Book> { it.trackCount }.thenBy { it.title.lowercase() })

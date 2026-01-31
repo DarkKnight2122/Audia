@@ -576,7 +576,7 @@ class CastTransferStateHolder @Inject constructor(
         return false
     }
 
-     fun markPendingRemoteSong(song: Track) {
+     fun markPendingRemoteSong(track: Track) {
         pendingRemoteSongId = song.id
         pendingRemoteSongMarkedAt = SystemClock.elapsedRealtime()
         lastRemoteSongId = song.id
@@ -606,7 +606,7 @@ class CastTransferStateHolder @Inject constructor(
     private fun resolvePendingRemoteSong(
         reportedSong: Track?,
         currentTrackId: String?,
-        songMap: Map<String, Song>
+        songMap: Map<String, Track>
     ): Track? {
         if (reportedSong != null) return reportedSong
 

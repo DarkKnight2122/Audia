@@ -81,7 +81,7 @@ fun AuthorDetailScreen(
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val playerSheetState by playerViewModel.sheetState.collectAsState()
     val lazyListState = rememberLazyListState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState()
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState()
     var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -172,12 +172,12 @@ fun AuthorDetailScreen(
     ) {
         Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
             when {
-                uiState.isLoading && uiState.artist == null -> {
+                uiState.isLoading && uiState.author == null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ContainedLoadingIndicator()
                     }
                 }
-                uiState.error != null && uiState.artist == null -> {
+                uiState.error != null && uiState.author == null -> {
                     Box(
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Alignment.Center
@@ -189,12 +189,12 @@ fun AuthorDetailScreen(
                         )
                     }
                 }
-                uiState.artist != null -> {
-                    val artist = uiState.artist!!
-                    val songs = uiState.songs
+                uiState.author != null -> {
+                    val author = uiState.author!!
+                    val songs = uiState.tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
 
-                    val albumSections = uiState.albumSections
+                    val albumSections = uiState.bookSections
                     LazyColumn(
                         state = lazyListState,
                         contentPadding = PaddingValues(
@@ -206,14 +206,14 @@ fun AuthorDetailScreen(
                             .padding(horizontal = 0.dp)
                     ) {
                         albumSections.forEachIndexed { index, section ->
-                            if (section.songs.isEmpty()) return@forEachIndexed
+                            if (section.tracks.isEmpty()) return@forEachIndexed
 
                             stickyHeader(key = "artist_album_${section.bookId}_${section.title}_header") {
                                 AlbumSectionHeader(
                                     section = section,
                                     onPlayAlbum = {
-                                        section.songs.firstOrNull()?.let { firstSong ->
-                                            playerViewModel.showAndPlaySong(firstSong, section.songs)
+                                        section.tracks.firstOrNull()?.let { firstSong ->
+                                            playerViewModel.showAndPlaySong(firstSong, section.tracks)
                                         }
                                     }
                                 )
@@ -224,7 +224,7 @@ fun AuthorDetailScreen(
                             }
 
                             itemsIndexed(
-                                items = section.songs,
+                                items = section.tracks,
                                 key = { _, song -> "artist_album_${section.bookId}_song_${song.id}" }
                             ) { songIndex, song ->
                                 EnhancedTrackListItem(
@@ -236,10 +236,10 @@ fun AuthorDetailScreen(
                                         playerViewModel.selectSongForInfo(song)
                                         showTrackInfoBottomSheet = true
                                     },
-                                    onClick = { playerViewModel.showAndPlaySong(song, section.songs) }
+                                    onClick = { playerViewModel.showAndPlaySong(song, section.tracks) }
                                 )
 
-                                if (songIndex != section.songs.lastIndex) {
+                                if (songIndex != section.tracks.lastIndex) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
@@ -279,7 +279,7 @@ fun AuthorDetailScreen(
         }.value ?: false
 
         if (currentTrack != null) {
-            val removeFromListTrigger = remember(uiState.songs) {
+            val removeFromListTrigger = remember(uiState.tracks) {
                 {
                     viewModel.removeSongFromAlbumSection(currentTrack.id)
                 }
@@ -308,11 +308,11 @@ fun AuthorDetailScreen(
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.bookId))
                     showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.authorId))
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
@@ -371,7 +371,7 @@ private fun AlbumSectionHeader(
                         append(it.toString())
                         append(" â€¢ ")
                     }
-                    append("${section.songs.size} songs")
+                    append("${section.tracks.size} songs")
                 }
                 Text(
                     text = subtitle,

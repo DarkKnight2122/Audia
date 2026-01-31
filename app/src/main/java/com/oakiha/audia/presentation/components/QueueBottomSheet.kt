@@ -190,8 +190,8 @@ fun QueueBottomSheet(
     repeatMode: Int,
     isShuffleOn: Boolean,
     onDismiss: () -> Unit,
-    onSongInfoClick: (Song) -> Unit,
-    onPlaySong: (Song) -> Unit,
+    onSongInfoClick: (Track) -> Unit,
+    onPlaySong: (Track) -> Unit,
     onRemoveSong: (String) -> Unit,
     onReorder: (from: Int, to: Int) -> Unit,
     onToggleRepeat: () -> Unit,
@@ -261,7 +261,7 @@ fun QueueBottomSheet(
 
     // Calculate the display index of the current song (depends on whether we show history or not)
     val currentTrackDisplayIndex = remember(displayQueue, currentTrackId) {
-        displayQueue.indexOfFirst { it.song.id == currentTrackId }
+        displayQueue.indexOfFirst { it.track.id == currentTrackId }
     }
 
     val queueSnapshot = remember(queue) { queue.toList() }
@@ -315,7 +315,7 @@ fun QueueBottomSheet(
             val fromLocalIndex = mapKeyToLocalIndex(from.key) ?: return@rememberReorderableLazyListState
             val toLocalIndex = mapKeyToLocalIndex(to.key) ?: return@rememberReorderableLazyListState
             val movingItem = items.getOrNull(fromLocalIndex)
-            val movingSongId = movingItem?.song?.id
+            val movingSongId = movingItem?.track?.id
             items = items.toMutableList().apply {
                 add(toLocalIndex, removeAt(fromLocalIndex))
             }
@@ -604,7 +604,7 @@ fun QueueBottomSheet(
                         }
 
                         itemsIndexed(items, key = { _, item -> item.uniqueId }) { index, item ->
-                            val song = item.song
+                            val track = item.track
                             // Use currentTrackDisplayIndex for comparison since index is in displayQueue
                             val canReorder = index > currentTrackDisplayIndex
                             ReorderableItem(
@@ -1105,7 +1105,7 @@ fun SaveQueueAsPlaylistSheet(
     val filteredSongs = remember(searchQuery, songs) {
         if (searchQuery.isBlank()) songs
         else songs.filter {
-            it.title.contains(searchQuery, true) || it.artist.contains(searchQuery, true)
+            it.title.contains(searchQuery, true) || it.author.contains(searchQuery, true)
         }
     }
 
@@ -1457,7 +1457,7 @@ fun SaveQueueAsPlaylistSheet(
 
 @Composable
 private fun QueueMiniPlayer(
-    song: Track,
+    track: Track,
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
@@ -1596,14 +1596,14 @@ private fun QueueMiniPlayer(
 fun QueuePlaylistSongItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    song: Track,
+    track: Track,
     isCurrentSong: Boolean,
     isPlaying: Boolean? = null,
     isDragging: Boolean,
     onRemoveClick: () -> Unit,
     dragHandle: @Composable () -> Unit,
     isReorderModeEnabled: Boolean,
-    onMoreOptionsClick: (song: Track) -> Unit,
+    onMoreOptionsClick: (track: Track) -> Unit,
     isDragHandleVisible: Boolean,
     isRemoveButtonVisible: Boolean,
     enableSwipeToDismiss: Boolean = false,
@@ -1912,5 +1912,5 @@ private enum class SwipeState { Resting, Dismissed }
 @Immutable
 data class QueueUiItem(
     val uniqueId: String = java.util.UUID.randomUUID().toString(),
-    val song: Track
+    val track: Track
 )

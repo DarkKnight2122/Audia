@@ -345,7 +345,7 @@ fun TrackListItemFavs(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun TrackListItemFavsWrapper(
-    song: Track,
+    track: Track,
     playerViewModel: PlayerViewModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier

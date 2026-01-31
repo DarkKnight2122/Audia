@@ -18,7 +18,7 @@ import javax.inject.Inject
 sealed interface GroupedTrackListItem {
     data class AuthorHeader(val name: String) : GroupedTrackListItem
     data class BookHeader(val name: String, val artistName: String, val bookArtUri: String?) : GroupedTrackListItem
-    data class TrackItem(val song: Track) : GroupedTrackListItem
+    data class TrackItem(val track: Track) : GroupedTrackListItem
 }
 
 data class GenreDetailUiState(
@@ -88,10 +88,10 @@ class GenreDetailViewModel @Inject constructor(
 
     private fun groupSongs(songs: List<Track>): List<GroupedTrackListItem> {
         val newGroupedList = mutableListOf<GroupedTrackListItem>()
-        songs.groupBy { it.artist }
+        songs.groupBy { it.author }
             .forEach { (artistName, artistSongs) ->
                 newGroupedList.add(GroupedTrackListItem.ArtistHeader(artistName))
-                artistSongs.groupBy { it.album }
+                artistSongs.groupBy { it.book }
                     .forEach { (albumName, albumSongs) ->
                         val bookArtUri = albumSongs.firstOrNull()?.bookArtUriString
                         newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, bookArtUri))

@@ -248,7 +248,7 @@ fun AppNavigation(
                 }
             }
             composable(
-                route = Screen.AlbumDetail.route,
+                route = Screen.BookDetail.route,
                 arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
@@ -267,7 +267,7 @@ fun AppNavigation(
                 }
             }
             composable(
-                route = Screen.ArtistDetail.route,
+                route = Screen.AuthorDetail.route,
                 arguments = listOf(navArgument("authorId") { type = NavType.StringType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
@@ -327,7 +327,7 @@ fun AppNavigation(
                 }
             }
             composable(
-                Screen.ArtistSettings.route,
+                Screen.AuthorSettings.route,
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },

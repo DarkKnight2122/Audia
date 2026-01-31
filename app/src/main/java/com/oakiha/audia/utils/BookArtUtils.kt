@@ -122,7 +122,7 @@ object BookArtUtils {
                 "albumart.jpg", "albumart.png", "albumart.jpeg",
                 "artwork.jpg", "artwork.png", "artwork.jpeg",
                 "front.jpg", "front.png", "front.jpeg",
-                ".folder.jpg", ".albumart.jpg",
+                ".folder.jpg", ".bookart.jpg",
                 "thumb.jpg", "thumbnail.jpg",
                 "scan.jpg", "scanned.jpg"
             )

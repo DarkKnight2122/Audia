@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Room entity for storing song engagement statistics.
+ * Room entity for storing track engagement statistics.
  * This replaces the JSON-based storage in DailyMixManager for better performance
  * and structured querying.
  */

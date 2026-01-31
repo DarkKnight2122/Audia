@@ -7,7 +7,7 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 /**
- * DAO for song engagement statistics.
+ * DAO for track engagement statistics.
  * Provides efficient database operations for tracking play counts and durations.
  */
 @Dao

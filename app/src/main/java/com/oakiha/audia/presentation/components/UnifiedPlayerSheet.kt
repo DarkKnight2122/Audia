@@ -285,14 +285,14 @@ fun UnifiedPlayerSheet(
         sheetAnimationMutex,
         sheetCollapsedTargetY
     ) {
-        playerViewModel.artistNavigationRequests.collectLatest { authorId ->
+        playerViewModel.authorNavigationRequests.collectLatest { authorId ->
             sheetAnimationMutex.mutate {
                 currentSheetTranslationY.snapTo(sheetCollapsedTargetY)
                 playerContentExpansionFraction.snapTo(0f)
             }
             playerViewModel.collapsePlayerSheet()
 
-            navController.navigate(Screen.ArtistDetail.createRoute(authorId)) {
+            navController.navigate(Screen.AuthorDetail.createRoute(authorId)) {
                 launchSingleTop = true
             }
         }
@@ -1366,9 +1366,9 @@ fun UnifiedPlayerSheet(
                             }
 
                                 val onDimissQueueRequest = remember { { animateQueueSheet(false) } }
-                                val onQueueSongInfoClick = remember { { song: Track -> selectedTrackForInfo = song } }
+                                val onQueueSongInfoClick = remember { { track: Track -> selectedTrackForInfo = song } }
                                 val onPlayQueueSong = remember(currentPlaybackQueue, currentQueueSourceName) {
-                                    { song: Track -> 
+                                    { track: Track -> 
                                         playerViewModel.playSongs(currentPlaybackQueue, song, currentQueueSourceName)
                                     }
                                 }
@@ -1505,7 +1505,7 @@ fun UnifiedPlayerSheet(
                                         selectedTrackForInfo = null
 
                                          if (liveSong.bookId != -1L) {
-                                            navController.navigate(Screen.AlbumDetail.createRoute(liveSong.bookId))
+                                            navController.navigate(Screen.BookDetail.createRoute(liveSong.bookId))
                                          }
                                     },
                                     onNavigateToArtist = {
@@ -1519,7 +1519,7 @@ fun UnifiedPlayerSheet(
                                         animateQueueSheet(false)
                                         selectedTrackForInfo = null
                                         if (liveSong.authorId != -1L) {
-                                            navController.navigate(Screen.ArtistDetail.createRoute(liveSong.authorId))
+                                            navController.navigate(Screen.AuthorDetail.createRoute(liveSong.authorId))
                                         }
                                     },
                                     onEditSong = { title, artist, album, genre, lyrics, trackNumber, coverArtUpdate ->
@@ -1561,7 +1561,7 @@ fun UnifiedPlayerSheet(
 
         pendingSaveQueueOverlay?.let { overlay ->
             SaveQueueAsPlaylistSheet(
-                songs = overlay.songs,
+                songs = overlay.tracks,
                 defaultName = overlay.defaultName,
                 onDismiss = { pendingSaveQueueOverlay = null },
                 onConfirm = { name, selectedIds ->
@@ -1621,7 +1621,7 @@ fun getNavigationBarHeight(): Dp {
 
 @Composable
 private fun MiniPlayerContentInternal(
-    song: Track,
+    track: Track,
     isPlaying: Boolean,
     isCastConnecting: Boolean,
     onPlayPause: () -> Unit,

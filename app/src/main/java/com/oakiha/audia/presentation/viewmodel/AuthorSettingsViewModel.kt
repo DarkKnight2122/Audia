@@ -27,8 +27,8 @@ class AuthorSettingsViewModel @Inject constructor(
     private val syncManager: SyncManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ArtistSettingsUiState())
-    val uiState: StateFlow<ArtistSettingsUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AuthorSettingsUiState())
+    val uiState: StateFlow<AuthorSettingsUiState> = _uiState.asStateFlow()
 
     val isSyncing: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
@@ -39,7 +39,7 @@ class AuthorSettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userPreferencesRepository.artistDelimitersFlow.collect { delimiters ->
+            userPreferencesRepository.authorDelimitersFlow.collect { delimiters ->
                 _uiState.update { it.copy(artistDelimiters = delimiters) }
             }
         }
@@ -51,7 +51,7 @@ class AuthorSettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            userPreferencesRepository.artistSettingsRescanRequiredFlow.collect { required ->
+            userPreferencesRepository.authorSettingsRescanRequiredFlow.collect { required ->
                 _uiState.update { it.copy(rescanRequired = required) }
             }
         }
@@ -79,7 +79,7 @@ class AuthorSettingsViewModel @Inject constructor(
         val trimmed = delimiter.trim()
         if (trimmed.isEmpty()) return false
         
-        val current = _uiState.value.artistDelimiters
+        val current = _uiState.value.authorDelimiters
         if (current.contains(trimmed)) return false
         
         viewModelScope.launch {
@@ -89,7 +89,7 @@ class AuthorSettingsViewModel @Inject constructor(
     }
 
     fun removeDelimiter(delimiter: String) {
-        val current = _uiState.value.artistDelimiters
+        val current = _uiState.value.authorDelimiters
         if (current.size <= 1) return // Keep at least one delimiter
         
         viewModelScope.launch {

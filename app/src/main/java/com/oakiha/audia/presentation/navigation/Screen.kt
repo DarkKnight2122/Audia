@@ -25,12 +25,12 @@ sealed class Screen(val route: String) {
     }
     object DJSpace : Screen("dj_space")
     // La ruta base es "album_detail". La ruta completa con el argumento se define en AppNavigation.
-    object AlbumDetail : Screen("album_detail/{bookId}") {
+    object BookDetail : Screen("album_detail/{bookId}") {
         // FunciÃ³n de ayuda para construir la ruta de navegaciÃ³n con el ID del Ã¡lbum.
         fun createRoute(bookId: Long) = "album_detail/$bookId"
     }
 
-    object ArtistDetail : Screen("artist_detail/{authorId}") {
+    object AuthorDetail : Screen("artist_detail/{authorId}") {
         fun createRoute(authorId: Long) = "artist_detail/$authorId"
     }
 
@@ -41,7 +41,7 @@ sealed class Screen(val route: String) {
 
     object About : Screen("about")
 
-    object ArtistSettings : Screen("artist_settings")
+    object AuthorSettings : Screen("artist_settings")
     object DelimiterConfig : Screen("delimiter_config")
     object Equalizer : Screen("equalizer")
 

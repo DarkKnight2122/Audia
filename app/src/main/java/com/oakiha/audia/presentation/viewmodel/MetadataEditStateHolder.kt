@@ -52,7 +52,7 @@ class MetadataEditStateHolder @Inject constructor(
     }
 
     suspend fun saveMetadata(
-        song: Track,
+        track: Track,
         newTitle: String,
         newArtist: String,
         newAlbum: String,
@@ -157,7 +157,7 @@ class MetadataEditStateHolder @Inject constructor(
         }
     }
 
-    suspend fun deleteSong(song: Track): Boolean = withContext(Dispatchers.IO) {
+    suspend fun deleteSong(track: Track): Boolean = withContext(Dispatchers.IO) {
         val fileInfo = FileDeletionUtils.getFileInfo(song.path)
         if (fileInfo.exists && fileInfo.canWrite) {
             val success = FileDeletionUtils.deleteFile(context, song.path)

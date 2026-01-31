@@ -152,7 +152,7 @@ class PlaylistViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val initialPageForLoad = if (isInitialLoad) 1 else _uiState.value.songSelectionPage
+            val initialPageForLoad = if (isInitialLoad) 1 else _uiState.value.trackSelectionPage
 
             _uiState.update {
                 it.copy(
@@ -162,7 +162,7 @@ class PlaylistViewModel @Inject constructor(
             }
 
             // Usar el songSelectionPage del estado que acabamos de actualizar para la llamada al repo
-            val pageToLoad = _uiState.value.songSelectionPage // Esta ahora es la pÃ¡gina correcta
+            val pageToLoad = _uiState.value.trackSelectionPage // Esta ahora es la pÃ¡gina correcta
 
             Log.d(
                 "PlaylistVM",
@@ -184,10 +184,10 @@ class PlaylistViewModel @Inject constructor(
                     } else {
                         // Evitar duplicados si por alguna razÃ³n se recarga la misma pÃ¡gina
                         val currentTrackIds =
-                            currentStateAfterLoad.songSelectionForPlaylist.map { it.id }.toSet()
+                            currentStateAfterLoad.trackSelectionForPlaylist.map { it.id }.toSet()
                         val uniqueNewSongs =
                             actualNewSongsList.filterNot { currentTrackIds.contains(it.id) }
-                        currentStateAfterLoad.songSelectionForPlaylist + uniqueNewSongs
+                        currentStateAfterLoad.trackSelectionForPlaylist + uniqueNewSongs
                     }
 
                     currentStateAfterLoad.copy(
@@ -196,9 +196,9 @@ class PlaylistViewModel @Inject constructor(
                         canLoadMoreSongsForSelection = actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE,
                         // Incrementar la pÃ¡gina solo si se cargaron canciones y se espera que haya mÃ¡s
                         songSelectionPage = if (actualNewSongsList.isNotEmpty() && actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE) {
-                            currentStateAfterLoad.songSelectionPage + 1
+                            currentStateAfterLoad.trackSelectionPage + 1
                         } else {
-                            currentStateAfterLoad.songSelectionPage // No incrementar si no hay mÃ¡s o si la carga fue parcial
+                            currentStateAfterLoad.trackSelectionPage // No incrementar si no hay mÃ¡s o si la carga fue parcial
                         }
                     )
                 }
@@ -705,8 +705,8 @@ class PlaylistViewModel @Inject constructor(
         val sortedSongs = when (sortOption) {
             SortOption.SongTitleAZ -> currentTracks.sortedBy { it.title.lowercase() }
             SortOption.SongTitleZA -> currentTracks.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> currentTracks.sortedBy { it.artist.lowercase() }
-            SortOption.SongAlbum -> currentTracks.sortedBy { it.album.lowercase() }
+            SortOption.SongArtist -> currentTracks.sortedBy { it.author.lowercase() }
+            SortOption.SongAlbum -> currentTracks.sortedBy { it.book.lowercase() }
             SortOption.SongDuration -> currentTracks.sortedBy { it.duration }
             SortOption.SongDateAdded -> currentTracks.sortedByDescending { it.dateAdded }
             else -> currentTracks
@@ -765,8 +765,8 @@ class PlaylistViewModel @Inject constructor(
         return when (sortOption) {
             SortOption.SongTitleAZ -> songs.sortedBy { it.title.lowercase() }
             SortOption.SongTitleZA -> songs.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> songs.sortedBy { it.artist.lowercase() }
-            SortOption.SongAlbum -> songs.sortedBy { it.album.lowercase() }
+            SortOption.SongArtist -> songs.sortedBy { it.author.lowercase() }
+            SortOption.SongAlbum -> songs.sortedBy { it.book.lowercase() }
             SortOption.SongDuration -> songs.sortedBy { it.duration }
             SortOption.SongDateAdded -> songs.sortedByDescending { it.dateAdded }
             else -> songs

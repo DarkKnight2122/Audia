@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class DeckState(
-    val song: Track? = null,
+    val track: Track? = null,
     val isPlaying: Boolean = false,
     val progress: Float = 0f,
     val volume: Float = 1f,
@@ -68,7 +68,7 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    fun loadSong(deck: Int, song: Track) {
+    fun loadSong(deck: Int, track: Track) {
         updateDeckState(deck) { it.copy(song = song) }
         val songUri = Uri.parse(song.contentUriString)
         val controller = if (deck == 1) deck1Controller else deck2Controller

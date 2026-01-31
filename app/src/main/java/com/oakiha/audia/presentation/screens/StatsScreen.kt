@@ -1041,7 +1041,7 @@ private fun CategoryMetricsSection(
 
                 CategoryDimension.Artist -> summary?.topArtists.orEmpty().map {
                     CategoryMetricEntry(
-                        label = it.artist,
+                        label = it.author,
                         durationMs = it.totalDurationMs,
                         supporting = "${it.playCount} plays â€¢ ${it.uniqueSongs} tracks"
                     )
@@ -1049,7 +1049,7 @@ private fun CategoryMetricsSection(
 
                 CategoryDimension.Album -> summary?.topAlbums.orEmpty().map {
                     CategoryMetricEntry(
-                        label = it.album,
+                        label = it.book,
                         durationMs = it.totalDurationMs,
                         supporting = "${it.playCount} plays â€¢ ${it.uniqueSongs} tracks"
                     )
@@ -1058,8 +1058,8 @@ private fun CategoryMetricsSection(
                 CategoryDimension.Song -> summary?.topSongs.orEmpty().map {
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
-                        if (it.artist.isNotBlank()) {
-                            add(it.artist)
+                        if (it.author.isNotBlank()) {
+                            add(it.author)
                         }
                     }
                     CategoryMetricEntry(
@@ -1386,10 +1386,10 @@ private fun TopArtistsCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                ArtistAvatar(name = artistSummary.artist)
+                                ArtistAvatar(name = artistSummary.author)
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${index + 1}. ${artistSummary.artist}",
+                                        text = "${index + 1}. ${artistSummary.author}",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
@@ -1485,7 +1485,7 @@ private fun TopAlbumsCard(
                             ) {
                                 SmartImage(
                                     model = albumSummary.bookArtUri,
-                                    contentDescription = albumSummary.album,
+                                    contentDescription = albumSummary.book,
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(16.dp)),
@@ -1493,7 +1493,7 @@ private fun TopAlbumsCard(
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${index + 1}. ${albumSummary.album}",
+                                        text = "${index + 1}. ${albumSummary.book}",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
@@ -1541,7 +1541,7 @@ private fun SongStatsCard(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val songs = summary?.songs.orEmpty()
+            val songs = summary?.tracks.orEmpty()
             var showAll by rememberSaveable(songs) { mutableStateOf(songs.size <= 8) }
             val displayedSongs = remember(songs, showAll) {
                 if (showAll || songs.size <= 8) songs else songs.take(8)
@@ -1602,7 +1602,7 @@ private fun SongStatsCard(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = songSummary.artist,
+                                        text = songSummary.author,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,

@@ -468,7 +468,7 @@ fun RefreshLibraryItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                             text =
-                                    "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} songs",
+                                    "Scanned ${syncProgress.currentCount} of ${syncProgress.totalCount} tracks",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

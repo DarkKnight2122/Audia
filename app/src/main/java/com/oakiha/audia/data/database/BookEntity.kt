@@ -29,7 +29,7 @@ fun BookEntity.toAlbum(): Book {
     return Book(
         id = this.id,
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
+        artist = this.authorName.normalizeMetadataTextOrEmpty(),
         bookArtUriString = this.bookArtUriString, // El modelo Album usa bookArtUrl
         trackCount = this.trackCount,
         year = this.year
@@ -44,7 +44,7 @@ fun Album.toEntity(authorIdForAlbum: Long): BookEntity { // Necesitamos pasar el
     return BookEntity(
         id = this.id,
         title = this.title,
-        artistName = this.artist,
+        artistName = this.author,
         authorId = authorIdForAlbum, // Asignar el ID del artista
         bookArtUriString = this.bookArtUriString,
         trackCount = this.trackCount,

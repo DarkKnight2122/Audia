@@ -165,19 +165,19 @@ interface AudiobookRepository {
     fun getGenres(): Flow<List<com.oakiha.audia.data.model.Genre>>
 
     suspend fun getLyrics(
-        song: Track,
+        track: Track,
         sourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
         forceRefresh: Boolean = false
     ): Lyrics?
 
-    suspend fun getLyricsFromRemote(song: Track): Result<Pair<Lyrics, String>>
+    suspend fun getLyricsFromRemote(track: Track): Result<Pair<Lyrics, String>>
 
     /**
      * Search for lyrics remotely, less specific than `getLyricsFromRemote` but more lenient
      * @param song The song to search lyrics for
      * @return The search query and the results
      */
-    suspend fun searchRemoteLyrics(song: Track): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemoteLyrics(track: Track): Result<Pair<String, List<LyricsSearchResult>>>
 
     /**
      * Search for lyrics remotely using query provided, and not use song metadata

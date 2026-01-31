@@ -370,7 +370,7 @@ constructor(
                 preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] ?: false
             }
 
-    suspend fun clearArtistSettingsRescanRequired() {
+    suspend fun clearAuthorSettingsRescanRequired() {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] = false
         }
@@ -636,7 +636,7 @@ constructor(
             )
         }
 
-    val favoriteSongIdsFlow: Flow<Set<String>> =
+    val favoriteTrackIdsFlow: Flow<Set<String>> =
             dataStore.data // Nuevo flujo para favoritos
                     .map { preferences ->
                 preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()

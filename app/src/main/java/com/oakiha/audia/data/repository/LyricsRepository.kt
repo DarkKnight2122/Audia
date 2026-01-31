@@ -14,7 +14,7 @@ interface LyricsRepository {
      * @return Lyrics object or null if not found
      */
     suspend fun getLyrics(
-        song: Track,
+        track: Track,
         sourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
         forceRefresh: Boolean = false
     ): Lyrics?
@@ -22,12 +22,12 @@ interface LyricsRepository {
     /**
      * Fetch lyrics from remote API and save to database.
      */
-    suspend fun fetchFromRemote(song: Track): Result<Pair<Lyrics, String>>
+    suspend fun fetchFromRemote(track: Track): Result<Pair<Lyrics, String>>
     
     /**
      * Search for lyrics on remote API and return multiple results.
      */
-    suspend fun searchRemote(song: Track): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemote(track: Track): Result<Pair<String, List<LyricsSearchResult>>>
   
     /**
      * Search for lyrics on remote API using query title and artist, and return multiple results.

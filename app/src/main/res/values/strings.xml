@@ -6,11 +6,11 @@
     <string name="dismiss">Dismiss</string>
     <string name="lyrics">Lyrics</string>
     <string name="close_lyrics_sheet">Close Lyrics Sheet</string>
-    <string name="loading_lyrics">Loading lyricsÃ¢â‚¬Â¦</string>
+    <string name="loading_lyrics">Loading lyrics...</string>
     <string name="cant_find_lyrics">Couldn\'t find lyrics for this track.</string>
     <string name="lyrics_provided_by">Lyrics provided by</string>
     <string name="lrclib_uri">https://lrclib.net/</string>
-    <string name="glance_widget_description">Control your music from the home screen.</string>
+    <string name="glance_widget_description">Control your audiobook from the home screen.</string>
     <string name="all_files_access_title">Permiso Especial Requerido</string>
     <string name="all_files_access_description">Para poder editar los metadatos de tus canciones (archivos .mp3), Audia necesita un permiso especial de acceso a todos los archivos. Esto nos permitirÃƒÂ¡ modificar las etiquetas de tus pistas directamente. Por favor, concede este permiso en la Next pantalla para habilitar la ediciÃƒÂ³n de metadatos.</string>
     <string name="grant_permission_button">Conceder Permiso</string>
@@ -26,7 +26,7 @@
     <string name="found_n_matches_format">Found %d match(es)</string>
     <string name="searched_for_x_format">Searched for "%s"</string>
     <string name="search">Search</string>
-    <string name="searching_lyrics">Searching for lyricsÃ¢â‚¬Â¦</string>
+    <string name="searching_lyrics">Searching for lyrics...</string>
     <string name="fetch_lyrics_show_options_title">Show lyric options</string>
     <string name="fetch_lyrics_show_options_subtitle">Always open the picker instead of auto-applying the first match</string>
     <string name="error">Error</string>
@@ -35,13 +35,13 @@
     <string name="import_file">Import</string>
 
     <!-- Sync/Progress strings -->
-    <string name="sync_scanning">Scanning music filesÃ¢â‚¬Â¦</string>
-    <string name="sync_processing">Processing filesÃ¢â‚¬Â¦</string>
+    <string name="sync_scanning">Scanning audiobook files...</string>
+    <string name="sync_processing">Processing files...</string>
     <string name="sync_files_progress">%1$d of %2$d files</string>
-    <string name="sync_in_progress">Syncing libraryÃ¢â‚¬Â¦</string>
+    <string name="sync_in_progress">Syncing library...</string>
     <string name="sync_complete">Sync complete</string>
-    <string name="sync_pending">WaitingÃ¢â‚¬Â¦</string>
-    <string name="syncing_library">Syncing libraryÃ¢â‚¬Â¦</string>
+    <string name="sync_pending">Waiting...</string>
+    <string name="syncing_library">Syncing library...</string>
     <string name="unknown_track_title">Unknown track</string>
     <string name="unknown_author">Unknown author</string>
     <string name="unknown_book">Unknown book</string>
@@ -95,4 +95,4 @@
     <string name="error_loading_author">Error loading author data: %s</string>
     <string name="could_not_find_author">Could not find the author</string>
     <string name="no_valid_tracks">No valid tracks found to play</string>
-    <string name="invalid_artist_id">@string/invalid_author_id</string>     <string name="unknown_song_title">@string/unknown_track_title</string>     <string name="could_not_find_artist">@string/could_not_find_author</string>     <string name="error_loading_album">@string/error_loading_book</string>     <string name="album_not_found">@string/book_not_found</string>     <string name="artist_picker_title">@string/author_picker_title</string>     <string name="ai_no_songs_found">@string/ai_no_tracks_found</string>     <string name="unknown_artist">@string/unknown_author</string>     <string name="artist_id_not_found">@string/author_id_not_found</string>     <string name="album_id_not_found">@string/book_id_not_found</string>     <string name="no_valid_songs">@string/no_valid_tracks</string>     <string name="unknown_album">@string/unknown_book</string>     <string name="ai_no_songs_for_mix">@string/ai_no_tracks_for_mix</string>     <string name="error_loading_artist">@string/error_loading_author</string>     <string name="invalid_album_id">@string/invalid_book_id</string>     <string name="genre_default">Genre</string> </resources>
+    <string name="invalid_artist_id">Invalid author ID</string>     <string name="unknown_song_title">Unknown track title</string>     <string name="could_not_find_artist">Could not find author</string>     <string name="error_loading_album">Error loading book</string>     <string name="album_not_found">Book not found</string>     <string name="artist_picker_title">Select author</string>     <string name="ai_no_songs_found">No tracks found for this AI request</string>     <string name="unknown_artist">Unknown author</string>     <string name="artist_id_not_found">Author ID not found</string>     <string name="album_id_not_found">Book ID not found</string>     <string name="no_valid_songs">No valid tracks found</string>     <string name="unknown_album">Unknown book</string>     <string name="ai_no_songs_for_mix">No tracks available for this mix</string>     <string name="error_loading_artist">Error loading author</string>     <string name="invalid_album_id">Invalid book ID</string>     <string name="category_default">Category</string> </resources>

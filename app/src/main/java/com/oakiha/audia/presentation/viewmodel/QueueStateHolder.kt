@@ -78,7 +78,7 @@ class QueueStateHolder @Inject constructor() {
      * 2. Picks a random start song.
      * 3. Creates a shuffled list starting with that song.
      */
-    fun prepareShuffledQueue(songs: List<Track>, queueName: String): Pair<List<Track>, Song>? {
+    fun prepareShuffledQueue(songs: List<Track>, queueName: String): Pair<List<Track>, Track>? {
         if (songs.isEmpty()) return null
         
         val startSong = songs.random()

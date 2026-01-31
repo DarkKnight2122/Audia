@@ -82,7 +82,7 @@ class SleepTimerStateHolder @Inject constructor(
         this.toastEmitter = { msg -> scope.launch { toastEmitter(msg) } }
         this.mediaControllerProvider = mediaControllerProvider
         this.currentTrackIdProvider = currentTrackIdProvider
-        this.songTitleResolver = songTitleResolver
+        this.trackTitleResolver = songTitleResolver
     }
 
     /**

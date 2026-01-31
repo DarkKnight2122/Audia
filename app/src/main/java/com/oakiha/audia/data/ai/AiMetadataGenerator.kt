@@ -29,7 +29,7 @@ class AiMetadataGenerator @Inject constructor(
     }
 
     suspend fun generate(
-        song: Track,
+        track: Track,
         fieldsToComplete: List<String>
     ): Result<SongMetadata> {
         return try {
@@ -63,7 +63,7 @@ class AiMetadataGenerator @Inject constructor(
             }
             """.trimIndent()
 
-            val albumInfo = if (song.album.isNotBlank()) "Album: \"${song.album}\"" else ""
+            val albumInfo = if (song.book.isNotBlank()) "Album: \"${song.book}\"" else ""
 
             val fullPrompt = """
             $systemPrompt

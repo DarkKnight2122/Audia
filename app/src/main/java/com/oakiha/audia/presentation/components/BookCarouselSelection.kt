@@ -37,7 +37,7 @@ fun AlbumCarouselSection(
     currentTrack: Track?,
     queue: ImmutableList<Track>,
     expansionFraction: Float,
-    onSongSelected: (Song) -> Unit,
+    onSongSelected: (Track) -> Unit,
     modifier: Modifier = Modifier,
     carouselStyle: String = CarouselStyle.NO_PEEK,
     itemSpacing: Dp = 8.dp,
@@ -120,7 +120,7 @@ fun AlbumCarouselSection(
             carouselStyle = if (carouselState.pagerState.pageCount == 1) CarouselStyle.NO_PEEK else carouselStyle, // Handle single-item case
             carouselWidth = availableWidth // Pass the full width for layout calculations
         ) { index ->
-            val song = queue[index]
+            val track = queue[index]
             key(song.id) {
                 Box(
                     Modifier

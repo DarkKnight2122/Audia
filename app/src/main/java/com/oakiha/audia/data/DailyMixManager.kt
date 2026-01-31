@@ -25,7 +25,7 @@ class DailyMixManager @Inject constructor(
 ) {
 
     private val gson = Gson()
-    private val legacyScoresFile = File(context.filesDir, "song_scores.json")
+    private val legacyScoresFile = File(context.filesDir, "track_scores.json")
     private val fileLock = Any()
     private val statsType = object : TypeToken<MutableMap<String, TrackEngagementStats>>() {}.type
 
@@ -74,7 +74,7 @@ class DailyMixManager @Inject constructor(
                     Log.i(TAG, "Migrated ${entities.size} engagement records from JSON to Room")
                     
                     // Rename legacy file as backup instead of deleting
-                    val backupFile = File(context.filesDir, "song_scores.json.bak")
+                    val backupFile = File(context.filesDir, "track_scores.json.bak")
                     legacyScoresFile.renameTo(backupFile)
                 }
             } catch (e: Exception) {
@@ -136,7 +136,7 @@ class DailyMixManager @Inject constructor(
             val parsed: MutableMap<String, TrackEngagementStats> = gson.fromJson(element, statsType)
             parsed.mapValuesTo(mutableMapOf()) { (_, stats) -> sanitizeStats(stats) }
         }.getOrElse {
-            Log.w(TAG, "Unsupported song engagement format, ignoring it")
+            Log.w(TAG, "Unsupported track engagement format, ignoring it")
             mutableMapOf()
         }
     }
@@ -148,7 +148,7 @@ class DailyMixManager @Inject constructor(
             if (stats != null) {
                 result[key] = stats
             } else {
-                Log.w(TAG, "Skipping song engagement entry for \"$key\" because it could not be parsed: $value")
+                Log.w(TAG, "Skipping track engagement entry for \"$key\" because it could not be parsed: $value")
             }
         }
         return result
@@ -224,13 +224,13 @@ class DailyMixManager @Inject constructor(
      */
     fun recordPlay(
         trackId: String,
-        songDurationMs: Long = 0L,
+        trackDurationMs: Long = 0L,
         timestamp: Long = System.currentTimeMillis()
     ) {
         runBlocking {
             engagementDao.recordPlay(
                 trackId = trackId,
-                durationMs = songDurationMs.coerceAtLeast(0L),
+                durationMs = trackDurationMs.coerceAtLeast(0L),
                 timestamp = timestamp.coerceAtLeast(0L)
             )
         }
@@ -262,22 +262,22 @@ class DailyMixManager @Inject constructor(
         return readEngagements()
     }
 
-    private fun computeRankedSongs(
+    private fun computeRankedTracks(
         allTracks: List<Track>,
-        favoriteSongIds: Set<String>,
+        favoriteTrackIds: Set<String>,
         random: java.util.Random
-    ): List<RankedSong> {
+    ): List<RankedTrack> {
         if (allTracks.isEmpty()) return emptyList()
 
         val engagements = readEngagements()
-        val songById = allTracks.associateBy { it.id }
+        val trackById = allTracks.associateBy { it.id }
         val now = System.currentTimeMillis()
 
         val artistAffinity = mutableMapOf<Long, Double>()
         val genreAffinity = mutableMapOf<String, Double>()
 
         engagements.forEach { (trackId, stats) ->
-            val song = songById[trackId] ?: return@forEach
+            val track = trackById[trackId] ?: return@forEach
             val weight = stats.playCount.toDouble() + (stats.totalPlayDurationMs / 60000.0)
             if (weight <= 0) return@forEach
             artistAffinity.merge(song.authorId, weight, Double::plus)
@@ -285,8 +285,8 @@ class DailyMixManager @Inject constructor(
         }
 
         val favoriteArtistWeights = mutableMapOf<Long, Int>()
-        favoriteSongIds.forEach { id ->
-            val song = songById[id] ?: return@forEach
+        favoriteTrackIds.forEach { id ->
+            val track = trackById[id] ?: return@forEach
             favoriteArtistWeights.merge(song.authorId, 1, Int::plus)
         }
 
@@ -310,7 +310,7 @@ class DailyMixManager @Inject constructor(
 
             val recencyScore = computeRecencyScore(stats?.lastPlayedTimestamp, now)
             val noveltyScore = computeNoveltyScore(song.dateAdded, now)
-            val favoriteScore = if (favoriteSongIds.contains(song.id)) 1.0 else 0.0
+            val favoriteScore = if (favoriteTrackIds.contains(song.id)) 1.0 else 0.0
             val baselineScore = if (stats == null) 0.1 else 0.0
             val noise = random.nextDouble() * 0.03
 
@@ -336,12 +336,12 @@ class DailyMixManager @Inject constructor(
                 favoriteScore = favoriteScore
             )
         }
-            .sortedWith(compareByDescending<RankedSong> { it.finalScore }.thenBy { it.song.id })
+            .sortedWith(compareByDescending<RankedTrack> { it.finalScore }.thenBy { it.track.id })
     }
 
     fun generateDailyMix(
         allTracks: List<Track>,
-        favoriteSongIds: Set<String> = emptySet(),
+        favoriteTrackIds: Set<String> = emptySet(),
         limit: Int = 30
     ): List<Track> {
         if (allTracks.isEmpty()) {
@@ -352,12 +352,12 @@ class DailyMixManager @Inject constructor(
         val seed = calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR)
         val random = java.util.Random(seed.toLong())
 
-        val rankedSongs = computeRankedSongs(allTracks, favoriteSongIds, random)
+        val rankedSongs = computeRankedTracks(allTracks, favoriteTrackIds, random)
         if (rankedSongs.isEmpty()) {
             return allTracks.shuffled(random).take(limit.coerceAtMost(allTracks.size))
         }
 
-        val selected = pickWithDiversity(rankedSongs, favoriteSongIds, limit)
+        val selected = pickWithDiversity(rankedSongs, favoriteTrackIds, limit)
         if (selected.size >= limit || selected.size == rankedSongs.size) {
             return selected
         }
@@ -372,7 +372,7 @@ class DailyMixManager @Inject constructor(
 
     fun generateYourMix(
         allTracks: List<Track>,
-        favoriteSongIds: Set<String> = emptySet(),
+        favoriteTrackIds: Set<String> = emptySet(),
         limit: Int = 60
     ): List<Track> {
         if (allTracks.isEmpty()) {
@@ -382,7 +382,7 @@ class DailyMixManager @Inject constructor(
         val calendar = Calendar.getInstance()
         val seed = calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR) + 17
         val random = java.util.Random(seed.toLong())
-        val rankedSongs = computeRankedSongs(allTracks, favoriteSongIds, random)
+        val rankedSongs = computeRankedTracks(allTracks, favoriteTrackIds, random)
 
         if (rankedSongs.isEmpty()) {
             return allTracks.shuffled(random).take(limit.coerceAtMost(allTracks.size))
@@ -393,26 +393,26 @@ class DailyMixManager @Inject constructor(
         val discoverySectionSize = (limit - favoriteSectionSize - coreSectionSize).coerceAtLeast(0)
 
         val favoriteSection = pickWithDiversity(
-            rankedSongs.filter { favoriteSongIds.contains(it.song.id) },
-            favoriteSongIds,
+            rankedSongs.filter { favoriteTrackIds.contains(it.track.id) },
+            favoriteTrackIds,
             favoriteSectionSize
         )
 
         val alreadySelectedIds = favoriteSection.map { it.id }.toMutableSet()
 
         val coreSection = pickWithDiversity(
-            rankedSongs.filterNot { alreadySelectedIds.contains(it.song.id) },
-            favoriteSongIds,
+            rankedSongs.filterNot { alreadySelectedIds.contains(it.track.id) },
+            favoriteTrackIds,
             coreSectionSize
         )
 
         alreadySelectedIds.addAll(coreSection.map { it.id })
 
         val discoveryCandidates = rankedSongs
-            .filterNot { alreadySelectedIds.contains(it.song.id) }
-            .sortedWith(compareByDescending<RankedSong> { it.discoveryScore }.thenBy { it.song.id })
+            .filterNot { alreadySelectedIds.contains(it.track.id) }
+            .sortedWith(compareByDescending<RankedTrack> { it.discoveryScore }.thenBy { it.track.id })
 
-        val discoverySection = pickWithDiversity(discoveryCandidates, favoriteSongIds, discoverySectionSize)
+        val discoverySection = pickWithDiversity(discoveryCandidates, favoriteTrackIds, discoverySectionSize)
 
         val orderedResult = LinkedHashSet<Track>()
         orderedResult.addAll(favoriteSection)
@@ -433,8 +433,8 @@ class DailyMixManager @Inject constructor(
     }
 
     private fun pickWithDiversity(
-        rankedSongs: List<RankedSong>,
-        favoriteSongIds: Set<String>,
+        rankedSongs: List<RankedTrack>,
+        favoriteTrackIds: Set<String>,
         limit: Int
     ): List<Track> {
         if (limit <= 0 || rankedSongs.isEmpty()) return emptyList()
@@ -444,20 +444,20 @@ class DailyMixManager @Inject constructor(
 
         for (candidate in rankedSongs) {
             if (selected.size >= limit) break
-            val authorId = candidate.song.authorId
-            val maxPerArtist = if (favoriteSongIds.contains(candidate.song.id)) 2 else 1
+            val authorId = candidate.track.authorId
+            val maxPerArtist = if (favoriteTrackIds.contains(candidate.track.id)) 2 else 1
             val currentCount = artistCounts.getOrDefault(authorId, 0)
             if (currentCount >= maxPerArtist) continue
 
-            selected += candidate.song
+            selected += candidate.track
             artistCounts[authorId] = currentCount + 1
         }
 
         if (selected.size < limit) {
             for (candidate in rankedSongs) {
                 if (selected.size >= limit) break
-                if (selected.any { it.id == candidate.song.id }) continue
-                selected += candidate.song
+                if (selected.any { it.id == candidate.track.id }) continue
+                selected += candidate.track
             }
         }
 
@@ -488,7 +488,7 @@ class DailyMixManager @Inject constructor(
     }
 
     private data class RankedSong(
-        val song: Track,
+        val track: Track,
         val finalScore: Double,
         val discoveryScore: Double,
         val affinityScore: Double,

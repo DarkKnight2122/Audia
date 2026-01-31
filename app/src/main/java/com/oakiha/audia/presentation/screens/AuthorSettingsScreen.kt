@@ -200,7 +200,7 @@ fun AuthorSettingsScreen(
                         // Configure Delimiters
                         SettingsItem(
                             title = "Configure Delimiters",
-                            subtitle = "Current: ${uiState.artistDelimiters.joinToString(", ")}",
+                            subtitle = "Current: ${uiState.authorDelimiters.joinToString(", ")}",
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
@@ -282,7 +282,7 @@ fun AuthorSettingsScreen(
 }
 
 @Composable
-private fun ArtistSettingsTopBar(
+private fun AuthorSettingsTopBar(
     collapseFraction: Float,
     headerHeight: Dp,
     onBackPressed: () -> Unit,

@@ -75,7 +75,7 @@ class M3uManager @Inject constructor(
         val sb = StringBuilder()
         sb.append("#EXTM3U\n")
         for (song in songs) {
-            sb.append("#EXTINF:${song.duration / 1000},${song.artist} - ${song.title}\n")
+            sb.append("#EXTINF:${song.duration / 1000},${song.author} - ${song.title}\n")
             sb.append("${song.path}\n")
         }
         return sb.toString()

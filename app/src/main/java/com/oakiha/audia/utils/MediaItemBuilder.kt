@@ -22,7 +22,7 @@ object MediaItemBuilder {
     const val EXTERNAL_EXTRA_BITRATE = EXTERNAL_EXTRA_PREFIX + "BITRATE"
     const val EXTERNAL_EXTRA_SAMPLE_RATE = EXTERNAL_EXTRA_PREFIX + "SAMPLE_RATE"
 
-    fun build(song: Track): MediaItem {
+    fun build(track: Track): MediaItem {
         return MediaItem.Builder()
             .setMediaId(song.id)
             .setUri(song.contentUriString.toUri())
@@ -30,11 +30,11 @@ object MediaItemBuilder {
             .build()
     }
 
-    private fun buildMediaMetadataForSong(song: Track): MediaMetadata {
+    private fun buildMediaMetadataForSong(track: Track): MediaMetadata {
         val metadataBuilder = MediaMetadata.Builder()
             .setTitle(song.title)
             .setArtist(song.displayAuthor)
-            .setAlbumTitle(song.album)
+            .setAlbumTitle(song.book)
 
         song.bookArtUriString?.toUri()?.let { artworkUri ->
             metadataBuilder.setArtworkUri(artworkUri)
@@ -42,7 +42,7 @@ object MediaItemBuilder {
 
         val extras = Bundle().apply {
             putBoolean(EXTERNAL_EXTRA_FLAG, song.id.startsWith(EXTERNAL_MEDIA_ID_PREFIX))
-            putString(EXTERNAL_EXTRA_ALBUM, song.album)
+            putString(EXTERNAL_EXTRA_ALBUM, song.book)
             putLong(EXTERNAL_EXTRA_DURATION, song.duration)
             putString(EXTERNAL_EXTRA_CONTENT_URI, song.contentUriString)
             song.bookArtUriString?.let { putString(EXTERNAL_EXTRA_ALBUM_ART, it) }

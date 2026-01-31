@@ -54,7 +54,7 @@ class AiPlaylistGenerator @Inject constructor(
                     // Prefer a cost-aware ranked list before falling back to the whole library
                     val rankedForPrompt = dailyMixManager.generateDailyMix(
                         allTracks = allTracks,
-                        favoriteSongIds = emptySet(),
+                        favoriteTrackIds = emptySet(),
                         limit = 200
                     )
                     if (rankedForPrompt.isNotEmpty()) rankedForPrompt else allTracks

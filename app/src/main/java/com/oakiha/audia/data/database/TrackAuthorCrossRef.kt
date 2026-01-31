@@ -47,7 +47,7 @@ data class TrackAuthorCrossRef(
  * Used for queries that need to retrieve a song along with its artists.
  */
 data class TrackWithArtists(
-    @Embedded val song: TrackEntity,
+    @Embedded val track: TrackEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",

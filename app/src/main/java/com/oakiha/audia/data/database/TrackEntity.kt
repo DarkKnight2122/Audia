@@ -65,10 +65,10 @@ fun TrackEntity.toTrack(): Track {
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
+        artist = this.authorName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         artists = emptyList(), // Will be populated from junction table when needed
-        album = this.albumName.normalizeMetadataTextOrEmpty(),
+        album = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
         bookArtist = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
@@ -104,10 +104,10 @@ fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: Li
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.artistName.normalizeMetadataTextOrEmpty(),
+        artist = this.authorName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         artists = artistRefs,
-        album = this.albumName.normalizeMetadataTextOrEmpty(),
+        album = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
         bookArtist = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath,
@@ -137,10 +137,10 @@ fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Strin
     return TrackEntity(
         id = this.id.toLong(), // Asumiendo que el ID del modelo Song puede convertirse a Long
         title = this.title,
-        artistName = this.artist,
+        artistName = this.author,
         authorId = this.authorId,
         bookArtist = this.bookArtist,
-        albumName = this.album,
+        albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -163,10 +163,10 @@ fun Song.toEntityWithoutPaths(): TrackEntity {
     return TrackEntity(
         id = this.id.toLong(),
         title = this.title,
-        artistName = this.artist,
+        artistName = this.author,
         authorId = this.authorId,
         bookArtist = this.bookArtist,
-        albumName = this.album,
+        albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,

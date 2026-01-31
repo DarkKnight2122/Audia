@@ -18,7 +18,7 @@ import java.io.File
 import javax.inject.Inject
 
 data class ExternalSongLoadResult(
-    val song: Track,
+    val track: Track,
     val relativePath: String?,
     val bucketId: Long?,
     val displayName: String?
@@ -34,10 +34,10 @@ class ExternalMediaStateHolder @Inject constructor(
     ): List<Track> {
         val continuation = loadAdditionalSongsFromFolder(result, originalUri)
         if (continuation.isEmpty()) {
-            return listOf(result.song)
+            return listOf(result.track)
         }
 
-        val queue = mutableListOf(result.song)
+        val queue = mutableListOf(result.track)
         continuation.forEach { song ->
             if (queue.none { it.id == song.id }) {
                 queue.add(song)
@@ -129,8 +129,8 @@ class ExternalMediaStateHolder @Inject constructor(
         val resolved = mutableListOf<Track>()
         for ((candidateUri, _) in candidates) {
             val additional = buildExternalSongFromUri(candidateUri, captureFolderInfo = false)
-            val song = additional?.song ?: continue
-            if (song.id != reference.song.id) {
+            val track = additional?.track ?: continue
+            if (song.id != reference.track.id) {
                 resolved.add(song)
             }
         }
@@ -217,8 +217,8 @@ class ExternalMediaStateHolder @Inject constructor(
         }
 
         val finalTitle = storeTitle ?: metadata.title ?: displayName ?: "Unknown Title"
-        val finalArtist = storeArtist ?: metadata.artist ?: "Unknown Artist"
-        val finalAlbum = storeAlbum ?: metadata.album ?: "Unknown Album"
+        val finalArtist = storeArtist ?: metadata.author ?: "Unknown Artist"
+        val finalAlbum = storeAlbum ?: metadata.book ?: "Unknown Album"
         // Use metadata duration if store duration is missing or 0
         val finalDuration = storeDuration?.takeIf { it > 0 } ?: metadata.durationMs ?: 0L
 
@@ -226,7 +226,7 @@ class ExternalMediaStateHolder @Inject constructor(
         
         val trackId = "external:${uri}" 
         
-        val song = Track(
+        val track = Track(
             id = trackId, 
             title = finalTitle,
             artist = finalArtist,

@@ -48,7 +48,7 @@ import com.oakiha.audia.ui.theme.GoogleSansRounded
 @Composable
 fun PlaylistBottomSheet(
     playlistUiState: PlaylistUiState,
-    song: Track,
+    track: Track,
     onDismiss: () -> Unit,
     bottomBarHeight: Dp,
     playerViewModel: PlayerViewModel,

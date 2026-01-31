@@ -320,7 +320,7 @@ fun SettingsCategoryScreen(
                                 subtitle = "Multi-artist parsing and organization options.",
                                 leadingIcon = { Icon(Icons.Outlined.Person, null, tint = MaterialTheme.colorScheme.secondary) },
                                 trailingIcon = { Icon(Icons.Rounded.ChevronRight, "Open", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                                onClick = { navController.navigate(Screen.ArtistSettings.route) }
+                                onClick = { navController.navigate(Screen.AuthorSettings.route) }
                             )
                         }
                         SettingsCategory.APPEARANCE -> {

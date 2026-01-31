@@ -461,7 +461,7 @@ private fun CreatePlaylistContent(
                       if (searchQuery.isBlank()) allTracks 
                       else allTracks.filter { 
                           it.title.contains(searchQuery, ignoreCase = true) || 
-                          it.artist.contains(searchQuery, ignoreCase = true) 
+                          it.author.contains(searchQuery, ignoreCase = true) 
                       }
                  }
 

@@ -195,12 +195,12 @@ fun DelimiterConfigScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
-                            uiState.artistDelimiters.forEach { delimiter ->
+                            uiState.authorDelimiters.forEach { delimiter ->
                                 DelimiterChip(
                                     delimiter = delimiter,
-                                    canRemove = uiState.artistDelimiters.size > 1,
+                                    canRemove = uiState.authorDelimiters.size > 1,
                                     onRemove = {
-                                        if (uiState.artistDelimiters.size > 1) {
+                                        if (uiState.authorDelimiters.size > 1) {
                                             viewModel.removeDelimiter(delimiter)
                                         } else {
                                             Toast.makeText(

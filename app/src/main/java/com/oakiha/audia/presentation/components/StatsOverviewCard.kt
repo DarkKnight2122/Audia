@@ -185,7 +185,7 @@ private fun OverviewContent(summary: PlaybackStatsRepository.PlaybackStatsSummar
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${topTrack.artist} â€¢ ${topTrack.playCount} plays",
+                    text = "${topTrack.author} â€¢ ${topTrack.playCount} plays",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

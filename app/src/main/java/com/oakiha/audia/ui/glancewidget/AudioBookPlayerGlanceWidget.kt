@@ -103,7 +103,7 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
             val currentSize = LocalSize.current
 
             Timber.tag("AudioBookPlayerGlanceWidget")
-                .d("Providing Glance. PlayerInfo: title='${playerInfo.songTitle}', artist='${playerInfo.artistName}', isPlaying=${playerInfo.isPlaying}, hasBitmap=${playerInfo.bookArtBitmapData != null}, progress=${playerInfo.currentPositionMs}/${playerInfo.totalDurationMs}")
+                .d("Providing Glance. PlayerInfo: title='${playerInfo.trackTitle}', artist='${playerInfo.authorName}', isPlaying=${playerInfo.isPlaying}, hasBitmap=${playerInfo.bookArtBitmapData != null}, progress=${playerInfo.currentPositionMs}/${playerInfo.totalDurationMs}")
 
             GlanceTheme {
                 WidgetUi(playerInfo = playerInfo, size = currentSize, context = context)
@@ -117,8 +117,8 @@ class AudioBookPlayerGlanceWidget : GlanceAppWidget() {
         size: DpSize,
         context: Context
     ) {
-        val title = playerInfo.songTitle.ifEmpty { "AudioBookPlayer" }
-        val artist = playerInfo.artistName.ifEmpty { "Toca para abrir" }
+        val title = playerInfo.trackTitle.ifEmpty { "AudioBookPlayer" }
+        val author = playerInfo.authorName.ifEmpty { "Toca para abrir" }
         val isPlaying = playerInfo.isPlaying
         val isFavorite = playerInfo.isFavorite
         val bookArtBitmapData = playerInfo.bookArtBitmapData

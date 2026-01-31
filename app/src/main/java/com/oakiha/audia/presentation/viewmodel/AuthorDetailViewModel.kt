@@ -47,8 +47,8 @@ class AuthorDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ArtistDetailUiState())
-    val uiState: StateFlow<ArtistDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AuthorDetailUiState())
+    val uiState: StateFlow<AuthorDetailUiState> = _uiState.asStateFlow()
 
     init {
         val authorIdString: String? = savedStateHandle.get("authorId")
@@ -60,7 +60,7 @@ class AuthorDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(error = context.getString(R.string.invalid_artist_id), isLoading = false) }
             }
         } else {
-            _uiState.update { it.copy(error = context.getString(R.string.artist_id_not_found), isLoading = false) }
+            _uiState.update { it.copy(error = context.getString(R.string.author_id_not_found), isLoading = false) }
         }
     }
 
@@ -76,15 +76,15 @@ class AuthorDetailViewModel @Inject constructor(
                     Log.d("ArtistDebug", "loadArtistData: id=$id found=${artist != null} songs=${songs.size}")
                     if (artist != null) {
                         val albumSections = buildAlbumSections(songs)
-                        val orderedSongs = albumSections.flatMap { it.songs }
-                        ArtistDetailUiState(
+                        val orderedSongs = albumSections.flatMap { it.tracks }
+                        AuthorDetailUiState(
                             artist = artist,
                             songs = orderedSongs,
                             albumSections = albumSections,
                             isLoading = false
                         )
                     } else {
-                        ArtistDetailUiState(
+                        AuthorDetailUiState(
                             error = context.getString(R.string.could_not_find_artist),
                             isLoading = false
                         )
@@ -92,7 +92,7 @@ class AuthorDetailViewModel @Inject constructor(
                 }
                     .catch { e ->
                         emit(
-                            ArtistDetailUiState(
+                            AuthorDetailUiState(
                                 error = context.getString(
                                     R.string.error_loading_artist,
                                     e.localizedMessage ?: ""
@@ -104,14 +104,14 @@ class AuthorDetailViewModel @Inject constructor(
                         _uiState.value = newState
                         
                         // Fetch artist image from Deezer if not already cached
-                        newState.artist?.let { artist ->
+                        newState.author?.let { artist ->
                             if (artist.imageUrl.isNullOrEmpty()) {
                                 launch {
                                     try {
                                         val imageUrl = artistImageRepository.getArtistImageUrl(artist.name, artist.id)
                                         if (!imageUrl.isNullOrEmpty()) {
                                             _uiState.update { state ->
-                                                state.copy(artist = state.artist?.copy(imageUrl = imageUrl))
+                                                state.copy(artist = state.author?.copy(imageUrl = imageUrl))
                                             }
                                         }
                                     } catch (e: Exception) {
@@ -134,16 +134,16 @@ class AuthorDetailViewModel @Inject constructor(
     }
     fun removeSongFromAlbumSection(trackId: String) {
         _uiState.update { currentState ->
-            val updatedAlbumSections = currentState.albumSections.map { section ->
+            val updatedAlbumSections = currentState.bookSections.map { section ->
                 // Remove the song from this section if it exists
-                val updatedSongs = section.songs.filterNot { it.id == trackId }
+                val updatedSongs = section.tracks.filterNot { it.id == trackId }
                 // Return updated section only if it still has songs, otherwise filter out empty sections
                 section.copy(songs = updatedSongs)
-            }.filter { it.songs.isNotEmpty() } // Remove empty album sections
+            }.filter { it.tracks.isNotEmpty() } // Remove empty album sections
 
             currentState.copy(
                 albumSections = updatedAlbumSections,
-                songs = currentState.songs.filterNot { it.id == trackId } // Also update the main songs list
+                songs = currentState.tracks.filterNot { it.id == trackId } // Also update the main songs list
             )
         }
     }
@@ -157,7 +157,7 @@ private fun buildAlbumSections(songs: List<Track>): List<ArtistAlbumSection> {
     if (songs.isEmpty()) return emptyList()
 
     val sections = songs
-        .groupBy { it.bookId to it.album }
+        .groupBy { it.bookId to it.book }
         .map { (key, albumSongs) ->
             val sortedSongs = albumSongs.sortedWith(songDisplayComparator)
             val albumYear = albumSongs.mapNotNull { song -> song.year.takeIf { it > 0 } }.maxOrNull()

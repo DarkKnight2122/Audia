@@ -48,7 +48,7 @@ fun BookArtCollage(
     modifier: Modifier = Modifier,
     height: Dp = 400.dp,
     padding: Dp = 0.dp,
-    onSongClick: (Song) -> Unit,
+    onSongClick: (Track) -> Unit,
 ) {
     val context = LocalContext.current
     val songsToShow = remember(songs) {

@@ -101,7 +101,7 @@ fun BookDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val playerSheetState by playerViewModel.sheetState.collectAsState()
-    val favoriteIds by playerViewModel.favoriteSongIds.collectAsState()
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState()
     var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -120,13 +120,13 @@ fun BookDetailScreen(
     }
 
     when {
-        uiState.isLoading && uiState.album == null -> {
+        uiState.isLoading && uiState.book == null -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             ContainedLoadingIndicator()
             }
         }
 
-        uiState.error != null && uiState.album == null -> {
+        uiState.error != null && uiState.book == null -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -141,9 +141,9 @@ fun BookDetailScreen(
             }
         }
 
-        uiState.album != null -> {
-            val album = uiState.album!!
-            val songs = uiState.songs
+        uiState.book != null -> {
+            val book = uiState.book!!
+            val songs = uiState.tracks
             val lazyListState = rememberLazyListState()
 
             val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -276,9 +276,9 @@ fun BookDetailScreen(
         }.value ?: false
 
         if (currentTrack != null) {
-            val removeFromListTrigger = remember(uiState.songs) {
+            val removeFromListTrigger = remember(uiState.tracks) {
                 {
-                    viewModel.update(uiState.songs.filterNot { it.id == currentTrack.id })
+                    viewModel.update(uiState.tracks.filterNot { it.id == currentTrack.id })
                 }
             }
             TrackInfoBottomSheet(
@@ -305,11 +305,11 @@ fun BookDetailScreen(
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    navController.navigate(Screen.BookDetail.createRoute(currentTrack.bookId))
                     showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    navController.navigate(Screen.AuthorDetail.createRoute(currentTrack.authorId))
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
@@ -468,7 +468,7 @@ private fun CollapsingAlbumTopBar(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${album.artist} â€¢ $songsCount songs",
+                        text = "${album.author} â€¢ $songsCount songs",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

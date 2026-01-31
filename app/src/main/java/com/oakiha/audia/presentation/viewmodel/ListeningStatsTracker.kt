@@ -40,7 +40,7 @@ class ListeningStatsTracker @Inject constructor(
     }
 
     fun onSongChanged(
-        song: Track?,
+        track: Track?,
         positionMs: Long,
         durationMs: Long,
         isPlaying: Boolean
@@ -102,7 +102,7 @@ class ListeningStatsTracker @Inject constructor(
     }
 
     fun ensureSession(
-        song: Track?,
+        track: Track?,
         positionMs: Long,
         durationMs: Long,
         isPlaying: Boolean
@@ -152,7 +152,7 @@ class ListeningStatsTracker @Inject constructor(
             scope?.launch(Dispatchers.IO) {
                 dailyMixManager.recordPlay(
                     trackId = trackId,
-                    songDurationMs = listened,
+                    trackDurationMs = listened,
                     timestamp = timestamp
                 )
                 playbackStatsRepository.recordPlayback(

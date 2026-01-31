@@ -141,7 +141,7 @@ class MediaStoreTrackRepository @Inject constructor(
                     val id = cursor.getLong(idCol)
                     val bookId = cursor.getLong(bookIdCol)
                     
-                    val song = Track(
+                    val track = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
                         artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
@@ -240,7 +240,7 @@ class MediaStoreTrackRepository @Inject constructor(
     override suspend fun searchSongs(query: String): List<Track> {
         val allTracks = getTracks().first() // Snapshot
         return allTracks.filter { 
-            it.title.contains(query, true) || it.artist.contains(query, true) 
+            it.title.contains(query, true) || it.author.contains(query, true) 
         }
     }
 

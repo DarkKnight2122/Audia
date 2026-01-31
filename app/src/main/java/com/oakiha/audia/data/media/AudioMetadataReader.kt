@@ -60,11 +60,11 @@ object AudioMetadataReader {
                 val propertyMap = metadata?.propertyMap ?: emptyMap()
 
                 val title = propertyMap["TITLE"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val artist = propertyMap["ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val author = propertyMap["ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val bookArtist = propertyMap["ALBUMARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["ALBUM ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["BAND"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val album = propertyMap["ALBUM"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val book = propertyMap["ALBUM"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val genre = propertyMap["GENRE"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val trackString = propertyMap["TRACKNUMBER"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["TRACK"]?.firstOrNull()?.takeIf { it.isNotBlank() }
