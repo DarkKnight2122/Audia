@@ -105,7 +105,7 @@ fun HomeScreen(
                     }
                 )
             }
-        ) { scaffoldPadding ->
+        ) {
             LazyColumn(
                 state = rememberLazyListState(),
                 modifier = Modifier
@@ -118,11 +118,7 @@ fun HomeScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                if (allTracks.isNotEmpty()) {
-                
-                if (currentSong != null) {
-                                    if (currentSong != null) {
-                    
+                // HERO SECTION: Continue Listening (Only show if a book is actually active)
                 if (currentSong != null) {
                     item(key = "continue_listening_header") {
                         ContinueListeningHeader(
@@ -136,18 +132,8 @@ fun HomeScreen(
                         )
                     }
                 }
-                            }
-                        )
-                    }
-                }
-                            }
-                        )
-                    }
-                }
-                        }
-                    )
-                }
 
+                // Recently Added Audiobooks
                 if (allTracks.isNotEmpty()) {
                     item(key = "recently_added_label") {
                         Text(
@@ -172,6 +158,7 @@ fun HomeScreen(
                     }
                 }
 
+                // Listening Stats
                 item(key = "listening_stats_preview") {
                     StatsOverviewCard(
                         summary = weeklyStats,
@@ -180,6 +167,8 @@ fun HomeScreen(
                 }
             }
         }
+        
+        // Bottom Gradient Scrim
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -195,10 +184,9 @@ fun HomeScreen(
                         )
                     )
                 )
-        ) { 
-
-        } 
+        ) { } // 
     }
+    
     if (showChangelogBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showChangelogBottomSheet = false },
@@ -246,7 +234,7 @@ fun ContinueListeningHeader(
             )
 
             Text(
-                text = "$song â€¢ $author",
+                text = "$song \u2022 $author",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(start = 8.dp),
@@ -293,7 +281,7 @@ fun SongListItemFavs(
     onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    val containerColor = if (isCurrentSong) colors.primaryContainer.copy(alpha = 0.46f) else colors.surfaceContainer
+    val containerColor = if (isCurrentSong) colors.primaryContainer.copy(alpha = 0.46f) else colors.surfaceContainer    
     val contentColor = if (isCurrentSong) colors.primary else colors.onSurface
 
     Card(

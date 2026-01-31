@@ -29,16 +29,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manages the data state of the music library: Songs, Albums, Artists, Folders.
+ * Manages the data state of the audiobook library: Songs, Albums, Artists, Folders.
  * Handles loading from Repository and applying SortOptions.
  */
 @Singleton
 class LibraryStateHolder @Inject constructor(
-    private val musicRepository: AudiobookRepository,
+    private val audiobookRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
 
-    // --- State ---
+    // --- UI State ---
     private val _allTracks = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
     val allTracks = _allTracks.asStateFlow()
 
@@ -48,8 +48,8 @@ class LibraryStateHolder @Inject constructor(
     private val _artists = MutableStateFlow<ImmutableList<Artist>>(persistentListOf())
     val artists = _artists.asStateFlow()
 
-    private val _musicFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
-    val musicFolders = _musicFolders.asStateFlow()
+    private val _audiobookFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
+    val audiobookFolders = _musicFolders.asStateFlow()
 
     private val _isLoadingLibrary = MutableStateFlow(false)
     val isLoadingLibrary = _isLoadingLibrary.asStateFlow()
@@ -164,7 +164,7 @@ class LibraryStateHolder @Inject constructor(
         
         songsJob = scope?.launch {
             _isLoadingLibrary.value = true
-            musicRepository.getAudioFiles().collect { songs ->
+            audiobookRepository.getAudioFiles().collect { songs ->
                  // When the repository emits a new list (triggered by directory changes),
                  // we update our state and re-apply current sorting.
                  _allTracks.value = songs.toImmutableList()
@@ -176,7 +176,7 @@ class LibraryStateHolder @Inject constructor(
         
         albumsJob = scope?.launch {
             _isLoadingCategories.value = true
-            musicRepository.getAlbums().collect { albums ->
+            audiobookRepository.getAlbums().collect { albums ->
                 _albums.value = albums.toImmutableList()
                 sortAlbums(_currentAlbumSortOption.value, persist = false)
                 _isLoadingCategories.value = false
@@ -185,7 +185,7 @@ class LibraryStateHolder @Inject constructor(
         
         artistsJob = scope?.launch {
             _isLoadingCategories.value = true
-            musicRepository.getArtists().collect { artists ->
+            audiobookRepository.getArtists().collect { artists ->
                 _artists.value = artists.toImmutableList()
                 sortArtists(_currentArtistSortOption.value, persist = false)
                 _isLoadingCategories.value = false
