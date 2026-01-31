@@ -5,7 +5,7 @@ import android.content.Context
 import android.provider.MediaStore
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.utils.normalizeMetadataText
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +21,7 @@ import kotlin.math.min
 class MediaStorePagingSource(
     private val context: Context,
     private val filteredIds: List<Long>,
-    private val songIdToGenreMap: Map<Long, String>
+    private val trackIdToGenreMap: Map<Long, String>
 ) : PagingSource<Int, Song>() {
 
     override fun getRefreshKey(state: PagingState<Int, Song>): Int? {
@@ -71,8 +71,8 @@ class MediaStorePagingSource(
         )
     }
 
-    private fun fetchSongDetails(ids: List<Long>): List<Song> {
-        val songs = mutableListOf<Song>()
+    private fun fetchSongDetails(ids: List<Long>): List<Track> {
+        val songs = mutableListOf<Track>()
         if (ids.isEmpty()) return songs
 
         val selection = "${MediaStore.Audio.Media._ID} IN (${ids.joinToString(",")})"
@@ -104,39 +104,39 @@ class MediaStorePagingSource(
                 val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
                 val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
                 val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-                val artistIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
+                val authorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
                 val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-                val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                val bookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
                 val pathCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                 val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
                 val yearCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
                 val dateModifiedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-                val albumArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
-                    val albumId = cursor.getLong(albumIdCol)
+                    val bookId = cursor.getLong(bookIdCol)
                     val path = cursor.getString(pathCol)
 
-                    val song = Song(
+                    val song = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
                         artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
-                        artistId = cursor.getLong(artistIdCol),
+                        authorId = cursor.getLong(authorIdCol),
                         artists = emptyList(),
                         album = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
-                        albumId = albumId,
-                        albumArtist = if (albumArtistCol != -1) cursor.getString(albumArtistCol).normalizeMetadataText() else null,
+                        bookId = bookId,
+                        bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
                         path = path,
                         contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString(),
-                        albumArtUriString = ContentUris.withAppendedId(
+                        bookArtUriString = ContentUris.withAppendedId(
                             android.net.Uri.parse("content://media/external/audio/albumart"),
-                            albumId
+                            bookId
                         ).toString(),
                         duration = cursor.getLong(durationCol),
-                        genre = songIdToGenreMap[id],
+                        genre = trackIdToGenreMap[id],
                         lyrics = null,
                         isFavorite = false, // Not critical for paging source display usually, or passed in?
                         trackNumber = cursor.getInt(trackCol),

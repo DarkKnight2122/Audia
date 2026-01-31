@@ -2,7 +2,7 @@ package com.oakiha.audia.data.repository
 
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 
 interface LyricsRepository {
     /**
@@ -14,7 +14,7 @@ interface LyricsRepository {
      * @return Lyrics object or null if not found
      */
     suspend fun getLyrics(
-        song: Song,
+        song: Track,
         sourcePreference: LyricsSourcePreference = LyricsSourcePreference.EMBEDDED_FIRST,
         forceRefresh: Boolean = false
     ): Lyrics?
@@ -22,12 +22,12 @@ interface LyricsRepository {
     /**
      * Fetch lyrics from remote API and save to database.
      */
-    suspend fun fetchFromRemote(song: Song): Result<Pair<Lyrics, String>>
+    suspend fun fetchFromRemote(song: Track): Result<Pair<Lyrics, String>>
     
     /**
      * Search for lyrics on remote API and return multiple results.
      */
-    suspend fun searchRemote(song: Song): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemote(song: Track): Result<Pair<String, List<LyricsSearchResult>>>
   
     /**
      * Search for lyrics on remote API using query title and artist, and return multiple results.
@@ -37,12 +37,12 @@ interface LyricsRepository {
     /**
      * Update lyrics for a song in the database.
      */
-    suspend fun updateLyrics(songId: Long, lyricsContent: String)
+    suspend fun updateLyrics(trackId: Long, lyricsContent: String)
     
     /**
      * Reset lyrics for a song (remove from database and cache).
      */
-    suspend fun resetLyrics(songId: Long)
+    suspend fun resetLyrics(trackId: Long)
     
     /**
      * Reset all lyrics (clear database and cache).
@@ -62,7 +62,7 @@ interface LyricsRepository {
      * @return Number of songs updated
      */
     suspend fun scanAndAssignLocalLrcFiles(
-        songs: List<Song>,
+        songs: List<Track>,
         onProgress: suspend (current: Int, total: Int) -> Unit
     ): Int
 }

@@ -5,8 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.ArtistRef
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.AuthorRef
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.utils.normalizeMetadataText
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
@@ -41,12 +41,12 @@ data class TrackEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "artist_name") val artistName: String, // Display string (combined or primary)
-    @ColumnInfo(name = "artist_id") val artistId: Long, // Primary artist ID for backward compatibility
-    @ColumnInfo(name = "album_artist") val albumArtist: String? = null, // Album artist from metadata
+    @ColumnInfo(name = "artist_id") val authorId: Long, // Primary artist ID for backward compatibility
+    @ColumnInfo(name = "album_artist") val bookArtist: String? = null, // Album artist from metadata
     @ColumnInfo(name = "album_name") val albumName: String,
-    @ColumnInfo(name = "album_id") val albumId: Long, // index = true eliminado
+    @ColumnInfo(name = "album_id") val bookId: Long, // index = true eliminado
     @ColumnInfo(name = "content_uri_string") val contentUriString: String,
-    @ColumnInfo(name = "album_art_uri_string") val albumArtUriString: String?,
+    @ColumnInfo(name = "album_art_uri_string") val bookArtUriString: String?,
     @ColumnInfo(name = "duration") val duration: Long,
     @ColumnInfo(name = "genre") val genre: String?,
     @ColumnInfo(name = "file_path") val filePath: String, // Added filePath
@@ -61,19 +61,19 @@ data class TrackEntity(
     @ColumnInfo(name = "sample_rate") val sampleRate: Int? = null // Hz
 )
 
-fun TrackEntity.toTrack(): Song {
-    return Song(
+fun TrackEntity.toTrack(): Track {
+    return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
         artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        artistId = this.artistId,
+        authorId = this.authorId,
         artists = emptyList(), // Will be populated from junction table when needed
         album = this.albumName.normalizeMetadataTextOrEmpty(),
-        albumId = this.albumId,
-        albumArtist = this.albumArtist?.normalizeMetadataText(),
+        bookId = this.bookId,
+        bookArtist = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        bookArtUriString = this.bookArtUriString,
         duration = this.duration,
         genre = this.genre.normalizeMetadataText(),
         lyrics = this.lyrics?.normalizeMetadataText(),
@@ -90,29 +90,29 @@ fun TrackEntity.toTrack(): Song {
 /**
  * Converts a TrackEntity to Song with artists from the junction table.
  */
-fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Song {
-    val crossRefByArtistId = crossRefs.associateBy { it.artistId }
+fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Track {
+    val crossRefByArtistId = crossRefs.associateBy { it.authorId }
     val artistRefs = artists.map { artist ->
         val crossRef = crossRefByArtistId[artist.id]
-        ArtistRef(
+        AuthorRef(
             id = artist.id,
             name = artist.name.normalizeMetadataTextOrEmpty(),
             isPrimary = crossRef?.isPrimary ?: false
         )
     }.sortedByDescending { it.isPrimary }
     
-    return Song(
+    return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
         artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        artistId = this.artistId,
+        authorId = this.authorId,
         artists = artistRefs,
         album = this.albumName.normalizeMetadataTextOrEmpty(),
-        albumId = this.albumId,
-        albumArtist = this.albumArtist?.normalizeMetadataText(),
+        bookId = this.bookId,
+        bookArtist = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        bookArtUriString = this.bookArtUriString,
         duration = this.duration,
         genre = this.genre.normalizeMetadataText(),
         lyrics = this.lyrics?.normalizeMetadataText(),
@@ -126,7 +126,7 @@ fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: Li
     )
 }
 
-fun List<TrackEntity>.toTracks(): List<Song> {
+fun List<TrackEntity>.toTracks(): List<Track> {
     return this.map { it.toTrack() }
 }
 
@@ -138,12 +138,12 @@ fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Strin
         id = this.id.toLong(), // Asumiendo que el ID del modelo Song puede convertirse a Long
         title = this.title,
         artistName = this.artist,
-        artistId = this.artistId,
-        albumArtist = this.albumArtist,
+        authorId = this.authorId,
+        bookArtist = this.bookArtist,
         albumName = this.album,
-        albumId = this.albumId,
+        bookId = this.bookId,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        bookArtUriString = this.bookArtUriString,
         duration = this.duration,
         genre = this.genre,
         lyrics = this.lyrics,
@@ -164,12 +164,12 @@ fun Song.toEntityWithoutPaths(): TrackEntity {
         id = this.id.toLong(),
         title = this.title,
         artistName = this.artist,
-        artistId = this.artistId,
-        albumArtist = this.albumArtist,
+        authorId = this.authorId,
+        bookArtist = this.bookArtist,
         albumName = this.album,
-        albumId = this.albumId,
+        bookId = this.bookId,
         contentUriString = this.contentUriString,
-        albumArtUriString = this.albumArtUriString,
+        bookArtUriString = this.bookArtUriString,
         duration = this.duration,
         genre = this.genre,
         lyrics = this.lyrics,

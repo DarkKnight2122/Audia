@@ -10,9 +10,9 @@ interface BookArtThemeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTheme(theme: BookArtThemeEntity)
 
-    @Query("SELECT * FROM album_art_themes WHERE albumArtUriString = :uriString")
+    @Query("SELECT * FROM album_art_themes WHERE bookArtUriString = :uriString")
     suspend fun getThemeByUri(uriString: String): BookArtThemeEntity?
 
-    @Query("DELETE FROM album_art_themes WHERE albumArtUriString IN (:uriStrings)")
+    @Query("DELETE FROM album_art_themes WHERE bookArtUriString IN (:uriStrings)")
     suspend fun deleteThemesByUris(uriStrings: List<String>)
 }

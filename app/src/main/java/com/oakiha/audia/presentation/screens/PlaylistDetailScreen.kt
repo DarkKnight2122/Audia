@@ -103,14 +103,14 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil.size.Size
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.PlaylistBottomSheet
 import com.oakiha.audia.presentation.components.QueuePlaylistSongItem
-import com.oakiha.audia.presentation.components.SongPickerBottomSheet
+import com.oakiha.audia.presentation.components.TrackPickerBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
@@ -161,7 +161,7 @@ fun PlaylistDetailScreen(
 
     var isReorderModeEnabled by remember { mutableStateOf(false) }
     var isRemoveModeEnabled by remember { mutableStateOf(false) }
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     var showPlaylistOptionsSheet by remember { mutableStateOf(false) }
     var showEditPlaylistDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -176,12 +176,12 @@ fun PlaylistDetailScreen(
         }
     }
 
-    val selectedSongForInfo by playerViewModel.selectedSongForInfo.collectAsState()
+    val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
     val favoriteIds by playerViewModel.favoriteSongIds.collectAsState() // Reintroducir favoriteIds aquÃ­
     val stableOnMoreOptionsClick: (Song) -> Unit = remember {
         { song ->
             playerViewModel.selectSongForInfo(song)
-            showSongInfoBottomSheet = true
+            showTrackInfoBottomSheet = true
         }
     }
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -580,7 +580,7 @@ fun PlaylistDetailScreen(
                                         )
                                     },
                                     song = song,
-                                    isCurrentSong = playerStableState.currentSong?.id == song.id,
+                                    isCurrentSong = playerStableState.currentTrack?.id == song.id,
                                     isPlaying = playerStableState.isPlaying,
                                     isDragging = isDragging,
                                     onRemoveClick = {
@@ -632,10 +632,10 @@ fun PlaylistDetailScreen(
     }
 
     if (showAddSongsSheet && currentPlaylist != null && !isFolderPlaylist) {
-        SongPickerBottomSheet(
+        TrackPickerBottomSheet(
             allTracks = uiState.songSelectionForPlaylist,
             isLoading = uiState.isLoadingSongSelection,
-            initiallySelectedSongIds = currentPlaylist.songIds.toSet(),
+            initiallySelectedSongIds = currentPlaylist.trackIds.toSet(),
             onDismiss = { showAddSongsSheet = false },
             onConfirm = { selectedIds ->
                 playlistViewModel.addSongsToPlaylist(currentPlaylist.id, selectedIds.toList())
@@ -782,11 +782,11 @@ fun PlaylistDetailScreen(
         )
     }
 
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteIds) {
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteIds) {
             derivedStateOf {
-                currentSong?.let {
+                currentTrack?.let {
                     favoriteIds.contains(
                         it.id
                     )
@@ -794,27 +794,27 @@ fun PlaylistDetailScreen(
             }
         }.value ?: false
 
-        if (currentSong != null) {
-            SongInfoBottomSheet(
-                song = currentSong,
+        if (currentTrack != null) {
+            TrackInfoBottomSheet(
+                song = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     // Directly use PlayerViewModel's method to toggle, which should handle UserPreferencesRepository
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong) // Assumes such a method exists or will be added to PlayerViewModel
+                    playerViewModel.toggleFavoriteSpecificSong(currentTrack) // Assumes such a method exists or will be added to PlayerViewModel
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
+                onDismiss = { showTrackInfoBottomSheet = false },
                 onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.showAndPlaySong(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong) // Assumes such a method exists or will be added
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addSongToQueue(currentTrack) // Assumes such a method exists or will be added
+                    showTrackInfoBottomSheet = false
                     playerViewModel.sendToast("Added to the queue")
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addSongNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                     playerViewModel.sendToast("Will play next")
                 },
                 onAddToPlayList = {
@@ -822,16 +822,16 @@ fun PlaylistDetailScreen(
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
                     playerViewModel.editSongMetadata(
-                        currentSong,
+                        currentTrack,
                         newTitle,
                         newArtist,
                         newAlbum,
@@ -842,10 +842,10 @@ fun PlaylistDetailScreen(
                     )
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
                 removeFromListTrigger = {
-                    playlistViewModel.removeSongFromPlaylist(playlistId, currentSong.id)
+                    playlistViewModel.removeSongFromPlaylist(playlistId, currentTrack.id)
                 }
             )
             if (showPlaylistBottomSheet) {
@@ -853,7 +853,7 @@ fun PlaylistDetailScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentSong,
+                    song = currentTrack,
                     onDismiss = {
                         showPlaylistBottomSheet = false
                     },
@@ -951,7 +951,7 @@ private fun PlaylistActionItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// SongPickerBottomSheet moved to com.oakiha.audia.presentation.components
+// TrackPickerBottomSheet moved to com.oakiha.audia.presentation.components
 fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (String) -> Unit) {
     var newName by remember { mutableStateOf(TextFieldValue(currentName)) }
     AlertDialog(

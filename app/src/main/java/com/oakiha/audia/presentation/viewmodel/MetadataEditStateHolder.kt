@@ -5,9 +5,9 @@ import android.util.Log
 import com.oakiha.audia.data.media.CoverArtUpdate
 import com.oakiha.audia.data.media.ImageCacheManager
 import com.oakiha.audia.data.media.MetadataEditError
-import com.oakiha.audia.data.media.SongMetadataEditor
+import com.oakiha.audia.data.media.TrackMetadataEditor
 import com.oakiha.audia.data.model.Lyrics
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.utils.FileDeletionUtils
 import com.oakiha.audia.utils.LyricsUtils
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class MetadataEditStateHolder @Inject constructor(
-    private val songMetadataEditor: SongMetadataEditor,
+    private val songMetadataEditor: TrackMetadataEditor,
     private val audiobookRepository: AudiobookRepository,
     private val imageCacheManager: ImageCacheManager,
     private val themeStateHolder: ThemeStateHolder,
@@ -27,7 +27,7 @@ class MetadataEditStateHolder @Inject constructor(
 
     data class MetadataEditResult(
         val success: Boolean,
-        val updatedSong: Song? = null,
+        val updatedSong: Track? = null,
         val updatedAlbumArtUri: String? = null,
         val parsedLyrics: Lyrics? = null,
         val error: MetadataEditError? = null,
@@ -52,7 +52,7 @@ class MetadataEditStateHolder @Inject constructor(
     }
 
     suspend fun saveMetadata(
-        song: Song,
+        song: Track,
         newTitle: String,
         newArtist: String,
         newAlbum: String,
@@ -97,13 +97,13 @@ class MetadataEditStateHolder @Inject constructor(
             newLyrics = trimmedLyrics,
             newTrackNumber = newTrackNumber,
             coverArtUpdate = finalCoverArtUpdate,
-            songId = song.id.toLong(),
+            trackId = song.id.toLong(),
         )
 
         Log.d("MetadataEditStateHolder", "Editor result: success=${result.success}, error=${result.error}")
 
         if (result.success) {
-            val refreshedAlbumArtUri = result.updatedAlbumArtUri ?: song.albumArtUriString
+            val refreshedAlbumArtUri = result.updatedAlbumArtUri ?: song.bookArtUriString
             
             // Update Repository (Lyrics)
             if (normalizedLyrics != null) {
@@ -119,13 +119,13 @@ class MetadataEditStateHolder @Inject constructor(
                 genre = newGenre,
                 lyrics = normalizedLyrics,
                 trackNumber = newTrackNumber,
-                albumArtUriString = refreshedAlbumArtUri,
+                bookArtUriString = refreshedAlbumArtUri,
             )
 
             // CRITICAL: Fetch the authoritative song object from the repository (MediaStore/DB).
             // When metadata changes (especially album/artist), MediaStore might re-index the song
-            // and assign it a NEW album ID, resulting in a NEW albumArtUri.
-            // Using the 'updatedSong' copy above might retain a STALE albumArtUri.
+            // and assign it a NEW album ID, resulting in a NEW bookArtUri.
+            // Using the 'updatedSong' copy above might retain a STALE bookArtUri.
             val freshSong = try {
                 audiobookRepository.getTrack(song.id).first() ?: updatedSong
             } catch (e: Exception) {
@@ -144,7 +144,7 @@ class MetadataEditStateHolder @Inject constructor(
             MetadataEditResult(
                 success = true,
                 updatedSong = freshSong,
-                updatedAlbumArtUri = freshSong.albumArtUriString,
+                updatedAlbumArtUri = freshSong.bookArtUriString,
                 parsedLyrics = parsedLyrics
             )
         } else {
@@ -157,7 +157,7 @@ class MetadataEditStateHolder @Inject constructor(
         }
     }
 
-    suspend fun deleteSong(song: Song): Boolean = withContext(Dispatchers.IO) {
+    suspend fun deleteSong(song: Track): Boolean = withContext(Dispatchers.IO) {
         val fileInfo = FileDeletionUtils.getFileInfo(song.path)
         if (fileInfo.exists && fileInfo.canWrite) {
             val success = FileDeletionUtils.deleteFile(context, song.path)

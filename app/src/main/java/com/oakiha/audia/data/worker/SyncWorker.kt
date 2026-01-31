@@ -16,15 +16,15 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.oakiha.audia.data.database.BookEntity
 import com.oakiha.audia.data.database.AuthorEntity
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.database.TrackAuthorCrossRef
 import com.oakiha.audia.data.database.TrackEntity
 import com.oakiha.audia.data.media.AudioMetadataReader
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.repository.LyricsRepository
-import com.oakiha.audia.utils.AlbumArtCacheManager
-import com.oakiha.audia.utils.AlbumArtUtils
+import com.oakiha.audia.utils.BookArtCacheManager
+import com.oakiha.audia.utils.BookArtUtils
 import com.oakiha.audia.utils.AudioMetaUtils.getAudioMetadata
 import com.oakiha.audia.utils.DirectoryRuleResolver
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
@@ -59,7 +59,7 @@ class SyncWorker
 constructor(
         @Assisted appContext: Context,
         @Assisted workerParams: WorkerParameters,
-        private val audiobookDao: MusicDao,
+        private val audiobookDao: AudiobookDao,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val lyricsRepository: LyricsRepository
 ) : CoroutineWorker(appContext, workerParams) {
@@ -270,8 +270,8 @@ constructor(
                                                         )
                                                                 localSong.trackNumber
                                                         else mediaStoreSong.trackNumber,
-                                                albumArtUriString = localSong.albumArtUriString
-                                                                ?: mediaStoreSong.albumArtUriString
+                                                bookArtUriString = localSong.bookArtUriString
+                                                                ?: mediaStoreSong.bookArtUriString
                                         )
                                     } else {
                                         mediaStoreSong
@@ -328,16 +328,16 @@ constructor(
                             val allTracksEntities = audiobookDao.getAllTracksList()
                             val allTracks =
                                     allTracksEntities.map { entity ->
-                                        Song(
+                                        Track(
                                                 id = entity.id.toString(),
                                                 title = entity.title,
                                                 artist = entity.artistName,
-                                                artistId = entity.artistId,
+                                                authorId = entity.authorId,
                                                 album = entity.albumName,
-                                                albumId = entity.albumId,
+                                                bookId = entity.bookId,
                                                 path = entity.filePath,
                                                 contentUriString = entity.contentUriString,
-                                                albumArtUriString = entity.albumArtUriString,
+                                                bookArtUriString = entity.bookArtUriString,
                                                 duration = entity.duration,
                                                 lyrics = entity.lyrics,
                                                 dateAdded = entity.dateAdded,
@@ -369,7 +369,7 @@ constructor(
                         
                         // Clean orphaned album art cache files
                         val allSongIds = audiobookDao.getAllSongIds().toSet()
-                        AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
+                        BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
 
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
                     } else {
@@ -397,7 +397,7 @@ constructor(
                         
                         // Clean orphaned album art cache files
                         val allSongIds = audiobookDao.getAllSongIds().toSet()
-                        AlbumArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
+                        BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
                         
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
                     }
@@ -516,44 +516,44 @@ constructor(
             val primaryArtistName =
                     artistsForSong.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
                             ?: songArtistNameTrimmed
-            val primaryArtistId = artistNameToId[primaryArtistName] ?: song.artistId
+            val primaryArtistId = artistNameToId[primaryArtistName] ?: song.authorId
 
             artistsForSong.forEachIndexed { index, artistName ->
                 val normalizedName = artistName.trim()
-                val artistId = artistNameToId[normalizedName]
-                if (artistId != null) {
+                val authorId = artistNameToId[normalizedName]
+                if (authorId != null) {
                     val isPrimary = (index == 0) // First artist is primary
                     allCrossRefs.add(
                             TrackAuthorCrossRef(
-                                    songId = song.id,
-                                    artistId = artistId,
+                                    trackId = song.id,
+                                    authorId = authorId,
                                     isPrimary = isPrimary
                             )
                     )
-                    artistTrackCounts[artistId] = (artistTrackCounts[artistId] ?: 0) + 1
+                    artistTrackCounts[authorId] = (artistTrackCounts[authorId] ?: 0) + 1
                 }
             }
 
             // --- Album Logic ---
             val rawAlbumName = song.albumName.trim()
-            val albumIdentityArtist = if (groupByAlbumArtist) {
-                song.albumArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
+            val bookIdentityArtist = if (groupByAlbumArtist) {
+                song.bookArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
             } else {
                 primaryArtistName
             }
             
-            val albumKey = rawAlbumName to albumIdentityArtist
+            val albumKey = rawAlbumName to bookIdentityArtist
             
             if (!albumMap.containsKey(albumKey)) {
-                albumMap[albumKey] = song.albumId 
+                albumMap[albumKey] = song.bookId 
             }
-            val finalAlbumId = albumMap[albumKey] ?: song.albumId // fallback
+            val finalAlbumId = albumMap[albumKey] ?: song.bookId // fallback
 
             correctedSongs.add(
                     song.copy(
-                            artistId = primaryArtistId,
+                            authorId = primaryArtistId,
                             artistName = primaryArtistName,
-                            albumId = finalAlbumId
+                            bookId = finalAlbumId
                     )
             )
         }
@@ -571,10 +571,10 @@ constructor(
         
         // Re-calculate Album Entities from the corrected songs to ensure we have valid metadata (Art, Year)
         // which isn't available in the simple albumMap (which only has ID)
-        val albumEntities = correctedSongs.groupBy { it.albumId }.map { (catAlbumId, songsInAlbum) ->
+        val albumEntities = correctedSongs.groupBy { it.bookId }.map { (catAlbumId, songsInAlbum) ->
              val firstSong = songsInAlbum.first()
              // Determine Album Artist Name
-             val determinedAlbumArtist = firstSong.albumArtist?.takeIf { it.isNotBlank() } 
+             val determinedAlbumArtist = firstSong.bookArtist?.takeIf { it.isNotBlank() } 
                  ?: firstSong.artistName
                  
              // Determine Album Artist ID (best effort lookup)
@@ -584,9 +584,9 @@ constructor(
                  id = catAlbumId,
                  title = firstSong.albumName,
                  artistName = determinedAlbumArtist,
-                 artistId = determinedAlbumArtistId,
-                 albumArtUriString = firstSong.albumArtUriString,
-                 songCount = songsInAlbum.size, 
+                 authorId = determinedAlbumArtistId,
+                 bookArtUriString = firstSong.bookArtUriString,
+                 trackCount = songsInAlbum.size, 
                  year = firstSong.year
              )
         }
@@ -615,22 +615,22 @@ constructor(
                         val artCol = cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)
                         if (artCol >= 0) {
                             while (cursor.moveToNext()) {
-                                val albumId = cursor.getLong(idCol)
+                                val bookId = cursor.getLong(idCol)
                                 val storedArtPath = cursor.getString(artCol)
                                 val uriString =
                                         when {
                                             !storedArtPath.isNullOrBlank() ->
                                                     File(storedArtPath).toURI().toString()
-                                            albumId > 0 ->
+                                            bookId > 0 ->
                                                     ContentUris.withAppendedId(
                                                                     "content://media/external/audio/albumart".toUri(),
-                                                                    albumId
+                                                                    bookId
                                                             )
                                                             .toString()
                                             else -> null
                                         }
 
-                                if (uriString != null) put(albumId, uriString)
+                                if (uriString != null) put(bookId, uriString)
                             }
                         }
                     }
@@ -744,13 +744,13 @@ constructor(
     /** Raw data extracted from cursor - lightweight class for fast iteration */
     private data class RawSongData(
             val id: Long,
-            val albumId: Long,
-            val artistId: Long,
+            val bookId: Long,
+            val authorId: Long,
             val filePath: String,
             val title: String,
             val artist: String,
             val album: String,
-            val albumArtist: String?,
+            val bookArtist: String?,
             val duration: Long,
             val trackNumber: Int,
             val year: Int,
@@ -767,7 +767,7 @@ constructor(
         Trace.beginSection("SyncWorker.fetchMusicFromMediaStore")
 
         val deepScan = forceMetadata
-        val albumArtByAlbumId = if (!deepScan) fetchAlbumArtUrisByAlbumId() else emptyMap()
+        val bookArtByAlbumId = if (!deepScan) fetchAlbumArtUrisByAlbumId() else emptyMap()
         val genreMap = fetchGenreMap() // Load genres upfront
 
         val projection =
@@ -819,10 +819,10 @@ constructor(
                     val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
                     val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
                     val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-                    val artistIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
+                    val authorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
                     val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-                    val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                    val albumArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                    val bookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                    val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
                     val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                     val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
@@ -844,12 +844,12 @@ constructor(
                             // Proceed on error
                         }
 
-                        val songId = cursor.getLong(idCol)
+                        val trackId = cursor.getLong(idCol)
                         rawDataList.add(
                                 RawSongData(
                                         id = cursor.getLong(idCol),
-                                        albumId = cursor.getLong(albumIdCol),
-                                        artistId = cursor.getLong(artistIdCol),
+                                        bookId = cursor.getLong(bookIdCol),
+                                        authorId = cursor.getLong(authorIdCol),
                                         filePath = cursor.getString(dataCol) ?: "",
                                         title =
                                                 cursor.getString(titleCol)
@@ -863,9 +863,9 @@ constructor(
                                                 cursor.getString(albumCol)
                                                         .normalizeMetadataTextOrEmpty()
                                                         .ifEmpty { "Unknown Album" },
-                                        albumArtist =
-                                                if (albumArtistCol >= 0)
-                                                        cursor.getString(albumArtistCol)
+                                        bookArtist =
+                                                if (bookArtistCol >= 0)
+                                                        cursor.getString(bookArtistCol)
                                                                 ?.normalizeMetadataTextOrEmpty()
                                                                 ?.takeIf { it.isNotBlank() }
                                                 else null,
@@ -895,7 +895,7 @@ constructor(
                         async {
                             semaphore.withPermit {
                                 val song =
-                                        processSongData(raw, albumArtByAlbumId, genreMap, deepScan)
+                                        processSongData(raw, bookArtByAlbumId, genreMap, deepScan)
 
                                 // Report progress
                                 val count = processedCount.incrementAndGet()
@@ -924,7 +924,7 @@ constructor(
      */
     private suspend fun processSongData(
             raw: RawSongData,
-            albumArtByAlbumId: Map<Long, String>,
+            bookArtByAlbumId: Map<Long, String>,
             genreMap: Map<Long, String>,
             deepScan: Boolean
     ): TrackEntity {
@@ -933,18 +933,18 @@ constructor(
                 ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, raw.id)
                         .toString()
 
-        var albumArtUriString = albumArtByAlbumId[raw.albumId]
+        var bookArtUriString = bookArtByAlbumId[raw.bookId]
         if (deepScan) {
-            albumArtUriString =
-                    AlbumArtUtils.getAlbumArtUri(
+            bookArtUriString =
+                    BookArtUtils.getAlbumArtUri(
                             applicationContext,
                             audiobookDao,
                             raw.filePath,
-                            raw.albumId,
+                            raw.bookId,
                             raw.id,
                             true
                     )
-                            ?: albumArtUriString
+                            ?: bookArtUriString
         }
         val audioMetadata =
                 if (deepScan) getAudioMetadata(audiobookDao, raw.id, raw.filePath, true) else null
@@ -978,12 +978,12 @@ constructor(
 
                         meta.artwork?.let { art ->
                             val uri =
-                                    AlbumArtUtils.saveAlbumArtToCache(
+                                    BookArtUtils.saveAlbumArtToCache(
                                             applicationContext,
                                             art.bytes,
                                             raw.id
                                     )
-                            albumArtUriString = uri.toString()
+                            bookArtUriString = uri.toString()
                         }
                     }
                 } catch (e: Exception) {
@@ -996,12 +996,12 @@ constructor(
                 id = raw.id,
                 title = title,
                 artistName = artist,
-                artistId = raw.artistId,
-                albumArtist = raw.albumArtist,
+                authorId = raw.authorId,
+                bookArtist = raw.bookArtist,
                 albumName = album,
-                albumId = raw.albumId,
+                bookId = raw.bookId,
                 contentUriString = contentUriString,
-                albumArtUriString = albumArtUriString,
+                bookArtUriString = bookArtUriString,
                 duration = raw.duration,
                 genre = genre,
                 filePath = raw.filePath,

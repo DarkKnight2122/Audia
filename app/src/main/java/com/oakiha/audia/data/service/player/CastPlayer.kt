@@ -8,7 +8,7 @@ import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -21,7 +21,7 @@ class CastPlayer(private val castSession: CastSession) {
      * Includes a 15-second timeout to prevent stuck "Connecting..." states.
      */
     fun loadQueue(
-        songs: List<Song>,
+        songs: List<Track>,
         startIndex: Int,
         startPosition: Long,
         repeatMode: Int,
@@ -109,7 +109,7 @@ class CastPlayer(private val castSession: CastSession) {
             .build()
 
         return MediaQueueItem.Builder(mediaInfo)
-            .setCustomData(JSONObject().put("songId", this.id))
+            .setCustomData(JSONObject().put("trackId", this.id))
             .build()
     }
 

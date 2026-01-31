@@ -52,7 +52,7 @@ object AppThemeMode {
  * @property maxSize Maximum size in pixels (0 = original size)
  * @property label Human-readable label for UI
  */
-enum class AlbumArtQuality(val maxSize: Int, val label: String) {
+enum class BookArtQuality(val maxSize: Int, val label: String) {
     LOW(256, "Low (256px) - Better performance"),
     MEDIUM(512, "Medium (512px) - Balanced"),
     HIGH(800, "High (800px) - Best quality"),
@@ -160,7 +160,7 @@ constructor(
         // Library Sync
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         
-        // Lyrics Sync Offset per song (Map<songId, offsetMs> as JSON)
+        // Lyrics Sync Offset per song (Map<trackId, offsetMs> as JSON)
         val LYRICS_SYNC_OFFSETS = stringPreferencesKey("lyrics_sync_offsets_json")
         
         // Lyrics Source Preference
@@ -399,7 +399,7 @@ constructor(
     
     /**
      * Lyrics sync offset per song in milliseconds.
-     * Stored as a JSON map: { "songId": offsetMs, ... }
+     * Stored as a JSON map: { "trackId": offsetMs, ... }
      * Positive values = lyrics appear later (use when lyrics are ahead of audio)
      * Negative values = lyrics appear earlier (use when lyrics are behind audio)
      */
@@ -414,15 +414,15 @@ constructor(
                 } ?: emptyMap()
             }
 
-    fun getLyricsSyncOffsetFlow(songId: String): Flow<Int> {
-        return lyricsSyncOffsetsFlow.map { offsets -> offsets[songId] ?: 0 }
+    fun getLyricsSyncOffsetFlow(trackId: String): Flow<Int> {
+        return lyricsSyncOffsetsFlow.map { offsets -> offsets[trackId] ?: 0 }
     }
 
-    suspend fun getLyricsSyncOffset(songId: String): Int {
-        return getLyricsSyncOffsetFlow(songId).first()
+    suspend fun getLyricsSyncOffset(trackId: String): Int {
+        return getLyricsSyncOffsetFlow(trackId).first()
     }
 
-    suspend fun setLyricsSyncOffset(songId: String, offsetMs: Int) {
+    suspend fun setLyricsSyncOffset(trackId: String, offsetMs: Int) {
         dataStore.edit { preferences ->
             val currentOffsets = preferences[PreferencesKeys.LYRICS_SYNC_OFFSETS]?.let { jsonString ->
                 try {
@@ -433,9 +433,9 @@ constructor(
             } ?: mutableMapOf()
             
             if (offsetMs == 0) {
-                currentOffsets.remove(songId) // Don't store default value
+                currentOffsets.remove(trackId) // Don't store default value
             } else {
-                currentOffsets[songId] = offsetMs
+                currentOffsets[trackId] = offsetMs
             }
             
             preferences[PreferencesKeys.LYRICS_SYNC_OFFSETS] = json.encodeToString(currentOffsets)
@@ -531,9 +531,9 @@ constructor(
                 }
             }
 
-    suspend fun saveDailyMixSongIds(songIds: List<String>) {
+    suspend fun saveDailyMixSongIds(trackIds: List<String>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DAILY_MIX_SONG_IDS] = json.encodeToString(songIds)
+            preferences[PreferencesKeys.DAILY_MIX_SONG_IDS] = json.encodeToString(trackIds)
         }
     }
 
@@ -551,9 +551,9 @@ constructor(
                 }
             }
 
-    suspend fun saveYourMixSongIds(songIds: List<String>) {
+    suspend fun saveYourMixSongIds(trackIds: List<String>) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.YOUR_MIX_SONG_IDS] = json.encodeToString(songIds)
+            preferences[PreferencesKeys.YOUR_MIX_SONG_IDS] = json.encodeToString(trackIds)
         }
     }
 
@@ -676,7 +676,7 @@ constructor(
 
     suspend fun createPlaylist(
             name: String,
-            songIds: List<String> = emptyList(),
+            trackIds: List<String> = emptyList(),
             isAiGenerated: Boolean = false,
             isQueueGenerated: Boolean = false,
             coverImageUri: String? = null,
@@ -693,7 +693,7 @@ constructor(
                 Playlist(
                         id = UUID.randomUUID().toString(),
                         name = name,
-                        songIds = songIds,
+                        trackIds = trackIds,
                         isAiGenerated = isAiGenerated,
                         isQueueGenerated = isQueueGenerated,
                         coverImageUri = coverImageUri,
@@ -739,15 +739,15 @@ constructor(
         }
     }
 
-    suspend fun addSongsToPlaylist(playlistId: String, songIdsToAdd: List<String>) {
+    suspend fun addSongsToPlaylist(playlistId: String, trackIdsToAdd: List<String>) {
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
         val index = currentPlaylists.indexOfFirst { it.id == playlistId }
         if (index != -1) {
             val playlist = currentPlaylists[index]
             // Evitar duplicados, aÃ±adir solo los nuevos
-            val newSongIds = (playlist.songIds + songIdsToAdd).distinct()
+            val newSongIds = (playlist.trackIds + trackIdsToAdd).distinct()
             currentPlaylists[index] =
-                    playlist.copy(songIds = newSongIds, lastModified = System.currentTimeMillis())
+                    playlist.copy(trackIds = newSongIds, lastModified = System.currentTimeMillis())
             savePlaylists(currentPlaylists)
         }
     }
@@ -757,7 +757,7 @@ constructor(
      * will remove song from the playlists which are not in playlistIds
      * */
     suspend fun addOrRemoveSongFromPlaylists(
-            songId: String,
+            trackId: String,
             playlistIds: List<String>
     ): MutableList<String> {
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
@@ -768,12 +768,12 @@ constructor(
             val index = currentPlaylists.indexOfFirst { it.id == playlistId }
             if (index != -1) {
                 val playlist = currentPlaylists[index]
-                if (playlist.songIds.contains(songId)) return@forEach
+                if (playlist.trackIds.contains(trackId)) return@forEach
                 else {
-                    val newSongIds = (playlist.songIds + songId).distinct()
+                    val newSongIds = (playlist.trackIds + trackId).distinct()
                     currentPlaylists[index] =
                             playlist.copy(
-                                    songIds = newSongIds,
+                                    trackIds = newSongIds,
                                     lastModified = System.currentTimeMillis()
                             )
                     savePlaylists(currentPlaylists)
@@ -783,38 +783,38 @@ constructor(
 
         // removing from playlist if not in playlistIds
         currentPlaylists.forEach { playlist ->
-            if (playlist.songIds.contains(songId) && !playlistIds.contains(playlist.id)) {
-                removeSongFromPlaylist(playlist.id, songId)
+            if (playlist.trackIds.contains(trackId) && !playlistIds.contains(playlist.id)) {
+                removeSongFromPlaylist(playlist.id, trackId)
                 removedPlaylistIds.add(playlist.id)
             }
         }
         return removedPlaylistIds
     }
 
-    suspend fun removeSongFromPlaylist(playlistId: String, songIdToRemove: String) {
+    suspend fun removeSongFromPlaylist(playlistId: String, trackIdToRemove: String) {
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
         val index = currentPlaylists.indexOfFirst { it.id == playlistId }
         if (index != -1) {
             val playlist = currentPlaylists[index]
             currentPlaylists[index] =
                     playlist.copy(
-                            songIds = playlist.songIds.filterNot { it == songIdToRemove },
+                            trackIds = playlist.trackIds.filterNot { it == trackIdToRemove },
                             lastModified = System.currentTimeMillis()
                     )
             savePlaylists(currentPlaylists)
         }
     }
 
-    suspend fun removeSongFromAllPlaylists(songId: String) {
+    suspend fun removeSongFromAllPlaylists(trackId: String) {
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
         var updated = false
 
         // Iterate through all playlists and remove the song
         currentPlaylists.forEachIndexed { index, playlist ->
-            if (playlist.songIds.contains(songId)) {
+            if (playlist.trackIds.contains(trackId)) {
                 currentPlaylists[index] =
                         playlist.copy(
-                                songIds = playlist.songIds.filterNot { it == songId },
+                                trackIds = playlist.trackIds.filterNot { it == trackId },
                                 lastModified = System.currentTimeMillis()
                         )
                 updated = true
@@ -832,7 +832,7 @@ constructor(
         if (index != -1) {
             currentPlaylists[index] =
                     currentPlaylists[index].copy(
-                            songIds = newSongOrderIds,
+                            trackIds = newSongOrderIds,
                             lastModified = System.currentTimeMillis()
                     )
             savePlaylists(currentPlaylists)
@@ -897,18 +897,18 @@ constructor(
     }
 
     suspend fun toggleFavoriteSong(
-            songId: String,
+            trackId: String,
             removing: Boolean = false
     ) { // Nueva funciÃ³n para favoritos
         dataStore.edit { preferences ->
             val currentFavorites = preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()
-            val contains = currentFavorites.contains(songId)
+            val contains = currentFavorites.contains(trackId)
 
-            if (contains) preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - songId
+            if (contains) preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - trackId
             else {
                 if (removing)
-                        preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - songId
-                else preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites + songId
+                        preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites - trackId
+                else preferences[PreferencesKeys.FAVORITE_SONG_IDS] = currentFavorites + trackId
             }
         }
     }
@@ -1455,17 +1455,17 @@ constructor(
      * Controls the maximum resolution for album artwork displayed in the full player.
      * Thumbnails in lists always use low resolution (256px) for optimal performance.
      */
-    val albumArtQualityFlow: Flow<AlbumArtQuality> =
+    val bookArtQualityFlow: Flow<AlbumArtQuality> =
         dataStore.data.map { preferences ->
             preferences[PreferencesKeys.ALBUM_ART_QUALITY]
                 ?.let { 
                     try { AlbumArtQuality.valueOf(it) } 
                     catch (e: Exception) { AlbumArtQuality.ORIGINAL }
                 }
-                ?: AlbumArtQuality.ORIGINAL
+                ?: BookArtQuality.ORIGINAL
         }
 
-    suspend fun setAlbumArtQuality(quality: AlbumArtQuality) {
+    suspend fun setAlbumArtQuality(quality: BookArtQuality) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALBUM_ART_QUALITY] = quality.name
         }

@@ -3,7 +3,7 @@ package com.oakiha.audia.presentation.viewmodel
 import android.os.SystemClock
 import androidx.media3.common.C
 import com.oakiha.audia.data.DailyMixManager
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.stats.PlaybackStatsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,12 +35,12 @@ class ListeningStatsTracker @Inject constructor(
         scope = coroutineScope
     }
 
-    fun onVoluntarySelection(songId: String) {
-        pendingVoluntarySongId = songId
+    fun onVoluntarySelection(trackId: String) {
+        pendingVoluntarySongId = trackId
     }
 
     fun onSongChanged(
-        song: Song?,
+        song: Track?,
         positionMs: Long,
         durationMs: Long,
         isPlaying: Boolean
@@ -59,7 +59,7 @@ class ListeningStatsTracker @Inject constructor(
         }
 
         currentSession = ActiveSession(
-            songId = song.id,
+            trackId = song.id,
             totalDurationMs = normalizedDuration,
             startedAtEpochMs = nowEpoch,
             lastKnownPositionMs = positionMs.coerceAtLeast(0L),
@@ -102,7 +102,7 @@ class ListeningStatsTracker @Inject constructor(
     }
 
     fun ensureSession(
-        song: Song?,
+        song: Track?,
         positionMs: Long,
         durationMs: Long,
         isPlaying: Boolean
@@ -112,7 +112,7 @@ class ListeningStatsTracker @Inject constructor(
             return
         }
         val existing = currentSession
-        if (existing?.songId == song.id) {
+        if (existing?.trackId == song.id) {
             updateDuration(durationMs)
             val nowRealtime = SystemClock.elapsedRealtime()
             if (existing.isPlaying) {
@@ -148,22 +148,22 @@ class ListeningStatsTracker @Inject constructor(
             val timestamp = rawEndTimestamp
                 .coerceAtLeast(session.startedAtEpochMs.coerceAtLeast(0L))
                 .coerceAtMost(System.currentTimeMillis())
-            val songId = session.songId
+            val trackId = session.trackId
             scope?.launch(Dispatchers.IO) {
                 dailyMixManager.recordPlay(
-                    songId = songId,
+                    trackId = trackId,
                     songDurationMs = listened,
                     timestamp = timestamp
                 )
                 playbackStatsRepository.recordPlayback(
-                    songId = songId,
+                    trackId = trackId,
                     durationMs = listened,
                     timestamp = timestamp
                 )
             }
         }
         currentSession = null
-        if (pendingVoluntarySongId == session.songId) {
+        if (pendingVoluntarySongId == session.trackId) {
             pendingVoluntarySongId = null
         }
     }
@@ -186,7 +186,7 @@ class ListeningStatsTracker @Inject constructor(
  * Represents an active listening session for a song.
  */
 data class ActiveSession(
-    val songId: String,
+    val trackId: String,
     var totalDurationMs: Long,
     val startedAtEpochMs: Long,
     var lastKnownPositionMs: Long,

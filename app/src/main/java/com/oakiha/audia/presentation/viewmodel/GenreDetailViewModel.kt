@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.model.Genre
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +16,14 @@ import javax.inject.Inject
 
 // Define Item Types for LazyColumn
 sealed interface GroupedTrackListItem {
-    data class ArtistHeader(val name: String) : GroupedTrackListItem
-    data class AlbumHeader(val name: String, val artistName: String, val albumArtUri: String?) : GroupedTrackListItem
-    data class SongItem(val song: Song) : GroupedTrackListItem
+    data class AuthorHeader(val name: String) : GroupedTrackListItem
+    data class BookHeader(val name: String, val artistName: String, val bookArtUri: String?) : GroupedTrackListItem
+    data class TrackItem(val song: Track) : GroupedTrackListItem
 }
 
 data class GenreDetailUiState(
     val genre: Genre? = null,
-    val songs: List<Song> = emptyList(),
+    val songs: List<Track> = emptyList(),
     val groupedSongs: List<GroupedTrackListItem> = emptyList(),
     val isLoadingGenreName: Boolean = false,
     val isLoadingSongs: Boolean = false,
@@ -86,15 +86,15 @@ class GenreDetailViewModel @Inject constructor(
         }
     }
 
-    private fun groupSongs(songs: List<Song>): List<GroupedTrackListItem> {
+    private fun groupSongs(songs: List<Track>): List<GroupedTrackListItem> {
         val newGroupedList = mutableListOf<GroupedTrackListItem>()
         songs.groupBy { it.artist }
             .forEach { (artistName, artistSongs) ->
                 newGroupedList.add(GroupedTrackListItem.ArtistHeader(artistName))
                 artistSongs.groupBy { it.album }
                     .forEach { (albumName, albumSongs) ->
-                        val albumArtUri = albumSongs.firstOrNull()?.albumArtUriString
-                        newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, albumArtUri))
+                        val bookArtUri = albumSongs.firstOrNull()?.bookArtUriString
+                        newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, bookArtUri))
                         albumSongs.forEach { song ->
                             newGroupedList.add(GroupedTrackListItem.SongItem(song))
                         }

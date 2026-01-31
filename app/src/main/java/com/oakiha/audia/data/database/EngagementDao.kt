@@ -19,8 +19,8 @@ interface EngagementDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertEngagements(engagements: List<TrackEngagementEntity>)
 
-    @Query("SELECT * FROM song_engagements WHERE song_id = :songId")
-    suspend fun getEngagement(songId: String): TrackEngagementEntity?
+    @Query("SELECT * FROM song_engagements WHERE song_id = :trackId")
+    suspend fun getEngagement(trackId: String): TrackEngagementEntity?
 
     @Query("SELECT * FROM song_engagements")
     suspend fun getAllEngagements(): List<TrackEngagementEntity>
@@ -28,11 +28,11 @@ interface EngagementDao {
     @Query("SELECT * FROM song_engagements")
     fun getAllEngagementsFlow(): Flow<List<TrackEngagementEntity>>
 
-    @Query("SELECT play_count FROM song_engagements WHERE song_id = :songId")
-    suspend fun getPlayCount(songId: String): Int?
+    @Query("SELECT play_count FROM song_engagements WHERE song_id = :trackId")
+    suspend fun getPlayCount(trackId: String): Int?
 
-    @Query("DELETE FROM song_engagements WHERE song_id = :songId")
-    suspend fun deleteEngagement(songId: String)
+    @Query("DELETE FROM song_engagements WHERE song_id = :trackId")
+    suspend fun deleteEngagement(trackId: String)
 
     @Query("DELETE FROM song_engagements WHERE song_id NOT IN (SELECT CAST(id AS TEXT) FROM songs)")
     suspend fun deleteOrphanedEngagements()
@@ -46,13 +46,13 @@ interface EngagementDao {
      */
     @Query("""
         INSERT INTO song_engagements (song_id, play_count, total_play_duration_ms, last_played_timestamp)
-        VALUES (:songId, 1, :durationMs, :timestamp)
+        VALUES (:trackId, 1, :durationMs, :timestamp)
         ON CONFLICT(song_id) DO UPDATE SET
             play_count = play_count + 1,
             total_play_duration_ms = total_play_duration_ms + :durationMs,
             last_played_timestamp = :timestamp
     """)
-    suspend fun recordPlay(songId: String, durationMs: Long, timestamp: Long)
+    suspend fun recordPlay(trackId: String, durationMs: Long, timestamp: Long)
 
     /**
      * Get top songs by play count for quick access.

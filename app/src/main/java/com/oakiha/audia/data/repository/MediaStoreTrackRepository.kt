@@ -5,7 +5,7 @@ import android.content.Context
 import android.provider.MediaStore
 import android.util.Log
 import com.oakiha.audia.data.database.FavoritesDao
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.observer.MediaStoreObserver
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.utils.DirectoryRuleResolver
@@ -57,7 +57,7 @@ class MediaStoreTrackRepository @Inject constructor(
         return emptySet() 
     }
 
-    override fun getTracks(): Flow<List<Song>> = combine(
+    override fun getTracks(): Flow<List<Track>> = combine(
         mediaStoreObserver.mediaStoreChanges.onStart { emit(Unit) },
         favoritesDao.getFavoriteSongIds(),
         userPreferencesRepository.allowedDirectoriesFlow,
@@ -71,8 +71,8 @@ class MediaStoreTrackRepository @Inject constructor(
         favoriteIds: Set<Long>,
         allowedDirs: List<String>,
         blockedDirs: List<String>
-    ): List<Song> = withContext(Dispatchers.IO) {
-        val songs = mutableListOf<Song>()
+    ): List<Track> = withContext(Dispatchers.IO) {
+        val songs = mutableListOf<Track>()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -96,7 +96,7 @@ class MediaStoreTrackRepository @Inject constructor(
         
         val selection = getBaseSelection()
 
-        val songIdToGenreMap = getTrackIdToGenreMap(context.contentResolver)
+        val trackIdToGenreMap = getTrackIdToGenreMap(context.contentResolver)
 
         try {
             context.contentResolver.query(
@@ -109,16 +109,16 @@ class MediaStoreTrackRepository @Inject constructor(
                 val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
                 val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
                 val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-                val artistIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
+                val authorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
                 val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-                val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+                val bookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
                 val pathCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                 val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
                 val yearCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
                 val dateModifiedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-                val albumArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST) // Can be -1
+                val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST) // Can be -1
 
                 val resolver = DirectoryRuleResolver(
                     allowedDirs.map(::normalizePath).toSet(),
@@ -139,25 +139,25 @@ class MediaStoreTrackRepository @Inject constructor(
                     }
 
                     val id = cursor.getLong(idCol)
-                    val albumId = cursor.getLong(albumIdCol)
+                    val bookId = cursor.getLong(bookIdCol)
                     
-                    val song = Song(
+                    val song = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
                         artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
-                        artistId = cursor.getLong(artistIdCol),
+                        authorId = cursor.getLong(authorIdCol),
                         artists = emptyList(), // TODO: Secondary query for Multi-Artist or split string
                         album = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
-                        albumId = albumId,
-                        albumArtist = if (albumArtistCol != -1) cursor.getString(albumArtistCol).normalizeMetadataText() else null,
+                        bookId = bookId,
+                        bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
                         path = path,
                         contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString(),
-                        albumArtUriString = ContentUris.withAppendedId(
+                        bookArtUriString = ContentUris.withAppendedId(
                             android.net.Uri.parse("content://media/external/audio/albumart"),
-                            albumId
+                            bookId
                         ).toString(),
                         duration = cursor.getLong(durationCol),
-                        genre = songIdToGenreMap[id],
+                        genre = trackIdToGenreMap[id],
                         lyrics = null,
                         isFavorite = favoriteIds.contains(id),
                         trackNumber = cursor.getInt(trackCol),
@@ -203,10 +203,10 @@ class MediaStoreTrackRepository @Inject constructor(
                                 val audioIdCol = membersCursor.getColumnIndex(MediaStore.Audio.Genres.Members.AUDIO_ID)
                                 if (audioIdCol != -1) {
                                     while (membersCursor.moveToNext()) {
-                                        val songId = membersCursor.getLong(audioIdCol)
+                                        val trackId = membersCursor.getLong(audioIdCol)
                                         // If a song has multiple genres, this simple map keeps the last one found.
                                         // Could be improved to join them if needed.
-                                        genreMap[songId] = genreName 
+                                        genreMap[trackId] = genreName 
                                     }
                                 }
                             }
@@ -222,36 +222,36 @@ class MediaStoreTrackRepository @Inject constructor(
         return genreMap
     }
 
-    override fun getTracksByAlbum(albumId: Long): Flow<List<Song>> {
+    override fun getTracksByAlbum(bookId: Long): Flow<List<Track>> {
          // Reusing getTracks() and filtering might be inefficient for one album, 
          // but consistent with the reactive source of truth.
          // Optimization: Create specific query flow if needed.
-         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(albumId)) { songs, id ->
-             songs.filter { it.albumId == id }
+         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(bookId)) { songs, id ->
+             songs.filter { it.bookId == id }
          }
     }
 
-    override fun getTracksByArtist(artistId: Long): Flow<List<Song>> {
-        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(artistId)) { songs, id ->
-            songs.filter { it.artistId == id }
+    override fun getTracksByArtist(authorId: Long): Flow<List<Track>> {
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(authorId)) { songs, id ->
+            songs.filter { it.authorId == id }
         }
     }
 
-    override suspend fun searchSongs(query: String): List<Song> {
+    override suspend fun searchSongs(query: String): List<Track> {
         val allTracks = getTracks().first() // Snapshot
         return allTracks.filter { 
             it.title.contains(query, true) || it.artist.contains(query, true) 
         }
     }
 
-    override fun getTrackById(songId: Long): Flow<Song?> {
-        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(songId)) { songs, id ->
+    override fun getTrackById(trackId: Long): Flow<Song?> {
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(trackId)) { songs, id ->
             songs.find { it.id == id.toString() }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Song>> {
+    override fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Track>> {
         return combine(
             mediaStoreObserver.mediaStoreChanges.onStart { emit(Unit) },
             userPreferencesRepository.allowedDirectoriesFlow,

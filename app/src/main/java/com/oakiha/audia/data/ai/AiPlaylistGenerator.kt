@@ -2,7 +2,7 @@ package com.oakiha.audia.data.ai
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.oakiha.audia.data.DailyMixManager
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.decodeFromString
@@ -20,11 +20,11 @@ class AiPlaylistGenerator @Inject constructor(
 
     suspend fun generate(
         userPrompt: String,
-        allTracks: List<Song>,
+        allTracks: List<Track>,
         minLength: Int,
         maxLength: Int,
-        candidateSongs: List<Song>? = null
-    ): Result<List<Song>> {
+        candidateSongs: List<Track>? = null
+    ): Result<List<Track>> {
         return try {
             val apiKey = userPreferencesRepository.geminiApiKey.first()
             if (apiKey.isBlank()) {
@@ -72,7 +72,7 @@ class AiPlaylistGenerator @Inject constructor(
                 {
                     "id": "${song.id}",
                     "title": "${song.title.replace("\"", "'")}",
-                    "artist": "${song.displayArtist.replace("\"", "'")}",
+                    "artist": "${song.displayAuthor.replace("\"", "'")}",
                     "genre": "${song.genre?.replace("\"", "'") ?: "unknown"}",
                     "relevance_score": $score
                 }
@@ -116,11 +116,11 @@ class AiPlaylistGenerator @Inject constructor(
             val response = generativeModel.generateContent(fullPrompt)
             val responseText = response.text ?: return Result.failure(Exception("AI returned an empty response."))
 
-            val songIds = extractPlaylistSongIds(responseText)
+            val trackIds = extractPlaylistSongIds(responseText)
 
             // Map the returned IDs to the actual Song objects
             val songMap = allTracks.associateBy { it.id }
-            val generatedPlaylist = songIds.mapNotNull { songMap[it] }
+            val generatedPlaylist = trackIds.mapNotNull { songMap[it] }
 
             if (generatedPlaylist.isNotEmpty()) {
                 promptCache[normalizedPrompt] = generatedPlaylist.map { it.id }

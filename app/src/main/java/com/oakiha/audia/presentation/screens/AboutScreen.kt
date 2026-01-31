@@ -226,7 +226,7 @@ fun AboutScreen(
 
     var showBrickBreaker by remember { mutableStateOf(false) }
     val stablePlayerState by viewModel.stablePlayerState.collectAsState()
-    val currentSong = stablePlayerState.currentSong
+    val currentTrack = stablePlayerState.currentTrack
 
     Box(
         modifier = Modifier
@@ -355,7 +355,7 @@ fun AboutScreen(
         if (showBrickBreaker) {
             BackHandler { showBrickBreaker = false }
             BrickBreakerOverlay(
-                isMiniPlayerVisible = currentSong != null,
+                isMiniPlayerVisible = currentTrack != null,
                 onPlayRandom = { viewModel.playRandomTrack() },
                 onClose = { showBrickBreaker = false }
             )

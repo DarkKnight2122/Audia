@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 data class AudiobookFolder(
     val path: String,
     val name: String,
-    val songs: ImmutableList<Song> = persistentListOf(),
+    val songs: ImmutableList<Track> = persistentListOf(),
     val subFolders: ImmutableList<AudiobookFolder> = persistentListOf()
 ) {
     val totalSongCount: Int by lazy {

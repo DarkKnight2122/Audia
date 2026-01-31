@@ -11,10 +11,10 @@ import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.kyant.taglib.TagLib
 import com.oakiha.audia.R
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.network.lyrics.LrcLibApiService
 import com.oakiha.audia.data.network.lyrics.LrcLibResponse
 import com.oakiha.audia.utils.LogUtils
@@ -140,13 +140,13 @@ class LyricsRepositoryImpl @Inject constructor(
      * Main lyrics fetching method with source preference support (matching Rhythm)
      */
     override suspend fun getLyrics(
-        song: Song,
+        song: Track,
         sourcePreference: LyricsSourcePreference,
         forceRefresh: Boolean
     ): Lyrics? = withContext(Dispatchers.IO) {
         val cacheKey = generateCacheKey(song.id)
         
-        Log.d(TAG, "===== FETCH LYRICS START: ${song.displayArtist} - ${song.title} (forceRefresh=$forceRefresh, source=$sourcePreference) =====")
+        Log.d(TAG, "===== FETCH LYRICS START: ${song.displayAuthor} - ${song.title} (forceRefresh=$forceRefresh, source=$sourcePreference) =====")
 
         // Check in-memory cache unless force refresh (early return - matching Rhythm)
         if (!forceRefresh) {
@@ -203,7 +203,7 @@ class LyricsRepositoryImpl @Inject constructor(
                             LyricsSourcePreference.LOCAL_FIRST -> "API"
                         }
                     }
-                    Log.d(TAG, "Found lyrics from $sourceName for: ${song.displayArtist} - ${song.title}")
+                    Log.d(TAG, "Found lyrics from $sourceName for: ${song.displayAuthor} - ${song.title}")
                     
                     // Cache the result
                     synchronized(lyricsCache) {
@@ -224,14 +224,14 @@ class LyricsRepositoryImpl @Inject constructor(
         }
 
         // No lyrics found from any source
-        Log.d(TAG, "No lyrics found from any source for: ${song.displayArtist} - ${song.title}")
+        Log.d(TAG, "No lyrics found from any source for: ${song.displayAuthor} - ${song.title}")
         return@withContext null
     }
 
     /**
      * Fetches lyrics from LRCLIB API with rate limiting (matching Rhythm)
      */
-    private suspend fun fetchLyricsFromAPI(song: Song): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun fetchLyricsFromAPI(song: Track): Lyrics? = withContext(Dispatchers.IO) {
         // Check JSON disk cache first (matching Rhythm)
         val cachedJson = loadLocalLyricsJson(song)
         if (cachedJson != null) {
@@ -249,7 +249,7 @@ class LyricsRepositoryImpl @Inject constructor(
         updateLastApiCall("lrclib", System.currentTimeMillis())
 
         try {
-            val cleanArtist = song.displayArtist.trim().replace(Regex("\\(.*?\\)"), "").trim()
+            val cleanArtist = song.displayAuthor.trim().replace(Regex("\\(.*?\\)"), "").trim()
             val cleanTitle = song.title.trim().replace(Regex("\\(.*?\\)"), "").trim()
 
             // Strategy 1: Search by track name and artist name (matching Rhythm)
@@ -303,7 +303,7 @@ class LyricsRepositoryImpl @Inject constructor(
                         // Save to database
                         lyricsDao.insert(
                             com.oakiha.audia.data.database.LyricsEntity(
-                                songId = song.id.toLong(),
+                                trackId = song.id.toLong(),
                                 content = rawLyrics,
                                 isSynced = !bestMatch.syncedLyrics.isNullOrBlank(),
                                 source = "remote"
@@ -331,7 +331,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Find local .lrc file next to the music file (matching Rhythm)
      */
-    private suspend fun findLocalLrcFile(song: Song): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun findLocalLrcFile(song: Track): Lyrics? = withContext(Dispatchers.IO) {
         try {
             val songFile = File(song.path)
             val directory = songFile.parentFile ?: return@withContext null
@@ -350,7 +350,7 @@ class LyricsRepositoryImpl @Inject constructor(
                 }
 
                 // Also try with artist - title pattern
-                val cleanArtist = song.displayArtist.replace(Regex("[^a-zA-Z0-9]"), "_")
+                val cleanArtist = song.displayAuthor.replace(Regex("[^a-zA-Z0-9]"), "_")
                 val cleanTitle = song.title.replace(Regex("[^a-zA-Z0-9]"), "_")
                 val alternativeLrcFile = File(directory, "${cleanArtist}_${cleanTitle}.lrc")
                 if (alternativeLrcFile.exists() && alternativeLrcFile.canRead()) {
@@ -382,7 +382,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Save lyrics to JSON disk cache (matching Rhythm)
      */
-    private fun saveLocalLyricsJson(song: Song, lyrics: Lyrics) {
+    private fun saveLocalLyricsJson(song: Track, lyrics: Lyrics) {
         try {
             val fileName = "${song.id}.json"
             val lyricsDir = File(context.filesDir, "lyrics")
@@ -405,7 +405,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Load lyrics from JSON disk cache (matching Rhythm)
      */
-    private fun loadLocalLyricsJson(song: Song): Lyrics? {
+    private fun loadLocalLyricsJson(song: Track): Lyrics? {
         try {
             val fileName = "${song.id}.json"
             val file = File(context.filesDir, "lyrics/$fileName")
@@ -438,7 +438,7 @@ class LyricsRepositoryImpl @Inject constructor(
     /**
      * Load embedded lyrics from audio file metadata
      */
-    private suspend fun loadLyricsFromStorage(song: Song): Lyrics? = withContext(Dispatchers.IO) {
+    private suspend fun loadLyricsFromStorage(song: Track): Lyrics? = withContext(Dispatchers.IO) {
         // First check database for persisted lyrics (was user-imported or cached)
         val persisted = lyricsDao.getLyrics(song.id.toLong())
         if (persisted != null && !persisted.content.isBlank()) {
@@ -486,7 +486,7 @@ class LyricsRepositoryImpl @Inject constructor(
 
     // ========== Original methods (kept for backward compatibility) ==========
 
-    override suspend fun fetchFromRemote(song: Song): Result<Pair<Lyrics, String>> = withContext(Dispatchers.IO) {
+    override suspend fun fetchFromRemote(song: Track): Result<Pair<Lyrics, String>> = withContext(Dispatchers.IO) {
         try {
             LogUtils.d(this@LyricsRepositoryImpl, "Fetching lyrics from remote for: ${song.title}")
 
@@ -503,7 +503,7 @@ class LyricsRepositoryImpl @Inject constructor(
 
                     lyricsDao.insert(
                          com.oakiha.audia.data.database.LyricsEntity(
-                             songId = song.id.toLong(),
+                             trackId = song.id.toLong(),
                              content = rawLyricsToSave,
                              isSynced = !best.lyrics.synced.isNullOrEmpty(),
                              source = "remote"
@@ -523,7 +523,7 @@ class LyricsRepositoryImpl @Inject constructor(
             // Fallback: Try the exact match API (less likely to succeed, but worth a shot)
             val response = lrcLibApiService.getLyrics(
                 trackName = song.title,
-                artistName = song.displayArtist,
+                artistName = song.displayAuthor,
                 albumName = song.album,
                 duration = (song.duration / 1000).toInt()
             )
@@ -538,7 +538,7 @@ class LyricsRepositoryImpl @Inject constructor(
 
                 lyricsDao.insert(
                      com.oakiha.audia.data.database.LyricsEntity(
-                         songId = song.id.toLong(),
+                         trackId = song.id.toLong(),
                          content = rawLyricsToSave,
                          isSynced = !parsedLyrics.synced.isNullOrEmpty(),
                          source = "remote"
@@ -569,16 +569,16 @@ class LyricsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchRemote(song: Song): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
+    override suspend fun searchRemote(song: Track): Result<Pair<String, List<LyricsSearchResult>>> = withContext(Dispatchers.IO) {
         try {
-            LogUtils.d(this@LyricsRepositoryImpl, "Searching remote for lyrics for: ${song.title} by ${song.displayArtist}")
+            LogUtils.d(this@LyricsRepositoryImpl, "Searching remote for lyrics for: ${song.title} by ${song.displayAuthor}")
 
-            val combinedQuery = "${song.title} ${song.displayArtist}"
+            val combinedQuery = "${song.title} ${song.displayAuthor}"
 
             // SEQUENTIAL STRATEGY: Try each search strategy one by one
             val strategies: List<suspend () -> Array<LrcLibResponse>?> = listOf(
-                { runCatching { lrcLibApiService.searchLyrics(query = combinedQuery, artistName = song.displayArtist) }.getOrNull() },
-                { runCatching { lrcLibApiService.searchLyrics(trackName = song.title, artistName = song.displayArtist) }.getOrNull() },
+                { runCatching { lrcLibApiService.searchLyrics(query = combinedQuery, artistName = song.displayAuthor) }.getOrNull() },
+                { runCatching { lrcLibApiService.searchLyrics(trackName = song.title, artistName = song.displayAuthor) }.getOrNull() },
                 { runCatching { lrcLibApiService.searchLyrics(trackName = song.title) }.getOrNull() },
                 { runCatching { lrcLibApiService.searchLyrics(query = song.title) }.getOrNull() }
             )
@@ -680,42 +680,42 @@ class LyricsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateLyrics(songId: Long, lyricsContent: String): Unit = withContext(Dispatchers.IO) {
-        LogUtils.d(this@LyricsRepositoryImpl, "Updating lyrics for songId: $songId")
+    override suspend fun updateLyrics(trackId: Long, lyricsContent: String): Unit = withContext(Dispatchers.IO) {
+        LogUtils.d(this@LyricsRepositoryImpl, "Updating lyrics for trackId: $trackId")
 
         val parsedLyrics = LyricsUtils.parseLyrics(lyricsContent)
         if (!parsedLyrics.isValid()) {
-            LogUtils.w(this@LyricsRepositoryImpl, "Attempted to save empty lyrics for songId: $songId")
+            LogUtils.w(this@LyricsRepositoryImpl, "Attempted to save empty lyrics for trackId: $trackId")
             return@withContext
         }
 
         lyricsDao.insert(
              com.oakiha.audia.data.database.LyricsEntity(
-                 songId = songId,
+                 trackId = trackId,
                  content = lyricsContent,
                  isSynced = parsedLyrics.synced?.isNotEmpty() == true,
                  source = "manual"
              )
         )
 
-        val cacheKey = generateCacheKey(songId.toString())
+        val cacheKey = generateCacheKey(trackId.toString())
         synchronized(lyricsCache) {
             lyricsCache[cacheKey] = parsedLyrics
         }
-        LogUtils.d(this@LyricsRepositoryImpl, "Updated and cached lyrics for songId: $songId")
+        LogUtils.d(this@LyricsRepositoryImpl, "Updated and cached lyrics for trackId: $trackId")
     }
 
-    override suspend fun resetLyrics(songId: Long): Unit = withContext(Dispatchers.IO) {
-        LogUtils.d(this, "Resetting lyrics for songId: $songId")
-        val cacheKey = generateCacheKey(songId.toString())
+    override suspend fun resetLyrics(trackId: Long): Unit = withContext(Dispatchers.IO) {
+        LogUtils.d(this, "Resetting lyrics for trackId: $trackId")
+        val cacheKey = generateCacheKey(trackId.toString())
         synchronized(lyricsCache) {
             lyricsCache.remove(cacheKey)
         }
-        lyricsDao.deleteLyrics(songId)
+        lyricsDao.deleteLyrics(trackId)
         
         // Also remove JSON cache
         try {
-            val file = File(context.filesDir, "lyrics/${songId}.json")
+            val file = File(context.filesDir, "lyrics/${trackId}.json")
             if (file.exists()) file.delete()
         } catch (e: Exception) {
             Log.w(TAG, "Error deleting JSON cache: ${e.message}")
@@ -741,7 +741,7 @@ class LyricsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun scanAndAssignLocalLrcFiles(
-        songs: List<Song>,
+        songs: List<Track>,
         onProgress: suspend (current: Int, total: Int) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         LogUtils.d(this@LyricsRepositoryImpl, "Starting bulk scan for .lrc files for ${songs.size} songs")
@@ -782,9 +782,9 @@ class LyricsRepositoryImpl @Inject constructor(
                                     foundFile = exactMatch
                                 }
                                 
-                                // Strategy 2: Artist - Title
+                                // Strategy 2: Author - Title
                                 if (foundFile == null) {
-                                    val cleanArtist = song.displayArtist.replace(Regex("[^a-zA-Z0-9]"), "_")
+                                    val cleanArtist = song.displayAuthor.replace(Regex("[^a-zA-Z0-9]"), "_")
                                     val cleanTitle = song.title.replace(Regex("[^a-zA-Z0-9]"), "_")
                                     val altMatch = File(directory, "${cleanArtist}_${cleanTitle}.lrc")
                                     if (altMatch.exists() && altMatch.canRead()) {
@@ -798,7 +798,7 @@ class LyricsRepositoryImpl @Inject constructor(
                                     if (LyricsUtils.parseLyrics(content).isValid()) {
                                         lyricsDao.insert(
                                              com.oakiha.audia.data.database.LyricsEntity(
-                                                 songId = song.id.toLong(),
+                                                 trackId = song.id.toLong(),
                                                  content = content,
                                                  isSynced = LyricsUtils.parseLyrics(content).synced?.isNotEmpty() == true,
                                                  source = "local_file"
@@ -833,7 +833,7 @@ class LyricsRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun generateCacheKey(songId: String): String = songId
+    private fun generateCacheKey(trackId: String): String = trackId
 
     private fun createTempFileFromUri(uri: Uri): File? {
         return try {

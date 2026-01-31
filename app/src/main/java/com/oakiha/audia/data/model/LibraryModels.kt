@@ -4,38 +4,38 @@ import android.net.Uri
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class Album(
+data class Book(
     val id: Long, // MediaStore.Audio.Albums._ID
     val title: String,
     val artist: String,
     val year: Int,
-    val albumArtUriString: String?,
-    val songCount: Int
+    val bookArtUriString: String?,
+    val trackCount: Int
 ) {
     companion object {
-        fun empty() = Album(
+        fun empty() = Book(
             id = -1,
             title = "",
             artist = "",
             year = 0,
-            albumArtUriString = null,
-            songCount = 0
+            bookArtUriString = null,
+            trackCount = 0
         )
     }
 }
 
 @Immutable
-data class Artist(
+data class Author(
     val id: Long, // MediaStore.Audio.Artists._ID
     val name: String,
-    val songCount: Int,
+    val trackCount: Int,
     val imageUrl: String? = null // Deezer artist image URL
 ) {
     companion object {
-        fun empty() = Artist(
+        fun empty() = Author(
             id = -1,
             name = "",
-            songCount = 0,
+            trackCount = 0,
             imageUrl = null
         )
     }
@@ -46,7 +46,7 @@ data class Artist(
  * Used when displaying multiple artists for a song.
  */
 @Immutable
-data class ArtistRef(
+data class AuthorRef(
     val id: Long,
     val name: String,
     val isPrimary: Boolean = false

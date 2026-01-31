@@ -1,10 +1,10 @@
 package com.oakiha.audia.presentation.viewmodel
 
 import androidx.compose.runtime.Immutable
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.AudiobookFolder
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.model.SearchResultItem
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.model.SearchFilterType
@@ -14,22 +14,22 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class PlayerUiState(
-    val allTracks: ImmutableList<Song> = persistentListOf(),
+    val allTracks: ImmutableList<Track> = persistentListOf(),
     val currentPosition: Long = 0L,
-    val currentPlaybackQueue: ImmutableList<Song> = persistentListOf(),
+    val currentPlaybackQueue: ImmutableList<Track> = persistentListOf(),
     val currentQueueSourceName: String = "All Songs",
-    val albums: ImmutableList<Album> = persistentListOf(),
-    val artists: ImmutableList<Artist> = persistentListOf(),
+    val albums: ImmutableList<Book> = persistentListOf(),
+    val artists: ImmutableList<Author> = persistentListOf(),
     val searchResults: ImmutableList<SearchResultItem> = persistentListOf(),
     val musicFolders: ImmutableList<AudiobookFolder> = persistentListOf(),
     val sortOption: SortOption = SortOption.SongDefaultOrder,
     val isLoadingInitialSongs: Boolean = true,
     val isLoadingLibrary: Boolean = true,
-    val filteredSongs: ImmutableList<Song> = persistentListOf(), // For search filtering within lists
+    val filteredSongs: ImmutableList<Track> = persistentListOf(), // For search filtering within lists
     val isFiltering: Boolean = false,
     val showDismissUndoBar: Boolean = false,
-    val dismissedSong: Song? = null,
-    val dismissedQueue: ImmutableList<Song> = persistentListOf(),
+    val dismissedSong: Track? = null,
+    val dismissedQueue: ImmutableList<Track> = persistentListOf(),
     val dismissedQueueName: String = "",
     val dismissedPosition: Long = 0L,
     val currentFolder: AudiobookFolder? = null,
@@ -44,8 +44,8 @@ data class PlayerUiState(
     val currentAlbumSortOption: SortOption = SortOption.AlbumTitleAZ,
     val currentArtistSortOption: SortOption = SortOption.ArtistNameAZ,
     val currentFolderSortOption: SortOption = SortOption.FolderNameAZ,
-    val currentSongSortOption: SortOption = SortOption.SongTitleAZ,
-    val songCount: Int = 0,
+    val currentTrackSortOption: SortOption = SortOption.SongTitleAZ,
+    val trackCount: Int = 0,
     val isGeneratingAiMetadata: Boolean = false,
     val searchHistory: ImmutableList<SearchHistoryItem> = persistentListOf(),
     val searchQuery: String = "",

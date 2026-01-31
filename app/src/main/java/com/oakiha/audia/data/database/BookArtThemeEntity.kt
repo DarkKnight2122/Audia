@@ -21,7 +21,7 @@ data class StoredColorSchemeValues(
 
 @Entity(tableName = "album_art_themes")
 data class BookArtThemeEntity(
-    @PrimaryKey val albumArtUriString: String,
+    @PrimaryKey val bookArtUriString: String,
     @Embedded(prefix = "light_") val lightThemeValues: StoredColorSchemeValues,
     @Embedded(prefix = "dark_") val darkThemeValues: StoredColorSchemeValues
 )

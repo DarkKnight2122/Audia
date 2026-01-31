@@ -16,7 +16,7 @@ import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.service.http.MediaFileHttpServerService
 import com.oakiha.audia.data.service.player.CastPlayer
 import com.oakiha.audia.data.service.player.DualPlayerEngine
@@ -50,11 +50,11 @@ class CastTransferStateHolder @Inject constructor(
     
     // Callbacks for interacting with PlayerViewModel
     // Provides current queue from UI state
-    private var getCurrentQueue: (() -> List<Song>)? = null
+    private var getCurrentQueue: (() -> List<Track>)? = null
     // Syncs queue updates back to UI
-    private var updateQueue: ((List<Song>) -> Unit)? = null
+    private var updateQueue: ((List<Track>) -> Unit)? = null
     // Provides master song list for resolution
-    private var getMasterAllSongs: (() -> List<Song>)? = null
+    private var getMasterAllSongs: (() -> List<Track>)? = null
     // Callback when transfer is finished
     private var onTransferBackComplete: (() -> Unit)? = null
     // Callback to ensure UI sheet is visible
@@ -74,7 +74,7 @@ class CastTransferStateHolder @Inject constructor(
 
     // State tracking variables
     private var lastRemoteMediaStatus: MediaStatus? = null
-    var lastRemoteQueue: List<Song> = emptyList()
+    var lastRemoteQueue: List<Track> = emptyList()
         private set
     var lastRemoteSongId: String? = null
         private set
@@ -94,9 +94,9 @@ class CastTransferStateHolder @Inject constructor(
 
     fun initialize(
         scope: CoroutineScope,
-        getCurrentQueue: () -> List<Song>,
-        updateQueue: (List<Song>) -> Unit,
-        getMasterAllSongs: () -> List<Song>,
+        getCurrentQueue: () -> List<Track>,
+        updateQueue: (List<Track>) -> Unit,
+        getMasterAllSongs: () -> List<Track>,
         onTransferBackComplete: () -> Unit,
         onSheetVisible: () -> Unit,
         onDisconnect: () -> Unit,
@@ -124,7 +124,7 @@ class CastTransferStateHolder @Inject constructor(
                     val activeId = status
                         ?.getQueueItemById(status.getCurrentItemId())
                         ?.customData
-                        ?.optString("songId")
+                        ?.optString("trackId")
                     if (activeId == null || activeId != pendingId) {
                          Timber.tag(CAST_LOG_TAG).d("Ignoring remote progress %d while pending target %s", progress, pendingId)
                         return@ProgressListener
@@ -195,18 +195,18 @@ class CastTransferStateHolder @Inject constructor(
         val songMap = getMasterAllSongs?.invoke()?.associateBy { it.id } ?: emptyMap()
         
         val newQueue = mediaStatus.queueItems.mapNotNull { item ->
-            item.customData?.optString("songId")?.let { songId -> songMap[songId] }
+            item.customData?.optString("trackId")?.let { trackId -> songMap[trackId] }
         }.toImmutableList()
 
         val currentItemId = mediaStatus.getCurrentItemId()
         val currentRemoteItem = mediaStatus.getQueueItemById(currentItemId)
-        val currentSongId = currentRemoteItem?.customData?.optString("songId")
+        val currentTrackId = currentRemoteItem?.customData?.optString("trackId")
         val streamPosition = mediaStatus.streamPosition
 
         val pendingId = pendingRemoteSongId
         val pendingIsFresh = pendingId != null &&
             SystemClock.elapsedRealtime() - pendingRemoteSongMarkedAt < 4000
-        if (pendingIsFresh && currentSongId != null && currentSongId != pendingId) {
+        if (pendingIsFresh && currentTrackId != null && currentTrackId != pendingId) {
              remoteMediaClient.requestStatus()
              return
         }
@@ -214,7 +214,7 @@ class CastTransferStateHolder @Inject constructor(
         val itemChanged = lastRemoteItemId != currentItemId
         if (itemChanged) {
              lastRemoteItemId = currentItemId
-             if (pendingRemoteSongId != null && pendingRemoteSongId != currentSongId) {
+             if (pendingRemoteSongId != null && pendingRemoteSongId != currentTrackId) {
                  pendingRemoteSongId = null
              }
              castStateHolder.setRemotelySeeking(false)
@@ -232,29 +232,29 @@ class CastTransferStateHolder @Inject constructor(
         }
         
         // Update current song
-        val reportedSong = currentSongId?.let { songMap[it] }
-        val effectiveSong = resolvePendingRemoteSong(reportedSong, currentSongId, songMap)
-        val effectiveSongId = effectiveSong?.id ?: currentSongId ?: lastRemoteSongId
+        val reportedSong = currentTrackId?.let { songMap[it] }
+        val effectiveSong = resolvePendingRemoteSong(reportedSong, currentTrackId, songMap)
+        val effectiveSongId = effectiveSong?.id ?: currentTrackId ?: lastRemoteSongId
         
         if (effectiveSongId != null) {
             lastRemoteSongId = effectiveSongId
         }
         
-        val currentSongFallback = effectiveSong 
+        val currentTrackFallback = effectiveSong 
             ?: run {
                 val pId = pendingRemoteSongId
-                val stableSong = playbackStateHolder.stablePlayerState.value.currentSong
+                val stableSong = playbackStateHolder.stablePlayerState.value.currentTrack
                 if (pId != null && pId == stableSong?.id && SystemClock.elapsedRealtime() - pendingRemoteSongMarkedAt < 4000) {
                     stableSong
                 } else {
-                    playbackStateHolder.stablePlayerState.value.currentSong
+                    playbackStateHolder.stablePlayerState.value.currentTrack
                 }
             }
             ?: lastRemoteQueue.firstOrNull { it.id == lastRemoteSongId }
             
-        if (currentSongFallback?.id != playbackStateHolder.stablePlayerState.value.currentSong?.id) {
+        if (currentTrackFallback?.id != playbackStateHolder.stablePlayerState.value.currentTrack?.id) {
              // Pass callback to generate colors or handle it in PlayerViewModel observing stablePlayerState
-             onSongChanged?.invoke(currentSongFallback?.albumArtUriString)
+             onSongChanged?.invoke(currentTrackFallback?.bookArtUriString)
         }
 
         val isPlaying = mediaStatus.playerState == MediaStatus.PLAYER_STATE_PLAYING
@@ -268,7 +268,7 @@ class CastTransferStateHolder @Inject constructor(
                  it.copy(
                      currentPosition = streamPosition,
                      totalDuration = remoteMediaClient.streamDuration,
-                     currentSong = currentSongFallback,
+                     currentTrack = currentTrackFallback,
                      isPlaying = isPlaying,
                      repeatMode = if (mediaStatus.queueRepeatMode == MediaStatus.REPEAT_MODE_REPEAT_SINGLE) Player.REPEAT_MODE_ONE
                                   else if (mediaStatus.queueRepeatMode == MediaStatus.REPEAT_MODE_REPEAT_ALL || mediaStatus.queueRepeatMode == MediaStatus.REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE) Player.REPEAT_MODE_ALL
@@ -316,7 +316,7 @@ class CastTransferStateHolder @Inject constructor(
             }
 
             val wasPlaying = localPlayer.isPlaying
-            val currentSongIndex = localPlayer.currentMediaItemIndex
+            val currentTrackIndex = localPlayer.currentMediaItemIndex
             val currentPosition = localPlayer.currentPosition
             
              val castRepeatMode = if (localPlayer.shuffleModeEnabled) {
@@ -331,7 +331,7 @@ class CastTransferStateHolder @Inject constructor(
 
             lastRemoteMediaStatus = null
             lastRemoteQueue = currentQueue
-            lastRemoteSongId = currentQueue.getOrNull(currentSongIndex)?.id
+            lastRemoteSongId = currentQueue.getOrNull(currentTrackIndex)?.id
             lastRemoteStreamPosition = currentPosition
             lastRemoteRepeatMode = castRepeatMode
 
@@ -346,7 +346,7 @@ class CastTransferStateHolder @Inject constructor(
 
             castStateHolder.castPlayer?.loadQueue(
                 songs = currentQueue,
-                startIndex = currentSongIndex,
+                startIndex = currentTrackIndex,
                 startPosition = currentPosition,
                 repeatMode = castRepeatMode,
                 serverAddress = serverAddress,
@@ -429,8 +429,8 @@ class CastTransferStateHolder @Inject constructor(
         val queueData = withContext(Dispatchers.Default) {
             val fallbackQueue = if (transferSnapshot.lastKnownStatus?.queueItems?.isNotEmpty() == true) {
                 transferSnapshot.lastKnownStatus.queueItems.mapNotNull { item ->
-                    item.customData?.optString("songId")?.let { songId ->
-                         getMasterAllSongs?.invoke()?.firstOrNull { it.id == songId }
+                    item.customData?.optString("trackId")?.let { trackId ->
+                         getMasterAllSongs?.invoke()?.firstOrNull { it.id == trackId }
                     }
                 }.toImmutableList()
             } else {
@@ -440,7 +440,7 @@ class CastTransferStateHolder @Inject constructor(
              val songMap = getMasterAllSongs?.invoke()?.associateBy { it.id } ?: emptyMap()
             val finalQueue = chosenQueue.mapNotNull { song -> songMap[song.id] }
             
-            val targetTrackId = transferSnapshot.lastKnownStatus?.getQueueItemById(lastItemId ?: 0)?.customData?.optString("songId")
+            val targetTrackId = transferSnapshot.lastKnownStatus?.getQueueItemById(lastItemId ?: 0)?.customData?.optString("trackId")
                 ?: transferSnapshot.lastRemoteSongId
                 
             QueueTransferData(
@@ -478,7 +478,7 @@ class CastTransferStateHolder @Inject constructor(
             updateQueue?.invoke(queueData.finalQueue)
             playbackStateHolder.updateStablePlayerState {
                 it.copy(
-                    currentSong = rebuildResult.targetTrack,
+                    currentTrack = rebuildResult.targetTrack,
                     isPlaying = wasPlaying,
                     totalDuration = rebuildResult.targetTrack?.duration ?: it.totalDuration,
                     isShuffleEnabled = queueData.isShuffleEnabled,
@@ -526,8 +526,8 @@ class CastTransferStateHolder @Inject constructor(
     }
 
     suspend fun playRemoteQueue(
-        songsToPlay: List<Song>,
-        startSong: Song,
+        songsToPlay: List<Track>,
+        startSong: Track,
         isShuffleEnabled: Boolean
     ): Boolean {
         if (!ensureHttpServerRunning()) return false
@@ -576,17 +576,17 @@ class CastTransferStateHolder @Inject constructor(
         return false
     }
 
-     fun markPendingRemoteSong(song: Song) {
+     fun markPendingRemoteSong(song: Track) {
         pendingRemoteSongId = song.id
         pendingRemoteSongMarkedAt = SystemClock.elapsedRealtime()
         lastRemoteSongId = song.id
         lastRemoteItemId = null
         Timber.tag(CAST_LOG_TAG).d("Marked pending remote song: %s", song.id)
         
-        playbackStateHolder.updateStablePlayerState { state -> state.copy(currentSong = song) }
+        playbackStateHolder.updateStablePlayerState { state -> state.copy(currentTrack = song) }
         onSheetVisible?.invoke()
         
-        onSongChanged?.invoke(song.albumArtUriString)
+        onSongChanged?.invoke(song.bookArtUriString)
 
         val queue = getCurrentQueue?.invoke() ?: lastRemoteQueue
         val updatedQueue = if (queue.any { it.id == song.id } || queue.isEmpty()) {
@@ -604,10 +604,10 @@ class CastTransferStateHolder @Inject constructor(
     }
 
     private fun resolvePendingRemoteSong(
-        reportedSong: Song?,
-        currentSongId: String?,
+        reportedSong: Track?,
+        currentTrackId: String?,
         songMap: Map<String, Song>
-    ): Song? {
+    ): Track? {
         if (reportedSong != null) return reportedSong
 
         val pendingId = pendingRemoteSongId
@@ -616,7 +616,7 @@ class CastTransferStateHolder @Inject constructor(
         val pendingIsFresh = SystemClock.elapsedRealtime() - pendingRemoteSongMarkedAt < 4000
         if (!pendingIsFresh) return null
 
-        if (currentSongId != pendingId) {
+        if (currentTrackId != pendingId) {
              return null
         }
 
@@ -626,7 +626,7 @@ class CastTransferStateHolder @Inject constructor(
     // Helper Data Classes
     private data class TransferSnapshot(
         val lastKnownStatus: MediaStatus?,
-        val lastRemoteQueue: List<Song>,
+        val lastRemoteQueue: List<Track>,
         val lastRemoteSongId: String?,
         val lastRemoteStreamPosition: Long,
         val lastRemoteRepeatMode: Int,
@@ -636,7 +636,7 @@ class CastTransferStateHolder @Inject constructor(
     )
     
      private data class QueueTransferData(
-        val finalQueue: List<Song>,
+        val finalQueue: List<Track>,
         val targetTrackId: String?,
         val isShuffleEnabled: Boolean
     )
@@ -644,6 +644,6 @@ class CastTransferStateHolder @Inject constructor(
     private data class RebuildArtifacts(
         val startIndex: Int,
         val mediaItems: List<MediaItem>,
-        val targetTrack: Song?
+        val targetTrack: Track?
     )
 }

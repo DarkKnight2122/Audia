@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
@@ -45,8 +45,8 @@ import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LibrarySongsTab(
-    songs: ImmutableList<Song>,
+fun LibraryTracksTab(
+    songs: ImmutableList<Track>,
     isLoading: Boolean,
     stablePlayerState: StablePlayerState,
     playerViewModel: PlayerViewModel,
@@ -152,7 +152,7 @@ fun LibrarySongsTab(
                             key = { "song_${it.id}" },
                             contentType = { "song" }
                         ) { song ->
-                            val isPlayingThisSong = song.id == stablePlayerState.currentSong?.id && stablePlayerState.isPlaying
+                            val isPlayingThisSong = song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                             
                             val rememberedOnMoreOptionsClick: (Song) -> Unit = remember(onMoreOptionsClick) {
                                 { songFromListItem -> onMoreOptionsClick(songFromListItem) }
@@ -171,7 +171,7 @@ fun LibrarySongsTab(
                             EnhancedTrackListItem(
                                 song = song,
                                 isPlaying = isPlayingThisSong,
-                                isCurrentSong = stablePlayerState.currentSong?.id == song.id,
+                                isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
                                 isLoading = false,
                                 onMoreOptionsClick = rememberedOnMoreOptionsClick,
                                 onClick = rememberedOnClick

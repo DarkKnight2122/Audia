@@ -61,15 +61,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.model.Album
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Book
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.Playlist
 import com.oakiha.audia.data.model.SearchFilterType
 import com.oakiha.audia.data.model.SearchHistoryItem
 import com.oakiha.audia.data.model.SearchResultItem
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import android.util.Log
 import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
@@ -126,8 +126,8 @@ fun SearchScreen(
     val genres by playerViewModel.genres.collectAsState()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsState()
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
-    var selectedSongForInfo by remember { mutableStateOf<Song?>(null) }
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
+    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) }
 
     // Perform search whenever searchQuery, active state, or filter changes
     LaunchedEffect(searchQuery, active, currentFilter) {
@@ -139,9 +139,9 @@ fun SearchScreen(
     }
     val searchResults = uiState.searchResults
     val handleSongMoreOptionsClick: (Song) -> Unit = { song ->
-        selectedSongForInfo = song
+        selectedTrackForInfo = song
         playerViewModel.selectSongForInfo(song)
-        showSongInfoBottomSheet = true
+        showTrackInfoBottomSheet = true
     }
 
     val searchbarHorizontalPadding by animateDpAsState(
@@ -332,7 +332,7 @@ fun SearchScreen(
                                     results = searchResults,
                                     playerViewModel = playerViewModel,
                                     onItemSelected = rememberedOnItemSelected,
-                                    currentPlayingSongId = stablePlayerState.currentSong?.id,
+                                    currentPlayingSongId = stablePlayerState.currentTrack?.id,
                                     isPlaying = stablePlayerState.isPlaying,
                                     onSongMoreOptionsClick = handleSongMoreOptionsClick,
                                     navController = navController
@@ -406,7 +406,7 @@ fun SearchScreen(
                             results = searchResults,
                             playerViewModel = playerViewModel,
                             onItemSelected = { },
-                            currentPlayingSongId = stablePlayerState.currentSong?.id,
+                            currentPlayingSongId = stablePlayerState.currentTrack?.id,
                             isPlaying = stablePlayerState.isPlaying,
                             onSongMoreOptionsClick = handleSongMoreOptionsClick,
                             navController = navController
@@ -417,55 +417,55 @@ fun SearchScreen(
         }
     }
 
-    if (showSongInfoBottomSheet && selectedSongForInfo != null) {
-        val currentSong = selectedSongForInfo
-        val isFavorite = remember(currentSong?.id, favoriteSongIds) {
+    if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
+        val currentTrack = selectedTrackForInfo
+        val isFavorite = remember(currentTrack?.id, favoriteSongIds) {
             derivedStateOf {
-                currentSong?.let { favoriteSongIds.contains(it.id) }
+                currentTrack?.let { favoriteSongIds.contains(it.id) }
             }
         }.value ?: false
-        val removeFromListTrigger = remember(currentSong) {
+        val removeFromListTrigger = remember(currentTrack) {
             {
                 searchQuery = "$searchQuery "
             }
         }
 
-        if (currentSong != null) {
-            SongInfoBottomSheet(
-                song = currentSong,
+        if (currentTrack != null) {
+            TrackInfoBottomSheet(
+                song = currentTrack,
                 isFavorite = isFavorite,
                 removeFromListTrigger = removeFromListTrigger,
                 onToggleFavorite = {
-                    playerViewModel.toggleFavoriteSpecificSong(currentSong)
+                    playerViewModel.toggleFavoriteSpecificSong(currentTrack)
                 },
-                onDismiss = { showSongInfoBottomSheet = false },
+                onDismiss = { showTrackInfoBottomSheet = false },
                 onPlaySong = {
-                    playerViewModel.showAndPlaySong(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.showAndPlaySong(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToQueue = {
-                    playerViewModel.addSongToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addSongToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddNextToQueue = {
-                    playerViewModel.addSongNextToQueue(currentSong)
-                    showSongInfoBottomSheet = false
+                    playerViewModel.addSongNextToQueue(currentTrack)
+                    showTrackInfoBottomSheet = false
                 },
                 onAddToPlayList = {
                     showPlaylistBottomSheet = true;
                 },
                 onDeleteFromDevice = playerViewModel::deleteFromDevice,
                 onNavigateToAlbum = {
-                    navController.navigate(Screen.AlbumDetail.createRoute(currentSong.albumId))
-                    showSongInfoBottomSheet = false
+                    navController.navigate(Screen.AlbumDetail.createRoute(currentTrack.bookId))
+                    showTrackInfoBottomSheet = false
                 },
                 onNavigateToArtist = {
-                    navController.navigate(Screen.ArtistDetail.createRoute(currentSong.artistId))
-                    showSongInfoBottomSheet = false
+                    navController.navigate(Screen.ArtistDetail.createRoute(currentTrack.authorId))
+                    showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
                     playerViewModel.editSongMetadata(
-                        currentSong,
+                        currentTrack,
                         newTitle,
                         newArtist,
                         newAlbum,
@@ -476,7 +476,7 @@ fun SearchScreen(
                     )
                 },
                 generateAiMetadata = { fields ->
-                    playerViewModel.generateAiMetadata(currentSong, fields)
+                    playerViewModel.generateAiMetadata(currentTrack, fields)
                 },
             )
             if (showPlaylistBottomSheet) {
@@ -484,7 +484,7 @@ fun SearchScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentSong,
+                    song = currentTrack,
                     onDismiss = { showPlaylistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
@@ -774,10 +774,10 @@ fun SearchResultsList(
                             }
 
                             is SearchResultItem.PlaylistItem -> {
-                                var songsInPlaylist by remember { mutableStateOf<List<Song>>(emptyList()) }
+                                var songsInPlaylist by remember { mutableStateOf<List<Track>>(emptyList()) }
                                 var fetchSongs by remember { mutableStateOf(false) }
                                 LaunchedEffect(fetchSongs) {
-                                    songsInPlaylist = playerViewModel.getTracks( item.playlist.songIds)
+                                    songsInPlaylist = playerViewModel.getTracks( item.playlist.trackIds)
                                 }
                                 val onPlayClick = remember(item.playlist, playerViewModel, onItemSelected) {
                                     {
@@ -819,7 +819,7 @@ fun SearchResultsList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultAlbumItem(
-    album: Album,
+    album: Book,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -851,7 +851,7 @@ fun SearchResultAlbumItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SmartImage(
-                model = album.albumArtUriString,
+                model = album.bookArtUriString,
                 contentDescription = "Album Art: ${album.title}",
                 modifier = Modifier
                     .size(56.dp)
@@ -895,7 +895,7 @@ fun SearchResultAlbumItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultArtistItem(
-    artist: Artist,
+    artist: Author,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -945,7 +945,7 @@ fun SearchResultArtistItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${artist.songCount} Songs",
+                    text = "${artist.trackCount} Songs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

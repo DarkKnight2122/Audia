@@ -18,9 +18,9 @@ object EotStateHolder {
      * Sets the song ID for which the "End of Track" timer is active.
      * Call with null to indicate EOT is not active or has been cleared.
      *
-     * @param songId The ID of the song targeted by EOT, or null if EOT is inactive.
+     * @param trackId The ID of the song targeted by EOT, or null if EOT is inactive.
      */
-    fun setEotTargetTrack(songId: String?) {
-        _eotTargetTrackId.value = songId
+    fun setEotTargetTrack(trackId: String?) {
+        _eotTargetTrackId.value = trackId
     }
 }

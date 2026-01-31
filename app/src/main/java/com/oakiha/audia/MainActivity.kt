@@ -539,7 +539,7 @@ class MainActivity : ComponentActivity() {
             bottomBar = {
                 if (!shouldHideNavigationBar) {
                     val playerContentExpansionFraction = playerViewModel.playerContentExpansionFraction.value
-                    val showPlayerContentArea = playerViewModel.stablePlayerState.collectAsState().value.currentSong != null
+                    val showPlayerContentArea = playerViewModel.stablePlayerState.collectAsState().value.currentTrack != null
                     val currentSheetContentState by playerViewModel.sheetState.collectAsState()
                     val navBarCornerRadius by playerViewModel.navBarCornerRadius.collectAsState()
                     val navBarElevation = 3.dp
@@ -657,7 +657,7 @@ class MainActivity : ComponentActivity() {
                 val containerHeight = this.maxHeight
 
                 val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
-                val showPlayerContentInitially = stablePlayerState.currentSong != null
+                val showPlayerContentInitially = stablePlayerState.currentTrack != null
 
                 val routesWithHiddenMiniPlayer = remember { setOf(Screen.NavBarCrRad.route) }
                 val shouldHideMiniPlayer by remember(currentRoute) {

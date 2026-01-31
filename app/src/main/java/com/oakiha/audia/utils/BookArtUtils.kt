@@ -5,33 +5,33 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 
-object AlbumArtUtils {
+object BookArtUtils {
 
     /**
      * Main function to get album art - tries multiple methods
      */
     fun getAlbumArtUri(
         appContext: Context,
-        audiobookDao: MusicDao,
+        audiobookDao: AudiobookDao,
         path: String,
-        albumId: Long,
-        songId: Long,
+        bookId: Long,
+        trackId: Long,
         deepScan: Boolean
     ): String? {
         // Method 1: Try MediaStore (even though it often fails)
-//        getMediaStoreAlbumArtUri(appContext, albumId)?.let { return it.toString() }
+//        getMediaStoreAlbumArtUri(appContext, bookId)?.let { return it.toString() }
 
         // Method 2: Try embedded art from file
-        getEmbeddedAlbumArtUri(appContext, path, songId, deepScan)?.let { return it.toString() }
+        getEmbeddedAlbumArtUri(appContext, path, trackId, deepScan)?.let { return it.toString() }
         // Method 3: try from db
-//        audiobookDao.getAlbumArtUriById(songId)?.let {
+//        audiobookDao.getAlbumArtUriById(trackId)?.let {
 //            return it
 //        }
         // Method 4: Try external album art files in directory
@@ -46,7 +46,7 @@ object AlbumArtUtils {
     fun getEmbeddedAlbumArtUri(
         appContext: Context,
         filePath: String,
-        songId: Long,
+        trackId: Long,
         deepScan: Boolean
     ): Uri? {
         if (!File(filePath).exists() || !File(filePath).canRead()) {
@@ -55,7 +55,7 @@ object AlbumArtUtils {
         if (!deepScan) {
 
             // 1. Check if art is already cached
-            val cachedFile = File(appContext.cacheDir, "song_art_${songId}.jpg")
+            val cachedFile = File(appContext.cacheDir, "song_art_${trackId}.jpg")
             if (cachedFile.exists()) {
                 // Touch file for LRU tracking
                 cachedFile.setLastModified(System.currentTimeMillis())
@@ -72,7 +72,7 @@ object AlbumArtUtils {
         }
 
         // 2. Check if marked as "no art" to skip extraction
-        val noArtFile = File(appContext.cacheDir, "song_art_${songId}_no.jpg")
+        val noArtFile = File(appContext.cacheDir, "song_art_${trackId}_no.jpg")
         if (noArtFile.exists()) {
             if (deepScan)
                 noArtFile.delete()
@@ -97,7 +97,7 @@ object AlbumArtUtils {
 
             val bytes = retriever.embeddedPicture
             if (bytes != null) {
-                saveAlbumArtToCache(appContext, bytes, songId)
+                saveAlbumArtToCache(appContext, bytes, trackId)
             } else {
                 // Mark "no art" to avoid trying again
                 noArtFile.createNewFile()
@@ -163,12 +163,12 @@ object AlbumArtUtils {
     /**
      * Try MediaStore as last resort
      */
-    fun getMediaStoreAlbumArtUri(appContext: Context, albumId: Long): Uri? {
-        if (albumId <= 0) return null
+    fun getMediaStoreAlbumArtUri(appContext: Context, bookId: Long): Uri? {
+        if (bookId <= 0) return null
 
         val potentialUri = ContentUris.withAppendedId(
             "content://media/external/audio/albumart".toUri(),
-            albumId
+            bookId
         )
 
         return try {
@@ -183,8 +183,8 @@ object AlbumArtUtils {
     /**
      * Save embedded art to cache with unique naming
      */
-    fun saveAlbumArtToCache(appContext: Context, bytes: ByteArray, songId: Long): Uri {
-        val file = File(appContext.cacheDir, "song_art_${songId}.jpg")
+    fun saveAlbumArtToCache(appContext: Context, bytes: ByteArray, trackId: Long): Uri {
+        val file = File(appContext.cacheDir, "song_art_${trackId}.jpg")
 
         file.outputStream().use { outputStream ->
             outputStream.write(bytes)
@@ -192,7 +192,7 @@ object AlbumArtUtils {
         
         // Trigger async cache cleanup if needed
         CoroutineScope(Dispatchers.IO).launch {
-            AlbumArtCacheManager.cleanCacheIfNeeded(appContext)
+            BookArtCacheManager.cleanCacheIfNeeded(appContext)
         }
 
         return try {

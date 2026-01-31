@@ -26,7 +26,7 @@ import com.oakiha.audia.data.preferences.NavBarStyle
 import com.oakiha.audia.data.ai.GeminiModelService
 import com.oakiha.audia.data.ai.GeminiModel
 import com.oakiha.audia.data.preferences.LaunchTab
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import java.io.File
 
 data class SettingsUiState(
@@ -54,7 +54,7 @@ data class SettingsUiState(
     val appRebrandDialogShown: Boolean = false,
     val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
     // Developer Options
-    val albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM,
+    val bookArtQuality: BookArtQuality = AlbumArtQuality.MEDIUM,
     val tapBackgroundClosesPlayer: Boolean = true,
     val immersiveLyricsEnabled: Boolean = false,
     val immersiveLyricsTimeout: Long = 4000L
@@ -263,8 +263,8 @@ class SettingsViewModel @Inject constructor(
 
         // Beta Features Collectors
         viewModelScope.launch {
-            userPreferencesRepository.albumArtQualityFlow.collect { quality ->
-                _uiState.update { it.copy(albumArtQuality = quality) }
+            userPreferencesRepository.bookArtQualityFlow.collect { quality ->
+                _uiState.update { it.copy(bookArtQuality = quality) }
             }
         }
 
@@ -590,7 +590,7 @@ class SettingsViewModel @Inject constructor(
 
     // ===== Developer Options =====
 
-    val albumArtQuality: StateFlow<AlbumArtQuality> = userPreferencesRepository.albumArtQualityFlow
+    val bookArtQuality: StateFlow<AlbumArtQuality> = userPreferencesRepository.bookArtQualityFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlbumArtQuality.MEDIUM)
 
     val useSmoothCorners: StateFlow<Boolean> = userPreferencesRepository.useSmoothCornersFlow
@@ -599,7 +599,7 @@ class SettingsViewModel @Inject constructor(
     val tapBackgroundClosesPlayer: StateFlow<Boolean> = userPreferencesRepository.tapBackgroundClosesPlayerFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    fun setAlbumArtQuality(quality: AlbumArtQuality) {
+    fun setAlbumArtQuality(quality: BookArtQuality) {
         viewModelScope.launch {
             userPreferencesRepository.setAlbumArtQuality(quality)
         }

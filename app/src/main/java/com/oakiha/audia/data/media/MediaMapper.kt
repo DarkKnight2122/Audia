@@ -3,7 +3,7 @@ package com.oakiha.audia.data.media
 import android.content.Context
 import androidx.media3.common.MediaItem
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.utils.MediaItemBuilder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -19,7 +19,7 @@ import javax.inject.Singleton
 class MediaMapper @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    fun resolveSongFromMediaItem(mediaItem: MediaItem): Song? {
+    fun resolveSongFromMediaItem(mediaItem: MediaItem): Track? {
         val metadata = mediaItem.mediaMetadata
         val extras = metadata.extras
         // extras are lazily populated in some cases, or we rely on localConfiguration
@@ -34,23 +34,23 @@ class MediaMapper @Inject constructor(
         val album = extras?.getString(MediaItemBuilder.EXTERNAL_EXTRA_ALBUM)?.takeIf { it.isNotBlank() }
             ?: metadata.albumTitle?.toString()?.takeIf { it.isNotBlank() }
             ?: context.getString(R.string.unknown_album)
-        val albumId = -1L
+        val bookId = -1L
         val duration = extras?.getLong(MediaItemBuilder.EXTERNAL_EXTRA_DURATION) ?: 0L
         val dateAdded = extras?.getLong(MediaItemBuilder.EXTERNAL_EXTRA_DATE_ADDED) ?: System.currentTimeMillis()
         val id = mediaItem.mediaId
 
         // Note: This creates a partial Song object. 
         // Some fields like path, genre, year might be missing if not in extras.
-        return Song(
+        return Track(
             id = id,
             title = title,
             artist = artist,
-            artistId = -1L, // unknown from just MediaItem typically
+            authorId = -1L, // unknown from just MediaItem typically
             album = album,
-            albumId = albumId,
+            bookId = bookId,
             path = "", // local path unknown from URI usually
             contentUriString = contentUri,
-            albumArtUriString = metadata.artworkUri?.toString(),
+            bookArtUriString = metadata.artworkUri?.toString(),
             duration = duration,
             dateAdded = dateAdded,
             mimeType = null, 

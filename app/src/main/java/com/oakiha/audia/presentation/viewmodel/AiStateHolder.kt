@@ -7,7 +7,7 @@ import com.oakiha.audia.data.ai.AiMetadataGenerator
 import com.oakiha.audia.data.ai.AiPlaylistGenerator
 import com.oakiha.audia.data.ai.SongMetadata
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,20 +43,20 @@ class AiStateHolder @Inject constructor(
     val isGeneratingMetadata = _isGeneratingMetadata.asStateFlow()
 
     private var scope: CoroutineScope? = null
-    private var allTracksProvider: (() -> List<Song>)? = null
+    private var allTracksProvider: (() -> List<Track>)? = null
     private var favoriteSongIdsProvider: (() -> Set<String>)? = null
     
     // Callbacks to interact with PlayerViewModel/UI
     private var toastEmitter: ((String) -> Unit)? = null
-    private var playSongsCallback: ((List<Song>, Song, String) -> Unit)? = null // songs, startSong, queueName
+    private var playSongsCallback: ((List<Track>, Song, String) -> Unit)? = null // songs, startSong, queueName
     private var openPlayerSheetCallback: (() -> Unit)? = null
 
     fun initialize(
         scope: CoroutineScope,
-        allTracksProvider: () -> List<Song>,
+        allTracksProvider: () -> List<Track>,
         favoriteSongIdsProvider: () -> Set<String>,
         toastEmitter: (String) -> Unit,
-        playSongsCallback: (List<Song>, Song, String) -> Unit,
+        playSongsCallback: (List<Track>, Song, String) -> Unit,
         openPlayerSheetCallback: () -> Unit
     ) {
         this.scope = scope
@@ -106,10 +106,10 @@ class AiStateHolder @Inject constructor(
                     if (generatedSongs.isNotEmpty()) {
                         if (saveAsPlaylist) {
                             val playlistName = "AI: ${prompt.take(25)}${if (prompt.length > 25) "..." else ""}"
-                            val songIds = generatedSongs.map { it.id }
+                            val trackIds = generatedSongs.map { it.id }
                             userPreferencesRepository.createPlaylist(
                                 name = playlistName,
-                                songIds = songIds,
+                                trackIds = trackIds,
                                 isAiGenerated = true
                             )
                             toastEmitter?.invoke("AI Playlist '$playlistName' created!")
@@ -188,7 +188,7 @@ class AiStateHolder @Inject constructor(
         }
     }
 
-    suspend fun generateAiMetadata(song: Song, fields: List<String>): Result<SongMetadata> {
+    suspend fun generateAiMetadata(song: Track, fields: List<String>): Result<SongMetadata> {
         _isGeneratingMetadata.value = true
         return try {
             aiMetadataGenerator.generate(song, fields)

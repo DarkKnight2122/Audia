@@ -65,27 +65,27 @@ class ThemeStateHolder @Inject constructor(
 
     private var currentAlbumArtUri: String? = null
 
-    suspend fun extractAndGenerateColorScheme(albumArtUriAsUri: Uri?, currentSongUriString: String?, isPreload: Boolean = false) {
+    suspend fun extractAndGenerateColorScheme(bookArtUriAsUri: Uri?, currentTrackUriString: String?, isPreload: Boolean = false) {
         Trace.beginSection("ThemeStateHolder.extractAndGenerateColorScheme")
         try {
-            if (albumArtUriAsUri == null) {
-                if (!isPreload && currentSongUriString == null) {
+            if (bookArtUriAsUri == null) {
+                if (!isPreload && currentTrackUriString == null) {
                     _currentAlbumArtColorSchemePair.value = null
                     currentAlbumArtUri = null
                 }
                 return
             }
 
-            val uriString = albumArtUriAsUri.toString()
+            val uriString = bookArtUriAsUri.toString()
             // Use the optimized ColorSchemeProcessor with LRU cache
             val schemePair = colorSchemeProcessor.getOrGenerateColorScheme(uriString)
 
-            if (!isPreload && currentSongUriString == uriString) {
+            if (!isPreload && currentTrackUriString == uriString) {
                 _currentAlbumArtColorSchemePair.value = schemePair
                 currentAlbumArtUri = uriString
             }
         } catch (e: Exception) {
-            if (!isPreload && albumArtUriAsUri != null && currentSongUriString == albumArtUriAsUri.toString()) {
+            if (!isPreload && bookArtUriAsUri != null && currentTrackUriString == bookArtUriAsUri.toString()) {
                 _currentAlbumArtColorSchemePair.value = null
                 currentAlbumArtUri = null
             }

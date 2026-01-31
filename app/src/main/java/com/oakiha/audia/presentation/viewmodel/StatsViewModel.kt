@@ -2,7 +2,7 @@ package com.oakiha.audia.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository
 import com.oakiha.audia.data.stats.PlaybackStatsRepository.PlaybackStatsSummary
@@ -39,7 +39,7 @@ class StatsViewModel @Inject constructor(
     val weeklyOverview: StateFlow<PlaybackStatsSummary?> = _weeklyOverview.asStateFlow()
 
     @Volatile
-    private var cachedSongs: List<Song>? = null
+    private var cachedSongs: List<Track>? = null
 
     init {
         refreshWeeklyOverview()
@@ -95,7 +95,7 @@ class StatsViewModel @Inject constructor(
         refreshRange(_uiState.value.selectedRange)
     }
 
-    private suspend fun loadSongs(): List<Song> {
+    private suspend fun loadSongs(): List<Track> {
         cachedSongs?.let { existing ->
             if (existing.isNotEmpty()) return existing
         }

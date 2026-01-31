@@ -101,7 +101,7 @@ import androidx.compose.ui.window.DialogProperties
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.ImageCropView
 import com.oakiha.audia.data.model.PlaylistShapeType
 // import com.oakiha.audia.presentation.screens.ShapeType // Removed local enum
@@ -147,7 +147,7 @@ data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val 
 @Composable
 fun CreatePlaylistDialog(
     visible: Boolean,
-    allTracks: List<Song>,
+    allTracks: List<Track>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit // ... d4
 ) {
@@ -232,7 +232,7 @@ fun EditPlaylistDialog(
 
 @Composable
 private fun CreatePlaylistContent(
-    allTracks: List<Song>,
+    allTracks: List<Track>,
     onDismiss: () -> Unit,
     onCreate: (String, String?, Int?, String?, List<String>, Float, Float, Float, String?, Float?, Float?, Float?, Float?) -> Unit
 ) {
@@ -242,11 +242,11 @@ private fun CreatePlaylistContent(
     var playlistName by remember { mutableStateOf("") }
     
     // Step 1: Info State
-    var currentStep by remember { mutableStateOf(0) } // 0: Info, 1: Songs
+    var currentStep by remember { mutableStateOf(0) } // 0: Info, 1: Tracks
     var selectedTab by remember { mutableStateOf(0) } // 0: Default, 1: Image, 2: Icon
     
     // Songs State
-    val selectedSongIds = remember { mutableStateMapOf<String, Boolean>() }
+    val selectedTrackIds = remember { mutableStateMapOf<String, Boolean>() }
     
     // Image State
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -387,7 +387,7 @@ private fun CreatePlaylistContent(
                                 imageUriString, 
                                 color, 
                                 icon, 
-                                selectedSongIds.filterValues { it }.keys.toList(),
+                                selectedTrackIds.filterValues { it }.keys.toList(),
                                 scale,
                                 panX,
                                 panY,
@@ -505,7 +505,7 @@ private fun CreatePlaylistContent(
                       SongPickerList(
                           filteredSongs = filteredSongs,
                           isLoading = false,
-                          selectedSongIds = selectedSongIds,
+                          selectedTrackIds = selectedTrackIds,
                           albumShape = albumShape,
                           modifier = Modifier
                               .fillMaxSize()

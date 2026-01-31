@@ -12,9 +12,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import coil.size.Size
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.CarouselStyle
-import com.oakiha.audia.presentation.components.scoped.PrefetchAlbumNeighbors
+import com.oakiha.audia.presentation.components.scoped.PrefetchBookNeighbors
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.first
 
@@ -34,23 +34,23 @@ fun rememberRoundedParallaxCarouselState(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumCarouselSection(
-    currentSong: Song?,
-    queue: ImmutableList<Song>,
+    currentTrack: Track?,
+    queue: ImmutableList<Track>,
     expansionFraction: Float,
     onSongSelected: (Song) -> Unit,
     modifier: Modifier = Modifier,
     carouselStyle: String = CarouselStyle.NO_PEEK,
     itemSpacing: Dp = 8.dp,
-    albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM
+    bookArtQuality: BookArtQuality = AlbumArtQuality.MEDIUM
 ) {
     if (queue.isEmpty()) return
 
     // Mantiene compatibilidad con tu llamada actual
-    val initialIndex = remember(currentSong?.id, queue) {
-        val songId = currentSong?.id ?: return@remember 0
-        queue.indexOfFirst { it.id == songId }
+    val initialIndex = remember(currentTrack?.id, queue) {
+        val trackId = currentTrack?.id ?: return@remember 0
+        queue.indexOfFirst { it.id == trackId }
             .takeIf { it >= 0 }
-            ?: queue.indexOf(currentSong)
+            ?: queue.indexOf(currentTrack)
                 .takeIf { it >= 0 }
                 ?: 0
     }
@@ -61,12 +61,12 @@ fun AlbumCarouselSection(
     )
 
     // Calculate target size based on quality
-    val targetSize = remember(albumArtQuality) {
-        if (albumArtQuality.maxSize == 0) Size.ORIGINAL
-        else Size(albumArtQuality.maxSize, albumArtQuality.maxSize)
+    val targetSize = remember(bookArtQuality) {
+        if (bookArtQuality.maxSize == 0) Size.ORIGINAL
+        else Size(bookArtQuality.maxSize, bookArtQuality.maxSize)
     }
 
-    PrefetchAlbumNeighbors(
+    PrefetchBookNeighbors(
         isActive = expansionFraction > 0.08f,
         pagerState = carouselState.pagerState,
         queue = queue,
@@ -75,32 +75,32 @@ fun AlbumCarouselSection(
     )
 
     // Player -> Carousel
-    val currentSongIndex = remember(currentSong?.id, queue) {
-        val songId = currentSong?.id ?: return@remember 0
-        queue.indexOfFirst { it.id == songId }
+    val currentTrackIndex = remember(currentTrack?.id, queue) {
+        val trackId = currentTrack?.id ?: return@remember 0
+        queue.indexOfFirst { it.id == trackId }
             .takeIf { it >= 0 }
-            ?: queue.indexOf(currentSong)
+            ?: queue.indexOf(currentTrack)
                 .takeIf { it >= 0 }
                 ?: 0
     }
     val smoothCarouselSpec = remember { tween<Float>(durationMillis = 360, easing = FastOutSlowInEasing) }
-    LaunchedEffect(currentSongIndex, queue) {
+    LaunchedEffect(currentTrackIndex, queue) {
         snapshotFlow { carouselState.pagerState.isScrollInProgress }
             .first { !it }
-        if (carouselState.pagerState.currentPage != currentSongIndex) {
-            carouselState.animateScrollToItem(currentSongIndex, animationSpec = smoothCarouselSpec)
+        if (carouselState.pagerState.currentPage != currentTrackIndex) {
+            carouselState.animateScrollToItem(currentTrackIndex, animationSpec = smoothCarouselSpec)
         }
     }
 
     val hapticFeedback = LocalHapticFeedback.current
     // Carousel -> Player (cuando se detiene el scroll)
-    LaunchedEffect(carouselState, currentSongIndex, queue) {
+    LaunchedEffect(carouselState, currentTrackIndex, queue) {
         snapshotFlow { carouselState.pagerState.isScrollInProgress }
             .distinctUntilChanged()
             .filter { !it }
             .collect {
                 val settled = carouselState.pagerState.currentPage
-                if (settled != currentSongIndex) {
+                if (settled != currentTrackIndex) {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                     queue.getOrNull(settled)?.let(onSongSelected)
                 }
@@ -127,8 +127,8 @@ fun AlbumCarouselSection(
                         .fillMaxSize()
                         .aspectRatio(1f)
                 ) { // Enforce 1:1 aspect ratio for the item itself
-                    OptimizedAlbumArt(
-                        uri = song.albumArtUriString,
+                    OptimizedBookArt(
+                        uri = song.bookArtUriString,
                         title = song.title,
                         modifier = Modifier.fillMaxSize(),
                         targetSize = targetSize

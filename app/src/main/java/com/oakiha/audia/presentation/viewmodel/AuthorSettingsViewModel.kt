@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ArtistSettingsUiState(
+data class AuthorSettingsUiState(
     val artistDelimiters: List<String> = UserPreferencesRepository.DEFAULT_ARTIST_DELIMITERS,
     val groupByAlbumArtist: Boolean = false,
     val rescanRequired: Boolean = false,
@@ -22,7 +22,7 @@ data class ArtistSettingsUiState(
 )
 
 @HiltViewModel
-class ArtistSettingsViewModel @Inject constructor(
+class AuthorSettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val syncManager: SyncManager
 ) : ViewModel() {

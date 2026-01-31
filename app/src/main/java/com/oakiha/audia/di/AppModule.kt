@@ -15,16 +15,16 @@ import com.oakiha.audia.data.database.BookArtThemeDao
 import com.oakiha.audia.data.database.EngagementDao
 import com.oakiha.audia.data.database.FavoritesDao
 import com.oakiha.audia.data.database.LyricsDao
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.database.AudioBookDatabase
 import com.oakiha.audia.data.database.SearchHistoryDao
 import com.oakiha.audia.data.database.TransitionDao
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.preferences.dataStore
-import com.oakiha.audia.data.media.SongMetadataEditor
+import com.oakiha.audia.data.media.TrackMetadataEditor
 import com.oakiha.audia.data.network.deezer.DeezerApiService
 import com.oakiha.audia.data.network.lyrics.LrcLibApiService
-import com.oakiha.audia.data.repository.ArtistImageRepository
+import com.oakiha.audia.data.repository.AuthorImageRepository
 import com.oakiha.audia.data.repository.LyricsRepository
 import com.oakiha.audia.data.repository.LyricsRepositoryImpl
 import com.oakiha.audia.data.repository.AudiobookRepository
@@ -95,7 +95,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideBookArtThemeDao(database: AudioBookDatabase): BookArtThemeDao {
-        return database.albumArtThemeDao()
+        return database.bookArtThemeDao()
     }
 
     @Singleton
@@ -106,7 +106,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideMusicDao(database: AudioBookDatabase): MusicDao { // Proveer MusicDao
+    fun provideAudiobookDao(database: AudioBookDatabase): AudiobookDao { // Proveer MusicDao
         return database.audiobookDao()
     }
 
@@ -162,7 +162,7 @@ object AppModule {
     fun provideLyricsRepository(
         @ApplicationContext context: Context,
         lrcLibApiService: LrcLibApiService,
-        audiobookDao: MusicDao,
+        audiobookDao: AudiobookDao,
         lyricsDao: LyricsDao
     ): LyricsRepository {
         return LyricsRepositoryImpl(
@@ -195,7 +195,7 @@ object AppModule {
         @ApplicationContext context: Context,
         userPreferencesRepository: UserPreferencesRepository,
         searchHistoryDao: SearchHistoryDao,
-        audiobookDao: MusicDao,
+        audiobookDao: AudiobookDao,
         lyricsRepository: LyricsRepository,
         songRepository: com.oakiha.audia.data.repository.TrackRepository,
         favoritesDao: FavoritesDao
@@ -221,8 +221,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSongMetadataEditor(@ApplicationContext context: Context, audiobookDao: MusicDao): SongMetadataEditor {
-        return SongMetadataEditor(context, audiobookDao)
+    fun provideTrackMetadataEditor(@ApplicationContext context: Context, audiobookDao: AudiobookDao): TrackMetadataEditor {
+        return TrackMetadataEditor(context, audiobookDao)
     }
 
     /**
@@ -393,10 +393,10 @@ object AppModule {
      */
     @Provides
     @Singleton
-    fun provideArtistImageRepository(
+    fun provideAuthorImageRepository(
         deezerApiService: DeezerApiService,
-        audiobookDao: MusicDao
-    ): ArtistImageRepository {
-        return ArtistImageRepository(deezerApiService, audiobookDao)
+        audiobookDao: AudiobookDao
+    ): AuthorImageRepository {
+        return AuthorImageRepository(deezerApiService, audiobookDao)
     }
 }

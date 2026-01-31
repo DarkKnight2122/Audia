@@ -88,15 +88,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.presentation.components.ExpressiveTopBarContent
-import com.oakiha.audia.presentation.viewmodel.ArtistSettingsViewModel
+import com.oakiha.audia.presentation.viewmodel.AuthorSettingsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ArtistSettingsScreen(
+fun AuthorSettingsScreen(
     navController: NavController,
-    viewModel: ArtistSettingsViewModel = hiltViewModel()
+    viewModel: AuthorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current

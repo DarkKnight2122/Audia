@@ -63,14 +63,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.AiPlaylistSheet
 import com.oakiha.audia.presentation.components.DailyMixMenu
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.PlaylistBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
-import com.oakiha.audia.presentation.components.SongInfoBottomSheet
+import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.components.threeShapeSwitch
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.MainViewModel
@@ -93,8 +93,8 @@ fun DailyMixScreen(
     navController: NavController,
 ) {
     Trace.beginSection("DailyMixScreen.Composition")
-    val dailyMixSongs: ImmutableList<Song> by playerViewModel.dailyMixSongs.collectAsState()
-    val currentSongId by remember { playerViewModel.stablePlayerState.map { it.currentSong?.id }.distinctUntilChanged() }.collectAsState(initial = null)
+    val dailyMixSongs: ImmutableList<Track> by playerViewModel.dailyMixSongs.collectAsState()
+    val currentTrackId by remember { playerViewModel.stablePlayerState.map { it.currentTrack?.id }.distinctUntilChanged() }.collectAsState(initial = null)
     val isPlaying by remember { playerViewModel.stablePlayerState.map { it.isPlaying }.distinctUntilChanged() }.collectAsState(initial = false)
     val isShuffleEnabled by remember { playerViewModel.stablePlayerState.map { it.isShuffleEnabled }.distinctUntilChanged() }.collectAsState(initial = false)
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -110,7 +110,7 @@ fun DailyMixScreen(
     val lazyListState = rememberLazyListState()
 
     var showSongInfoSheet by remember { mutableStateOf(false) }
-    var selectedSongForInfo by remember { mutableStateOf<Song?>(null) }
+    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) }
     var showDailyMixMenu by remember { mutableStateOf(false) }
 
     if (showDailyMixMenu) {
@@ -152,14 +152,14 @@ fun DailyMixScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    if (showSongInfoSheet && selectedSongForInfo != null) {
-        val song = selectedSongForInfo!!
+    if (showSongInfoSheet && selectedTrackForInfo != null) {
+        val song = selectedTrackForInfo!!
         val removeFromListTrigger = remember(dailyMixSongs) {
             {
                 playerViewModel.removeFromDailyMix(song.id)
             }
         }
-        SongInfoBottomSheet(
+        TrackInfoBottomSheet(
             song = song,
             isFavorite = favoriteSongIds.contains(song.id),
             onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(song) },
@@ -182,7 +182,7 @@ fun DailyMixScreen(
             onDeleteFromDevice = playerViewModel::deleteFromDevice,
             onNavigateToAlbum = {
                 // Assuming Screen object has a method to create a route
-                navController.navigate(Screen.AlbumDetail.createRoute(song.albumId))
+                navController.navigate(Screen.AlbumDetail.createRoute(song.bookId))
                 showSongInfoSheet = false
             },
             onNavigateToArtist = {
@@ -303,11 +303,11 @@ fun DailyMixScreen(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         song = song,
-                        isCurrentSong = stablePlayerState.currentSong?.id == song.id,
-                        isPlaying = currentSongId == song.id && isPlaying,
+                        isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                        isPlaying = currentTrackId == song.id && isPlaying,
                         onClick = { playerViewModel.showAndPlaySong(song, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false) },
                         onMoreOptionsClick = {
-                            selectedSongForInfo = it
+                            selectedTrackForInfo = it
                             showSongInfoSheet = true
                         }
                     )
@@ -376,12 +376,12 @@ fun DailyMixScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ExpressiveDailyMixHeader(
-    songs: List<Song>,
+    songs: List<Track>,
     scrollState: LazyListState,
     onShowMenu: () -> Unit
 ) {
     Trace.beginSection("ExpressiveDailyMixHeader.Composition")
-    val albumArts = remember(songs) { songs.map { it.albumArtUriString }.distinct().take(3) }
+    val bookArts = remember(songs) { songs.map { it.bookArtUriString }.distinct().take(3) }
     val totalDuration = remember(songs) { songs.sumOf { it.duration } }
 
     val parallaxOffset by remember { derivedStateOf { if (scrollState.firstVisibleItemIndex == 0) scrollState.firstVisibleItemScrollOffset * 0.5f else 0f } }
@@ -406,7 +406,7 @@ private fun ExpressiveDailyMixHeader(
                 horizontalArrangement = Arrangement.spacedBy((-80).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                albumArts.forEachIndexed { index, artUrl ->
+                bookArts.forEachIndexed { index, artUrl ->
                     val size = when (index) {
                         0 -> 180.dp
                         1 -> 220.dp

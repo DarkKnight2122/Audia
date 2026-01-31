@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.presentation.components.OptimizedAlbumArt
+import com.oakiha.audia.presentation.components.OptimizedBookArt
 import com.oakiha.audia.presentation.components.WavyTrackSlider
 import com.oakiha.audia.presentation.components.player.AnimatedPlaybackControls
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
@@ -74,7 +74,7 @@ fun ExternalPlayerOverlay(
     val remotePosition by playerViewModel.remotePosition.collectAsState()
     val isRemotePlaybackActive by playerViewModel.isRemotePlaybackActive.collectAsState()
     val navBarCornerRadius by playerViewModel.navBarCornerRadius.collectAsState()
-    val currentSong = stablePlayerState.currentSong
+    val currentTrack = stablePlayerState.currentTrack
 
     var sheetVisible by remember { mutableStateOf(true) }
     var awaitingSong by remember { mutableStateOf(true) }
@@ -100,8 +100,8 @@ fun ExternalPlayerOverlay(
         )
     }
 
-    LaunchedEffect(currentSong) {
-        if (currentSong != null) {
+    LaunchedEffect(currentTrack) {
+        if (currentTrack != null) {
             awaitingSong = false
             sheetVisible = true
         } else if (!awaitingSong) {
@@ -149,7 +149,7 @@ fun ExternalPlayerOverlay(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                if (currentSong == null) {
+                if (currentTrack == null) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,7 +164,7 @@ fun ExternalPlayerOverlay(
                     val position = rawPosition.coerceIn(0L, totalDuration)
                     val progressFraction = if (totalDuration > 0) position.toFloat() / totalDuration else 0f
 
-                    var sliderPosition by remember(currentSong.id) { mutableStateOf(progressFraction) }
+                    var sliderPosition by remember(currentTrack.id) { mutableStateOf(progressFraction) }
                     var isUserScrubbing by remember { mutableStateOf(false) }
 
                     LaunchedEffect(progressFraction) {
@@ -216,9 +216,9 @@ fun ExternalPlayerOverlay(
                                 shape = RoundedCornerShape(18.dp),
                                 tonalElevation = 4.dp
                             ) {
-                                OptimizedAlbumArt(
-                                    uri = currentSong.albumArtUriString,
-                                    title = currentSong.title,
+                                OptimizedBookArt(
+                                    uri = currentTrack.bookArtUriString,
+                                    title = currentTrack.title,
                                     modifier = Modifier
                                         .size(96.dp)
                                         .clip(RoundedCornerShape(18.dp))
@@ -229,7 +229,7 @@ fun ExternalPlayerOverlay(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSong.title,
+                                    text = currentTrack.title,
                                     style = MaterialTheme.typography.headlineSmall.copy(
                                         fontSize = 22.sp,
                                         fontWeight = FontWeight.SemiBold
@@ -239,7 +239,7 @@ fun ExternalPlayerOverlay(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = currentSong.displayArtist,
+                                    text = currentTrack.displayAuthor,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -247,7 +247,7 @@ fun ExternalPlayerOverlay(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = currentSong.album,
+                                    text = currentTrack.album,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,

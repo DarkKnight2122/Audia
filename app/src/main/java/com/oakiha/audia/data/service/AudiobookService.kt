@@ -211,21 +211,21 @@ class AudiobookService : MediaSessionService() {
                         refreshMediaSessionUi(session)
                     }
                     AudiobookNotificationProvider.CUSTOM_COMMAND_LIKE -> {
-                        val songId = session.player.currentMediaItem?.mediaId ?: return@onCustomCommand Futures.immediateFuture(SessionResult(
+                        val trackId = session.player.currentMediaItem?.mediaId ?: return@onCustomCommand Futures.immediateFuture(SessionResult(
                             SessionError.ERROR_UNKNOWN))
-                        Timber.tag("AudiobookService").d("Executing LIKE for songId: $songId")
-                        val isCurrentlyFavorite = favoriteSongIds.contains(songId)
+                        Timber.tag("AudiobookService").d("Executing LIKE for trackId: $trackId")
+                        val isCurrentlyFavorite = favoriteSongIds.contains(trackId)
                         favoriteSongIds = if (isCurrentlyFavorite) {
-                            favoriteSongIds - songId
+                            favoriteSongIds - trackId
                         } else {
-                            favoriteSongIds + songId
+                            favoriteSongIds + trackId
                         }
 
                         refreshMediaSessionUi(session)
 
                         serviceScope.launch {
-                            Timber.tag("AudiobookService").d("Toggling favorite status for $songId")
-                            userPreferencesRepository.toggleFavoriteSong(songId)
+                            Timber.tag("AudiobookService").d("Toggling favorite status for $trackId")
+                            userPreferencesRepository.toggleFavoriteSong(trackId)
                             Timber.tag("AudiobookService")
                                 .d("Toggled favorite status. Updating notification.")
                             refreshMediaSessionUi(session)
@@ -254,10 +254,10 @@ class AudiobookService : MediaSessionService() {
                     .d("favoriteSongIdsFlow collected. New ids size: ${ids.size}")
                 val oldIds = favoriteSongIds
                 favoriteSongIds = ids
-                val currentSongId = mediaSession?.player?.currentMediaItem?.mediaId
-                if (currentSongId != null) {
-                    val wasFavorite = oldIds.contains(currentSongId)
-                    val isFavorite = ids.contains(currentSongId)
+                val currentTrackId = mediaSession?.player?.currentMediaItem?.mediaId
+                if (currentTrackId != null) {
+                    val wasFavorite = oldIds.contains(currentTrackId)
+                    val isFavorite = ids.contains(currentTrackId)
                     if (wasFavorite != isFavorite) {
                         Timber.tag("AudiobookService")
                             .d("Favorite status changed for current song. Updating notification.")
@@ -276,14 +276,14 @@ class AudiobookService : MediaSessionService() {
                 PlayerActions.NEXT -> player.seekToNext()
                 PlayerActions.PREVIOUS -> player.seekToPrevious()
                 PlayerActions.PLAY_FROM_QUEUE -> {
-                    val songId = intent.getLongExtra("song_id", -1L)
-                    if (songId != -1L) {
+                    val trackId = intent.getLongExtra("song_id", -1L)
+                    if (trackId != -1L) {
                         val timeline = player.currentTimeline
                         if (!timeline.isEmpty) {
                             val window = androidx.media3.common.Timeline.Window()
                             for (i in 0 until timeline.windowCount) {
                                 timeline.getWindow(i, window)
-                                if (window.mediaItem.mediaId.toLongOrNull() == songId) {
+                                if (window.mediaItem.mediaId.toLongOrNull() == trackId) {
                                     player.seekTo(i, C.TIME_UNSET)
                                     player.play()
                                     break
@@ -433,16 +433,16 @@ class AudiobookService : MediaSessionService() {
             for (i in startIndex until endIndex) {
                 timeline.getWindow(i, window)
                 val mediaItem = window.mediaItem
-                val songId = mediaItem.mediaId.toLongOrNull()
-                if (songId != null) {
+                val trackId = mediaItem.mediaId.toLongOrNull()
+                if (trackId != null) {
                     val (artBytes, _) = getAlbumArtForWidget(
                         embeddedArt = mediaItem.mediaMetadata?.artworkData,
                         artUri = mediaItem.mediaMetadata?.artworkUri
                     )
                     queueItems.add(
                         com.oakiha.audia.data.model.QueueItem(
-                            id = songId,
-                            albumArtBitmapData = artBytes
+                            id = trackId,
+                            bookArtBitmapData = artBytes
                         )
                     )
                 }
@@ -453,8 +453,8 @@ class AudiobookService : MediaSessionService() {
             songTitle = title,
             artistName = artist,
             isPlaying = isPlaying,
-            albumArtUri = artUriString,
-            albumArtBitmapData = artBytes,
+            bookArtUri = artUriString,
+            bookArtBitmapData = artBytes,
             currentPositionMs = currentPosition,
             totalDurationMs = totalDuration,
             isFavorite = isFavorite,
@@ -519,8 +519,8 @@ class AudiobookService : MediaSessionService() {
         }
     }
 
-    fun isSongFavorite(songId: String?): Boolean {
-        return songId != null && favoriteSongIds.contains(songId)
+    fun isSongFavorite(trackId: String?): Boolean {
+        return trackId != null && favoriteSongIds.contains(trackId)
     }
 
     fun isManualShuffleEnabled(): Boolean {
@@ -561,8 +561,8 @@ class AudiobookService : MediaSessionService() {
 
     private fun buildMediaButtonPreferences(session: MediaSession): List<CommandButton> {
         val player = session.player
-        val songId = player.currentMediaItem?.mediaId
-        val isFavorite = isSongFavorite(songId)
+        val trackId = player.currentMediaItem?.mediaId
+        val isFavorite = isSongFavorite(trackId)
         val likeIcon = if (isFavorite) R.drawable.round_favorite_24 else R.drawable.round_favorite_border_24
         val likeButton = CommandButton.Builder()
             .setDisplayName("Like")

@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.request.ImageRequest
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -43,8 +43,8 @@ data class Config(val size: Dp, val width: Dp, val height: Dp, val align: Alignm
  * Utiliza BoxWithConstraints para adaptar las dimensiones al contenedor.
  */
 @Composable
-fun AlbumArtCollage(
-    songs: ImmutableList<Song>,
+fun BookArtCollage(
+    songs: ImmutableList<Track>,
     modifier: Modifier = Modifier,
     height: Dp = 400.dp,
     padding: Dp = 0.dp,
@@ -57,7 +57,7 @@ fun AlbumArtCollage(
 
     val requests = remember(songsToShow) {
         songsToShow.map { song ->
-            song?.albumArtUriString?.let {
+            song?.bookArtUriString?.let {
                 ImageRequest.Builder(context)
                     .data(it)
                     .dispatcher(Dispatchers.IO)

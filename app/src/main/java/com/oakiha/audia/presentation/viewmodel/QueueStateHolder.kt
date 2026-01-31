@@ -1,6 +1,6 @@
 package com.oakiha.audia.presentation.viewmodel
 
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,8 +14,8 @@ import javax.inject.Singleton
 class QueueStateHolder @Inject constructor() {
     
     // Original queue order before shuffle (for restoring when unshuffling)
-    private var _originalQueueOrder: List<Song> = emptyList()
-    val originalQueueOrder: List<Song> get() = _originalQueueOrder
+    private var _originalQueueOrder: List<Track> = emptyList()
+    val originalQueueOrder: List<Track> get() = _originalQueueOrder
     
     // Original queue name before shuffle
     private var _originalQueueName: String = "None"
@@ -24,7 +24,7 @@ class QueueStateHolder @Inject constructor() {
     /**
      * Store the original queue state before shuffling.
      */
-    fun saveOriginalQueueState(queue: List<Song>, queueName: String) {
+    fun saveOriginalQueueState(queue: List<Track>, queueName: String) {
         _originalQueueOrder = queue.toList()
         _originalQueueName = queueName
     }
@@ -32,7 +32,7 @@ class QueueStateHolder @Inject constructor() {
     /**
      * Set original queue order (for updates during playback).
      */
-    fun setOriginalQueueOrder(queue: List<Song>) {
+    fun setOriginalQueueOrder(queue: List<Track>) {
         _originalQueueOrder = queue.toList()
     }
     
@@ -44,7 +44,7 @@ class QueueStateHolder @Inject constructor() {
     /**
      * Get the original queue for restoring after unshuffle.
      */
-    fun getOriginalQueueForRestore(): List<Song> = _originalQueueOrder.toList()
+    fun getOriginalQueueForRestore(): List<Track> = _originalQueueOrder.toList()
     
     /**
      * Clear the original queue state (e.g., when queue is cleared).
@@ -58,16 +58,16 @@ class QueueStateHolder @Inject constructor() {
      * Create a shuffled version of a queue, keeping the current song at the start.
      */
     fun createShuffledQueue(
-        currentQueue: List<Song>,
-        currentSongId: String?
-    ): List<Song> {
+        currentQueue: List<Track>,
+        currentTrackId: String?
+    ): List<Track> {
         if (currentQueue.isEmpty()) return emptyList()
         
-        val currentSong = currentQueue.find { it.id == currentSongId }
-        val otherSongs = currentQueue.filter { it.id != currentSongId }.shuffled()
+        val currentTrack = currentQueue.find { it.id == currentTrackId }
+        val otherSongs = currentQueue.filter { it.id != currentTrackId }.shuffled()
         
-        return if (currentSong != null) {
-            listOf(currentSong) + otherSongs
+        return if (currentTrack != null) {
+            listOf(currentTrack) + otherSongs
         } else {
             otherSongs.shuffled()
         }
@@ -78,7 +78,7 @@ class QueueStateHolder @Inject constructor() {
      * 2. Picks a random start song.
      * 3. Creates a shuffled list starting with that song.
      */
-    fun prepareShuffledQueue(songs: List<Song>, queueName: String): Pair<List<Song>, Song>? {
+    fun prepareShuffledQueue(songs: List<Track>, queueName: String): Pair<List<Track>, Song>? {
         if (songs.isEmpty()) return null
         
         val startSong = songs.random()
@@ -93,7 +93,7 @@ class QueueStateHolder @Inject constructor() {
     /**
      * Prepares a list for shuffled playback with a specific start song.
      */
-    fun prepareShuffledQueueWithStart(songs: List<Song>, startSong: Song, queueName: String): List<Song> {
+    fun prepareShuffledQueueWithStart(songs: List<Track>, startSong: Track, queueName: String): List<Track> {
          saveOriginalQueueState(songs, queueName)
          val otherSongs = songs.filter { it.id != startSong.id }.shuffled()
          return listOf(startSong) + otherSongs

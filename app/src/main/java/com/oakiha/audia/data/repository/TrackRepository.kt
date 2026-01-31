@@ -1,13 +1,13 @@
 package com.oakiha.audia.data.repository
 
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlinx.coroutines.flow.Flow
 
 interface TrackRepository {
-    fun getTracks(): Flow<List<Song>>
-    fun getTracksByAlbum(albumId: Long): Flow<List<Song>>
-    fun getTracksByArtist(artistId: Long): Flow<List<Song>>
-    suspend fun searchSongs(query: String): List<Song>
-    fun getTrackById(songId: Long): Flow<Song?>
-    fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Song>>
+    fun getTracks(): Flow<List<Track>>
+    fun getTracksByAlbum(bookId: Long): Flow<List<Track>>
+    fun getTracksByArtist(authorId: Long): Flow<List<Track>>
+    suspend fun searchSongs(query: String): List<Track>
+    fun getTrackById(trackId: Long): Flow<Song?>
+    fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Track>>
 }

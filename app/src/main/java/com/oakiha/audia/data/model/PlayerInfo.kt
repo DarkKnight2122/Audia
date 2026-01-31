@@ -6,7 +6,7 @@ import kotlinx.serialization.Transient // Para campos que no queremos serializar
 @Serializable
 data class QueueItem(
     val id: Long, // ID Ãºnico de la canciÃ³n
-    val albumArtBitmapData: ByteArray?
+    val bookArtBitmapData: ByteArray?
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -15,17 +15,17 @@ data class QueueItem(
         other as QueueItem
 
         if (id != other.id) return false
-        if (albumArtBitmapData != null) {
-            if (other.albumArtBitmapData == null) return false
-            if (!albumArtBitmapData.contentEquals(other.albumArtBitmapData)) return false
-        } else if (other.albumArtBitmapData != null) return false
+        if (bookArtBitmapData != null) {
+            if (other.bookArtBitmapData == null) return false
+            if (!bookArtBitmapData.contentEquals(other.bookArtBitmapData)) return false
+        } else if (other.bookArtBitmapData != null) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + (albumArtBitmapData?.contentHashCode() ?: 0)
+        result = 31 * result + (bookArtBitmapData?.contentHashCode() ?: 0)
         return result
     }
 }
@@ -35,8 +35,8 @@ data class PlayerInfo(
     val songTitle: String = "",
     val artistName: String = "",
     val isPlaying: Boolean = false,
-    val albumArtUri: String? = null,
-    val albumArtBitmapData: ByteArray? = null,
+    val bookArtUri: String? = null,
+    val bookArtBitmapData: ByteArray? = null,
     val currentPositionMs: Long = 0L,
     val totalDurationMs: Long = 0L,
     val isFavorite: Boolean = false,
@@ -54,11 +54,11 @@ data class PlayerInfo(
         if (songTitle != other.songTitle) return false
         if (artistName != other.artistName) return false
         if (isPlaying != other.isPlaying) return false
-        if (albumArtUri != other.albumArtUri) return false
-        if (albumArtBitmapData != null) {
-            if (other.albumArtBitmapData == null) return false
-            if (!albumArtBitmapData.contentEquals(other.albumArtBitmapData)) return false
-        } else if (other.albumArtBitmapData != null) return false
+        if (bookArtUri != other.bookArtUri) return false
+        if (bookArtBitmapData != null) {
+            if (other.bookArtBitmapData == null) return false
+            if (!bookArtBitmapData.contentEquals(other.bookArtBitmapData)) return false
+        } else if (other.bookArtBitmapData != null) return false
         if (currentPositionMs != other.currentPositionMs) return false
         if (totalDurationMs != other.totalDurationMs) return false
         if (queue != other.queue) return false
@@ -72,8 +72,8 @@ data class PlayerInfo(
         var result = songTitle.hashCode()
         result = 31 * result + artistName.hashCode()
         result = 31 * result + isPlaying.hashCode()
-        result = 31 * result + (albumArtUri?.hashCode() ?: 0)
-        result = 31 * result + (albumArtBitmapData?.contentHashCode() ?: 0)
+        result = 31 * result + (bookArtUri?.hashCode() ?: 0)
+        result = 31 * result + (bookArtBitmapData?.contentHashCode() ?: 0)
         result = 31 * result + currentPositionMs.hashCode()
         result = 31 * result + totalDurationMs.hashCode()
         result = 31 * result + queue.hashCode()

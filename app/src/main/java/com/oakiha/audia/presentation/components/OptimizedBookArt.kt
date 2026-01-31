@@ -29,7 +29,7 @@ import com.oakiha.audia.R
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun OptimizedAlbumArt(
+fun OptimizedBookArt(
     uri: Any?,
     title: String,
     modifier: Modifier = Modifier,
@@ -147,7 +147,7 @@ private fun renderDirectAlbumArt(
 
 
 //@Composable
-//fun OptimizedAlbumArt(
+//fun OptimizedBookArt(
 //    uri: String?,
 //    title: String,
 //    expansionFraction: Float,
@@ -167,10 +167,10 @@ private fun renderDirectAlbumArt(
 //            .diskCachePolicy(CachePolicy.ENABLED)
 //            .build(),
 //        onState = { state ->
-//            Timber.tag("OptimizedAlbumArt")
+//            Timber.tag("OptimizedBookArt")
 //                .d("Painter State (Size: $targetSize): $state for URI: $uri")
 //            if (state is AsyncImagePainter.State.Error) {
-//                Timber.tag("OptimizedAlbumArt")
+//                Timber.tag("OptimizedBookArt")
 //                    .e(state.result.throwable, "Coil Error State for URI: $uri")
 //            }
 //        }
@@ -204,7 +204,7 @@ private fun renderDirectAlbumArt(
 //                )
 //            }
 //            is AsyncImagePainter.State.Error -> {
-//                Timber.tag("OptimizedAlbumArt")
+//                Timber.tag("OptimizedBookArt")
 //                    .e(currentState.result.throwable, "Displaying error placeholder for URI: $uri")
 //                Image(
 //                    painter = painterResource(id = R.drawable.rounded_broken_image_24),

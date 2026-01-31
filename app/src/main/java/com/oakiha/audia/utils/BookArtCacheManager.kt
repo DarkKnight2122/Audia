@@ -17,9 +17,9 @@ import java.io.File
  * - Cleanup of orphaned cache files for deleted songs
  * - Thread-safe operations
  */
-object AlbumArtCacheManager {
+object BookArtCacheManager {
     
-    private const val TAG = "AlbumArtCacheManager"
+    private const val TAG = "BookArtCacheManager"
     
     /**
      * Maximum cache size in bytes (200MB default)
@@ -139,8 +139,8 @@ object AlbumArtCacheManager {
             var deletedCount = 0
             
             for (file in allArtFiles) {
-                val songId = extractSongIdFromFilename(file.name)
-                if (songId != null && songId !in validSongIds) {
+                val trackId = extractSongIdFromFilename(file.name)
+                if (trackId != null && trackId !in validSongIds) {
                     if (file.delete()) {
                         deletedCount++
                     }

@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.model.SortOption
 import com.oakiha.audia.data.playlist.M3uManager
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
@@ -37,14 +37,14 @@ import javax.inject.Inject
 
 data class PlaylistUiState(
     val playlists: List<Playlist> = emptyList(),
-    val currentPlaylistSongs: List<Song> = emptyList(),
+    val currentPlaylistSongs: List<Track> = emptyList(),
     val currentPlaylistDetails: Playlist? = null,
     val isLoading: Boolean = false,
     val playlistNotFound: Boolean = false,
 
     // Para el diÃ¡logo/pantalla de selecciÃ³n de canciones
     val songSelectionPage: Int = 1, // Nuevo: para rastrear la pÃ¡gina actual de selecciÃ³n
-    val songSelectionForPlaylist: List<Song> = emptyList(),
+    val songSelectionForPlaylist: List<Track> = emptyList(),
     val isLoadingSongSelection: Boolean = false,
     val canLoadMoreSongsForSelection: Boolean = true, // Nuevo: para saber si hay mÃ¡s canciones para cargar
 
@@ -171,7 +171,7 @@ class PlaylistViewModel @Inject constructor(
 
             try {
                 // Colectar la lista de canciones del Flow en un hilo de IO
-                val actualNewSongsList: List<Song> =
+                val actualNewSongsList: List<Track> =
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
                         audiobookRepository.getAudioFiles().first()
                     }
@@ -183,10 +183,10 @@ class PlaylistViewModel @Inject constructor(
                         actualNewSongsList
                     } else {
                         // Evitar duplicados si por alguna razÃ³n se recarga la misma pÃ¡gina
-                        val currentSongIds =
+                        val currentTrackIds =
                             currentStateAfterLoad.songSelectionForPlaylist.map { it.id }.toSet()
                         val uniqueNewSongs =
-                            actualNewSongsList.filterNot { currentSongIds.contains(it.id) }
+                            actualNewSongsList.filterNot { currentTrackIds.contains(it.id) }
                         currentStateAfterLoad.songSelectionForPlaylist + uniqueNewSongs
                     }
 
@@ -236,7 +236,7 @@ class PlaylistViewModel @Inject constructor(
                         val pseudoPlaylist = Playlist(
                             id = playlistId,
                             name = folder.name,
-                            songIds = songsList.map { it.id }
+                            trackIds = songsList.map { it.id }
                         )
 
                         _uiState.update {
@@ -269,8 +269,8 @@ class PlaylistViewModel @Inject constructor(
                             ?: PlaylistSongsOrderMode.Manual
 
                         // Colectar la lista de canciones del Flow devuelto por el repositorio en un hilo de IO
-                        val songsList: List<Song> = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            audiobookRepository.getTracksByIds(playlist.songIds).first()
+                        val songsList: List<Track> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            audiobookRepository.getTracksByIds(playlist.trackIds).first()
                         }
 
                         val orderedSongs = when (orderMode) {
@@ -323,7 +323,7 @@ class PlaylistViewModel @Inject constructor(
         coverImageUri: String? = null,
         coverColor: Int? = null,
         coverIcon: String? = null,
-        songIds: List<String> = emptyList(), // Added songIds parameter
+        trackIds: List<String> = emptyList(), // Added trackIds parameter
         cropScale: Float = 1f,
         cropPanX: Float = 0f,
         cropPanY: Float = 0f,
@@ -352,7 +352,7 @@ class PlaylistViewModel @Inject constructor(
 
             userPreferencesRepository.createPlaylist(
                 name = name,
-                songIds = songIds, // Use passed songIds
+                trackIds = trackIds, // Use passed trackIds
                 isAiGenerated = isAiGenerated,
                 isQueueGenerated = isQueueGenerated,
                 coverImageUri = savedCoverPath,
@@ -467,9 +467,9 @@ class PlaylistViewModel @Inject constructor(
     fun importM3u(uri: Uri) {
         viewModelScope.launch {
             try {
-                val (name, songIds) = m3uManager.parseM3u(uri)
-                if (songIds.isNotEmpty()) {
-                    userPreferencesRepository.createPlaylist(name, songIds)
+                val (name, trackIds) = m3uManager.parseM3u(uri)
+                if (trackIds.isNotEmpty()) {
+                    userPreferencesRepository.createPlaylist(name, trackIds)
                 }
             } catch (e: Exception) {
                 Log.e("PlaylistViewModel", "Error importing M3U", e)
@@ -480,7 +480,7 @@ class PlaylistViewModel @Inject constructor(
     fun exportM3u(playlist: Playlist, uri: Uri, context: android.content.Context) {
         viewModelScope.launch {
             try {
-                val songs = audiobookRepository.getTracksByIds(playlist.songIds).first()
+                val songs = audiobookRepository.getTracksByIds(playlist.trackIds).first()
                 val m3uContent = m3uManager.generateM3u(playlist, songs)
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     OutputStreamWriter(outputStream).use { writer ->
@@ -599,10 +599,10 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    fun addSongsToPlaylist(playlistId: String, songIdsToAdd: List<String>) {
+    fun addSongsToPlaylist(playlistId: String, trackIdsToAdd: List<String>) {
         if (isFolderPlaylistId(playlistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.addSongsToPlaylist(playlistId, songIdsToAdd)
+            userPreferencesRepository.addSongsToPlaylist(playlistId, trackIdsToAdd)
             if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
                 loadPlaylistDetails(playlistId)
             }
@@ -613,26 +613,26 @@ class PlaylistViewModel @Inject constructor(
      * @param playlistIds Ids of playlists to add the song to
      * */
     fun addOrRemoveSongFromPlaylists(
-        songId: String,
+        trackId: String,
         playlistIds: List<String>,
         currentPlaylistId: String?
     ) {
         viewModelScope.launch {
             val removedFromPlaylists =
-                userPreferencesRepository.addOrRemoveSongFromPlaylists(songId, playlistIds)
+                userPreferencesRepository.addOrRemoveSongFromPlaylists(trackId, playlistIds)
             if (currentPlaylistId != null && removedFromPlaylists.contains (currentPlaylistId)) {
-                removeSongFromPlaylist(currentPlaylistId, songId)
+                removeSongFromPlaylist(currentPlaylistId, trackId)
             }
         }
     }
 
-    fun removeSongFromPlaylist(playlistId: String, songIdToRemove: String) {
+    fun removeSongFromPlaylist(playlistId: String, trackIdToRemove: String) {
         if (isFolderPlaylistId(playlistId)) return
         viewModelScope.launch {
-            userPreferencesRepository.removeSongFromPlaylist(playlistId, songIdToRemove)
+            userPreferencesRepository.removeSongFromPlaylist(playlistId, trackIdToRemove)
             if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
                 _uiState.update {
-                    it.copy(currentPlaylistSongs = it.currentPlaylistSongs.filterNot { s -> s.id == songIdToRemove })
+                    it.copy(currentPlaylistSongs = it.currentPlaylistSongs.filterNot { s -> s.id == trackIdToRemove })
                 }
             }
         }
@@ -641,11 +641,11 @@ class PlaylistViewModel @Inject constructor(
     fun reorderSongsInPlaylist(playlistId: String, fromIndex: Int, toIndex: Int) {
         if (isFolderPlaylistId(playlistId)) return
         viewModelScope.launch {
-            val currentSongs = _uiState.value.currentPlaylistSongs.toMutableList()
-            if (fromIndex in currentSongs.indices && toIndex in currentSongs.indices) {
-                val item = currentSongs.removeAt(fromIndex)
-                currentSongs.add(toIndex, item)
-                val newSongOrderIds = currentSongs.map { it.id }
+            val currentTracks = _uiState.value.currentPlaylistSongs.toMutableList()
+            if (fromIndex in currentTracks.indices && toIndex in currentTracks.indices) {
+                val item = currentTracks.removeAt(fromIndex)
+                currentTracks.add(toIndex, item)
+                val newSongOrderIds = currentTracks.map { it.id }
                 userPreferencesRepository.reorderSongsInPlaylist(playlistId, newSongOrderIds)
                 userPreferencesRepository.setPlaylistSongOrderMode(
                     playlistId,
@@ -654,7 +654,7 @@ class PlaylistViewModel @Inject constructor(
                 _uiState.update {
                     val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
                     it.copy(
-                        currentPlaylistSongs = currentSongs,
+                        currentPlaylistSongs = currentTracks,
                         playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
                         playlistOrderModes = updatedModes
                     )
@@ -701,15 +701,15 @@ class PlaylistViewModel @Inject constructor(
             return
         }
 
-        val currentSongs = _uiState.value.currentPlaylistSongs
+        val currentTracks = _uiState.value.currentPlaylistSongs
         val sortedSongs = when (sortOption) {
-            SortOption.SongTitleAZ -> currentSongs.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> currentSongs.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> currentSongs.sortedBy { it.artist.lowercase() }
-            SortOption.SongAlbum -> currentSongs.sortedBy { it.album.lowercase() }
-            SortOption.SongDuration -> currentSongs.sortedBy { it.duration }
-            SortOption.SongDateAdded -> currentSongs.sortedByDescending { it.dateAdded }
-            else -> currentSongs
+            SortOption.SongTitleAZ -> currentTracks.sortedBy { it.title.lowercase() }
+            SortOption.SongTitleZA -> currentTracks.sortedByDescending { it.title.lowercase() }
+            SortOption.SongArtist -> currentTracks.sortedBy { it.artist.lowercase() }
+            SortOption.SongAlbum -> currentTracks.sortedBy { it.album.lowercase() }
+            SortOption.SongDuration -> currentTracks.sortedBy { it.duration }
+            SortOption.SongDateAdded -> currentTracks.sortedByDescending { it.dateAdded }
+            else -> currentTracks
         }
 
         _uiState.update {
@@ -757,11 +757,11 @@ class PlaylistViewModel @Inject constructor(
         return null
     }
 
-    private fun com.oakiha.audia.data.model.AudiobookFolder.collectAllSongs(): List<Song> {
+    private fun com.oakiha.audia.data.model.AudiobookFolder.collectAllSongs(): List<Track> {
         return songs + subFolders.flatMap { it.collectAllSongs() }
     }
 
-    private fun applySortToSongs(songs: List<Song>, sortOption: SortOption): List<Song> {
+    private fun applySortToSongs(songs: List<Track>, sortOption: SortOption): List<Track> {
         return when (sortOption) {
             SortOption.SongTitleAZ -> songs.sortedBy { it.title.lowercase() }
             SortOption.SongTitleZA -> songs.sortedByDescending { it.title.lowercase() }

@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.presentation.viewmodel.exts.DeckController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class DeckState(
-    val song: Song? = null,
+    val song: Track? = null,
     val isPlaying: Boolean = false,
     val progress: Float = 0f,
     val volume: Float = 1f,
@@ -31,7 +31,7 @@ data class MashupUiState(
     val deck1: DeckState = DeckState(),
     val deck2: DeckState = DeckState(),
     val crossfaderValue: Float = 0f,
-    val allTracks: List<Song> = emptyList(),
+    val allTracks: List<Track> = emptyList(),
     val showSongPickerForDeck: Int? = null
 )
 
@@ -68,7 +68,7 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    fun loadSong(deck: Int, song: Song) {
+    fun loadSong(deck: Int, song: Track) {
         updateDeckState(deck) { it.copy(song = song) }
         val songUri = Uri.parse(song.contentUriString)
         val controller = if (deck == 1) deck1Controller else deck2Controller

@@ -12,7 +12,7 @@ import com.oakiha.audia.utils.AudioMeta
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MusicDao {
+interface AudiobookDao {
 
     // --- Insert Operations ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,11 +52,11 @@ interface MusicDao {
     @Query("SELECT id FROM songs")
     suspend fun getAllSongIds(): List<Long>
 
-    @Query("DELETE FROM songs WHERE id IN (:songIds)")
-    suspend fun deleteSongsByIds(songIds: List<Long>)
+    @Query("DELETE FROM songs WHERE id IN (:trackIds)")
+    suspend fun deleteSongsByIds(trackIds: List<Long>)
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE song_id IN (:songIds)")
-    suspend fun deleteCrossRefsBySongIds(songIds: List<Long>)
+    @Query("DELETE FROM song_artist_cross_ref WHERE song_id IN (:trackIds)")
+    suspend fun deleteCrossRefsBySongIds(trackIds: List<Long>)
 
     /**
      * Incrementally sync music data: upsert new/modified songs and remove deleted ones.
@@ -113,29 +113,29 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE id = :songId")
-    fun getTrackById(songId: Long): Flow<TrackEntity?>
+    @Query("SELECT * FROM songs WHERE id = :trackId")
+    fun getTrackById(trackId: Long): Flow<TrackEntity?>
 
     @Query("SELECT * FROM songs WHERE file_path = :path LIMIT 1")
     suspend fun getTrackByPath(path: String): TrackEntity?
 
-    //@Query("SELECT * FROM songs WHERE id IN (:songIds)")
+    //@Query("SELECT * FROM songs WHERE id IN (:trackIds)")
     @Query("""
         SELECT * FROM songs
-        WHERE id IN (:songIds)
+        WHERE id IN (:trackIds)
         AND (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
     """)
     fun getTracksByIds(
-        songIds: List<Long>,
+        trackIds: List<Long>,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY title ASC")
-    fun getTracksByAlbumId(albumId: Long): Flow<List<TrackEntity>>
+    @Query("SELECT * FROM songs WHERE album_id = :bookId ORDER BY title ASC")
+    fun getTracksByAlbumId(bookId: Long): Flow<List<TrackEntity>>
 
-    @Query("SELECT * FROM songs WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getTracksByArtistId(artistId: Long): Flow<List<TrackEntity>>
+    @Query("SELECT * FROM songs WHERE artist_id = :authorId ORDER BY title ASC")
+    fun getTracksByArtistId(authorId: Long): Flow<List<TrackEntity>>
 
     @Query("""
         SELECT * FROM songs
@@ -207,8 +207,8 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<BookEntity>>
 
-    @Query("SELECT * FROM albums WHERE id = :albumId")
-    fun getAlbumById(albumId: Long): Flow<BookEntity?>
+    @Query("SELECT * FROM albums WHERE id = :bookId")
+    fun getAlbumById(bookId: Long): Flow<BookEntity?>
 
     @Query("SELECT * FROM albums WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
     fun searchAlbums(query: String): Flow<List<BookEntity>>
@@ -228,8 +228,8 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): List<BookEntity>
 
-    @Query("SELECT * FROM albums WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getAlbumsByArtistId(artistId: Long): Flow<List<BookEntity>>
+    @Query("SELECT * FROM albums WHERE artist_id = :authorId ORDER BY title ASC")
+    fun getAlbumsByArtistId(authorId: Long): Flow<List<BookEntity>>
 
     @Query("""
         SELECT DISTINCT albums.* FROM albums
@@ -262,8 +262,8 @@ interface MusicDao {
     @Query("SELECT * FROM artists ORDER BY name ASC")
     fun getAllArtistsRaw(): Flow<List<AuthorEntity>>
 
-    @Query("SELECT * FROM artists WHERE id = :artistId")
-    fun getArtistById(artistId: Long): Flow<AuthorEntity?>
+    @Query("SELECT * FROM artists WHERE id = :authorId")
+    fun getArtistById(authorId: Long): Flow<AuthorEntity?>
 
     @Query("SELECT * FROM artists WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchArtists(query: String): Flow<List<AuthorEntity>>
@@ -303,11 +303,11 @@ interface MusicDao {
     ): Flow<List<AuthorEntity>>
 
     // --- Artist Image Operations ---
-    @Query("SELECT image_url FROM artists WHERE id = :artistId")
-    suspend fun getArtistImageUrl(artistId: Long): String?
+    @Query("SELECT image_url FROM artists WHERE id = :authorId")
+    suspend fun getArtistImageUrl(authorId: Long): String?
 
-    @Query("UPDATE artists SET image_url = :imageUrl WHERE id = :artistId")
-    suspend fun updateArtistImageUrl(artistId: Long, imageUrl: String)
+    @Query("UPDATE artists SET image_url = :imageUrl WHERE id = :authorId")
+    suspend fun updateArtistImageUrl(authorId: Long, imageUrl: String)
 
     @Query("SELECT id FROM artists WHERE name = :name LIMIT 1")
     suspend fun getArtistIdByName(name: String): Long?
@@ -356,24 +356,24 @@ interface MusicDao {
     suspend fun deleteOrphanedArtists()
 
     // --- Favorite Operations ---
-    @Query("UPDATE songs SET is_favorite = :isFavorite WHERE id = :songId")
-    suspend fun setFavoriteStatus(songId: Long, isFavorite: Boolean)
+    @Query("UPDATE songs SET is_favorite = :isFavorite WHERE id = :trackId")
+    suspend fun setFavoriteStatus(trackId: Long, isFavorite: Boolean)
 
-    @Query("SELECT is_favorite FROM songs WHERE id = :songId")
-    suspend fun getFavoriteStatus(songId: Long): Boolean?
+    @Query("SELECT is_favorite FROM songs WHERE id = :trackId")
+    suspend fun getFavoriteStatus(trackId: Long): Boolean?
 
     // Transaction to toggle favorite status
     @Transaction
-    suspend fun toggleFavoriteStatus(songId: Long): Boolean {
-        val currentStatus = getFavoriteStatus(songId) ?: false // Default to false if not found (should not happen for existing song)
+    suspend fun toggleFavoriteStatus(trackId: Long): Boolean {
+        val currentStatus = getFavoriteStatus(trackId) ?: false // Default to false if not found (should not happen for existing song)
         val newStatus = !currentStatus
-        setFavoriteStatus(songId, newStatus)
+        setFavoriteStatus(trackId, newStatus)
         return newStatus
     }
 
-    @Query("UPDATE songs SET title = :title, artist_name = :artist, album_name = :album, genre = :genre, lyrics = :lyrics, track_number = :trackNumber WHERE id = :songId")
+    @Query("UPDATE songs SET title = :title, artist_name = :artist, album_name = :album, genre = :genre, lyrics = :lyrics, track_number = :trackNumber WHERE id = :trackId")
     suspend fun updateSongMetadata(
-        songId: Long,
+        trackId: Long,
         title: String,
         artist: String,
         album: String,
@@ -382,14 +382,14 @@ interface MusicDao {
         trackNumber: Int
     )
 
-    @Query("UPDATE songs SET album_art_uri_string = :albumArtUri WHERE id = :songId")
-    suspend fun updateSongAlbumArt(songId: Long, albumArtUri: String?)
+    @Query("UPDATE songs SET album_art_uri_string = :bookArtUri WHERE id = :trackId")
+    suspend fun updateSongAlbumArt(trackId: Long, bookArtUri: String?)
 
-    @Query("UPDATE songs SET lyrics = :lyrics WHERE id = :songId")
-    suspend fun updateLyrics(songId: Long, lyrics: String)
+    @Query("UPDATE songs SET lyrics = :lyrics WHERE id = :trackId")
+    suspend fun updateLyrics(trackId: Long, lyrics: String)
 
-    @Query("UPDATE songs SET lyrics = NULL WHERE id = :songId")
-    suspend fun resetLyrics(songId: Long)
+    @Query("UPDATE songs SET lyrics = NULL WHERE id = :trackId")
+    suspend fun resetLyrics(trackId: Long)
 
     @Query("UPDATE songs SET lyrics = NULL")
     suspend fun resetAllLyrics()
@@ -426,11 +426,11 @@ interface MusicDao {
     @Query("DELETE FROM song_artist_cross_ref")
     suspend fun clearAllTrackAuthorCrossRefs()
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE song_id = :songId")
-    suspend fun deleteCrossRefsForSong(songId: Long)
+    @Query("DELETE FROM song_artist_cross_ref WHERE song_id = :trackId")
+    suspend fun deleteCrossRefsForSong(trackId: Long)
 
-    @Query("DELETE FROM song_artist_cross_ref WHERE artist_id = :artistId")
-    suspend fun deleteCrossRefsForArtist(artistId: Long)
+    @Query("DELETE FROM song_artist_cross_ref WHERE artist_id = :authorId")
+    suspend fun deleteCrossRefsForArtist(authorId: Long)
 
     /**
      * Get all artists for a specific song using the junction table.
@@ -438,10 +438,10 @@ interface MusicDao {
     @Query("""
         SELECT artists.* FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId
+        WHERE song_artist_cross_ref.song_id = :trackId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
-    fun getArtistsForSong(songId: Long): Flow<List<AuthorEntity>>
+    fun getArtistsForSong(trackId: Long): Flow<List<AuthorEntity>>
 
     /**
      * Get all artists for a specific song (one-shot).
@@ -449,10 +449,10 @@ interface MusicDao {
     @Query("""
         SELECT artists.* FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId
+        WHERE song_artist_cross_ref.song_id = :trackId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
-    suspend fun getArtistsForSongList(songId: Long): List<AuthorEntity>
+    suspend fun getArtistsForSongList(trackId: Long): List<AuthorEntity>
 
     /**
      * Get all songs for a specific artist using the junction table.
@@ -460,10 +460,10 @@ interface MusicDao {
     @Query("""
         SELECT songs.* FROM songs
         INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :artistId
+        WHERE song_artist_cross_ref.artist_id = :authorId
         ORDER BY songs.title ASC
     """)
-    fun getTracksForArtist(artistId: Long): Flow<List<TrackEntity>>
+    fun getTracksForArtist(authorId: Long): Flow<List<TrackEntity>>
 
     /**
      * Get all songs for a specific artist (one-shot).
@@ -471,16 +471,16 @@ interface MusicDao {
     @Query("""
         SELECT songs.* FROM songs
         INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
-        WHERE song_artist_cross_ref.artist_id = :artistId
+        WHERE song_artist_cross_ref.artist_id = :authorId
         ORDER BY songs.title ASC
     """)
-    suspend fun getTracksForArtistList(artistId: Long): List<TrackEntity>
+    suspend fun getTracksForArtistList(authorId: Long): List<TrackEntity>
 
     /**
      * Get the cross-references for a specific song.
      */
-    @Query("SELECT * FROM song_artist_cross_ref WHERE song_id = :songId")
-    suspend fun getCrossRefsForSong(songId: Long): List<TrackAuthorCrossRef>
+    @Query("SELECT * FROM song_artist_cross_ref WHERE song_id = :trackId")
+    suspend fun getCrossRefsForSong(trackId: Long): List<TrackAuthorCrossRef>
 
     /**
      * Get the primary artist for a song.
@@ -488,16 +488,16 @@ interface MusicDao {
     @Query("""
         SELECT artists.id AS artist_id, artists.name FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
-        WHERE song_artist_cross_ref.song_id = :songId AND song_artist_cross_ref.is_primary = 1
+        WHERE song_artist_cross_ref.song_id = :trackId AND song_artist_cross_ref.is_primary = 1
         LIMIT 1
     """)
-    suspend fun getPrimaryArtistForSong(songId: Long): PrimaryArtistInfo?
+    suspend fun getPrimaryArtistForSong(trackId: Long): PrimaryArtistInfo?
 
     /**
      * Get song count for an artist from the junction table.
      */
-    @Query("SELECT COUNT(*) FROM song_artist_cross_ref WHERE artist_id = :artistId")
-    suspend fun getTrackCountForArtist(artistId: Long): Int
+    @Query("SELECT COUNT(*) FROM song_artist_cross_ref WHERE artist_id = :authorId")
+    suspend fun getTrackCountForArtist(authorId: Long): Int
 
     /**
      * Get all artists with their song counts computed from the junction table.
@@ -565,7 +565,7 @@ interface MusicDao {
     companion object {
         /**
          * SQLite has a limit on the number of variables per statement (default 999, higher in newer versions).
-         * Each TrackAuthorCrossRef insert uses 3 variables (songId, artistId, isPrimary).
+         * Each TrackAuthorCrossRef insert uses 3 variables (trackId, authorId, isPrimary).
          * The batch size is calculated so that batchSize * 3 <= SQLITE_MAX_VARIABLE_NUMBER.
          */
         private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more

@@ -21,9 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.oakiha.audia.data.preferences.LaunchTab
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.presentation.screens.AlbumDetailScreen
-import com.oakiha.audia.presentation.screens.ArtistDetailScreen
-import com.oakiha.audia.presentation.screens.ArtistSettingsScreen
+import com.oakiha.audia.presentation.screens.BookDetailScreen
+import com.oakiha.audia.presentation.screens.AuthorDetailScreen
+import com.oakiha.audia.presentation.screens.AuthorSettingsScreen
 import com.oakiha.audia.presentation.screens.DailyMixScreen
 import com.oakiha.audia.presentation.screens.EditTransitionScreen
 import com.oakiha.audia.presentation.screens.ExperimentalSettingsScreen
@@ -249,17 +249,17 @@ fun AppNavigation(
             }
             composable(
                 route = Screen.AlbumDetail.route,
-                arguments = listOf(navArgument("albumId") { type = NavType.StringType }),
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
             ) { backStackEntry ->
-                val albumId = backStackEntry.arguments?.getString("albumId")
-                if (albumId != null) {
+                val bookId = backStackEntry.arguments?.getString("bookId")
+                if (bookId != null) {
                     ScreenWrapper(navController = navController) {
-                        AlbumDetailScreen(
-                            albumId = albumId,
+                        BookDetailScreen(
+                            bookId = bookId,
                             navController = navController,
                             playerViewModel = playerViewModel
                         )
@@ -268,17 +268,17 @@ fun AppNavigation(
             }
             composable(
                 route = Screen.ArtistDetail.route,
-                arguments = listOf(navArgument("artistId") { type = NavType.StringType }),
+                arguments = listOf(navArgument("authorId") { type = NavType.StringType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
             ) { backStackEntry ->
-                val artistId = backStackEntry.arguments?.getString("artistId")
-                if (artistId != null) {
+                val authorId = backStackEntry.arguments?.getString("authorId")
+                if (authorId != null) {
                     ScreenWrapper(navController = navController) {
-                        ArtistDetailScreen(
-                            artistId = artistId,
+                        AuthorDetailScreen(
+                            authorId = authorId,
                             navController = navController,
                             playerViewModel = playerViewModel
                         )
@@ -334,7 +334,7 @@ fun AppNavigation(
                 popExitTransition = { popExitTransition() },
             ) {
                 ScreenWrapper(navController = navController) {
-                    ArtistSettingsScreen(navController = navController)
+                    AuthorSettingsScreen(navController = navController)
                 }
             }
             composable(

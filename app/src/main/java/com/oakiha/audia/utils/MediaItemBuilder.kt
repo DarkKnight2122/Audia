@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 
 object MediaItemBuilder {
     private const val EXTERNAL_MEDIA_ID_PREFIX = "external:"
@@ -22,7 +22,7 @@ object MediaItemBuilder {
     const val EXTERNAL_EXTRA_BITRATE = EXTERNAL_EXTRA_PREFIX + "BITRATE"
     const val EXTERNAL_EXTRA_SAMPLE_RATE = EXTERNAL_EXTRA_PREFIX + "SAMPLE_RATE"
 
-    fun build(song: Song): MediaItem {
+    fun build(song: Track): MediaItem {
         return MediaItem.Builder()
             .setMediaId(song.id)
             .setUri(song.contentUriString.toUri())
@@ -30,13 +30,13 @@ object MediaItemBuilder {
             .build()
     }
 
-    private fun buildMediaMetadataForSong(song: Song): MediaMetadata {
+    private fun buildMediaMetadataForSong(song: Track): MediaMetadata {
         val metadataBuilder = MediaMetadata.Builder()
             .setTitle(song.title)
-            .setArtist(song.displayArtist)
+            .setArtist(song.displayAuthor)
             .setAlbumTitle(song.album)
 
-        song.albumArtUriString?.toUri()?.let { artworkUri ->
+        song.bookArtUriString?.toUri()?.let { artworkUri ->
             metadataBuilder.setArtworkUri(artworkUri)
         }
 
@@ -45,7 +45,7 @@ object MediaItemBuilder {
             putString(EXTERNAL_EXTRA_ALBUM, song.album)
             putLong(EXTERNAL_EXTRA_DURATION, song.duration)
             putString(EXTERNAL_EXTRA_CONTENT_URI, song.contentUriString)
-            song.albumArtUriString?.let { putString(EXTERNAL_EXTRA_ALBUM_ART, it) }
+            song.bookArtUriString?.let { putString(EXTERNAL_EXTRA_ALBUM_ART, it) }
             song.genre?.let { putString(EXTERNAL_EXTRA_GENRE, it) }
             putInt(EXTERNAL_EXTRA_TRACK, song.trackNumber)
             putInt(EXTERNAL_EXTRA_YEAR, song.year)

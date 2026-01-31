@@ -106,7 +106,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import coil.size.Size
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.NavBarStyle
 import com.oakiha.audia.presentation.components.player.FullPlayerContent
 import com.oakiha.audia.presentation.components.scoped.rememberExpansionTransition
@@ -138,7 +138,7 @@ val MiniPlayerHeight = 64.dp
 const val ANIMATION_DURATION_MS = 255
 
 private data class SaveQueueOverlayData(
-    val songs: List<Song>,
+    val songs: List<Track>,
     val defaultName: String,
     val onConfirm: (String, Set<String>) -> Unit,
 )
@@ -213,12 +213,12 @@ fun UnifiedPlayerSheet(
     val tapBackgroundClosesPlayer by playerViewModel.tapBackgroundClosesPlayer.collectAsState()
     val useSmoothCorners by playerViewModel.useSmoothCorners.collectAsState()
 
-    LaunchedEffect(infrequentPlayerState.currentSong?.id) {
-        if (infrequentPlayerState.currentSong != null) {
+    LaunchedEffect(infrequentPlayerState.currentTrack?.id) {
+        if (infrequentPlayerState.currentTrack != null) {
             prewarmFullPlayer = true
         }
     }
-    LaunchedEffect(infrequentPlayerState.currentSong?.id, prewarmFullPlayer) {
+    LaunchedEffect(infrequentPlayerState.currentTrack?.id, prewarmFullPlayer) {
         if (prewarmFullPlayer) {
             delay(32)
             prewarmFullPlayer = false
@@ -252,8 +252,8 @@ fun UnifiedPlayerSheet(
 
     val isCastConnecting by playerViewModel.isCastConnecting.collectAsState()
 
-    val showPlayerContentArea by remember(infrequentPlayerState.currentSong, isCastConnecting) {
-        derivedStateOf { infrequentPlayerState.currentSong != null || isCastConnecting }
+    val showPlayerContentArea by remember(infrequentPlayerState.currentTrack, isCastConnecting) {
+        derivedStateOf { infrequentPlayerState.currentTrack != null || isCastConnecting }
     }
 
     // Use the granular showDismissUndoBar here
@@ -285,14 +285,14 @@ fun UnifiedPlayerSheet(
         sheetAnimationMutex,
         sheetCollapsedTargetY
     ) {
-        playerViewModel.artistNavigationRequests.collectLatest { artistId ->
+        playerViewModel.artistNavigationRequests.collectLatest { authorId ->
             sheetAnimationMutex.mutate {
                 currentSheetTranslationY.snapTo(sheetCollapsedTargetY)
                 playerContentExpansionFraction.snapTo(0f)
             }
             playerViewModel.collapsePlayerSheet()
 
-            navController.navigate(Screen.ArtistDetail.createRoute(artistId)) {
+            navController.navigate(Screen.ArtistDetail.createRoute(authorId)) {
                 launchSingleTop = true
             }
         }
@@ -535,7 +535,7 @@ fun UnifiedPlayerSheet(
         showPlayerContentArea,
         playerContentExpansionFraction,
         infrequentPlayerState.isPlaying,
-        infrequentPlayerState.currentSong,
+        infrequentPlayerState.currentTrack,
         predictiveBackCollapseProgress,
         currentSheetContentState,
         swipeDismissProgress.value,
@@ -563,7 +563,7 @@ fun UnifiedPlayerSheet(
                             26.dp
                         }
                     } else {
-                        if (!infrequentPlayerState.isPlaying || infrequentPlayerState.currentSong == null) {
+                        if (!infrequentPlayerState.isPlaying || infrequentPlayerState.currentTrack == null) {
                             if (isNavBarHidden) 32.dp else navBarCornerRadius.dp
                         } else {
                             if (isNavBarHidden) 32.dp else 12.dp
@@ -796,7 +796,7 @@ fun UnifiedPlayerSheet(
 
     val updatedPendingSaveOverlay = rememberUpdatedState(pendingSaveQueueOverlay)
     fun launchSaveQueueOverlay(
-        songs: List<Song>,
+        songs: List<Track>,
         defaultName: String,
         onConfirm: (String, Set<String>) -> Unit
     ) {
@@ -810,7 +810,7 @@ fun UnifiedPlayerSheet(
     }
 
     var internalIsKeyboardVisible by remember { mutableStateOf(false) }
-    var selectedSongForInfo by remember { mutableStateOf<Song?>(null) } // State for the selected song info
+    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) } // State for the selected song info
 
     val imeInsets = WindowInsets.ime
     LaunchedEffect(imeInsets, density) {
@@ -827,7 +827,7 @@ fun UnifiedPlayerSheet(
             !internalIsKeyboardVisible ||
             currentSheetContentState == PlayerSheetState.EXPANDED ||
             pendingSaveQueueOverlay != null ||
-            selectedSongForInfo != null
+            selectedTrackForInfo != null
     )
 
     // val currentAlbumColorSchemePair by playerViewModel.currentAlbumArtColorSchemePair.collectAsState() // Replaced by activePlayerColorSchemePair
@@ -1166,9 +1166,9 @@ fun UnifiedPlayerSheet(
                                 }
                         ) {
                                     // MiniPlayerContentInternal
-                                    // stablePlayerState.currentSong is already available from the top-level collection
+                                    // stablePlayerState.currentTrack is already available from the top-level collection
                                     // Use infrequentPlayerState
-                                    infrequentPlayerState.currentSong?.let { currentSongNonNull ->
+                                    infrequentPlayerState.currentTrack?.let { currentTrackNonNull ->
                                     // MiniPlayer
                                     Crossfade(
                                         targetState = albumColorScheme,
@@ -1188,7 +1188,7 @@ fun UnifiedPlayerSheet(
                                                     .zIndex(miniPlayerZIndex)
                                             ) {
                                                 MiniPlayerContentInternal(
-                                                    song = currentSongNonNull, // Use non-null version
+                                                    song = currentTrackNonNull, // Use non-null version
                                                     cornerRadiusAlb = (overallSheetTopCornerRadius.value * 0.5).dp,
                                                     isPlaying = infrequentPlayerState.isPlaying, // from top-level stablePlayerState
                                                     isCastConnecting = isCastConnecting,
@@ -1231,7 +1231,7 @@ fun UnifiedPlayerSheet(
                                                 .offset { fullPlayerOffset }
                                         ) {
                                             FullPlayerContent(
-                                                currentSong = currentSongNonNull,
+                                                currentTrack = currentTrackNonNull,
                                                 currentPlaybackQueue = currentPlaybackQueue,
                                                 currentQueueSourceName = currentQueueSourceName,
                                                 isShuffleEnabled = infrequentPlayerState.isShuffleEnabled,
@@ -1277,7 +1277,7 @@ fun UnifiedPlayerSheet(
                     }
 
                     // Prewarm full player once per track to reduce first-open jank.
-                    if (prewarmFullPlayer && infrequentPlayerState.currentSong != null) {
+                    if (prewarmFullPlayer && infrequentPlayerState.currentTrack != null) {
                         CompositionLocalProvider(
                             LocalMaterialTheme provides (albumColorScheme
                                 ?: MaterialTheme.colorScheme)
@@ -1290,7 +1290,7 @@ fun UnifiedPlayerSheet(
                                     .clipToBounds()
                             ) {
                                 FullPlayerContent(
-                                    currentSong = infrequentPlayerState.currentSong!!,
+                                    currentTrack = infrequentPlayerState.currentTrack!!,
                                     currentPlaybackQueue = currentPlaybackQueue,
                                     currentQueueSourceName = currentQueueSourceName,
                                     isShuffleEnabled = infrequentPlayerState.isShuffleEnabled,
@@ -1343,7 +1343,7 @@ fun UnifiedPlayerSheet(
                 }
 
 
-                if (!internalIsKeyboardVisible || selectedSongForInfo != null) {
+                if (!internalIsKeyboardVisible || selectedTrackForInfo != null) {
                     CompositionLocalProvider(
                         LocalMaterialTheme provides (albumColorScheme ?: MaterialTheme.colorScheme)
                     ) {
@@ -1366,9 +1366,9 @@ fun UnifiedPlayerSheet(
                             }
 
                                 val onDimissQueueRequest = remember { { animateQueueSheet(false) } }
-                                val onQueueSongInfoClick = remember { { song: Song -> selectedSongForInfo = song } }
+                                val onQueueSongInfoClick = remember { { song: Track -> selectedTrackForInfo = song } }
                                 val onPlayQueueSong = remember(currentPlaybackQueue, currentQueueSourceName) {
-                                    { song: Song -> 
+                                    { song: Track -> 
                                         playerViewModel.playSongs(currentPlaybackQueue, song, currentQueueSourceName)
                                     }
                                 }
@@ -1384,7 +1384,7 @@ fun UnifiedPlayerSheet(
                                 val onCancelCountedPlay = remember { playerViewModel::cancelCountedPlay }
                                 val onPlayCounter = remember { playerViewModel::playCounted }
                                 val onRequestSavePlaylist = remember {
-                                    { songs: List<Song>, defName: String, onConf: (String, Set<String>) -> Unit ->
+                                    { songs: List<Track>, defName: String, onConf: (String, Set<String>) -> Unit ->
                                         launchSaveQueueOverlay(songs, defName, onConf)
                                     }
                                 }
@@ -1422,7 +1422,7 @@ fun UnifiedPlayerSheet(
                                         },
                                     queue = currentPlaybackQueue,
                                     currentQueueSourceName = currentQueueSourceName,
-                                    currentSongId = infrequentPlayerState.currentSong?.id,
+                                    currentTrackId = infrequentPlayerState.currentTrack?.id,
                                     onDismiss = onDimissQueueRequest,
                                     onSongInfoClick = onQueueSongInfoClick,
                                     onPlaySong = onPlayQueueSong, // Correct lambda reference
@@ -1449,8 +1449,8 @@ fun UnifiedPlayerSheet(
                                 )
                               }
 
-                            // Show SongInfoBottomSheet when a song is selected
-                            selectedSongForInfo?.let { staticSong ->
+                            // Show TrackInfoBottomSheet when a song is selected
+                            selectedTrackForInfo?.let { staticSong ->
                                 // Observar cambios en la canciÃ³n (metadata o favorite status) reactivamente
                                 val liveSongState by remember(staticSong.id) {
                                     playerViewModel.observeSong(staticSong.id)
@@ -1459,24 +1459,24 @@ fun UnifiedPlayerSheet(
 
                                 val liveSong = liveSongState ?: staticSong
 
-                                SongInfoBottomSheet(
+                                TrackInfoBottomSheet(
                                     song = liveSong,
                                     isFavorite = liveSong.isFavorite,
                                     
                                     onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(liveSong) },
-                                    onDismiss = { selectedSongForInfo = null },
+                                    onDismiss = { selectedTrackForInfo = null },
                                     onPlaySong = { 
                                         playerViewModel.playSongs(currentPlaybackQueue, liveSong, currentQueueSourceName)
-                                        selectedSongForInfo = null
+                                        selectedTrackForInfo = null
                                     },
                                     onAddToQueue = { 
                                         playerViewModel.addSongToQueue(liveSong)
-                                        selectedSongForInfo = null
+                                        selectedTrackForInfo = null
                                         Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
                                     },
                                     onAddNextToQueue = { 
                                         playerViewModel.addSongNextToQueue(liveSong)
-                                        selectedSongForInfo = null
+                                        selectedTrackForInfo = null
                                          Toast.makeText(context, "Playing next", Toast.LENGTH_SHORT).show()
                                     },
                                     onAddToPlayList = { 
@@ -1484,14 +1484,14 @@ fun UnifiedPlayerSheet(
                                         // For now we might need a placeholder or check how it is implemented elsewhere.
                                         // playerViewModel doesn't seem to have 'openAddToPlaylistDialog'.
                                         // Maybe we can skip this or implement if simple.
-                                        // SongInfoBottomSheet usually handles the UI for it? No, it has onAddToPlayList callback.
+                                        // TrackInfoBottomSheet usually handles the UI for it? No, it has onAddToPlayList callback.
                                         // Let's leave it empty or log for now if we don't have a ready handler
                                         Log.d("UnifiedPlayerSheet", "Add to playlist clicked for ${liveSong.title}")
-                                         selectedSongForInfo = null
+                                         selectedTrackForInfo = null
                                     },
                                     onDeleteFromDevice = { activity, songToDelete, onResult ->
                                          playerViewModel.deleteFromDevice(activity, songToDelete, onResult)
-                                         selectedSongForInfo = null
+                                         selectedTrackForInfo = null
                                     },
                                     onNavigateToAlbum = {
                                         scope.launch {
@@ -1502,10 +1502,10 @@ fun UnifiedPlayerSheet(
                                         }
                                         playerViewModel.collapsePlayerSheet()
                                         animateQueueSheet(false)
-                                        selectedSongForInfo = null
+                                        selectedTrackForInfo = null
 
-                                         if (liveSong.albumId != -1L) {
-                                            navController.navigate(Screen.AlbumDetail.createRoute(liveSong.albumId))
+                                         if (liveSong.bookId != -1L) {
+                                            navController.navigate(Screen.AlbumDetail.createRoute(liveSong.bookId))
                                          }
                                     },
                                     onNavigateToArtist = {
@@ -1517,14 +1517,14 @@ fun UnifiedPlayerSheet(
                                         }
                                         playerViewModel.collapsePlayerSheet()
                                         animateQueueSheet(false)
-                                        selectedSongForInfo = null
-                                        if (liveSong.artistId != -1L) {
-                                            navController.navigate(Screen.ArtistDetail.createRoute(liveSong.artistId))
+                                        selectedTrackForInfo = null
+                                        if (liveSong.authorId != -1L) {
+                                            navController.navigate(Screen.ArtistDetail.createRoute(liveSong.authorId))
                                         }
                                     },
                                     onEditSong = { title, artist, album, genre, lyrics, trackNumber, coverArtUpdate ->
                                         playerViewModel.editSongMetadata(liveSong, title, artist, album, genre, lyrics, trackNumber, coverArtUpdate)
-                                         selectedSongForInfo = null
+                                         selectedTrackForInfo = null
                                     },
                                     generateAiMetadata = { fields -> playerViewModel.generateAiMetadata(liveSong, fields) },
                                     removeFromListTrigger = {
@@ -1532,7 +1532,7 @@ fun UnifiedPlayerSheet(
                                          // In Queue, we have specific 'Remove' button. 
                                          // But maybe the user wants to remove from queue via this menu?
                                          playerViewModel.removeSongFromQueue(liveSong.id)
-                                         selectedSongForInfo = null
+                                         selectedTrackForInfo = null
                                     }
                                 )
                             }
@@ -1621,7 +1621,7 @@ fun getNavigationBarHeight(): Dp {
 
 @Composable
 private fun MiniPlayerContentInternal(
-    song: Song,
+    song: Track,
     isPlaying: Boolean,
     isCastConnecting: Boolean,
     onPlayPause: () -> Unit,
@@ -1643,7 +1643,7 @@ private fun MiniPlayerContentInternal(
     ) {
         Box(contentAlignment = Alignment.Center) {
             SmartImage(
-                model = song.albumArtUriString,
+                model = song.bookArtUriString,
                 contentDescription = "Cover of ${song.title}",
                 shape = CircleShape,
                 targetSize = Size(150, 150),
@@ -1684,7 +1684,7 @@ private fun MiniPlayerContentInternal(
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer
             )
             AutoScrollingText(
-                text = song.displayArtist,
+                text = song.displayAuthor,
                 style = artistStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer
             )

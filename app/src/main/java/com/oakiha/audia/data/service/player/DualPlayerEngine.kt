@@ -349,7 +349,7 @@ class DualPlayerEngine @Inject constructor(
             historyToTransfer.add(outgoingPlayer.getMediaItemAt(i))
         }
 
-        // Future: Songs AFTER the Next Song
+        // Future: Tracks AFTER the Next Song
         // We skip the immediate next one because incomingPlayer already has it.
         val futureToTransfer = mutableListOf<MediaItem>()
         val futureStartIndex = if (isSelfTransition) currentOutgoingIndex + 1 else currentOutgoingIndex + 2

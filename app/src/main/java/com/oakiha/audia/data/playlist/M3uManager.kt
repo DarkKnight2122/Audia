@@ -3,7 +3,7 @@ package com.oakiha.audia.data.playlist
 import android.content.Context
 import android.net.Uri
 import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.AudiobookRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -19,7 +19,7 @@ class M3uManager @Inject constructor(
 ) {
 
     suspend fun parseM3u(uri: Uri): Pair<String, List<String>> {
-        val songIds = mutableListOf<String>()
+        val trackIds = mutableListOf<String>()
         var playlistName = "Imported Playlist"
 
         // Pre-load all songs once for efficient lookup (fixes performance issue with large M3U files)
@@ -46,14 +46,14 @@ class M3uManager @Inject constructor(
                     // First try exact path match from pre-loaded map
                     val songByPath = songsByPath[trimmedLine]
                     if (songByPath != null) {
-                        songIds.add(songByPath.id)
+                        trackIds.add(songByPath.id)
                     } else {
                         // Try to match by filename if path doesn't match exactly
                         val fileName = trimmedLine.substringAfterLast("/")
                         val matchedSong = songsByFileName[fileName]?.firstOrNull()
                             ?: songsByContentUriFileName[fileName]?.firstOrNull()
                         if (matchedSong != null) {
-                            songIds.add(matchedSong.id)
+                            trackIds.add(matchedSong.id)
                         }
                     }
                 }
@@ -68,10 +68,10 @@ class M3uManager @Inject constructor(
             }
         }
 
-        return Pair(playlistName, songIds)
+        return Pair(playlistName, trackIds)
     }
 
-    fun generateM3u(playlist: Playlist, songs: List<Song>): String {
+    fun generateM3u(playlist: Playlist, songs: List<Track>): String {
         val sb = StringBuilder()
         sb.append("#EXTM3U\n")
         for (song in songs) {

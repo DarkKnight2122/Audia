@@ -60,7 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
-import com.oakiha.audia.data.model.Song // Import Song
+import com.oakiha.audia.data.model.Track // Import Song
 import com.oakiha.audia.presentation.components.GenreGradientTopBar
 // Attempt to import ExpressiveTrackListItem. If this fails, a local one will be used.
 // import com.oakiha.audia.presentation.screens.ExpressiveTrackListItem // Path might vary
@@ -98,7 +98,7 @@ fun GenreDetailScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    val isMiniPlayerVisible = stablePlayerState.isPlaying || stablePlayerState.currentSong != null
+    val isMiniPlayerVisible = stablePlayerState.isPlaying || stablePlayerState.currentTrack != null
 
     val fabBottomPadding = animateDpAsState(
         targetValue = if (isMiniPlayerVisible) {
@@ -240,17 +240,17 @@ fun GenreDetailScreen(
 private sealed class SectionData {
     abstract val id: String
 
-    data class ArtistSection(
+    data class AuthorSection(
         override val id: String,
         val artistName: String,
         val albums: List<AlbumData>
     ) : SectionData()
 }
 
-private data class AlbumData(
+private data class BookData(
     val name: String,
     val artUri: String?,
-    val songs: List<Song>
+    val songs: List<Track>
 )
 
 // Helper function to build sections from grouped songs
@@ -258,7 +258,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
     val sections = mutableListOf<SectionData>()
     var currentArtist: String? = null
     var currentAlbums = mutableListOf<AlbumData>()
-    var currentAlbumSongs = mutableListOf<Song>()
+    var currentAlbumSongs = mutableListOf<Track>()
     var currentAlbumName: String? = null
     var currentAlbumArt: String? = null
 
@@ -300,7 +300,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 
                 // Start new album
                 currentAlbumName = item.name
-                currentAlbumArt = item.albumArtUri
+                currentAlbumArt = item.bookArtUri
                 currentAlbumSongs.clear()
             }
 
@@ -417,7 +417,7 @@ private fun ArtistSectionCard(
 
 @Composable
 private fun AlbumSection(
-    album: AlbumData,
+    album: BookData,
     onSongClick: (Song) -> Unit
 ) {
     Column {
@@ -474,7 +474,7 @@ private fun AlbumSection(
 
 @Composable
 private fun SquareSongCard(
-    song: Song,
+    song: Track,
     onClick: () -> Unit
 ) {
     Card(
@@ -514,7 +514,7 @@ private fun SquareSongCard(
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     SmartImage(
-                        model = song.albumArtUriString,
+                        model = song.bookArtUriString,
                         contentDescription = "Album art for ${song.title}",
                         modifier = Modifier
                             .fillMaxWidth()

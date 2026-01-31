@@ -23,9 +23,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     exportSchema = false
 )
 abstract class AudioBookDatabase : RoomDatabase() {
-    abstract fun albumArtThemeDao(): BookArtThemeDao
+    abstract fun bookArtThemeDao(): BookArtThemeDao
     abstract fun searchHistoryDao(): SearchHistoryDao
-    abstract fun audiobookDao(): MusicDao
+    abstract fun audiobookDao(): AudiobookDao
     abstract fun transitionDao(): TransitionDao
     abstract fun engagementDao(): EngagementDao
     abstract fun favoritesDao(): FavoritesDao
@@ -113,7 +113,7 @@ abstract class AudioBookDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("""
                     CREATE TABLE IF NOT EXISTS favorites (
-                        songId INTEGER NOT NULL PRIMARY KEY,
+                        trackId INTEGER NOT NULL PRIMARY KEY,
                         isFavorite INTEGER NOT NULL,
                         timestamp INTEGER NOT NULL
                     )
@@ -122,7 +122,7 @@ abstract class AudioBookDatabase : RoomDatabase() {
                 // Migrate existing favorites from songs table if possible
                 // Note: We need to cast is_favorite (boolean/int) to ensure compatibility
                 db.execSQL("""
-                    INSERT OR IGNORE INTO favorites (songId, isFavorite, timestamp)
+                    INSERT OR IGNORE INTO favorites (trackId, isFavorite, timestamp)
                     SELECT id, is_favorite, ? FROM songs WHERE is_favorite = 1
                 """, arrayOf(System.currentTimeMillis()))
             }
@@ -130,10 +130,10 @@ abstract class AudioBookDatabase : RoomDatabase() {
         val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `lyrics` (`songId` INTEGER NOT NULL, `content` TEXT NOT NULL, `isSynced` INTEGER NOT NULL DEFAULT 0, `source` TEXT, PRIMARY KEY(`songId`))"
+                    "CREATE TABLE IF NOT EXISTS `lyrics` (`trackId` INTEGER NOT NULL, `content` TEXT NOT NULL, `isSynced` INTEGER NOT NULL DEFAULT 0, `source` TEXT, PRIMARY KEY(`trackId`))"
                 )
                 database.execSQL(
-                    "INSERT INTO lyrics (songId, content) SELECT id, lyrics FROM songs WHERE lyrics IS NOT NULL AND lyrics != ''"
+                    "INSERT INTO lyrics (trackId, content) SELECT id, lyrics FROM songs WHERE lyrics IS NOT NULL AND lyrics != ''"
                 )
             }
         }

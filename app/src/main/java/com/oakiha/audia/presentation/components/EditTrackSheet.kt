@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
 import java.net.URLEncoder
 import timber.log.Timber
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
@@ -87,9 +87,9 @@ import java.io.ByteArrayOutputStream
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 
-fun EditSongSheet(
+fun EditTrackSheet(
     visible: Boolean,
-    song: Song,
+    song: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
@@ -124,13 +124,13 @@ fun EditSongSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EditSongContent(
-    song: Song,
+    song: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
 ) {
     var title by remember { mutableStateOf(song.title) }
-    var artist by remember { mutableStateOf(song.displayArtist) }
+    var artist by remember { mutableStateOf(song.displayAuthor) }
     var album by remember { mutableStateOf(song.album) }
     var genre by remember { mutableStateOf(song.genre ?: "") }
     var lyrics by remember { mutableStateOf(song.lyrics ?: "") }
@@ -154,7 +154,7 @@ private fun EditSongContent(
 
     LaunchedEffect(song) {
         title = song.title
-        artist = song.displayArtist
+        artist = song.displayAuthor
         album = song.album
         genre = song.genre ?: ""
         lyrics = song.lyrics ?: ""
@@ -334,7 +334,7 @@ private fun EditSongContent(
             item {
                 CoverArtEditorCard(
                     modifier = Modifier.fillMaxWidth(),
-                    albumArtUri = song.albumArtUriString,
+                    bookArtUri = song.bookArtUriString,
                     preview = coverArtPreview,
                     onPickNewArt = {
                         pickCoverArtLauncher.launch(
@@ -571,7 +571,7 @@ private fun EditSongContent(
 @Composable
 private fun CoverArtEditorCard(
     modifier: Modifier = Modifier,
-    albumArtUri: String?,
+    bookArtUri: String?,
     preview: ImageBitmap?,
     onPickNewArt: () -> Unit,
     onReset: () -> Unit,
@@ -626,9 +626,9 @@ private fun CoverArtEditorCard(
                             )
                         }
 
-                        albumArtUri != null -> {
+                        bookArtUri != null -> {
                             SmartImage(
-                                model = albumArtUri,
+                                model = bookArtUri,
                                 contentDescription = "Current song cover art",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,

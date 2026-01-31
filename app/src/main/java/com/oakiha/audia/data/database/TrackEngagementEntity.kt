@@ -13,7 +13,7 @@ import androidx.room.PrimaryKey
 data class TrackEngagementEntity(
     @PrimaryKey
     @ColumnInfo(name = "song_id")
-    val songId: String,
+    val trackId: String,
     
     @ColumnInfo(name = "play_count")
     val playCount: Int = 0,

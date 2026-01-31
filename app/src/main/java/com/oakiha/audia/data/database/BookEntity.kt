@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.Album
+import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
@@ -19,35 +19,35 @@ data class BookEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "artist_name") val artistName: String, // Nombre del artista del Ã¡lbum
-    @ColumnInfo(name = "artist_id") val artistId: Long, // ID del artista principal del Ã¡lbum (si aplica)
-    @ColumnInfo(name = "album_art_uri_string") val albumArtUriString: String?,
-    @ColumnInfo(name = "song_count") val songCount: Int,
+    @ColumnInfo(name = "artist_id") val authorId: Long, // ID del artista principal del Ã¡lbum (si aplica)
+    @ColumnInfo(name = "album_art_uri_string") val bookArtUriString: String?,
+    @ColumnInfo(name = "song_count") val trackCount: Int,
     @ColumnInfo(name = "year") val year: Int
 )
 
-fun BookEntity.toAlbum(): Album {
-    return Album(
+fun BookEntity.toAlbum(): Book {
+    return Book(
         id = this.id,
         title = this.title.normalizeMetadataTextOrEmpty(),
         artist = this.artistName.normalizeMetadataTextOrEmpty(),
-        albumArtUriString = this.albumArtUriString, // El modelo Album usa albumArtUrl
-        songCount = this.songCount,
+        bookArtUriString = this.bookArtUriString, // El modelo Album usa bookArtUrl
+        trackCount = this.trackCount,
         year = this.year
     )
 }
 
-fun List<BookEntity>.toAlbums(): List<Album> {
+fun List<BookEntity>.toAlbums(): List<Book> {
     return this.map { it.toAlbum() }
 }
 
-fun Album.toEntity(artistIdForAlbum: Long): BookEntity { // Necesitamos pasar el artistId si el modelo Album no lo tiene directamente
+fun Album.toEntity(authorIdForAlbum: Long): BookEntity { // Necesitamos pasar el authorId si el modelo Album no lo tiene directamente
     return BookEntity(
         id = this.id,
         title = this.title,
         artistName = this.artist,
-        artistId = artistIdForAlbum, // Asignar el ID del artista
-        albumArtUriString = this.albumArtUriString,
-        songCount = this.songCount,
+        authorId = authorIdForAlbum, // Asignar el ID del artista
+        bookArtUriString = this.bookArtUriString,
+        trackCount = this.trackCount,
         year = this.year
     )
 }

@@ -11,7 +11,7 @@ import java.io.FileOutputStream
 data class AudioMetadata(
     val title: String?,
     val artist: String?,
-    val albumArtist: String?,
+    val bookArtist: String?,
     val album: String?,
     val genre: String?,
     val durationMs: Long?,
@@ -61,7 +61,7 @@ object AudioMetadataReader {
 
                 val title = propertyMap["TITLE"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val artist = propertyMap["ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
-                val albumArtist = propertyMap["ALBUMARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
+                val bookArtist = propertyMap["ALBUMARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["ALBUM ARTIST"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                     ?: propertyMap["BAND"]?.firstOrNull()?.takeIf { it.isNotBlank() }
                 val album = propertyMap["ALBUM"]?.firstOrNull()?.takeIf { it.isNotBlank() }
@@ -86,7 +86,7 @@ object AudioMetadataReader {
                 AudioMetadata(
                     title = title,
                     artist = artist,
-                    albumArtist = albumArtist,
+                    bookArtist = bookArtist,
                     album = album,
                     genre = genre,
                     durationMs = durationMs,

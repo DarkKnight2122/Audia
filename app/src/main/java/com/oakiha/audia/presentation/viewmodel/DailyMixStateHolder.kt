@@ -1,7 +1,7 @@
 package com.oakiha.audia.presentation.viewmodel
 
 import com.oakiha.audia.data.DailyMixManager
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -39,11 +39,11 @@ class DailyMixStateHolder @Inject constructor(
     private var scope: CoroutineScope? = null
     private var updateJob: Job? = null
 
-    private val _dailyMixSongs = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
-    val dailyMixSongs: StateFlow<ImmutableList<Song>> = _dailyMixSongs.asStateFlow()
+    private val _dailyMixSongs = MutableStateFlow<ImmutableList<Track>>(persistentListOf())
+    val dailyMixSongs: StateFlow<ImmutableList<Track>> = _dailyMixSongs.asStateFlow()
 
-    private val _yourMixSongs = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
-    val yourMixSongs: StateFlow<ImmutableList<Song>> = _yourMixSongs.asStateFlow()
+    private val _yourMixSongs = MutableStateFlow<ImmutableList<Track>>(persistentListOf())
+    val yourMixSongs: StateFlow<ImmutableList<Track>> = _yourMixSongs.asStateFlow()
 
     /**
      * Initialize with coroutine scope from ViewModel.
@@ -55,9 +55,9 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Remove a song from the daily mix.
      */
-    fun removeFromDailyMix(songId: String) {
+    fun removeFromDailyMix(trackId: String) {
         _dailyMixSongs.update { currentList ->
-            currentList.filterNot { it.id == songId }.toImmutableList()
+            currentList.filterNot { it.id == trackId }.toImmutableList()
         }
     }
 
@@ -66,7 +66,7 @@ class DailyMixStateHolder @Inject constructor(
      * @param allTracksFlow Flow of all available songs
      * @param favoriteSongIdsFlow Flow of favorite song IDs
      */
-    fun updateDailyMix(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun updateDailyMix(allTracksFlow: Flow<List<Track>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         updateJob?.cancel()
         updateJob = scope?.launch(Dispatchers.IO) {
             val allTracks = allTracksFlow.first()
@@ -91,7 +91,7 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Load persisted daily mix from storage.
      */
-    fun loadPersistedDailyMix(allTracksFlow: Flow<List<Song>>) {
+    fun loadPersistedDailyMix(allTracksFlow: Flow<List<Track>>) {
         // Load Daily Mix
         scope?.launch {
             userPreferencesRepository.dailyMixSongIdsFlow
@@ -136,7 +136,7 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Force update the daily mix regardless of day.
      */
-    fun forceUpdate(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun forceUpdate(allTracksFlow: Flow<List<Track>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         scope?.launch {
             updateDailyMix(allTracksFlow, favoriteSongIdsFlow)
             userPreferencesRepository.saveLastDailyMixUpdateTimestamp(System.currentTimeMillis())
@@ -146,7 +146,7 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Check if daily mix needs updating (new day) and update if so.
      */
-    fun checkAndUpdateIfNeeded(allTracksFlow: Flow<List<Song>>, favoriteSongIdsFlow: Flow<Set<String>>) {
+    fun checkAndUpdateIfNeeded(allTracksFlow: Flow<List<Track>>, favoriteSongIdsFlow: Flow<Set<String>>) {
         scope?.launch {
             val lastUpdate = userPreferencesRepository.lastDailyMixUpdateFlow.first()
             val today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
@@ -164,7 +164,7 @@ class DailyMixStateHolder @Inject constructor(
     /**
      * Set the daily mix songs directly (used for AI-generated mixes).
      */
-    fun setDailyMixSongs(songs: List<Song>) {
+    fun setDailyMixSongs(songs: List<Track>) {
         _dailyMixSongs.value = songs.toImmutableList()
         scope?.launch {
             userPreferencesRepository.saveDailyMixSongIds(songs.map { it.id })
@@ -175,10 +175,10 @@ class DailyMixStateHolder @Inject constructor(
      * Get a candidate pool for AI playlist generation.
      */
     suspend fun getCandidatePool(
-        allTracks: List<Song>, 
+        allTracks: List<Track>, 
         favoriteIds: Set<String>,
         maxSize: Int = 100
-    ): List<Song> {
+    ): List<Track> {
         return dailyMixManager.generateDailyMix(allTracks, favoriteIds, maxSize)
     }
 

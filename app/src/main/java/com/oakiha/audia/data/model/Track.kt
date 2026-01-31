@@ -11,17 +11,17 @@ data class Track(
     /**
      * Legacy artist display string.
      * - With multi-artist parsing enabled by default, this typically contains only the primary artist for backward compatibility.
-     * For accurate display of all artists, use the [artists] list and [displayArtist] property.
+     * For accurate display of all artists, use the [artists] list and [displayAuthor] property.
      */
     val artist: String,
-    val artistId: Long, // Primary artist ID for backward compatibility
-    val artists: List<ArtistRef> = emptyList(), // All artists for multi-artist support
+    val authorId: Long, // Primary artist ID for backward compatibility
+    val artists: List<AuthorRef> = emptyList(), // All artists for multi-artist support
     val album: String,
-    val albumId: Long,
-    val albumArtist: String? = null, // Album artist from metadata
+    val bookId: Long,
+    val bookArtist: String? = null, // Album artist from metadata
     val path: String, // Added for direct file system access
     val contentUriString: String,
-    val albumArtUriString: String?,
+    val bookArtUriString: String?,
     val duration: Long,
     val genre: String? = null,
     val lyrics: String? = null,
@@ -42,7 +42,7 @@ data class Track(
      * Falls back to splitting the legacy artist string using common delimiters,
      * and finally the raw artist field if nothing else is available.
      */
-    val displayArtist: String
+    val displayAuthor: String
         get() {
             if (artists.isNotEmpty()) {
                 return artists.sortedByDescending { it.isPrimary }.joinToString(", ") { it.name }
@@ -55,25 +55,25 @@ data class Track(
      * Returns the primary artist from the artists list,
      * or creates one from the legacy artist field.
      */
-    val primaryArtist: ArtistRef
+    val primaryArtist: AuthorRef
         get() = artists.find { it.isPrimary }
             ?: artists.firstOrNull()
-            ?: ArtistRef(id = artistId, name = artist, isPrimary = true)
+            ?: AuthorRef(id = authorId, name = artist, isPrimary = true)
 
     companion object {
-        fun emptySong(): Song {
-            return Song(
+        fun emptySong(): Track {
+            return Track(
                 id = "-1",
                 title = "",
                 artist = "",
-                artistId = -1L,
+                authorId = -1L,
                 artists = emptyList(),
                 album = "",
-                albumId = -1L,
-                albumArtist = null,
+                bookId = -1L,
+                bookArtist = null,
                 path = "",
                 contentUriString = "",
-                albumArtUriString = null,
+                bookArtUriString = null,
                 duration = 0L,
                 genre = null,
                 lyrics = null,

@@ -75,7 +75,7 @@ import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.presentation.components.ExpressiveTopBarContent
-import com.oakiha.audia.presentation.viewmodel.ArtistSettingsViewModel
+import com.oakiha.audia.presentation.viewmodel.AuthorSettingsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -83,7 +83,7 @@ import kotlin.math.roundToInt
 @Composable
 fun DelimiterConfigScreen(
     navController: NavController,
-    viewModel: ArtistSettingsViewModel = hiltViewModel()
+    viewModel: AuthorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current

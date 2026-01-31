@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
@@ -18,16 +18,16 @@ data class AuthorEntity(
     @ColumnInfo(name = "image_url") val imageUrl: String? = null
 )
 
-fun AuthorEntity.toArtist(): Artist {
-    return Artist(
+fun AuthorEntity.toArtist(): Author {
+    return Author(
         id = this.id,
         name = this.name.normalizeMetadataTextOrEmpty(),
-        songCount = this.trackCount, // El modelo Artist usa songCount, MediaStore usa NUMBER_OF_TRACKS
+        trackCount = this.trackCount, // El modelo Artist usa trackCount, MediaStore usa NUMBER_OF_TRACKS
         imageUrl = this.imageUrl
     )
 }
 
-fun List<AuthorEntity>.toArtists(): List<Artist> {
+fun List<AuthorEntity>.toArtists(): List<Author> {
     return this.map { it.toArtist() }
 }
 
@@ -35,7 +35,7 @@ fun Artist.toEntity(): AuthorEntity {
     return AuthorEntity(
         id = this.id,
         name = this.name,
-        trackCount = this.songCount,
+        trackCount = this.trackCount,
         imageUrl = this.imageUrl
     )
 }

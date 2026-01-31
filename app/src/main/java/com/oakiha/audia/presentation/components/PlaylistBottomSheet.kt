@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.subcomps.LibraryActionRow
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.PlaylistUiState
@@ -48,7 +48,7 @@ import com.oakiha.audia.ui.theme.GoogleSansRounded
 @Composable
 fun PlaylistBottomSheet(
     playlistUiState: PlaylistUiState,
-    song: Song,
+    song: Track,
     onDismiss: () -> Unit,
     bottomBarHeight: Dp,
     playerViewModel: PlayerViewModel,
@@ -73,7 +73,7 @@ fun PlaylistBottomSheet(
             filteredPlaylists.forEach {
                 put(
                     it.id,
-                    it.songIds.contains(song.id)
+                    it.trackIds.contains(song.id)
                 )
             }
         }
@@ -162,7 +162,7 @@ fun PlaylistBottomSheet(
                     navController = null,
                     playerViewModel = playerViewModel,
                     isAddingToPlaylist = true,
-                    currentSong = song,
+                    currentTrack = song,
                     filteredPlaylists = filteredPlaylists,
                     selectedPlaylists = selectedPlaylists
                 )

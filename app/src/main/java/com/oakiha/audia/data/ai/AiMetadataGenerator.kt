@@ -1,7 +1,7 @@
 package com.oakiha.audia.data.ai
 
 import com.google.ai.client.generativeai.GenerativeModel
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.google.ai.client.generativeai.type.SerializationException
 import kotlinx.coroutines.flow.first
@@ -13,7 +13,7 @@ import javax.inject.Inject
 import kotlin.Result
 
 @Serializable
-data class SongMetadata(
+data class TrackMetadata(
     val title: String? = null,
     val artist: String? = null,
     val album: String? = null,
@@ -29,7 +29,7 @@ class AiMetadataGenerator @Inject constructor(
     }
 
     suspend fun generate(
-        song: Song,
+        song: Track,
         fieldsToComplete: List<String>
     ): Result<SongMetadata> {
         return try {
@@ -69,7 +69,7 @@ class AiMetadataGenerator @Inject constructor(
             $systemPrompt
 
             Song title: "${song.title}"
-            Song artist: "${song.displayArtist}"
+            Song artist: "${song.displayAuthor}"
             $albumInfo
             Fields to complete: [$fieldsJson]
             """.trimIndent()

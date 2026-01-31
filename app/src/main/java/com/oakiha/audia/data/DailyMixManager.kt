@@ -8,7 +8,7 @@ import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.oakiha.audia.data.database.EngagementDao
 import com.oakiha.audia.data.database.TrackEngagementEntity
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -59,9 +59,9 @@ class DailyMixManager @Inject constructor(
             try {
                 val legacyData = readLegacyEngagementsLocked()
                 if (legacyData.isNotEmpty()) {
-                    val entities = legacyData.map { (songId, stats) ->
+                    val entities = legacyData.map { (trackId, stats) ->
                         TrackEngagementEntity(
-                            songId = songId,
+                            trackId = trackId,
                             playCount = stats.playCount.coerceAtLeast(0),
                             totalPlayDurationMs = stats.totalPlayDurationMs.coerceAtLeast(0L),
                             lastPlayedTimestamp = stats.lastPlayedTimestamp.coerceAtLeast(0L)
@@ -91,7 +91,7 @@ class DailyMixManager @Inject constructor(
     private fun readEngagements(): Map<String, TrackEngagementStats> {
         return runBlocking {
             engagementDao.getAllEngagements().associate { entity ->
-                entity.songId to TrackEngagementStats(
+                entity.trackId to TrackEngagementStats(
                     playCount = entity.playCount,
                     totalPlayDurationMs = entity.totalPlayDurationMs,
                     lastPlayedTimestamp = entity.lastPlayedTimestamp
@@ -223,32 +223,32 @@ class DailyMixManager @Inject constructor(
      * More efficient than JSON read-modify-write.
      */
     fun recordPlay(
-        songId: String,
+        trackId: String,
         songDurationMs: Long = 0L,
         timestamp: Long = System.currentTimeMillis()
     ) {
         runBlocking {
             engagementDao.recordPlay(
-                songId = songId,
+                trackId = trackId,
                 durationMs = songDurationMs.coerceAtLeast(0L),
                 timestamp = timestamp.coerceAtLeast(0L)
             )
         }
     }
 
-    fun incrementScore(songId: String) {
-        recordPlay(songId)
+    fun incrementScore(trackId: String) {
+        recordPlay(trackId)
     }
 
-    fun getScore(songId: String): Int {
+    fun getScore(trackId: String): Int {
         return runBlocking {
-            engagementDao.getPlayCount(songId) ?: 0
+            engagementDao.getPlayCount(trackId) ?: 0
         }
     }
 
-    fun getEngagementStats(songId: String): TrackEngagementStats? {
+    fun getEngagementStats(trackId: String): TrackEngagementStats? {
         return runBlocking {
-            engagementDao.getEngagement(songId)?.let { entity ->
+            engagementDao.getEngagement(trackId)?.let { entity ->
                 TrackEngagementStats(
                     playCount = entity.playCount,
                     totalPlayDurationMs = entity.totalPlayDurationMs,
@@ -263,7 +263,7 @@ class DailyMixManager @Inject constructor(
     }
 
     private fun computeRankedSongs(
-        allTracks: List<Song>,
+        allTracks: List<Track>,
         favoriteSongIds: Set<String>,
         random: java.util.Random
     ): List<RankedSong> {
@@ -276,18 +276,18 @@ class DailyMixManager @Inject constructor(
         val artistAffinity = mutableMapOf<Long, Double>()
         val genreAffinity = mutableMapOf<String, Double>()
 
-        engagements.forEach { (songId, stats) ->
-            val song = songById[songId] ?: return@forEach
+        engagements.forEach { (trackId, stats) ->
+            val song = songById[trackId] ?: return@forEach
             val weight = stats.playCount.toDouble() + (stats.totalPlayDurationMs / 60000.0)
             if (weight <= 0) return@forEach
-            artistAffinity.merge(song.artistId, weight, Double::plus)
+            artistAffinity.merge(song.authorId, weight, Double::plus)
             song.genre?.lowercase()?.let { genreAffinity.merge(it, weight, Double::plus) }
         }
 
         val favoriteArtistWeights = mutableMapOf<Long, Int>()
         favoriteSongIds.forEach { id ->
             val song = songById[id] ?: return@forEach
-            favoriteArtistWeights.merge(song.artistId, 1, Int::plus)
+            favoriteArtistWeights.merge(song.authorId, 1, Int::plus)
         }
 
         val maxPlayCount = engagements.values.maxOfOrNull { it.playCount }?.takeIf { it > 0 } ?: 1
@@ -303,9 +303,9 @@ class DailyMixManager @Inject constructor(
             val affinityScore = (playCountScore * 0.7 + durationScore * 0.3).coerceIn(0.0, 1.0)
 
             val genreKey = song.genre?.lowercase()
-            val artistPreference = artistAffinity[song.artistId]?.div(maxArtistAffinity) ?: 0.0
+            val artistPreference = artistAffinity[song.authorId]?.div(maxArtistAffinity) ?: 0.0
             val genrePreference = genreKey?.let { (genreAffinity[it] ?: 0.0) / maxGenreAffinity } ?: 0.0
-            val favoriteArtistPreference = favoriteArtistWeights[song.artistId]?.toDouble()?.div(maxFavoriteArtist) ?: 0.0
+            val favoriteArtistPreference = favoriteArtistWeights[song.authorId]?.toDouble()?.div(maxFavoriteArtist) ?: 0.0
             val preferenceScore = listOf(artistPreference, genrePreference, favoriteArtistPreference).maxOrNull() ?: 0.0
 
             val recencyScore = computeRecencyScore(stats?.lastPlayedTimestamp, now)
@@ -340,10 +340,10 @@ class DailyMixManager @Inject constructor(
     }
 
     fun generateDailyMix(
-        allTracks: List<Song>,
+        allTracks: List<Track>,
         favoriteSongIds: Set<String> = emptySet(),
         limit: Int = 30
-    ): List<Song> {
+    ): List<Track> {
         if (allTracks.isEmpty()) {
             return emptyList()
         }
@@ -371,10 +371,10 @@ class DailyMixManager @Inject constructor(
     }
 
     fun generateYourMix(
-        allTracks: List<Song>,
+        allTracks: List<Track>,
         favoriteSongIds: Set<String> = emptySet(),
         limit: Int = 60
-    ): List<Song> {
+    ): List<Track> {
         if (allTracks.isEmpty()) {
             return emptyList()
         }
@@ -414,7 +414,7 @@ class DailyMixManager @Inject constructor(
 
         val discoverySection = pickWithDiversity(discoveryCandidates, favoriteSongIds, discoverySectionSize)
 
-        val orderedResult = LinkedHashSet<Song>()
+        val orderedResult = LinkedHashSet<Track>()
         orderedResult.addAll(favoriteSection)
         orderedResult.addAll(coreSection)
         orderedResult.addAll(discoverySection)
@@ -436,21 +436,21 @@ class DailyMixManager @Inject constructor(
         rankedSongs: List<RankedSong>,
         favoriteSongIds: Set<String>,
         limit: Int
-    ): List<Song> {
+    ): List<Track> {
         if (limit <= 0 || rankedSongs.isEmpty()) return emptyList()
 
-        val selected = mutableListOf<Song>()
+        val selected = mutableListOf<Track>()
         val artistCounts = mutableMapOf<Long, Int>()
 
         for (candidate in rankedSongs) {
             if (selected.size >= limit) break
-            val artistId = candidate.song.artistId
+            val authorId = candidate.song.authorId
             val maxPerArtist = if (favoriteSongIds.contains(candidate.song.id)) 2 else 1
-            val currentCount = artistCounts.getOrDefault(artistId, 0)
+            val currentCount = artistCounts.getOrDefault(authorId, 0)
             if (currentCount >= maxPerArtist) continue
 
             selected += candidate.song
-            artistCounts[artistId] = currentCount + 1
+            artistCounts[authorId] = currentCount + 1
         }
 
         if (selected.size < limit) {
@@ -488,7 +488,7 @@ class DailyMixManager @Inject constructor(
     }
 
     private data class RankedSong(
-        val song: Song,
+        val song: Track,
         val finalScore: Double,
         val discoveryScore: Double,
         val affinityScore: Double,

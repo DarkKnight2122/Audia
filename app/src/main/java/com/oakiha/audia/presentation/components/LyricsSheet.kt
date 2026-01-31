@@ -1,7 +1,7 @@
 package com.oakiha.audia.presentation.components
 
 import android.widget.Toast
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.R
 import androidx.activity.compose.BackHandler
@@ -165,7 +165,7 @@ fun LyricsSheet(
     val isLoadingLyrics by remember { derivedStateOf { stablePlayerState.isLoadingLyrics } }
     val lyrics by remember { derivedStateOf { stablePlayerState.lyrics } }
     val isPlaying by remember { derivedStateOf { stablePlayerState.isPlaying } }
-    val currentSong by remember { derivedStateOf { stablePlayerState.currentSong } }
+    val currentTrack by remember { derivedStateOf { stablePlayerState.currentTrack } }
 
     val context = LocalContext.current
 
@@ -228,8 +228,8 @@ fun LyricsSheet(
         immersiveMode = false
     }
 
-    LaunchedEffect(currentSong, lyrics, isLoadingLyrics) {
-        if (currentSong != null && lyrics == null && !isLoadingLyrics) {
+    LaunchedEffect(currentTrack, lyrics, isLoadingLyrics) {
+        if (currentTrack != null && lyrics == null && !isLoadingLyrics) {
             // Only show dialog if reset was not just triggered
             if (!wasResetTriggered) {
                 showFetchLyricsDialog = true
@@ -243,7 +243,7 @@ fun LyricsSheet(
     if (showFetchLyricsDialog) {
         FetchLyricsDialog(
             uiState = lyricsSearchUiState,
-            currentSong = currentSong,
+            currentTrack = currentTrack,
             onConfirm = onSearchLyrics,
             onPickResult = onPickResult,
             onManualSearch = onManualSearch,
@@ -259,7 +259,7 @@ fun LyricsSheet(
     }
 
     // Save Lyrics Dialog
-    if (showSaveLyricsDialog && lyrics != null && currentSong != null) {
+    if (showSaveLyricsDialog && lyrics != null && currentTrack != null) {
         val hasSynced = !lyrics?.synced.isNullOrEmpty()
         val hasPlain = !lyrics?.plain.isNullOrEmpty()
         
@@ -276,7 +276,7 @@ fun LyricsSheet(
                                 showSaveLyricsDialog = false
                                 saveLyricsToFile(
                                     context = context,
-                                    song = currentSong!!,
+                                    song = currentTrack!!,
                                     lyrics = lyrics!!,
                                     preferSynced = true
                                 )
@@ -293,7 +293,7 @@ fun LyricsSheet(
                                 showSaveLyricsDialog = false
                                 saveLyricsToFile(
                                     context = context,
-                                    song = currentSong!!,
+                                    song = currentTrack!!,
                                     lyrics = lyrics!!,
                                     preferSynced = false
                                 )
@@ -407,7 +407,7 @@ fun LyricsSheet(
             ) {
                 // Track Info Header (Fixed at top)
                 AnimatedContent(
-                    targetState = currentSong,
+                    targetState = currentTrack,
                     transitionSpec = {
                         (fadeIn(animationSpec = tween(300)) + 
                          scaleIn(initialScale = 0.9f, animationSpec = tween(300)))
@@ -1070,7 +1070,7 @@ internal suspend fun animateToSnapIndex(
  */
 private fun saveLyricsToFile(
     context: android.content.Context,
-    song: Song,
+    song: Track,
     lyrics: Lyrics,
     preferSynced: Boolean
 ) {
@@ -1124,7 +1124,7 @@ private fun saveLyricsToFile(
 
 @Composable
 private fun LyricsTrackInfo(
-    song: Song?,
+    song: Track?,
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     contentColor: Color
@@ -1160,7 +1160,7 @@ private fun LyricsTrackInfo(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SmartImage(
-            model = song.albumArtUriString ?: R.drawable.rounded_book_24,
+            model = song.bookArtUriString ?: R.drawable.rounded_book_24,
             shape = albumShape,
             contentDescription = "Cover Art",
             modifier = Modifier
@@ -1188,7 +1188,7 @@ private fun LyricsTrackInfo(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = song.displayArtist,
+                text = song.displayAuthor,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = contentColor.copy(alpha = 0.7f),
                     //textGeometricTransform = TextGeometricTransform(scaleX = (0.9f)),

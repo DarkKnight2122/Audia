@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.screens.TrackListItemFavsWrapper
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.utils.shapes.RoundedStarShape
@@ -48,7 +48,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun DailyMixSection(
-    songs: ImmutableList<Song>,
+    songs: ImmutableList<Track>,
     playerViewModel: PlayerViewModel,
     onClickOpen: () -> Unit = {}
 ) {
@@ -65,7 +65,7 @@ fun DailyMixSection(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun DailyMixCard(
-    songs: ImmutableList<Song>,
+    songs: ImmutableList<Track>,
     onClickOpen: () -> Unit,
     playerViewModel: PlayerViewModel
 ) {
@@ -108,7 +108,7 @@ private fun DailyMixCard(
 }
 
 @Composable
-fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
+fun DailyMixHeader(thumbnails: ImmutableList<Track>) {
 
     fun shapeConditionalModifier(index: Int): Modifier {
         if (index == 0){
@@ -169,7 +169,7 @@ fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
                             .border(2.dp, MaterialTheme.colorScheme.surface, threeShapeSwitch(index))
                     ) {
                         SmartImage(
-                            model = song.albumArtUriString,
+                            model = song.bookArtUriString,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -206,7 +206,7 @@ fun threeShapeSwitch(index: Int, thirdShapeCornerRadius: Dp = 16.dp): Shape { //
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun DailyMixSongList(
-    songs: ImmutableList<Song>,
+    songs: ImmutableList<Track>,
     playerViewModel: PlayerViewModel
 ) {
     Column(

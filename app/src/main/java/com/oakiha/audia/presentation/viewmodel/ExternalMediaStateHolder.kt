@@ -9,7 +9,7 @@ import com.oakiha.audia.data.media.AudioMetadataReader
 import com.oakiha.audia.data.media.guessImageMimeType
 import com.oakiha.audia.data.media.imageExtensionFromMimeType
 import com.oakiha.audia.data.media.isValidImageData
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +18,7 @@ import java.io.File
 import javax.inject.Inject
 
 data class ExternalSongLoadResult(
-    val song: Song,
+    val song: Track,
     val relativePath: String?,
     val bucketId: Long?,
     val displayName: String?
@@ -31,7 +31,7 @@ class ExternalMediaStateHolder @Inject constructor(
     suspend fun buildExternalQueue(
         result: ExternalSongLoadResult,
         originalUri: Uri
-    ): List<Song> {
+    ): List<Track> {
         val continuation = loadAdditionalSongsFromFolder(result, originalUri)
         if (continuation.isEmpty()) {
             return listOf(result.song)
@@ -50,7 +50,7 @@ class ExternalMediaStateHolder @Inject constructor(
     private suspend fun loadAdditionalSongsFromFolder(
         reference: ExternalSongLoadResult,
         originalUri: Uri
-    ): List<Song> = withContext(Dispatchers.IO) {
+    ): List<Track> = withContext(Dispatchers.IO) {
         val relativePath = reference.relativePath
         val bucketId = reference.bucketId
         if (relativePath.isNullOrEmpty() && bucketId == null) {
@@ -126,7 +126,7 @@ class ExternalMediaStateHolder @Inject constructor(
 
         if (candidates.isEmpty()) return@withContext emptyList()
 
-        val resolved = mutableListOf<Song>()
+        val resolved = mutableListOf<Track>()
         for ((candidateUri, _) in candidates) {
             val additional = buildExternalSongFromUri(candidateUri, captureFolderInfo = false)
             val song = additional?.song ?: continue
@@ -210,7 +210,7 @@ class ExternalMediaStateHolder @Inject constructor(
         val metadata = AudioMetadataReader.read(context, uri) ?: return@withContext null
 
         // Try to persist artwork
-        val albumArtUriString = metadata.artwork?.let { artwork ->
+        val bookArtUriString = metadata.artwork?.let { artwork ->
              if (isValidImageData(artwork.bytes)) {
                  persistExternalAlbumArt(uri, artwork.bytes, artwork.mimeType)
              } else null
@@ -224,19 +224,19 @@ class ExternalMediaStateHolder @Inject constructor(
 
         val mimeType = context.contentResolver.getType(uri) ?: "audio/*"
         
-        val songId = "external:${uri}" 
+        val trackId = "external:${uri}" 
         
-        val song = Song(
-            id = songId, 
+        val song = Track(
+            id = trackId, 
             title = finalTitle,
             artist = finalArtist,
-            artistId = -1, // No DB ID
+            authorId = -1, // No DB ID
             album = finalAlbum,
-            albumId = -1, // No DB ID
-            albumArtist = metadata.albumArtist,
+            bookId = -1, // No DB ID
+            bookArtist = metadata.bookArtist,
             path = uri.toString(), // Path is URI
             contentUriString = uri.toString(),
-            albumArtUriString = albumArtUriString,
+            bookArtUriString = bookArtUriString,
             duration = finalDuration,
             genre = metadata.genre, // Metadata reader might provide genre
             trackNumber = storeTrack ?: metadata.trackNumber ?: 0,

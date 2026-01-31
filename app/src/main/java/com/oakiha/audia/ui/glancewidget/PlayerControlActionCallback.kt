@@ -32,11 +32,11 @@ class PlayerControlActionCallback : ActionCallback {
         val serviceIntent = Intent(context, AudiobookService::class.java).apply {
             this.action = action
             if (action == PlayerActions.PLAY_FROM_QUEUE) {
-                val songId = parameters[PlayerActions.songIdKey]
-                if (songId != null) {
-                    putExtra("song_id", songId)
+                val trackId = parameters[PlayerActions.trackIdKey]
+                if (trackId != null) {
+                    putExtra("song_id", trackId)
                 } else {
-                    Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no songId found.")
+                    Timber.tag(TAG).w("PLAY_FROM_QUEUE action received but no trackId found.")
                     return // No hacer nada si no hay ID de canciÃƒÂ³n
                 }
             }
@@ -57,7 +57,7 @@ class PlayerControlActionCallback : ActionCallback {
 
 object PlayerActions {
     val key = ActionParameters.Key<String>("playerActionKey_v1")
-    val songIdKey = ActionParameters.Key<Long>("songIdKey_v1")
+    val trackIdKey = ActionParameters.Key<Long>("trackIdKey_v1")
     const val PLAY_PAUSE = "com.example.AudioBookPlayer.ACTION_WIDGET_PLAY_PAUSE"
     const val NEXT = "com.example.AudioBookPlayer.ACTION_WIDGET_NEXT"
     const val PREVIOUS = "com.example.AudioBookPlayer.ACTION_WIDGET_PREVIOUS"

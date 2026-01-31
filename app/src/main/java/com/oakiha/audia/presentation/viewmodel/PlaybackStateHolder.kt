@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.service.AudiobookNotificationProvider
 import com.google.android.gms.cast.MediaStatus
 import android.os.Bundle
@@ -227,10 +227,10 @@ class PlaybackStateHolder @Inject constructor(
     /* -------------------------------------------------------------------------- */
 
     fun toggleShuffle(
-        currentSongs: List<Song>,
-        currentSong: Song?,
+        currentTracks: List<Track>,
+        currentTrack: Track?,
         currentQueueSourceName: String,
-        updateQueueCallback: (List<Song>) -> Unit
+        updateQueueCallback: (List<Track>) -> Unit
     ) {
         val castSession = castStateHolder.castSession.value
         if (castSession != null && castSession.remoteMediaClient != null) {
@@ -244,22 +244,22 @@ class PlaybackStateHolder @Inject constructor(
         } else {
             scope?.launch {
                 val player = mediaController ?: return@launch
-                if (currentSongs.isEmpty()) return@launch
+                if (currentTracks.isEmpty()) return@launch
 
                 val isCurrentlyShuffled = _stablePlayerState.value.isShuffleEnabled
 
                 if (!isCurrentlyShuffled) {
                     // Enable Shuffle
                     if (!queueStateHolder.hasOriginalQueue()) {
-                        queueStateHolder.setOriginalQueueOrder(currentSongs)
-                        queueStateHolder.saveOriginalQueueState(currentSongs, currentQueueSourceName)
+                        queueStateHolder.setOriginalQueueOrder(currentTracks)
+                        queueStateHolder.saveOriginalQueueState(currentTracks, currentQueueSourceName)
                     }
 
-                    val currentIndex = player.currentMediaItemIndex.coerceIn(0, (currentSongs.size - 1).coerceAtLeast(0))
+                    val currentIndex = player.currentMediaItemIndex.coerceIn(0, (currentTracks.size - 1).coerceAtLeast(0))
                     val currentPosition = player.currentPosition
                     val currentMediaId = player.currentMediaItem?.mediaId
 
-                    val shuffledQueue = QueueUtils.buildAnchoredShuffleQueue(currentSongs, currentIndex)
+                    val shuffledQueue = QueueUtils.buildAnchoredShuffleQueue(currentTracks, currentIndex)
 
                     val targetIndex = shuffledQueue.indexOfFirst { it.id == currentMediaId }
                         .takeIf { it != -1 } ?: currentIndex
@@ -303,8 +303,8 @@ class PlaybackStateHolder @Inject constructor(
                     val currentPosition = player.currentPosition
                     
                     // Find where the current song is in the original queue
-                    val currentSongId = currentSong?.id
-                    val originalIndex = originalQueue.indexOfFirst { it.id == currentSongId }.takeIf { it >= 0 }
+                    val currentTrackId = currentTrack?.id
+                    val originalIndex = originalQueue.indexOfFirst { it.id == currentTrackId }.takeIf { it >= 0 }
 
                     if (originalIndex == null) {
                         _stablePlayerState.update { it.copy(isShuffleEnabled = false) }

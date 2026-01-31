@@ -384,7 +384,7 @@ fun ExperimentalSettingsScreen(
             }
 
             item(key = "visual_tweaks_section") {
-                val albumArtQuality = uiState.albumArtQuality
+                val bookArtQuality = uiState.bookArtQuality
                 
                  SettingsSection(
                     title = "Album Art Resolution",
@@ -411,7 +411,7 @@ fun ExperimentalSettingsScreen(
                            
                            // Using a loop to create selectable items for each enum value
                            com.oakiha.audia.data.preferences.AlbumArtQuality.entries.forEach { quality ->
-                               val isSelected = quality == albumArtQuality
+                               val isSelected = quality == bookArtQuality
                                
                                Surface(
                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,

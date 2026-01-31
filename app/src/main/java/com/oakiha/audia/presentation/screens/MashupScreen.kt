@@ -56,7 +56,7 @@ import androidx.media3.common.util.UnstableApi
 import com.linc.audiowaveform.AudioWaveform
 import com.linc.audiowaveform.model.WaveformAlignment
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.SmartImage
 import com.oakiha.audia.presentation.viewmodel.DeckState
 import com.oakiha.audia.presentation.viewmodel.MashupViewModel
@@ -201,7 +201,7 @@ private fun DeckUi(
                     ) {
                         if (deckState.song != null) {
                             SmartImage(
-                                model = deckState.song.albumArtUriString,
+                                model = deckState.song.bookArtUriString,
                                 contentDescription = "Song Cover",
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -307,7 +307,7 @@ private fun Crossfader(value: Float, onValueChange: (Float) -> Unit, modifier: M
 }
 
 @Composable
-private fun SongPickerSheet(songs: List<Song>, onSongSelected: (Song) -> Unit) {
+private fun SongPickerSheet(songs: List<Track>, onSongSelected: (Song) -> Unit) {
     Column(modifier = Modifier.navigationBarsPadding()) {
         Text("Select a Song", style = MaterialTheme.typography.titleLarge, modifier = Modifier
             .fillMaxWidth()
@@ -324,7 +324,7 @@ private fun SongPickerSheet(songs: List<Song>, onSongSelected: (Song) -> Unit) {
 }
 
 @Composable
-private fun SongPickerItem(song: Song, onClick: () -> Unit) {
+private fun SongPickerItem(song: Track, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,13 +334,13 @@ private fun SongPickerItem(song: Song, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SmartImage(
-            model = song.albumArtUriString,
+            model = song.bookArtUriString,
             contentDescription = "Song Cover",
             modifier = Modifier.size(40.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(text = song.title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold)
-            Text(text = song.displayArtist, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+            Text(text = song.displayAuthor, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

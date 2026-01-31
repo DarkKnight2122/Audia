@@ -846,17 +846,17 @@ private enum class CategoryDimension(
         cardTitle = "Listening by genre",
         highlightTitle = "Top genre"
     ),
-    Artist(
+    Author(
         displayName = "Artist",
         cardTitle = "Listening by artist",
         highlightTitle = "Top artist"
     ),
-    Album(
+    Book(
         displayName = "Album",
         cardTitle = "Listening by album",
         highlightTitle = "Top album"
     ),
-    Song(
+    Track(
         displayName = "Song",
         cardTitle = "Listening by song",
         highlightTitle = "Top song"
@@ -1484,7 +1484,7 @@ private fun TopAlbumsCard(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 SmartImage(
-                                    model = albumSummary.albumArtUri,
+                                    model = albumSummary.bookArtUri,
                                     contentDescription = albumSummary.album,
                                     modifier = Modifier
                                         .size(56.dp)
@@ -1547,7 +1547,7 @@ private fun SongStatsCard(
                 if (showAll || songs.size <= 8) songs else songs.take(8)
             }
             val maxDuration = songs.maxOfOrNull { it.totalDurationMs }?.coerceAtLeast(1L) ?: 1L
-            val positions = remember(songs) { songs.mapIndexed { index, song -> song.songId to index }.toMap() }
+            val positions = remember(songs) { songs.mapIndexed { index, song -> song.trackId to index }.toMap() }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1579,14 +1579,14 @@ private fun SongStatsCard(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     displayedSongs.forEach { songSummary ->
-                        val position = positions[songSummary.songId] ?: songs.indexOf(songSummary)
+                        val position = positions[songSummary.trackId] ?: songs.indexOf(songSummary)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 SmartImage(
-                                    model = songSummary.albumArtUri,
+                                    model = songSummary.bookArtUri,
                                     contentDescription = songSummary.title,
                                     modifier = Modifier
                                         .size(56.dp)

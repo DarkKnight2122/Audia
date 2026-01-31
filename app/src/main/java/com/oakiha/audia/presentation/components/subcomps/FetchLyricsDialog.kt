@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.repository.LyricsSearchResult
 import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
 import com.oakiha.audia.utils.ProviderText
@@ -75,7 +75,7 @@ import com.oakiha.audia.utils.shapes.RoundedStarShape
 @Composable
 fun FetchLyricsDialog(
     uiState: LyricsSearchUiState,
-    currentSong: Song?,
+    currentTrack: Track?,
     onConfirm: (Boolean) -> Unit,
     onPickResult: (LyricsSearchResult) -> Unit,
     onManualSearch: (String, String?) -> Unit,
@@ -105,7 +105,7 @@ fun FetchLyricsDialog(
                 when (uiState) {
                     LyricsSearchUiState.Idle -> {
                         IdleContent(
-                            currentSong = currentSong,
+                            currentTrack = currentTrack,
                             forcePickResults = forcePickResults,
                             onToggleForcePickResults = { forcePickResults = it },
                             onSearch = { onConfirm(forcePickResults) },
@@ -126,8 +126,8 @@ fun FetchLyricsDialog(
                     is LyricsSearchUiState.NotFound -> {
                         NotFoundContent(
                             message = uiState.message,
-                            initialTitle = currentSong?.title.orEmpty(),
-                            initialArtist = currentSong?.displayArtist,
+                            initialTitle = currentTrack?.title.orEmpty(),
+                            initialArtist = currentTrack?.displayAuthor,
                             onManualSearch = { title, artist ->
                                 onManualSearch(title, artist)
                             },
@@ -153,7 +153,7 @@ fun FetchLyricsDialog(
 
 @Composable
 private fun IdleContent(
-    currentSong: Song?,
+    currentTrack: Track?,
     forcePickResults: Boolean,
     onToggleForcePickResults: (Boolean) -> Unit,
     onSearch: () -> Unit,
@@ -184,9 +184,9 @@ private fun IdleContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     // TÃ­tulo y CanciÃ³n
-    if (currentSong != null) {
+    if (currentTrack != null) {
         Text(
-            text = currentSong.title,
+            text = currentTrack.title,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -194,7 +194,7 @@ private fun IdleContent(
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = currentSong.displayArtist,
+            text = currentTrack.displayAuthor,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
@@ -620,7 +620,7 @@ private fun ErrorContent(
 //@Composable
 //fun FetchLyricsDialog(
 //    uiState: LyricsSearchUiState,
-//    currentSong: Song?,
+//    currentTrack: Track?,
 //    onConfirm: () -> Unit,
 //    onPickResult: (LyricsSearchResult) -> Unit,
 //    onDismiss: () -> Unit,
@@ -644,7 +644,7 @@ private fun ErrorContent(
 //                            modifier = Modifier.padding(24.dp),
 //                            horizontalAlignment = Alignment.CenterHorizontally
 //                        ) {
-//                            DialogHeader(currentSong = currentSong)
+//                            DialogHeader(currentTrack = currentTrack)
 //                            Spacer(modifier = Modifier.height(8.dp))
 //                            Text(
 //                                text = stringResource(R.string.lyrics_not_found),
@@ -704,7 +704,7 @@ private fun ErrorContent(
 //                            modifier = Modifier.padding(24.dp),
 //                            horizontalAlignment = Alignment.CenterHorizontally
 //                        ) {
-//                            DialogHeader(currentSong = currentSong)
+//                            DialogHeader(currentTrack = currentTrack)
 //                            Spacer(modifier = Modifier.height(16.dp))
 //                            ResultContextChip(query = uiState.query)
 //                            Spacer(modifier = Modifier.height(10.dp))
@@ -830,10 +830,10 @@ private fun ErrorContent(
 //}
 //
 //@Composable
-//private fun DialogHeader(currentSong: Song?) {
-//    val title = currentSong?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_song_title)
-//    val artist = currentSong?.displayArtist.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
-//    val album = currentSong?.album.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
+//private fun DialogHeader(currentTrack: Track?) {
+//    val title = currentTrack?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_song_title)
+//    val artist = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
+//    val album = currentTrack?.album.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
 //
 //    Row(
 //        modifier = Modifier

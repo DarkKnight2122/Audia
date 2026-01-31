@@ -64,7 +64,7 @@ class SleepTimerStateHolder @Inject constructor(
     private var scope: CoroutineScope? = null
     private var toastEmitter: (suspend (String) -> Unit)? = null
     private var mediaControllerProvider: (() -> MediaController?)? = null
-    private var currentSongIdProvider: (() -> StateFlow<String?>)? = null
+    private var currentTrackIdProvider: (() -> StateFlow<String?>)? = null
     private var songTitleResolver: ((String?) -> String)? = null
 
     /**
@@ -75,13 +75,13 @@ class SleepTimerStateHolder @Inject constructor(
         scope: CoroutineScope,
         toastEmitter: suspend (String) -> Unit,
         mediaControllerProvider: () -> MediaController?,
-        currentSongIdProvider: () -> StateFlow<String?>,
+        currentTrackIdProvider: () -> StateFlow<String?>,
         songTitleResolver: (String?) -> String
     ) {
         this.scope = scope
         this.toastEmitter = { msg -> scope.launch { toastEmitter(msg) } }
         this.mediaControllerProvider = mediaControllerProvider
-        this.currentSongIdProvider = currentSongIdProvider
+        this.currentTrackIdProvider = currentTrackIdProvider
         this.songTitleResolver = songTitleResolver
     }
 
@@ -194,18 +194,18 @@ class SleepTimerStateHolder @Inject constructor(
     /**
      * Set or cancel end-of-track timer.
      */
-    fun setEndOfTrackTimer(enable: Boolean, currentSongId: String?) {
+    fun setEndOfTrackTimer(enable: Boolean, currentTrackId: String?) {
         val scope = this.scope ?: return
 
         if (enable) {
-            if (currentSongId == null) {
+            if (currentTrackId == null) {
                 scope.launch { toastEmitter?.invoke("Cannot enable End of Track: No active song.") }
                 return
             }
 
             _activeTimerValueDisplay.value = "End of Track"
             _isEndOfTrackTimerActive.value = true
-            EotStateHolder.setEotTargetTrack(currentSongId)
+            EotStateHolder.setEotTargetTrack(currentTrackId)
 
             sleepTimerJob?.cancel()
             _sleepTimerEndTimeMillis.value = null
@@ -213,7 +213,7 @@ class SleepTimerStateHolder @Inject constructor(
             // Monitor for song changes
             eotSongMonitorJob?.cancel()
             eotSongMonitorJob = scope.launch {
-                currentSongIdProvider?.invoke()?.collect { newSongId ->
+                currentTrackIdProvider?.invoke()?.collect { newSongId ->
                     if (_isEndOfTrackTimerActive.value &&
                         EotStateHolder.eotTargetTrackId.value != null &&
                         newSongId != EotStateHolder.eotTargetTrackId.value) {
@@ -293,7 +293,7 @@ class SleepTimerStateHolder @Inject constructor(
         scope = null
         toastEmitter = null
         mediaControllerProvider = null
-        currentSongIdProvider = null
+        currentTrackIdProvider = null
         songTitleResolver = null
     }
 }

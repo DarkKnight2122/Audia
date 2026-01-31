@@ -11,14 +11,14 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Size
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun PrefetchAlbumNeighborsImg(
-    current: Song?,
-    queue: ImmutableList<Song>,
+fun PrefetchBookNeighborsImg(
+    current: Track?,
+    queue: ImmutableList<Track>,
     radius: Int = 1
 ) {
     if (current == null) return
@@ -30,7 +30,7 @@ fun PrefetchAlbumNeighborsImg(
         val bounds = (maxOf(0, index - radius))..(minOf(queue.lastIndex, index + radius))
         for (i in bounds) {
             if (i == index) continue
-            queue[i].albumArtUriString?.let { data ->
+            queue[i].bookArtUriString?.let { data ->
                 val req = coil.request.ImageRequest.Builder(context)
                     .data(data)
                     .memoryCacheKey("album:$data")
@@ -45,10 +45,10 @@ fun PrefetchAlbumNeighborsImg(
 
 
 @Composable
-fun PrefetchAlbumNeighbors(
+fun PrefetchBookNeighbors(
     isActive: Boolean,
     pagerState: PagerState,
-    queue: ImmutableList<Song>,
+    queue: ImmutableList<Track>,
     radius: Int = 1,
     targetSize: Size = Size(600, 600)
 ) {
@@ -63,7 +63,7 @@ fun PrefetchAlbumNeighbors(
                 val indices = (page - radius..page + radius)
                     .filter { it in queue.indices && it != page }
                 indices.forEach { idx ->
-                    queue[idx].albumArtUriString?.let { uri ->
+                    queue[idx].bookArtUriString?.let { uri ->
                         val req = coil.request.ImageRequest.Builder(context)
                             .data(uri)
                             .size(targetSize)

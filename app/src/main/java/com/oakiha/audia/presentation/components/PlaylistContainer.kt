@@ -74,7 +74,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Playlist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.subcomps.SineWaveLine
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.screens.PlayerSheetCollapsedCornerRadius
@@ -108,7 +108,7 @@ fun PlaylistContainer(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     bottomBarHeight: Dp,
-    currentSong: Song? = null,
+    currentTrack: Track? = null,
     navController: NavController?,
     playerViewModel: PlayerViewModel,
     isAddingToPlaylist: Boolean = false,
@@ -170,7 +170,7 @@ fun PlaylistContainer(
         } else {
             if (isAddingToPlaylist) {
                 PlaylistItems(
-                    currentSong = currentSong,
+                    currentTrack = currentTrack,
                     bottomBarHeight = bottomBarHeight,
                     navController = navController,
                     playerViewModel = playerViewModel,
@@ -225,7 +225,7 @@ fun PlaylistContainer(
 fun PlaylistItems(
     bottomBarHeight: Dp,
     navController: NavController?,
-    currentSong: Song? = null,
+    currentTrack: Track? = null,
     playerViewModel: PlayerViewModel,
     isAddingToPlaylist: Boolean = false,
     filteredPlaylists: List<Playlist>,
@@ -263,7 +263,7 @@ fun PlaylistItems(
         items(filteredPlaylists, key = { it.id }) { playlist ->
             val rememberedOnClick = remember(playlist.id) {
                 {
-                    if (isAddingToPlaylist && currentSong != null && selectedPlaylists != null) {
+                    if (isAddingToPlaylist && currentTrack != null && selectedPlaylists != null) {
                         val currentSelection = selectedPlaylists[playlist.id] ?: false
                         selectedPlaylists[playlist.id] = !currentSelection
                     } else
@@ -291,8 +291,8 @@ fun PlaylistItem(
     selectedPlaylists: SnapshotStateMap<String, Boolean>? = null
 ) {
     val allTracks by playerViewModel.allTracksFlow.collectAsState()
-    val playlistSongs = remember(playlist.songIds, allTracks) {
-        allTracks.filter { it.id in playlist.songIds }
+    val playlistSongs = remember(playlist.trackIds, allTracks) {
+        allTracks.filter { it.id in playlist.trackIds }
     }
 
     // Shape Logic
@@ -418,7 +418,7 @@ fun PlaylistItem(
                     }
                 }
                 Text(
-                    text = "${playlist.songIds.size} Songs",
+                    text = "${playlist.trackIds.size} Songs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

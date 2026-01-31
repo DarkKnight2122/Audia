@@ -25,13 +25,13 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import coil.size.Size
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import kotlin.math.floor
 import kotlin.math.sqrt
 
 @Composable
 fun PlaylistArtCollage(
-    songs: List<Song>,
+    songs: List<Track>,
     modifier: Modifier = Modifier,
 ) {
     if (songs.isEmpty()) {
@@ -63,7 +63,7 @@ fun PlaylistArtCollage(
             when (songs.size) {
                 1 -> {
                     SmartImage(
-                        model = songs[0].albumArtUriString,
+                        model = songs[0].bookArtUriString,
                         contentDescription = songs[0].title,
                         contentScale = ContentScale.Crop,
                         targetSize = Size(256, 256),
@@ -79,7 +79,7 @@ fun PlaylistArtCollage(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SmartImage(
-                            model = songs[0].albumArtUriString,
+                            model = songs[0].bookArtUriString,
                             contentDescription = songs[0].title,
                             contentScale = ContentScale.Crop,
                             targetSize = Size(128, 128),
@@ -89,7 +89,7 @@ fun PlaylistArtCollage(
                                 .clip(CircleShape)
                         )
                         SmartImage(
-                            model = songs[1].albumArtUriString,
+                            model = songs[1].bookArtUriString,
                             contentDescription = songs[1].title,
                             contentScale = ContentScale.Crop,
                             targetSize = Size(128, 128),
@@ -105,7 +105,7 @@ fun PlaylistArtCollage(
                         content = {
                             songs.take(3).forEach { song ->
                                 SmartImage(
-                                    model = song.albumArtUriString,
+                                    model = song.bookArtUriString,
                                     contentDescription = song.title,
                                     contentScale = ContentScale.Crop,
                                     targetSize = Size(128, 128),
@@ -170,7 +170,7 @@ fun PlaylistArtCollage(
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             SmartImage(
-                                model = songs[0].albumArtUriString,
+                                model = songs[0].bookArtUriString,
                                 contentDescription = songs[0].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
@@ -180,7 +180,7 @@ fun PlaylistArtCollage(
                                     .clip(CircleShape)
                             )
                             SmartImage(
-                                model = songs[1].albumArtUriString,
+                                model = songs[1].bookArtUriString,
                                 contentDescription = songs[1].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
@@ -195,7 +195,7 @@ fun PlaylistArtCollage(
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             SmartImage(
-                                model = songs[2].albumArtUriString,
+                                model = songs[2].bookArtUriString,
                                 contentDescription = songs[2].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),
@@ -205,7 +205,7 @@ fun PlaylistArtCollage(
                                     .clip(CircleShape)
                             )
                             SmartImage(
-                                model = songs[3].albumArtUriString,
+                                model = songs[3].bookArtUriString,
                                 contentDescription = songs[3].title,
                                 contentScale = ContentScale.Crop,
                                 targetSize = Size(128, 128),

@@ -2,7 +2,7 @@ package com.oakiha.audia.presentation.viewmodel
 
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.repository.LyricsSearchResult
 import com.oakiha.audia.data.repository.AudiobookRepository
@@ -28,8 +28,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * Used to update StablePlayerState in PlayerViewModel.
  */
 interface LyricsLoadCallback {
-    fun onLoadingStarted(songId: String)
-    fun onLyricsLoaded(songId: String, lyrics: Lyrics?)
+    fun onLoadingStarted(trackId: String)
+    fun onLyricsLoaded(trackId: String, lyrics: Lyrics?)
 }
 
 /**
@@ -46,8 +46,8 @@ class LyricsStateHolder @Inject constructor(
     private var loadCallback: LyricsLoadCallback? = null
 
     // Sync offset per song in milliseconds
-    private val _currentSongSyncOffset = MutableStateFlow(0)
-    val currentSongSyncOffset: StateFlow<Int> = _currentSongSyncOffset.asStateFlow()
+    private val _currentTrackSyncOffset = MutableStateFlow(0)
+    val currentTrackSyncOffset: StateFlow<Int> = _currentTrackSyncOffset.asStateFlow()
 
     // Lyrics search UI state
     private val _searchUiState = MutableStateFlow<LyricsSearchUiState>(LyricsSearchUiState.Idle)
@@ -68,11 +68,11 @@ class LyricsStateHolder @Inject constructor(
         
         coroutineScope.launch {
             stablePlayerState
-                .map { it.currentSong?.id }
+                .map { it.currentTrack?.id }
                 .distinctUntilChanged()
-                .collect { songId ->
-                    if (songId != null) {
-                        updateSyncOffsetForSong(songId)
+                .collect { trackId ->
+                    if (trackId != null) {
+                        updateSyncOffsetForSong(trackId)
                     }
                 }
         }
@@ -83,7 +83,7 @@ class LyricsStateHolder @Inject constructor(
      * @param song The song to load lyrics for
      * @param sourcePreference The preferred source for lyrics
      */
-    fun loadLyricsForSong(song: Song, sourcePreference: LyricsSourcePreference) {
+    fun loadLyricsForSong(song: Track, sourcePreference: LyricsSourcePreference) {
         loadingJob?.cancel()
         val targetTrackId = song.id
 
@@ -117,19 +117,19 @@ class LyricsStateHolder @Inject constructor(
     /**
      * Set sync offset for a song.
      */
-    fun setSyncOffset(songId: String, offsetMs: Int) {
+    fun setSyncOffset(trackId: String, offsetMs: Int) {
         scope?.launch {
-            userPreferencesRepository.setLyricsSyncOffset(songId, offsetMs)
-            _currentSongSyncOffset.value = offsetMs
+            userPreferencesRepository.setLyricsSyncOffset(trackId, offsetMs)
+            _currentTrackSyncOffset.value = offsetMs
         }
     }
 
     /**
      * Update sync offset from song ID (called when song changes).
      */
-    suspend fun updateSyncOffsetForSong(songId: String) {
-        val offset = userPreferencesRepository.getLyricsSyncOffset(songId)
-        _currentSongSyncOffset.value = offset
+    suspend fun updateSyncOffsetForSong(trackId: String) {
+        val offset = userPreferencesRepository.getLyricsSyncOffset(trackId)
+        _currentTrackSyncOffset.value = offset
     }
 
     /**
@@ -158,7 +158,7 @@ class LyricsStateHolder @Inject constructor(
      * Fetch lyrics for the given song from the remote service.
      */
     fun fetchLyricsForSong(
-        song: Song,
+        song: Track,
         forcePickResults: Boolean,
         contextHelper: (Int) -> String // temporary helper for strings? Or we pass string.
         // Actually, let's keep it simple and pass strings or standard errors.
@@ -221,13 +221,13 @@ class LyricsStateHolder @Inject constructor(
     /**
      * Accept a search result.
      */
-    fun acceptLyricsSearchResult(result: LyricsSearchResult, currentSong: Song) {
+    fun acceptLyricsSearchResult(result: LyricsSearchResult, currentTrack: Track) {
         scope?.launch {
             _searchUiState.value = LyricsSearchUiState.Success(result.lyrics)
-            val updatedSong = currentSong.copy(lyrics = result.rawLyrics)
+            val updatedSong = currentTrack.copy(lyrics = result.rawLyrics)
             
             // 1. Update DB
-            audiobookRepository.updateLyrics(currentSong.id.toLong(), result.rawLyrics)
+            audiobookRepository.updateLyrics(currentTrack.id.toLong(), result.rawLyrics)
             
             // 2. Notify
             _songUpdates.emit(updatedSong to result.lyrics)
@@ -237,11 +237,11 @@ class LyricsStateHolder @Inject constructor(
     /**
      * Import from file.
      */
-    fun importLyricsFromFile(songId: Long, lyricsContent: String, currentSong: Song?) {
+    fun importLyricsFromFile(trackId: Long, lyricsContent: String, currentTrack: Track?) {
         scope?.launch {
-            audiobookRepository.updateLyrics(songId, lyricsContent)
-            if (currentSong != null && currentSong.id.toLong() == songId) {
-                val updatedSong = currentSong.copy(lyrics = lyricsContent)
+            audiobookRepository.updateLyrics(trackId, lyricsContent)
+            if (currentTrack != null && currentTrack.id.toLong() == trackId) {
+                val updatedSong = currentTrack.copy(lyrics = lyricsContent)
                 
                 // We need to parse it here. 
                 // Since LyricsUtils is likely a util, we assume we can't access it easily if it's not injected? 
@@ -274,11 +274,11 @@ class LyricsStateHolder @Inject constructor(
         }
     }
     
-    fun resetLyrics(songId: Long) {
+    fun resetLyrics(trackId: Long) {
         resetSearchState()
         scope?.launch {
-             audiobookRepository.resetLyrics(songId)
-             _songUpdates.emit(Song.emptySong().copy(id=songId.toString()) to null) 
+             audiobookRepository.resetLyrics(trackId)
+             _songUpdates.emit(Song.emptySong().copy(id=trackId.toString()) to null) 
         }
     }
     

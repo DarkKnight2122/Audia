@@ -31,7 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.*
 import com.oakiha.audia.presentation.components.subcomps.PlayingEqIcon
 import com.oakiha.audia.presentation.navigation.Screen
@@ -66,8 +66,8 @@ fun HomeScreen(
         allTracks.isNotEmpty() || isBenchmarkMode
     }
 
-    val currentSong by remember(playerViewModel.stablePlayerState) {
-        playerViewModel.stablePlayerState.map { it.currentSong }
+    val currentTrack by remember(playerViewModel.stablePlayerState) {
+        playerViewModel.stablePlayerState.map { it.currentTrack }
     }.collectAsState(initial = null)
 
     val isShuffleEnabled by remember(playerViewModel.stablePlayerState) {
@@ -76,7 +76,7 @@ fun HomeScreen(
             .distinctUntilChanged()
     }.collectAsState(initial = false)
 
-    val bottomPadding = if (currentSong != null) MiniPlayerHeight else 0.dp
+    val bottomPadding = if (currentTrack != null) MiniPlayerHeight else 0.dp
 
     var showChangelogBottomSheet by remember { mutableStateOf(false) }
     var showBetaInfoBottomSheet by remember { mutableStateOf(false) }
@@ -119,13 +119,13 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 // HERO SECTION: Continue Listening (Only show if a book is actually active)
-                if (currentSong != null) {
+                if (currentTrack != null) {
                     item(key = "continue_listening_header") {
                         ContinueListeningHeader(
-                            song = currentSong?.title ?: "",
-                            author = currentSong?.displayArtist ?: "",
+                            song = currentTrack?.title ?: "",
+                            author = currentTrack?.displayAuthor ?: "",
                             onPlayPressed = {
-                                currentSong?.let {
+                                currentTrack?.let {
                                     playerViewModel.showAndPlaySong(it, allTracks, "Library")
                                 }
                             }
@@ -275,7 +275,7 @@ fun TrackListItemFavs(
     cardCorners: Dp = 12.dp,
     title: String,
     artist: String,
-    albumArtUrl: String?,
+    bookArtUrl: String?,
     isPlaying: Boolean,
     isCurrentSong: Boolean,
     onClick: () -> Unit
@@ -305,7 +305,7 @@ fun TrackListItemFavs(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SmartImage(
-                    model = albumArtUrl,
+                    model = bookArtUrl,
                     contentDescription = "Cover",
                     contentScale = ContentScale.Crop,
                     shape = RoundedCornerShape(8.dp),
@@ -345,7 +345,7 @@ fun TrackListItemFavs(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun TrackListItemFavsWrapper(
-    song: Song,
+    song: Track,
     playerViewModel: PlayerViewModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -356,10 +356,10 @@ fun TrackListItemFavsWrapper(
         modifier = modifier,
         cardCorners = 0.dp,
         title = song.title,
-        artist = song.displayArtist,
-        albumArtUrl = song.albumArtUriString,
+        artist = song.displayAuthor,
+        bookArtUrl = song.bookArtUriString,
         isPlaying = stablePlayerState.isPlaying,
-        isCurrentSong = song.id == stablePlayerState.currentSong?.id,
+        isCurrentSong = song.id == stablePlayerState.currentTrack?.id,
         onClick = onClick
     )
 }

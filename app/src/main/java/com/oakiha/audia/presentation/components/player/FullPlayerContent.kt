@@ -102,8 +102,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
-import com.oakiha.audia.data.model.Artist
-import com.oakiha.audia.data.model.Song
+import com.oakiha.audia.data.model.Author
+import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.AlbumArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.AppThemeStyle
@@ -114,7 +114,7 @@ import com.oakiha.audia.presentation.components.LocalMaterialTheme
 import com.oakiha.audia.presentation.components.LyricsSheet
 import com.oakiha.audia.presentation.components.WavyTrackSlider
 import com.oakiha.audia.presentation.components.scoped.DeferAt
-import com.oakiha.audia.presentation.components.scoped.PrefetchAlbumNeighborsImg
+import com.oakiha.audia.presentation.components.scoped.PrefetchBookNeighborsImg
 import com.oakiha.audia.presentation.components.scoped.rememberSmoothProgress
 import com.oakiha.audia.presentation.components.subcomps.FetchLyricsDialog
 import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
@@ -142,8 +142,8 @@ import com.oakiha.audia.presentation.components.ToggleSegmentButton
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FullPlayerContent(
-    currentSong: Song?,
-    currentPlaybackQueue: ImmutableList<Song>,
+    currentTrack: Track?,
+    currentPlaybackQueue: ImmutableList<Track>,
     currentQueueSourceName: String,
     isShuffleEnabled: Boolean,
     repeatMode: Int,
@@ -178,24 +178,24 @@ fun FullPlayerContent(
     onRepeatToggle: () -> Unit,
     onFavoriteToggle: () -> Unit
 ) {
-    var retainedSong by remember { mutableStateOf(currentSong) }
-    LaunchedEffect(currentSong?.id) {
-        if (currentSong != null) {
-            retainedSong = currentSong
+    var retainedSong by remember { mutableStateOf(currentTrack) }
+    LaunchedEffect(currentTrack?.id) {
+        if (currentTrack != null) {
+            retainedSong = currentTrack
         }
     }
 
-    val song = currentSong ?: retainedSong ?: return // Keep the player visible while transitioning
-    var showSongInfoBottomSheet by remember { mutableStateOf(false) }
+    val song = currentTrack ?: retainedSong ?: return // Keep the player visible while transitioning
+    var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
     
     // REMOVED: val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     
     val lyricsSearchUiState by playerViewModel.lyricsSearchUiState.collectAsState()
-    val currentSongArtists by playerViewModel.currentSongArtists.collectAsState()
-    val lyricsSyncOffset by playerViewModel.currentSongLyricsSyncOffset.collectAsState()
-    val albumArtQuality by playerViewModel.albumArtQuality.collectAsState()
+    val currentTrackArtists by playerViewModel.currentTrackArtists.collectAsState()
+    val lyricsSyncOffset by playerViewModel.currentTrackLyricsSyncOffset.collectAsState()
+    val bookArtQuality by playerViewModel.bookArtQuality.collectAsState()
     val immersiveLyricsEnabled by playerViewModel.immersiveLyricsEnabled.collectAsState()
     val immersiveLyricsTimeout by playerViewModel.immersiveLyricsTimeout.collectAsState()
     val isImmersiveTemporarilyDisabled by playerViewModel.isImmersiveTemporarilyDisabled.collectAsState()
@@ -211,8 +211,8 @@ fun FullPlayerContent(
                 try {
                     context.contentResolver.openInputStream(it)?.use { inputStream ->
                         val lyricsContent = inputStream.bufferedReader().use { reader -> reader.readText() }
-                        currentSong?.id?.toLong()?.let { songId ->
-                            playerViewModel.importLyricsFromFile(songId, lyricsContent)
+                        currentTrack?.id?.toLong()?.let { trackId ->
+                            playerViewModel.importLyricsFromFile(trackId, lyricsContent)
                         }
                     }
                     showFetchLyricsDialog = false
@@ -259,7 +259,7 @@ fun FullPlayerContent(
     if (showFetchLyricsDialog) {
         FetchLyricsDialog(
             uiState = lyricsSearchUiState,
-            currentSong = song, // Use 'song' which is derived from args/retained
+            currentTrack = song, // Use 'song' which is derived from args/retained
             onConfirm = { forcePick ->
                 // El usuario confirma, iniciamos la bÃƒÂºsqueda
                 playerViewModel.fetchLyricsForCurrentSong(forcePick)
@@ -335,7 +335,7 @@ fun FullPlayerContent(
                 }
             ) {
                  AlbumCarouselSection(
-                    currentSong = song,
+                    currentTrack = song,
                     queue = currentPlaybackQueue,
                     expansionFraction = 1f, // Static layout
                     onSongSelected = { newSong ->
@@ -349,7 +349,7 @@ fun FullPlayerContent(
                     },
                     carouselStyle = carouselStyle,
                     modifier = Modifier.height(carouselHeight),
-                    albumArtQuality = albumArtQuality
+                    bookArtQuality = bookArtQuality
                 )
             }
         }
@@ -454,7 +454,7 @@ fun FullPlayerContent(
                     .padding(start = 0.dp),
                 onClickLyrics = onLyricsClick,
                 song = song,
-                currentSongArtists = currentSongArtists,
+                currentTrackArtists = currentTrackArtists,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = LocalMaterialTheme.current.onPrimaryContainer,
                 artistTextColor = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.8f),
@@ -462,14 +462,14 @@ fun FullPlayerContent(
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer,
                 showQueueButton = isLandscape,
                 onClickQueue = {
-                    showSongInfoBottomSheet = true
+                    showTrackInfoBottomSheet = true
                     onShowQueueClicked()
                 },
                 onClickArtist = {
-                    if (currentSongArtists.size > 1) {
+                    if (currentTrackArtists.size > 1) {
                         showArtistPicker = true
                     } else {
-                        playerViewModel.triggerArtistNavigationFromPlayer(song.artistId)
+                        playerViewModel.triggerArtistNavigationFromPlayer(song.authorId)
                     }
                 }
             )
@@ -489,7 +489,7 @@ fun FullPlayerContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            // Removed PrefetchAlbumNeighborsImg DeferAt wrapper - implicitly prefetching if composed?
+            // Removed PrefetchBookNeighborsImg DeferAt wrapper - implicitly prefetching if composed?
             // Actually Prefetch likely needs to be kept but maybe without DeferAt if it's lightweight
             // For now, let's keep it simple.
 
@@ -788,7 +788,7 @@ fun FullPlayerContent(
                                     )
                                     .background(LocalMaterialTheme.current.onPrimary)
                                     .clickable {
-                                        showSongInfoBottomSheet = true
+                                        showTrackInfoBottomSheet = true
                                         onShowQueueClicked()
                                     },
                                 contentAlignment = Alignment.Center
@@ -837,7 +837,7 @@ fun FullPlayerContent(
             onImportLyrics = { filePickerLauncher.launch("*/*") },
             onDismissLyricsSearch = { playerViewModel.resetLyricsSearchState() },
             lyricsSyncOffset = lyricsSyncOffset,
-            onLyricsSyncOffsetChange = { currentSong?.id?.let { songId -> playerViewModel.setLyricsSyncOffset(songId, it) } },
+            onLyricsSyncOffsetChange = { currentTrack?.id?.let { trackId -> playerViewModel.setLyricsSyncOffset(trackId, it) } },
             lyricsTextStyle = MaterialTheme.typography.titleLarge,
             backgroundColor = LocalMaterialTheme.current.background,
             onBackgroundColor = LocalMaterialTheme.current.onBackground,
@@ -862,7 +862,7 @@ fun FullPlayerContent(
     }
 
     val artistPickerSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    if (showArtistPicker && currentSongArtists.isNotEmpty()) {
+    if (showArtistPicker && currentTrackArtists.isNotEmpty()) {
         ModalBottomSheet(
             onDismissRequest = { showArtistPicker = false },
             sheetState = artistPickerSheetState
@@ -879,7 +879,7 @@ fun FullPlayerContent(
                     color = LocalMaterialTheme.current.onPrimaryContainer,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                currentSongArtists.forEachIndexed { index, artistItem ->
+                currentTrackArtists.forEachIndexed { index, artistItem ->
                     Text(
                         text = artistItem.name,
                         style = MaterialTheme.typography.bodyLarge,
@@ -892,7 +892,7 @@ fun FullPlayerContent(
                                 showArtistPicker = false
                             }
                     )
-                    if (index != currentSongArtists.lastIndex) {
+                    if (index != currentTrackArtists.lastIndex) {
                         HorizontalDivider(color = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.08f))
                     }
                 }
@@ -906,8 +906,8 @@ fun FullPlayerContent(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SongMetadataDisplaySection(
-    song: Song?,
-    currentSongArtists: List<Artist>,
+    song: Track?,
+    currentTrackArtists: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,
     artistTextColor: Color,
@@ -926,12 +926,12 @@ private fun SongMetadataDisplaySection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        song?.let { currentSong ->
+        song?.let { currentTrack ->
             PlayerSongInfo(
-                title = currentSong.title,
-                artist = currentSong.displayArtist,
-                artistId = currentSong.artistId,
-                artists = currentSongArtists,
+                title = currentTrack.title,
+                artist = currentTrack.displayAuthor,
+                authorId = currentTrack.authorId,
+                artists = currentTrackArtists,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = textColor,
                 artistTextColor = artistTextColor,
@@ -1318,8 +1318,8 @@ private fun DelayedContent(
 private fun PlayerSongInfo(
     title: String,
     artist: String,
-    artistId: Long,
-    artists: List<Artist>,
+    authorId: Long,
+    artists: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,
     artistTextColor: Color,
@@ -1393,7 +1393,7 @@ private fun PlayerSongInfo(
                     coroutineScope.launch {
                         isNavigatingToArtist = true
                         try {
-                            playerViewModel.triggerArtistNavigationFromPlayer(artistId)
+                            playerViewModel.triggerArtistNavigationFromPlayer(authorId)
                         } finally {
                             isNavigatingToArtist = false
                         }

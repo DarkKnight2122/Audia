@@ -4,7 +4,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.util.Log
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import java.io.File
 
 data class AudioMeta(
@@ -19,7 +19,7 @@ object AudioMetaUtils {
      * Returns audio metadata for a given file path.
      * Tries MediaMetadataRetriever first, then falls back to MediaExtractor.
      */
-    suspend fun getAudioMetadata(audiobookDao: MusicDao, id: Long, filePath: String, deepScan: Boolean): AudioMeta {
+    suspend fun getAudioMetadata(audiobookDao: AudiobookDao, id: Long, filePath: String, deepScan: Boolean): AudioMeta {
         val cached = audiobookDao.getAudioMetadataById(id)
         if (!deepScan && cached != null &&
             cached.mimeType != null &&

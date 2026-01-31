@@ -2,7 +2,7 @@ package com.oakiha.audia.data.repository
 
 import android.util.Log
 import android.util.LruCache
-import com.oakiha.audia.data.database.MusicDao
+import com.oakiha.audia.data.database.AudiobookDao
 import com.oakiha.audia.data.network.deezer.DeezerApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -16,9 +16,9 @@ import javax.inject.Singleton
  * Uses both in-memory LRU cache and Room database for persistent storage.
  */
 @Singleton
-class ArtistImageRepository @Inject constructor(
+class AuthorImageRepository @Inject constructor(
     private val deezerApiService: DeezerApiService,
-    private val audiobookDao: MusicDao
+    private val audiobookDao: AudiobookDao
 ) {
     companion object {
         private const val TAG = "ArtistImageRepository"
@@ -35,10 +35,10 @@ class ArtistImageRepository @Inject constructor(
     /**
      * Get artist image URL, fetching from Deezer if not cached.
      * @param artistName Name of the artist
-     * @param artistId Room database ID of the artist (for caching)
+     * @param authorId Room database ID of the artist (for caching)
      * @return Image URL or null if not found
      */
-    suspend fun getArtistImageUrl(artistName: String, artistId: Long): String? {
+    suspend fun getArtistImageUrl(artistName: String, authorId: Long): String? {
         if (artistName.isBlank()) return null
 
         val normalizedName = artistName.trim().lowercase()
@@ -50,7 +50,7 @@ class ArtistImageRepository @Inject constructor(
 
         // Check database cache
         val dbCachedUrl = withContext(Dispatchers.IO) {
-            audiobookDao.getArtistImageUrl(artistId)
+            audiobookDao.getArtistImageUrl(authorId)
         }
         if (!dbCachedUrl.isNullOrEmpty()) {
             memoryCache.put(normalizedName, dbCachedUrl)
@@ -58,7 +58,7 @@ class ArtistImageRepository @Inject constructor(
         }
 
         // Fetch from Deezer API
-        return fetchAndCacheArtistImage(artistName, artistId, normalizedName)
+        return fetchAndCacheArtistImage(artistName, authorId, normalizedName)
     }
 
     /**
@@ -67,9 +67,9 @@ class ArtistImageRepository @Inject constructor(
      */
     suspend fun prefetchArtistImages(artists: List<Pair<Long, String>>) {
         withContext(Dispatchers.IO) {
-            artists.forEach { (artistId, artistName) ->
+            artists.forEach { (authorId, artistName) ->
                 try {
-                    getArtistImageUrl(artistName, artistId)
+                    getArtistImageUrl(artistName, authorId)
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to prefetch image for $artistName: ${e.message}")
                 }
@@ -79,7 +79,7 @@ class ArtistImageRepository @Inject constructor(
 
     private suspend fun fetchAndCacheArtistImage(
         artistName: String,
-        artistId: Long,
+        authorId: Long,
         normalizedName: String
     ): String? {
         // Prevent duplicate fetches for the same artist
@@ -107,7 +107,7 @@ class ArtistImageRepository @Inject constructor(
                         memoryCache.put(normalizedName, imageUrl)
                         
                         // Cache in database
-                        audiobookDao.updateArtistImageUrl(artistId, imageUrl)
+                        audiobookDao.updateArtistImageUrl(authorId, imageUrl)
                         
                         Log.d(TAG, "Fetched and cached image for $artistName: $imageUrl")
                         imageUrl
