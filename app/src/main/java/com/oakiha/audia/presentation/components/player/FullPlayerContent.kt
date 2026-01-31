@@ -106,12 +106,13 @@ import com.oakiha.audia.data.model.Artist
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.preferences.AlbumArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
+import com.oakiha.audia.data.preferences.AppThemeStyle
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.presentation.components.AlbumCarouselSection
 import com.oakiha.audia.presentation.components.AutoScrollingTextOnDemand
 import com.oakiha.audia.presentation.components.LocalMaterialTheme
 import com.oakiha.audia.presentation.components.LyricsSheet
-import com.oakiha.audia.presentation.components.WavyMusicSlider
+import com.oakiha.audia.presentation.components.WavyTrackSlider
 import com.oakiha.audia.presentation.components.scoped.DeferAt
 import com.oakiha.audia.presentation.components.scoped.PrefetchAlbumNeighborsImg
 import com.oakiha.audia.presentation.components.scoped.rememberSmoothProgress
@@ -150,7 +151,8 @@ fun FullPlayerContent(
     currentSheetState: PlayerSheetState,
     carouselStyle: String,
     loadingTweaks: FullPlayerLoadingTweaks,
-    playerViewModel: PlayerViewModel, // For stable state like totalDuration and lyrics
+    playerViewModel: PlayerViewModel, 
+    settingsViewModel: SettingsViewModel,
     // State Providers
     currentPositionProvider: () -> Long,
     isPlayingProvider: () -> Boolean,
@@ -423,7 +425,8 @@ fun FullPlayerContent(
             inactiveTrackColor = LocalMaterialTheme.current.primary.copy(alpha = 0.2f),
             thumbColor = LocalMaterialTheme.current.primary,
             timeTextColor = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.7f),
-            loadingTweaks = loadingTweaks
+            loadingTweaks = loadingTweaks,
+            isGlassEffectEnabled = appThemeStyle == AppThemeStyle.GLASS
         )
     }
 
@@ -1029,6 +1032,7 @@ private fun PlayerProgressBarSection(
     thumbColor: Color,
     timeTextColor: Color,
     loadingTweaks: FullPlayerLoadingTweaks? = null,
+    isGlassEffectEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val expansionFraction by remember { derivedStateOf { expansionFractionProvider() } }
@@ -1159,7 +1163,8 @@ private fun PlayerProgressBarSection(
                 activeTrackColor = activeTrackColor,
                 inactiveTrackColor = inactiveTrackColor,
                 interactionSource = interactionSource,
-                isPlaying = isPlayingProvider()
+                isPlaying = isPlayingProvider(),
+                isGlassEffectEnabled = isGlassEffectEnabled
             )
 
             // Isolated Time Labels
@@ -1182,7 +1187,8 @@ private fun EfficientSlider(
     activeTrackColor: Color,
     inactiveTrackColor: Color,
     interactionSource: MutableInteractionSource,
-    isPlaying: Boolean // Added parameter
+    isPlaying: Boolean,
+    isGlassEffectEnabled: Boolean
 ) {
     WavySliderExpressive(
         value = valueState.value,
@@ -1192,6 +1198,7 @@ private fun EfficientSlider(
         inactiveTrackColor = inactiveTrackColor,
         thumbColor = thumbColor,
         isPlaying = isPlaying,
+        isGlassEffectEnabled = isGlassEffectEnabled,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 6.dp)

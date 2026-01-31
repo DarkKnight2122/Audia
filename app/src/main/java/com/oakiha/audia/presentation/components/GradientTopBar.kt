@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.oakiha.audia.ui.theme.glass.liquidGlass
 import com.oakiha.audia.R
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import kotlinx.collections.immutable.toImmutableList
@@ -50,6 +51,7 @@ fun GenreGradientTopBar(
     }
 
     LargeTopAppBar(
+        modifier = Modifier.then(if (isGlassEffectEnabled) Modifier.liquidGlass(refractionAmount = 0.02f, cornerRadius = 0.dp) else Modifier),
         scrollBehavior = scrollBehavior,
         title = {
             Text(
@@ -92,6 +94,7 @@ fun HomeGradientTopBar(
     onNavigationIconClick: () -> Unit,
     onMoreOptionsClick: () -> Unit,
     onBetaClick: () -> Unit,
+    isGlassEffectEnabled: Boolean = false,
     onMenuClick: () -> Unit = {},
 ) {
     // 1) Paint the status bar with the surface color

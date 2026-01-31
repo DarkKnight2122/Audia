@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.max
+import com.oakiha.audia.ui.theme.glass.liquidGlass
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -60,7 +61,8 @@ fun WavySliderExpressive(
     wavelength: Dp = WavyProgressIndicatorDefaults.LinearDeterminateWavelength,
     waveSpeed: Dp = WavyProgressIndicatorDefaults.LinearDeterminateWavelength / 2f, // Slower wave as requested
     
-    waveAmplitudeWhenPlaying: Dp = 4.dp, 
+    waveAmplitudeWhenPlaying: Dp = 4.dp,
+    isGlassEffectEnabled: Boolean = false, 
     thumbLineHeightWhenInteracting: Dp = 24.dp 
 ) {
     val density = LocalDensity.current
@@ -81,7 +83,7 @@ fun WavySliderExpressive(
     val interactionSource = remember { MutableInteractionSource() }
     // We can use interactionSource if we want, but we are doing manual gesture detection.
     // However, for the Thumb Morph animation, we need to know if we are interacting.
-    // The previous WavyMusicSlider used interactionSource logic or isDragging state.
+    // The previous WavyTrackSlider used interactionSource logic or isDragging state.
     // Here we have isDragging. Let's use that for simple logic.
     
     val thumbInteractionFraction by animateFloatAsState(
@@ -93,7 +95,7 @@ fun WavySliderExpressive(
     val displayValue = if (isDragging) dragValue else normalizedValue
     
     val animatedAmplitude by animateFloatAsState(
-        targetValue = if (isPlaying && !isDragging) 1f else 0f, // Flatten when interacting, like WavyMusicSlider
+        targetValue = if (isPlaying && !isDragging) 1f else 0f, // Flatten when interacting, like WavyTrackSlider
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "amplitude"
     )
@@ -144,12 +146,12 @@ fun WavySliderExpressive(
         // We can't use 'lerp' with Dp easily outside of density context without explicit conversion.
         // We'll calculate Px values for standard thumb vs line.
         // Thumb width: radius*2 -> radius*2 (circle) OR trackHeight*1.2 (pill width?)
-        // WavyMusicSlider logic:
+        // WavyTrackSlider logic:
         // width: lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, fraction)
         // height: lerp(thumbRadiusPx * 2f, thumbLineHeightPx, fraction)
         // trackHeightPx here is 'strokeWidthPx'.
         
-        // Wait, WavyMusicSlider's thumb becomes THINNER (width) and TALLER (height)?
+        // Wait, WavyTrackSlider's thumb becomes THINNER (width) and TALLER (height)?
         // width: thumbRadius*2 (16dp) -> strokeWidth*1.2 (4.8dp)
         // height: thumbRadius*2 (16dp) -> thumbLineHeight (24dp)
         
@@ -162,7 +164,7 @@ fun WavySliderExpressive(
         
         LinearWavyProgressIndicator(
             progress = { displayValue },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().then(if (isGlassEffectEnabled) Modifier.liquidGlass(refractionAmount = 0.05f) else Modifier),
             color = activeTrackColor,
             trackColor = inactiveTrackColor,
             stroke = stroke,
@@ -180,7 +182,7 @@ fun WavySliderExpressive(
             val thumbY = size.height / 2
             
             // Interpolate dimensions
-            // WavyMusicSlider logic:
+            // WavyTrackSlider logic:
             // val thumbCurrentWidthPx = lerp(thumbRadiusPx * 2f, trackHeightPx * 1.2f, thumbInteractionFraction)
             // val thumbCurrentHeightPx = lerp(thumbRadiusPx * 2f, thumbLineHeightPxInternal, thumbInteractionFraction)
 

@@ -682,6 +682,7 @@ class MainActivity : ComponentActivity() {
                 )
 
                 UnifiedPlayerSheet(
+                                settingsViewModel = settingsViewModel,
                     playerViewModel = playerViewModel,
                     sheetCollapsedTargetY = sheetCollapsedTargetY,
                     collapsedStateHorizontalPadding = horizontalPadding,

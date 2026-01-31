@@ -113,6 +113,7 @@ import com.oakiha.audia.presentation.components.scoped.rememberExpansionTransiti
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
+import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import kotlinx.collections.immutable.persistentListOf
@@ -148,6 +149,7 @@ val MiniPlayerBottomSpacer = 8.dp
 @Composable
 fun UnifiedPlayerSheet(
     playerViewModel: PlayerViewModel,
+    settingsViewModel: SettingsViewModel,
     sheetCollapsedTargetY: Float,
     containerHeight: Dp,
     collapsedStateHorizontalPadding: Dp = 12.dp,
@@ -1239,6 +1241,7 @@ fun UnifiedPlayerSheet(
                                                 carouselStyle = carouselStyle,
                                                 loadingTweaks = fullPlayerLoadingTweaks,
                                                 playerViewModel = playerViewModel,
+                                                settingsViewModel = settingsViewModel,
                                                 // State Providers
                                                 currentPositionProvider = positionToDisplayProvider,
                                                 isPlayingProvider = { infrequentPlayerState.isPlaying },
@@ -1297,6 +1300,7 @@ fun UnifiedPlayerSheet(
                                     carouselStyle = carouselStyle,
                                     loadingTweaks = fullPlayerLoadingTweaks,
                                     playerViewModel = playerViewModel,
+                                                settingsViewModel = settingsViewModel,
                                     currentPositionProvider = positionToDisplayProvider,
                                     isPlayingProvider = { infrequentPlayerState.isPlaying },
                                     repeatModeProvider = { infrequentPlayerState.repeatMode },
@@ -1545,6 +1549,7 @@ fun UnifiedPlayerSheet(
             ) {
                 CastBottomSheet(
                     playerViewModel = playerViewModel,
+                                                settingsViewModel = settingsViewModel,
                     onDismiss = {
                         castSheetOpenFraction = 0f
                         showCastSheet = false

@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope // Para el tipo de onDra
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.util.lerp
+import com.oakiha.audia.ui.theme.glass.liquidGlass
 
 /**
  * Un slider personalizado con un efecto de onda que se mueve a lo largo de la pista de progreso.
@@ -59,7 +60,7 @@ import androidx.compose.ui.util.lerp
  */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun WavyMusicSlider(
+fun WavyTrackSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -79,7 +80,8 @@ fun WavyMusicSlider(
     isPlaying: Boolean = true,
     thumbLineHeightWhenInteracting: Dp = 24.dp,
     // NUEVO: permite desactivar la onda si el sheet no estÃ¡ expandido
-    isWaveEligible: Boolean = true
+    isWaveEligible: Boolean = true,
+    isGlassEffectEnabled: Boolean = false
 ) {
     val isDragged by interactionSource.collectIsDraggedAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -169,7 +171,7 @@ fun WavyMusicSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(sliderVisualHeight)
-                .drawWithCache {
+                .then(if (isGlassEffectEnabled) Modifier.liquidGlass(refractionAmount = 0.05f) else Modifier).drawWithCache {
                     val canvasWidth = size.width
                     val localCenterY = size.height / 2f
                     val localTrackStart = thumbRadiusPx
@@ -302,7 +304,7 @@ fun WavyMusicSlider(
 }
 
 //@Composable
-//fun WavyMusicSlider(
+//fun WavyTrackSlider(
 //    value: Float,
 //    onValueChange: (Float) -> Unit,
 //    modifier: Modifier = Modifier,
@@ -399,7 +401,7 @@ fun WavyMusicSlider(
 //            modifier = Modifier
 //                .fillMaxWidth()
 //                .height(sliderVisualHeight)
-//                .drawWithCache {
+//                .then(if (isGlassEffectEnabled) Modifier.liquidGlass(refractionAmount = 0.05f) else Modifier).drawWithCache {
 //                    val canvasWidth = size.width
 //                    val localCenterY = size.height / 2f
 //                    val localTrackStart = thumbRadiusPx

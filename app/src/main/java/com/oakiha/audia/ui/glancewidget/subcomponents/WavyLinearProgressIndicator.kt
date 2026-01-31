@@ -88,7 +88,7 @@ fun WavyLinearProgressIndicator(
 
 /**
  * FunciÃ³n de utilidad que genera un Bitmap con el dibujo de la barra de progreso ondulada.
- * Esta funciÃ³n adapta la lÃ³gica del WavyMusicSlider original para dibujar en un Canvas de Android.
+ * Esta funciÃ³n adapta la lÃ³gica del WavyTrackSlider original para dibujar en un Canvas de Android.
  */
 private fun createWavyProgressBitmap(
     context: Context,

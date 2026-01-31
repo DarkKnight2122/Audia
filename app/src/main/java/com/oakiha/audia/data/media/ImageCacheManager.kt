@@ -1,5 +1,5 @@
-import coil.annotation.ExperimentalCoilApi
-@file:OptIn(ExperimentalCoilApi::class)
+
+@file:OptIn(coil.annotation.ExperimentalCoilApi::class)
 
 package com.oakiha.audia.data.media
 

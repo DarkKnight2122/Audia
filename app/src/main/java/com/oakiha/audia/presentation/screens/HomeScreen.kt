@@ -101,7 +101,7 @@ fun HomeScreen(
                     onBetaClick = {
                         showBetaInfoBottomSheet = true
                     },
-                    onMenuClick = {
+                    isGlassEffectEnabled = appThemeStyle == com.oakiha.audia.data.preferences.AppThemeStyle.GLASS, onMenuClick = {
                     }
                 )
             }

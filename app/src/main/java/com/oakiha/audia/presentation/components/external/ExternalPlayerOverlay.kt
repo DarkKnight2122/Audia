@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
 import com.oakiha.audia.presentation.components.OptimizedAlbumArt
-import com.oakiha.audia.presentation.components.WavyMusicSlider
+import com.oakiha.audia.presentation.components.WavyTrackSlider
 import com.oakiha.audia.presentation.components.player.AnimatedPlaybackControls
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.utils.formatDuration
@@ -258,7 +258,7 @@ fun ExternalPlayerOverlay(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        WavyMusicSlider(
+                        WavyTrackSlider(
                             value = sliderPosition,
                             onValueChange = { newValue ->
                                 isUserScrubbing = true
