@@ -23,20 +23,20 @@ import androidx.room.Relation
     ],
     foreignKeys = [
         ForeignKey(
-            entity = SongEntity::class,
+            entity = TrackEntity::class,
             parentColumns = ["id"],
             childColumns = ["song_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
-            entity = ArtistEntity::class,
+            entity = AuthorEntity::class,
             parentColumns = ["id"],
             childColumns = ["artist_id"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class SongArtistCrossRef(
+data class TrackAuthorCrossRef(
     @ColumnInfo(name = "song_id") val songId: Long,
     @ColumnInfo(name = "artist_id") val artistId: Long,
     @ColumnInfo(name = "is_primary", defaultValue = "0") val isPrimary: Boolean = false
@@ -47,17 +47,17 @@ data class SongArtistCrossRef(
  * Used for queries that need to retrieve a song along with its artists.
  */
 data class SongWithArtists(
-    @Embedded val song: SongEntity,
+    @Embedded val song: TrackEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = SongArtistCrossRef::class,
+            value = TrackAuthorCrossRef::class,
             parentColumn = "song_id",
             entityColumn = "artist_id"
         )
     )
-    val artists: List<ArtistEntity>
+    val artists: List<AuthorEntity>
 )
 
 /**
@@ -65,17 +65,17 @@ data class SongWithArtists(
  * Used for queries that need to retrieve an artist along with their songs.
  */
 data class ArtistWithSongs(
-    @Embedded val artist: ArtistEntity,
+    @Embedded val artist: AuthorEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = SongArtistCrossRef::class,
+            value = TrackAuthorCrossRef::class,
             parentColumn = "artist_id",
             entityColumn = "song_id"
         )
     )
-    val songs: List<SongEntity>
+    val songs: List<TrackEntity>
 )
 
 /**

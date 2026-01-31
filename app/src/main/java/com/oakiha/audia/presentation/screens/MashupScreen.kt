@@ -239,7 +239,7 @@ private fun DeckUi(
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -317,7 +317,7 @@ private fun SongPickerSheet(songs: List<Song>, onSongSelected: (Song) -> Unit) {
             .padding(horizontal = 8.dp)) {
             items(songs, key = { it.id }) { song ->
                 SongPickerItem(song = song, onClick = { onSongSelected(song) })
-                Divider()
+                HorizontalDivider()
             }
         }
     }

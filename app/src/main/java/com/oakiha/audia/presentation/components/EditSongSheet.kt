@@ -489,7 +489,7 @@ private fun EditSongContent(
                             shape = textFieldShape,
                             onValueChange = { lyrics = it },
                             placeholder = { Text("Lyrics") },
-                            leadingIcon = { Icon(Icons.Rounded.Notes, tint = MaterialTheme.colorScheme.primary, contentDescription = "Lyrics Icon") },
+                            leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Notes, tint = MaterialTheme.colorScheme.primary, contentDescription = "Lyrics Icon") },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(150.dp)

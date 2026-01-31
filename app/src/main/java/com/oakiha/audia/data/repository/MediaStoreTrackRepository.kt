@@ -27,12 +27,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MediaStoreSongRepository @Inject constructor(
+class MediaStoreTrackRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mediaStoreObserver: MediaStoreObserver,
     private val favoritesDao: FavoritesDao,
     private val userPreferencesRepository: UserPreferencesRepository
-) : SongRepository {
+) : TrackRepository {
 
     init {
         mediaStoreObserver.register()
@@ -172,7 +172,7 @@ class MediaStoreSongRepository @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e("MediaStoreSongRepository", "Error querying MediaStore", e)
+            Log.e("MediaStoreTrackRepository", "Error querying MediaStore", e)
         }
         songs
     }
@@ -211,13 +211,13 @@ class MediaStoreSongRepository @Inject constructor(
                                 }
                             }
                         } catch (e: Exception) {
-                             Log.w("MediaStoreSongRepository", "Error querying members for genreId=$genreId", e)
+                             Log.w("MediaStoreTrackRepository", "Error querying members for genreId=$genreId", e)
                         }
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("MediaStoreSongRepository", "Error querying Genres", e)
+            Log.e("MediaStoreTrackRepository", "Error querying Genres", e)
         }
         return genreMap
     }
@@ -312,7 +312,7 @@ class MediaStoreSongRepository @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e("MediaStoreSongRepository", "Error getting IDs", e)
+            Log.e("MediaStoreTrackRepository", "Error getting IDs", e)
         }
         ids
     }

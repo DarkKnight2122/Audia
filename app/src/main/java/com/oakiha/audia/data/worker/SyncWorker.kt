@@ -14,11 +14,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.oakiha.audia.data.database.AlbumEntity
-import com.oakiha.audia.data.database.ArtistEntity
+import com.oakiha.audia.data.database.BookEntity
+import com.oakiha.audia.data.database.AuthorEntity
 import com.oakiha.audia.data.database.MusicDao
-import com.oakiha.audia.data.database.SongArtistCrossRef
-import com.oakiha.audia.data.database.SongEntity
+import com.oakiha.audia.data.database.TrackAuthorCrossRef
+import com.oakiha.audia.data.database.TrackEntity
 import com.oakiha.audia.data.media.AudioMetadataReader
 import com.oakiha.audia.data.model.Song
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
@@ -467,10 +467,10 @@ constructor(
 
     /** Data class to hold the result of multi-artist preprocessing. */
     private data class MultiArtistProcessResult(
-            val songs: List<SongEntity>,
-            val albums: List<AlbumEntity>,
-            val artists: List<ArtistEntity>,
-            val crossRefs: List<SongArtistCrossRef>
+            val songs: List<TrackEntity>,
+            val albums: List<BookEntity>,
+            val artists: List<AuthorEntity>,
+            val crossRefs: List<TrackAuthorCrossRef>
     )
 
     /**
@@ -478,7 +478,7 @@ constructor(
      * cross-references.
      */
     private fun preProcessAndDeduplicateWithMultiArtist(
-            songs: List<SongEntity>,
+            songs: List<TrackEntity>,
             artistDelimiters: List<String>,
             groupByAlbumArtist: Boolean,
             existingArtistImageUrls: Map<Long, String?>,
@@ -489,11 +489,11 @@ constructor(
         val nextArtistId = AtomicLong(initialMaxArtistId + 1)
         val artistNameToId = existingArtistIdMap // Re-use the map passed in
         
-        val allCrossRefs = mutableListOf<SongArtistCrossRef>()
+        val allCrossRefs = mutableListOf<TrackAuthorCrossRef>()
         val artistTrackCounts = mutableMapOf<Long, Int>()
         val albumMap = mutableMapOf<Pair<String, String>, Long>()
         val artistSplitCache = mutableMapOf<String, List<String>>()
-        val correctedSongs = ArrayList<SongEntity>(songs.size)
+        val correctedSongs = ArrayList<TrackEntity>(songs.size)
 
         songs.forEach { song ->
             val rawArtistName = song.artistName
@@ -524,7 +524,7 @@ constructor(
                 if (artistId != null) {
                     val isPrimary = (index == 0) // First artist is primary
                     allCrossRefs.add(
-                            SongArtistCrossRef(
+                            TrackAuthorCrossRef(
                                     songId = song.id,
                                     artistId = artistId,
                                     isPrimary = isPrimary
@@ -561,7 +561,7 @@ constructor(
         // Build Entities
         val artistEntities = artistNameToId.map { (name, id) ->
             val count = artistTrackCounts[id] ?: 0
-            ArtistEntity(
+            AuthorEntity(
                 id = id,
                 name = name,
                 trackCount = count,
@@ -580,7 +580,7 @@ constructor(
              // Determine Album Artist ID (best effort lookup)
              val determinedAlbumArtistId = artistNameToId[determinedAlbumArtist] ?: 0L
 
-             AlbumEntity(
+             BookEntity(
                  id = catAlbumId,
                  title = firstSong.albumName,
                  artistName = determinedAlbumArtist,
@@ -763,7 +763,7 @@ constructor(
             directoryResolver: DirectoryRuleResolver,
             progressBatchSize: Int,
             onProgress: suspend (current: Int, total: Int, phaseOrdinal: Int) -> Unit
-    ): List<SongEntity> {
+    ): List<TrackEntity> {
         Trace.beginSection("SyncWorker.fetchMusicFromMediaStore")
 
         val deepScan = forceMetadata
@@ -919,7 +919,7 @@ constructor(
     }
 
     /**
-     * Process a single song's raw data into a SongEntity. This is the CPU/IO intensive work that
+     * Process a single song's raw data into a TrackEntity. This is the CPU/IO intensive work that
      * benefits from parallelization.
      */
     private suspend fun processSongData(
@@ -927,7 +927,7 @@ constructor(
             albumArtByAlbumId: Map<Long, String>,
             genreMap: Map<Long, String>,
             deepScan: Boolean
-    ): SongEntity {
+    ): TrackEntity {
         val parentDir = java.io.File(raw.filePath).parent ?: ""
         val contentUriString =
                 ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, raw.id)
@@ -992,7 +992,7 @@ constructor(
             }
         }
 
-        return SongEntity(
+        return TrackEntity(
                 id = raw.id,
                 title = title,
                 artistName = artist,

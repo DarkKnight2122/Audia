@@ -444,7 +444,7 @@ private fun getIconByName(name: String?): ImageVector? {
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite
         "Piano" -> Icons.Rounded.Piano
-        "Queue" -> Icons.Rounded.QueueMusic
+        "Queue" -> Icons.AutoMirrored.Rounded.QueueMusic
         else -> Icons.Rounded.MusicNote
     }
 }

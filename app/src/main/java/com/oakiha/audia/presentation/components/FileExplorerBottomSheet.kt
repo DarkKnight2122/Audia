@@ -625,7 +625,7 @@ private fun FileExplorerHeader(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = "Navigate up",
                         tint = MaterialTheme.colorScheme.onSurface
                     )

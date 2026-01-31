@@ -8,13 +8,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
-        AlbumArtThemeEntity::class,
+        BookArtThemeEntity::class,
         SearchHistoryEntity::class,
-        SongEntity::class,
-        AlbumEntity::class,
-        ArtistEntity::class,
+        TrackEntity::class,
+        BookEntity::class,
+        AuthorEntity::class,
         TransitionRuleEntity::class,
-        SongArtistCrossRef::class,
+        TrackAuthorCrossRef::class,
         SongEngagementEntity::class,
         FavoritesEntity::class,
         LyricsEntity::class
@@ -23,7 +23,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     exportSchema = false
 )
 abstract class AudioBookDatabase : RoomDatabase() {
-    abstract fun albumArtThemeDao(): AlbumArtThemeDao
+    abstract fun albumArtThemeDao(): BookArtThemeDao
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun musicDao(): MusicDao
     abstract fun transitionDao(): TransitionDao

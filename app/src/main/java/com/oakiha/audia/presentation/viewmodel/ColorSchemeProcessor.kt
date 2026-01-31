@@ -12,8 +12,8 @@ import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.size.Size
-import com.oakiha.audia.data.database.AlbumArtThemeDao
-import com.oakiha.audia.data.database.AlbumArtThemeEntity
+import com.oakiha.audia.data.database.BookArtThemeDao
+import com.oakiha.audia.data.database.BookArtThemeEntity
 import com.oakiha.audia.data.database.StoredColorSchemeValues
 import com.oakiha.audia.data.database.toComposeColor
 import com.oakiha.audia.ui.theme.DarkColorScheme
@@ -47,7 +47,7 @@ import androidx.compose.ui.graphics.toArgb
 @Singleton
 class ColorSchemeProcessor @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val albumArtThemeDao: AlbumArtThemeDao
+    private val albumArtThemeDao: BookArtThemeDao
 ) {
     // In-memory LRU cache for faster access (avoids DB reads for hot paths)
     private val memoryCache = LruCache<String, ColorSchemePair>(20)
@@ -217,7 +217,7 @@ class ColorSchemeProcessor @Inject constructor(
     }
 
     // Mapping functions
-    private fun mapColorSchemePairToEntity(uri: String, pair: ColorSchemePair): AlbumArtThemeEntity {
+    private fun mapColorSchemePairToEntity(uri: String, pair: ColorSchemePair): BookArtThemeEntity {
         fun mapScheme(cs: ColorScheme) = StoredColorSchemeValues(
             primary = cs.primary.toHexString(),
             onPrimary = cs.onPrimary.toHexString(),
@@ -249,10 +249,10 @@ class ColorSchemeProcessor @Inject constructor(
             outlineVariant = cs.outlineVariant.toHexString(),
             scrim = cs.scrim.toHexString()
         )
-        return AlbumArtThemeEntity(uri, mapScheme(pair.light), mapScheme(pair.dark))
+        return BookArtThemeEntity(uri, mapScheme(pair.light), mapScheme(pair.dark))
     }
 
-    private fun mapEntityToColorSchemePair(entity: AlbumArtThemeEntity): ColorSchemePair {
+    private fun mapEntityToColorSchemePair(entity: BookArtThemeEntity): ColorSchemePair {
         val placeholder = Color.Magenta
         fun mapStored(sv: StoredColorSchemeValues, isDark: Boolean) = ColorScheme(
             primary = sv.primary.toComposeColor(),

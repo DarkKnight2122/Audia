@@ -39,7 +39,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.oakiha.audia.R
 import com.oakiha.audia.data.EotStateHolder
 import com.oakiha.audia.data.ai.SongMetadata
-import com.oakiha.audia.data.database.AlbumArtThemeDao
+import com.oakiha.audia.data.database.BookArtThemeDao
 import com.oakiha.audia.data.media.CoverArtUpdate
 import com.oakiha.audia.data.model.Album
 import com.oakiha.audia.data.model.Artist
@@ -114,7 +114,7 @@ class PlayerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val musicRepository: AudiobookRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val albumArtThemeDao: AlbumArtThemeDao,
+    private val albumArtThemeDao: BookArtThemeDao,
     val syncManager: SyncManager, // Inyectar SyncManager
 
     private val dualPlayerEngine: DualPlayerEngine,
@@ -2570,7 +2570,7 @@ class PlayerViewModel @Inject constructor(
                 }
 
                 if (coverArtUpdate != null) {
-                    purgeAlbumArtThemes(previousAlbumArt, updatedSong.albumArtUriString)
+                    purgeBookArtThemes(previousAlbumArt, updatedSong.albumArtUriString)
                     val paletteTargetUri = updatedSong.albumArtUriString
                     if (paletteTargetUri != null) {
                         themeStateHolder.getAlbumColorSchemeFlow(paletteTargetUri)
@@ -2597,7 +2597,7 @@ class PlayerViewModel @Inject constructor(
         imageCacheManager.invalidateCoverArtCaches(*uriStrings)
     }
 
-    private suspend fun purgeAlbumArtThemes(vararg uriStrings: String?) {
+    private suspend fun purgeBookArtThemes(vararg uriStrings: String?) {
         val uris = uriStrings.mapNotNull { it?.takeIf(String::isNotBlank) }.distinct()
         if (uris.isEmpty()) return
 

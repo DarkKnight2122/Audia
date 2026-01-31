@@ -1000,7 +1000,7 @@ fun SearchResultPlaylistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Rounded.PlaylistPlay,
+                imageVector = Icons.AutoMirrored.Rounded.PlaylistPlay,
                 contentDescription = "Playlist",
                 modifier = Modifier
                     .size(56.dp)

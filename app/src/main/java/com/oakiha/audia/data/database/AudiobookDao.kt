@@ -16,16 +16,16 @@ interface MusicDao {
 
     // --- Insert Operations ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSongs(songs: List<SongEntity>)
+    suspend fun insertSongs(songs: List<TrackEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAlbums(albums: List<AlbumEntity>)
+    suspend fun insertAlbums(albums: List<BookEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertArtists(artists: List<ArtistEntity>)
+    suspend fun insertArtists(artists: List<AuthorEntity>)
 
     @Transaction
-    suspend fun insertMusicData(songs: List<SongEntity>, albums: List<AlbumEntity>, artists: List<ArtistEntity>) {
+    suspend fun insertMusicData(songs: List<TrackEntity>, albums: List<BookEntity>, artists: List<AuthorEntity>) {
         insertArtists(artists)
         insertAlbums(albums)
         insertSongs(songs)
@@ -64,10 +64,10 @@ interface MusicDao {
      */
     @Transaction
     suspend fun incrementalSyncMusicData(
-        songs: List<SongEntity>,
-        albums: List<AlbumEntity>,
-        artists: List<ArtistEntity>,
-        crossRefs: List<SongArtistCrossRef>,
+        songs: List<TrackEntity>,
+        albums: List<BookEntity>,
+        artists: List<AuthorEntity>,
+        crossRefs: List<TrackAuthorCrossRef>,
         deletedSongIds: List<Long>
     ) {
         // Delete removed songs and their cross-refs
@@ -93,7 +93,7 @@ interface MusicDao {
             deleteCrossRefsBySongIds(chunk)
         }
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-            insertSongArtistCrossRefs(chunk)
+            insertTrackAuthorCrossRefs(chunk)
         }
         
         // Clean up orphaned albums and artists
@@ -111,13 +111,13 @@ interface MusicDao {
     fun getSongs(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE id = :songId")
-    fun getSongById(songId: Long): Flow<SongEntity?>
+    fun getSongById(songId: Long): Flow<TrackEntity?>
 
     @Query("SELECT * FROM songs WHERE file_path = :path LIMIT 1")
-    suspend fun getSongByPath(path: String): SongEntity?
+    suspend fun getSongByPath(path: String): TrackEntity?
 
     //@Query("SELECT * FROM songs WHERE id IN (:songIds)")
     @Query("""
@@ -129,13 +129,13 @@ interface MusicDao {
         songIds: List<Long>,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE album_id = :albumId ORDER BY title ASC")
-    fun getSongsByAlbumId(albumId: Long): Flow<List<SongEntity>>
+    fun getSongsByAlbumId(albumId: Long): Flow<List<TrackEntity>>
 
     @Query("SELECT * FROM songs WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getSongsByArtistId(artistId: Long): Flow<List<SongEntity>>
+    fun getSongsByArtistId(artistId: Long): Flow<List<TrackEntity>>
 
     @Query("""
         SELECT * FROM songs
@@ -147,7 +147,7 @@ interface MusicDao {
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     @Query("SELECT COUNT(*) FROM songs")
     fun getSongCount(): Flow<Int>
@@ -169,7 +169,7 @@ interface MusicDao {
         limit: Int,
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
-    ): List<SongEntity>
+    ): List<TrackEntity>
 
     @Query("""
         SELECT * FROM songs
@@ -178,7 +178,7 @@ interface MusicDao {
     fun getAllSongs(
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
     
     // --- Paginated Queries for Large Libraries ---
     /**
@@ -193,7 +193,7 @@ interface MusicDao {
     fun getSongsPaginated(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): PagingSource<Int, SongEntity>
+    ): PagingSource<Int, TrackEntity>
 
     // --- Album Queries ---
     @Query("""
@@ -205,13 +205,13 @@ interface MusicDao {
     fun getAlbums(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<AlbumEntity>>
+    ): Flow<List<BookEntity>>
 
     @Query("SELECT * FROM albums WHERE id = :albumId")
-    fun getAlbumById(albumId: Long): Flow<AlbumEntity?>
+    fun getAlbumById(albumId: Long): Flow<BookEntity?>
 
     @Query("SELECT * FROM albums WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
-    fun searchAlbums(query: String): Flow<List<AlbumEntity>>
+    fun searchAlbums(query: String): Flow<List<BookEntity>>
 
     @Query("SELECT COUNT(*) FROM albums")
     fun getAlbumCount(): Flow<Int>
@@ -226,10 +226,10 @@ interface MusicDao {
     suspend fun getAllAlbumsList(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): List<AlbumEntity>
+    ): List<BookEntity>
 
     @Query("SELECT * FROM albums WHERE artist_id = :artistId ORDER BY title ASC")
-    fun getAlbumsByArtistId(artistId: Long): Flow<List<AlbumEntity>>
+    fun getAlbumsByArtistId(artistId: Long): Flow<List<BookEntity>>
 
     @Query("""
         SELECT DISTINCT albums.* FROM albums
@@ -242,7 +242,7 @@ interface MusicDao {
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<AlbumEntity>>
+    ): Flow<List<BookEntity>>
 
     // --- Artist Queries ---
     @Query("""
@@ -254,19 +254,19 @@ interface MusicDao {
     fun getArtists(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
     /**
      * Unfiltered list of all artists (including those only reachable via cross-refs).
      */
     @Query("SELECT * FROM artists ORDER BY name ASC")
-    fun getAllArtistsRaw(): Flow<List<ArtistEntity>>
+    fun getAllArtistsRaw(): Flow<List<AuthorEntity>>
 
     @Query("SELECT * FROM artists WHERE id = :artistId")
-    fun getArtistById(artistId: Long): Flow<ArtistEntity?>
+    fun getArtistById(artistId: Long): Flow<AuthorEntity?>
 
     @Query("SELECT * FROM artists WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
-    fun searchArtists(query: String): Flow<List<ArtistEntity>>
+    fun searchArtists(query: String): Flow<List<AuthorEntity>>
 
     @Query("SELECT COUNT(*) FROM artists")
     fun getArtistCount(): Flow<Int>
@@ -281,13 +281,13 @@ interface MusicDao {
     suspend fun getAllArtistsList(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): List<ArtistEntity>
+    ): List<AuthorEntity>
 
     /**
      * Unfiltered list of all artists (one-shot).
      */
     @Query("SELECT * FROM artists ORDER BY name ASC")
-    suspend fun getAllArtistsListRaw(): List<ArtistEntity>
+    suspend fun getAllArtistsListRaw(): List<AuthorEntity>
 
     @Query("""
         SELECT DISTINCT artists.* FROM artists
@@ -300,7 +300,7 @@ interface MusicDao {
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
     // --- Artist Image Operations ---
     @Query("SELECT image_url FROM artists WHERE id = :artistId")
@@ -327,7 +327,7 @@ interface MusicDao {
         genreName: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     @Query("""
         SELECT * FROM songs
@@ -338,7 +338,7 @@ interface MusicDao {
     fun getSongsWithNullGenre(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<SongEntity>>
+    ): Flow<List<TrackEntity>>
 
     // Example: Get all unique genre names
     @Query("SELECT DISTINCT genre FROM songs WHERE genre IS NOT NULL AND genre != '' ORDER BY genre ASC")
@@ -395,7 +395,7 @@ interface MusicDao {
     suspend fun resetAllLyrics()
 
     @Query("SELECT * FROM songs")
-    suspend fun getAllSongsList(): List<SongEntity>
+    suspend fun getAllSongsList(): List<TrackEntity>
 
     @Query("SELECT album_art_uri_string FROM songs WHERE id=:id")
     suspend fun getAlbumArtUriById(id: Long) : String?
@@ -415,16 +415,16 @@ interface MusicDao {
     // ===== Song-Artist Cross Reference (Junction Table) Operations =====
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertSongArtistCrossRefs(crossRefs: List<SongArtistCrossRef>)
+    suspend fun insertTrackAuthorCrossRefs(crossRefs: List<TrackAuthorCrossRef>)
 
     @Query("SELECT * FROM song_artist_cross_ref")
-    fun getAllSongArtistCrossRefs(): Flow<List<SongArtistCrossRef>>
+    fun getAllTrackAuthorCrossRefs(): Flow<List<TrackAuthorCrossRef>>
 
     @Query("SELECT * FROM song_artist_cross_ref")
-    suspend fun getAllSongArtistCrossRefsList(): List<SongArtistCrossRef>
+    suspend fun getAllTrackAuthorCrossRefsList(): List<TrackAuthorCrossRef>
 
     @Query("DELETE FROM song_artist_cross_ref")
-    suspend fun clearAllSongArtistCrossRefs()
+    suspend fun clearAllTrackAuthorCrossRefs()
 
     @Query("DELETE FROM song_artist_cross_ref WHERE song_id = :songId")
     suspend fun deleteCrossRefsForSong(songId: Long)
@@ -441,7 +441,7 @@ interface MusicDao {
         WHERE song_artist_cross_ref.song_id = :songId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
-    fun getArtistsForSong(songId: Long): Flow<List<ArtistEntity>>
+    fun getArtistsForSong(songId: Long): Flow<List<AuthorEntity>>
 
     /**
      * Get all artists for a specific song (one-shot).
@@ -452,7 +452,7 @@ interface MusicDao {
         WHERE song_artist_cross_ref.song_id = :songId
         ORDER BY song_artist_cross_ref.is_primary DESC, artists.name ASC
     """)
-    suspend fun getArtistsForSongList(songId: Long): List<ArtistEntity>
+    suspend fun getArtistsForSongList(songId: Long): List<AuthorEntity>
 
     /**
      * Get all songs for a specific artist using the junction table.
@@ -463,7 +463,7 @@ interface MusicDao {
         WHERE song_artist_cross_ref.artist_id = :artistId
         ORDER BY songs.title ASC
     """)
-    fun getSongsForArtist(artistId: Long): Flow<List<SongEntity>>
+    fun getSongsForArtist(artistId: Long): Flow<List<TrackEntity>>
 
     /**
      * Get all songs for a specific artist (one-shot).
@@ -474,13 +474,13 @@ interface MusicDao {
         WHERE song_artist_cross_ref.artist_id = :artistId
         ORDER BY songs.title ASC
     """)
-    suspend fun getSongsForArtistList(artistId: Long): List<SongEntity>
+    suspend fun getSongsForArtistList(artistId: Long): List<TrackEntity>
 
     /**
      * Get the cross-references for a specific song.
      */
     @Query("SELECT * FROM song_artist_cross_ref WHERE song_id = :songId")
-    suspend fun getCrossRefsForSong(songId: Long): List<SongArtistCrossRef>
+    suspend fun getCrossRefsForSong(songId: Long): List<TrackAuthorCrossRef>
 
     /**
      * Get the primary artist for a song.
@@ -508,7 +508,7 @@ interface MusicDao {
         FROM artists
         ORDER BY artists.name ASC
     """)
-    fun getArtistsWithSongCounts(): Flow<List<ArtistEntity>>
+    fun getArtistsWithSongCounts(): Flow<List<AuthorEntity>>
 
     /**
      * Get all artists with song counts, filtered by allowed directories.
@@ -528,14 +528,14 @@ interface MusicDao {
     fun getArtistsWithSongCountsFiltered(
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
-    ): Flow<List<ArtistEntity>>
+    ): Flow<List<AuthorEntity>>
 
     /**
      * Clear all music data including cross-references.
      */
     @Transaction
     suspend fun clearAllMusicDataWithCrossRefs() {
-        clearAllSongArtistCrossRefs()
+        clearAllTrackAuthorCrossRefs()
         clearAllSongs()
         clearAllAlbums()
         clearAllArtists()
@@ -547,25 +547,25 @@ interface MusicDao {
      */
     @Transaction
     suspend fun insertMusicDataWithCrossRefs(
-        songs: List<SongEntity>,
-        albums: List<AlbumEntity>,
-        artists: List<ArtistEntity>,
-        crossRefs: List<SongArtistCrossRef>
+        songs: List<TrackEntity>,
+        albums: List<BookEntity>,
+        artists: List<AuthorEntity>,
+        crossRefs: List<TrackAuthorCrossRef>
     ) {
         insertArtists(artists)
         insertAlbums(albums)
         insertSongs(songs)
         // Insert cross-refs in chunks to avoid SQLite variable limit.
-        // Each SongArtistCrossRef has 3 fields, so batch size is calculated accordingly.
+        // Each TrackAuthorCrossRef has 3 fields, so batch size is calculated accordingly.
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
-            insertSongArtistCrossRefs(chunk)
+            insertTrackAuthorCrossRefs(chunk)
         }
     }
 
     companion object {
         /**
          * SQLite has a limit on the number of variables per statement (default 999, higher in newer versions).
-         * Each SongArtistCrossRef insert uses 3 variables (songId, artistId, isPrimary).
+         * Each TrackAuthorCrossRef insert uses 3 variables (songId, artistId, isPrimary).
          * The batch size is calculated so that batchSize * 3 <= SQLITE_MAX_VARIABLE_NUMBER.
          */
         private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more

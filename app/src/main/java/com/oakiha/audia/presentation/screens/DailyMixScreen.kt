@@ -327,7 +327,7 @@ fun DailyMixScreen(
                 .clip(CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Rounded.ArrowBack,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Volver"
             )
         }

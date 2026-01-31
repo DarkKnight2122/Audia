@@ -1,0 +1,41 @@
+package com.oakiha.audia.data.database
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import com.oakiha.audia.data.model.Artist
+import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
+
+@Entity(
+    tableName = "artists",
+    indices = [Index(value = ["name"], unique = false)] // Ãndice en el nombre para bÃºsquedas rÃ¡pidas
+)
+data class AuthorEntity(
+    @PrimaryKey val id: Long,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "track_count") val trackCount: Int,
+    @ColumnInfo(name = "image_url") val imageUrl: String? = null
+)
+
+fun AuthorEntity.toArtist(): Artist {
+    return Artist(
+        id = this.id,
+        name = this.name.normalizeMetadataTextOrEmpty(),
+        songCount = this.trackCount, // El modelo Artist usa songCount, MediaStore usa NUMBER_OF_TRACKS
+        imageUrl = this.imageUrl
+    )
+}
+
+fun List<AuthorEntity>.toArtists(): List<Artist> {
+    return this.map { it.toArtist() }
+}
+
+fun Artist.toEntity(): AuthorEntity {
+    return AuthorEntity(
+        id = this.id,
+        name = this.name,
+        trackCount = this.songCount,
+        imageUrl = this.imageUrl
+    )
+}

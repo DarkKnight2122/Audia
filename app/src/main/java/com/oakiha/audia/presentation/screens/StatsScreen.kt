@@ -686,7 +686,7 @@ private fun ListeningHabitsCard(
                         value = String.format(Locale.US, "%.1f", summary.averageSessionsPerDay)
                     )
                 }
-                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                 HighlightRow(
                     title = "Most active day",
                     value = summary.peakDayLabel ?: "â€”",
@@ -1185,7 +1185,7 @@ private fun CategoryVerticalBarChart(
             }
         }
 
-        HorizontalDivider(
+        HorizontalHorizontalDivider(
             modifier = Modifier
                 .height(2.dp)
                 .clip(shape = CircleShape),

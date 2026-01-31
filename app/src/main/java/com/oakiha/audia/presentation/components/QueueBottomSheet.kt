@@ -1282,7 +1282,7 @@ fun SaveQueueAsPlaylistSheet(
                                 )
                             )
                         }
-                        HorizontalDivider(
+                        HorizontalHorizontalDivider(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
                     }

@@ -81,7 +81,7 @@ fun LyricsFloatingToolbar(
             onClick = onNavigateBack
         ) {
             Icon(
-                imageVector = Icons.Rounded.ArrowBack,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Back",
                 tint = onBackgroundColor
             )
@@ -196,7 +196,7 @@ fun LyricsFloatingToolbar(
                         }
                     )
 
-                    HorizontalDivider(
+                    HorizontalHorizontalDivider(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .clip(CircleShape),

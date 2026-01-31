@@ -11,7 +11,7 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.oakiha.audia.AudioBookApp
-import com.oakiha.audia.data.database.AlbumArtThemeDao
+import com.oakiha.audia.data.database.BookArtThemeDao
 import com.oakiha.audia.data.database.EngagementDao
 import com.oakiha.audia.data.database.FavoritesDao
 import com.oakiha.audia.data.database.LyricsDao
@@ -94,7 +94,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAlbumArtThemeDao(database: AudioBookDatabase): AlbumArtThemeDao {
+    fun provideBookArtThemeDao(database: AudioBookDatabase): BookArtThemeDao {
         return database.albumArtThemeDao()
     }
 
@@ -175,13 +175,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSongRepository(
+    fun provideTrackRepository(
         @ApplicationContext context: Context,
         mediaStoreObserver: com.oakiha.audia.data.observer.MediaStoreObserver,
         favoritesDao: FavoritesDao,
         userPreferencesRepository: UserPreferencesRepository
-    ): com.oakiha.audia.data.repository.SongRepository {
-        return com.oakiha.audia.data.repository.MediaStoreSongRepository(
+    ): com.oakiha.audia.data.repository.TrackRepository {
+        return com.oakiha.audia.data.repository.MediaStoreTrackRepository(
             context = context,
             mediaStoreObserver = mediaStoreObserver,
             favoritesDao = favoritesDao,
@@ -197,7 +197,7 @@ object AppModule {
         searchHistoryDao: SearchHistoryDao,
         musicDao: MusicDao,
         lyricsRepository: LyricsRepository,
-        songRepository: com.oakiha.audia.data.repository.SongRepository,
+        songRepository: com.oakiha.audia.data.repository.TrackRepository,
         favoritesDao: FavoritesDao
     ): AudiobookRepository {
         return AudiobookRepositoryImpl(

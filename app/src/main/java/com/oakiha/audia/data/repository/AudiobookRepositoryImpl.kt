@@ -36,9 +36,9 @@ import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import androidx.sqlite.db.SimpleSQLiteQuery
 
 import com.oakiha.audia.data.model.Genre
-import com.oakiha.audia.data.database.SongEntity
-import com.oakiha.audia.data.database.SongArtistCrossRef
-import com.oakiha.audia.data.database.ArtistEntity
+import com.oakiha.audia.data.database.TrackEntity
+import com.oakiha.audia.data.database.TrackAuthorCrossRef
+import com.oakiha.audia.data.database.AuthorEntity
 import com.oakiha.audia.data.database.toAlbum
 import com.oakiha.audia.data.database.toArtist
 import com.oakiha.audia.data.database.toSong
@@ -79,7 +79,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     private val searchHistoryDao: SearchHistoryDao,
     private val musicDao: MusicDao,
     private val lyricsRepository: LyricsRepository,
-    private val songRepository: SongRepository,
+    private val songRepository: TrackRepository,
     private val favoritesDao: FavoritesDao
 ) : AudiobookRepository {
 
@@ -92,7 +92,7 @@ class AudiobookRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getAudioFiles(): Flow<List<Song>> {
-        // Delegate to the reactive SongRepository which queries MediaStore directly
+        // Delegate to the reactive TrackRepository which queries MediaStore directly
         // and observes directory preference changes in real-time.
         return songRepository.getSongs()
     }

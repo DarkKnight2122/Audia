@@ -890,7 +890,7 @@ fun FullPlayerContent(
                             }
                     )
                     if (index != currentSongArtists.lastIndex) {
-                        HorizontalDivider(color = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.08f))
+                        HorizontalHorizontalDivider(color = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.08f))
                     }
                 }
             }

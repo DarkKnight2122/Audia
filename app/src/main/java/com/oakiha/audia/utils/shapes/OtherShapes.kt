@@ -167,15 +167,15 @@ fun createRoundedTriangleShape(cornerRadius: Dp) = object : Shape {
             moveTo(p1.x, p1.y + cornerRadiusPx * 2) // Empieza un poco mÃ¡s abajo del vÃ©rtice superior
 
             // Arco superior derecha
-            quadraticBezierTo(p1.x, p1.y, p1.x + cornerRadiusPx * sqrt(2f), p1.y + cornerRadiusPx * sqrt(2f))
+            quadraticTo(p1.x, p1.y, p1.x + cornerRadiusPx * sqrt(2f), p1.y + cornerRadiusPx * sqrt(2f))
             lineTo(p2.x - cornerRadiusPx * sqrt(2f), p2.y - cornerRadiusPx * sqrt(2f))
 
             // Arco inferior derecha
-            quadraticBezierTo(p2.x, p2.y, p2.x - cornerRadiusPx * sqrt(2f), p2.y + cornerRadiusPx * sqrt(2f))
+            quadraticTo(p2.x, p2.y, p2.x - cornerRadiusPx * sqrt(2f), p2.y + cornerRadiusPx * sqrt(2f))
             lineTo(p3.x + cornerRadiusPx * sqrt(2f), p3.y + cornerRadiusPx * sqrt(2f))
 
             // Arco inferior izquierda
-            quadraticBezierTo(p3.x, p3.y, p3.x + cornerRadiusPx * sqrt(2f), p3.y - cornerRadiusPx * sqrt(2f))
+            quadraticTo(p3.x, p3.y, p3.x + cornerRadiusPx * sqrt(2f), p3.y - cornerRadiusPx * sqrt(2f))
             lineTo(p1.x - cornerRadiusPx * sqrt(2f), p1.y + cornerRadiusPx * sqrt(2f))
 
             close() // Cierra la forma

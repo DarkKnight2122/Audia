@@ -27,7 +27,7 @@ android {
 
     defaultConfig {
         applicationId = "com.oakiha.audia"
-        minSdk = 29 // Bumped to match PixelPlayer requirements
+        minSdk = 28 // Bumped to match PixelPlayer requirements
         targetSdk = 36
         
         // Use tag_name from project property if available (e.g. from GitHub Actions)
