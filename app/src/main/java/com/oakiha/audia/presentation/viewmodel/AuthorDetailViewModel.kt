@@ -23,15 +23,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AuthorDetailUiState(
-    val artist: Author? = null,
+    val author: Author? = null,
     val songs: List<Track> = emptyList(),
-    val albumSections: List<ArtistAlbumSection> = emptyList(),
+    val bookSections: List<AuthorBookSection> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
 @Immutable
-data class AuthorAlbumSection(
+data class AuthorBookSection(
     val bookId: Long,
     val title: String,
     val year: Int?,
@@ -55,7 +55,7 @@ class AuthorDetailViewModel @Inject constructor(
         if (authorIdString != null) {
             val authorId = authorIdString.toLongOrNull()
             if (authorId != null) {
-                loadArtistData(authorId)
+                loadAuthorData(authorId)
             } else {
                 _uiState.update { it.copy(error = context.getString(R.string.invalid_artist_id), isLoading = false) }
             }
@@ -64,23 +64,23 @@ class AuthorDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadArtistData(id: Long) {
+    private fun loadAuthorData(id: Long) {
         viewModelScope.launch {
-            Log.d("ArtistDebug", "loadArtistData: id=$id")
+            Log.d("AuthorDebug", "loadAuthorData: id=$id")
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val artistDetailsFlow = audiobookRepository.getArtistById(id)
                 val artistSongsFlow = audiobookRepository.getTracksForArtist(id)
 
                 combine(artistDetailsFlow, artistSongsFlow) { artist, songs ->
-                    Log.d("ArtistDebug", "loadArtistData: id=$id found=${artist != null} songs=${songs.size}")
+                    Log.d("AuthorDebug", "loadAuthorData: id=$id found=${artist != null} songs=${songs.size}")
                     if (artist != null) {
-                        val albumSections = buildAlbumSections(songs)
-                        val orderedSongs = albumSections.flatMap { it.tracks }
+                        val bookSections = buildBookSections(songs)
+                        val orderedSongs = bookSections.flatMap { it.tracks }
                         AuthorDetailUiState(
                             artist = artist,
                             songs = orderedSongs,
-                            albumSections = albumSections,
+                            bookSections = bookSections,
                             isLoading = false
                         )
                     } else {
@@ -115,7 +115,7 @@ class AuthorDetailViewModel @Inject constructor(
                                             }
                                         }
                                     } catch (e: Exception) {
-                                        Log.w("ArtistDebug", "Failed to fetch artist image: ${e.message}")
+                                        Log.w("AuthorDebug", "Failed to fetch artist image: ${e.message}")
                                     }
                                 }
                             }
@@ -132,7 +132,7 @@ class AuthorDetailViewModel @Inject constructor(
             }
         }
     }
-    fun removeSongFromAlbumSection(trackId: String) {
+    fun removeTrackFromBookSection(trackId: String) {
         _uiState.update { currentState ->
             val updatedAlbumSections = currentState.bookSections.map { section ->
                 // Remove the song from this section if it exists
@@ -142,27 +142,27 @@ class AuthorDetailViewModel @Inject constructor(
             }.filter { it.tracks.isNotEmpty() } // Remove empty album sections
 
             currentState.copy(
-                albumSections = updatedAlbumSections,
+                bookSections = updatedAlbumSections,
                 songs = currentState.tracks.filterNot { it.id == trackId } // Also update the main songs list
             )
         }
     }
 }
 
-private val songDisplayComparator = compareBy<Track> {
+private val trackDisplayComparator = compareBy<Track> {
     if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE
 }.thenBy { it.title.lowercase() }
 
-private fun buildAlbumSections(songs: List<Track>): List<ArtistAlbumSection> {
+private fun buildBookSections(songs: List<Track>): List<AuthorBookSection> {
     if (songs.isEmpty()) return emptyList()
 
     val sections = songs
         .groupBy { it.bookId to it.book }
-        .map { (key, albumSongs) ->
-            val sortedSongs = albumSongs.sortedWith(songDisplayComparator)
-            val albumYear = albumSongs.mapNotNull { song -> song.year.takeIf { it > 0 } }.maxOrNull()
-            val bookArtUri = albumSongs.firstNotNullOfOrNull { it.bookArtUriString }
-            ArtistAlbumSection(
+        .map { (key, bookTracks) ->
+            val sortedSongs = bookTracks.sortedWith(trackDisplayComparator)
+            val albumYear = bookTracks.mapNotNull { song -> song.year.takeIf { it > 0 } }.maxOrNull()
+            val bookArtUri = bookTracks.firstNotNullOfOrNull { it.bookArtUriString }
+            AuthorBookSection(
                 bookId = key.first,
                 title = (key.second.takeIf { it.isNotBlank() } ?: "Unknown Album"),
                 year = albumYear,
@@ -173,7 +173,7 @@ private fun buildAlbumSections(songs: List<Track>): List<ArtistAlbumSection> {
 
     val (withYear, withoutYear) = sections.partition { it.year != null }
     val withYearSorted = withYear.sortedWith(
-        compareByDescending<ArtistAlbumSection> { it.year ?: Int.MIN_VALUE }
+        compareByDescending<AuthorBookSection> { it.year ?: Int.MIN_VALUE }
             .thenBy { it.title.lowercase() }
     )
     val withoutYearSorted = withoutYear.sortedBy { it.title.lowercase() }

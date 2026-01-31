@@ -7,7 +7,7 @@ import androidx.compose.runtime.Immutable
 data class Book(
     val id: Long, // MediaStore.Audio.Albums._ID
     val title: String,
-    val artist: String,
+    val author: String,
     val year: Int,
     val bookArtUriString: String?,
     val trackCount: Int

@@ -9,10 +9,10 @@ import androidx.room.PrimaryKey
  * This replaces the JSON-based storage in DailyMixManager for better performance
  * and structured querying.
  */
-@Entity(tableName = "song_engagements")
+@Entity(tableName = "track_engagements")
 data class TrackEngagementEntity(
     @PrimaryKey
-    @ColumnInfo(name = "song_id")
+    @ColumnInfo(name = "track_id")
     val trackId: String,
     
     @ColumnInfo(name = "play_count")

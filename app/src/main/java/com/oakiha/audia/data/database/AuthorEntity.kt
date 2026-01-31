@@ -8,7 +8,7 @@ import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "artists",
+    tableName = "authors",
     indices = [Index(value = ["name"], unique = false)] // Ãndice en el nombre para bÃºsquedas rÃ¡pidas
 )
 data class AuthorEntity(

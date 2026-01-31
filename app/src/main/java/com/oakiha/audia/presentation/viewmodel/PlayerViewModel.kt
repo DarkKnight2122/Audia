@@ -606,9 +606,9 @@ class PlayerViewModel @Inject constructor(
         val allAlbums = _playerUiState.value.books
         if (allAlbums.isNotEmpty()) {
             val randomAlbum = allAlbums.random()
-            val albumSongs = _masterAllSongs.value.filter { it.bookId == randomAlbum.id }
-            if (albumSongs.isNotEmpty()) {
-                playSongsShuffled(albumSongs, randomAlbum.title)
+            val bookTracks = _masterAllSongs.value.filter { it.bookId == randomAlbum.id }
+            if (bookTracks.isNotEmpty()) {
+                playSongsShuffled(bookTracks, randomAlbum.title)
             }
         }
     }
@@ -1244,13 +1244,13 @@ class PlayerViewModel @Inject constructor(
 
     fun triggerArtistNavigationFromPlayer(authorId: Long) {
         if (authorId <= 0) {
-            Log.d("ArtistDebug", "triggerArtistNavigationFromPlayer ignored invalid authorId=$authorId")
+            Log.d("AuthorDebug", "triggerArtistNavigationFromPlayer ignored invalid authorId=$authorId")
             return
         }
 
         val existingJob = artistNavigationJob
         if (existingJob != null && existingJob.isActive) {
-            Log.d("ArtistDebug", "triggerArtistNavigationFromPlayer ignored; navigation already in progress for authorId=$authorId")
+            Log.d("AuthorDebug", "triggerArtistNavigationFromPlayer ignored; navigation already in progress for authorId=$authorId")
             return
         }
 
@@ -1258,7 +1258,7 @@ class PlayerViewModel @Inject constructor(
         artistNavigationJob = viewModelScope.launch {
             val currentTrack = playbackStateHolder.stablePlayerState.value.currentTrack
             Log.d(
-                "ArtistDebug",
+                "AuthorDebug",
                 "triggerArtistNavigationFromPlayer: authorId=$authorId, trackId=${currentTrack?.id}, title=${currentTrack?.title}"
             )
             collapsePlayerSheet()

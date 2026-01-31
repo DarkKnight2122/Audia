@@ -6,6 +6,6 @@ import androidx.compose.runtime.Immutable
 sealed interface SearchResultItem {
     data class TrackItem(val track: Track) : SearchResultItem
     data class BookItem(val album: Book) : SearchResultItem
-    data class AuthorItem(val artist: Author) : SearchResultItem
+    data class AuthorItem(val author: Author) : SearchResultItem
     data class PlaylistItem(val playlist: Playlist) : SearchResultItem
 }

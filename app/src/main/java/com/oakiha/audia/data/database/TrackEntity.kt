@@ -11,12 +11,12 @@ import com.oakiha.audia.utils.normalizeMetadataText
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "songs",
+    tableName = "tracks",
     indices = [
         Index(value = ["title"], unique = false),
-        Index(value = ["album_id"], unique = false),
-        Index(value = ["artist_id"], unique = false),
-        Index(value = ["artist_name"], unique = false), // Nuevo Ã­ndice para bÃºsquedas por nombre de artista
+        Index(value = ["book_id"], unique = false),
+        Index(value = ["author_id"], unique = false),
+        Index(value = ["author_name"], unique = false), // Nuevo Ã­ndice para bÃºsquedas por nombre de artista
         Index(value = ["genre"], unique = false),
         Index(value = ["parent_directory_path"], unique = false) // Ãndice para filtrado por directorio
     ],
@@ -24,29 +24,29 @@ import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
         ForeignKey(
             entity = BookEntity::class,
             parentColumns = ["id"],
-            childColumns = ["album_id"],
+            childColumns = ["book_id"],
             onDelete = ForeignKey.CASCADE // Si un Ã¡lbum se borra, sus canciones tambiÃ©n
         ),
         ForeignKey(
             entity = AuthorEntity::class,
             parentColumns = ["id"],
-            childColumns = ["artist_id"],
+            childColumns = ["author_id"],
             onDelete = ForeignKey.SET_NULL // Si un artista se borra, el artist_id de la canciÃ³n se pone a null
                                           // o podrÃ­as elegir CASCADE si las canciones no deben existir sin artista.
-                                          // SET_NULL es mÃ¡s flexible si las canciones pueden ser de "Artista Desconocido".
+                                          // SET_NULL es mÃ¡s flexible si las canciones pueden ser de "Unknown Author".
         )
     ]
 )
 data class TrackEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "artist_name") val artistName: String, // Display string (combined or primary)
-    @ColumnInfo(name = "artist_id") val authorId: Long, // Primary artist ID for backward compatibility
-    @ColumnInfo(name = "album_artist") val bookArtist: String? = null, // Album artist from metadata
-    @ColumnInfo(name = "album_name") val albumName: String,
-    @ColumnInfo(name = "album_id") val bookId: Long, // index = true eliminado
+    @ColumnInfo(name = "author_name") val artistName: String, // Display string (combined or primary)
+    @ColumnInfo(name = "author_id") val authorId: Long, // Primary artist ID for backward compatibility
+    @ColumnInfo(name = "book_author") val bookArtist: String? = null, // Album artist from metadata
+    @ColumnInfo(name = "book_name") val albumName: String,
+    @ColumnInfo(name = "book_id") val bookId: Long, // index = true eliminado
     @ColumnInfo(name = "content_uri_string") val contentUriString: String,
-    @ColumnInfo(name = "album_art_uri_string") val bookArtUriString: String?,
+    @ColumnInfo(name = "book_art_uri_string") val bookArtUriString: String?,
     @ColumnInfo(name = "duration") val duration: Long,
     @ColumnInfo(name = "genre") val genre: String?,
     @ColumnInfo(name = "file_path") val filePath: String, // Added filePath

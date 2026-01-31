@@ -48,14 +48,14 @@ class PlaybackStatsRepository @Inject constructor(
     data class TrackPlaybackSummary(
         val trackId: String,
         val title: String,
-        val artist: String,
+        val author: String,
         val bookArtUri: String?,
         val totalDurationMs: Long,
         val playCount: Int
     )
 
     data class AuthorPlaybackSummary(
-        val artist: String,
+        val author: String,
         val totalDurationMs: Long,
         val playCount: Int,
         val uniqueSongs: Int

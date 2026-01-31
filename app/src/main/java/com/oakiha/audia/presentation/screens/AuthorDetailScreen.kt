@@ -53,7 +53,7 @@ import com.oakiha.audia.presentation.components.PlaylistBottomSheet
 import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.AuthorDetailViewModel
-import com.oakiha.audia.presentation.viewmodel.ArtistAlbumSection
+import com.oakiha.audia.presentation.viewmodel.AuthorBookSection
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
@@ -194,7 +194,7 @@ fun AuthorDetailScreen(
                     val songs = uiState.tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
 
-                    val albumSections = uiState.bookSections
+                    val bookSections = uiState.bookSections
                     LazyColumn(
                         state = lazyListState,
                         contentPadding = PaddingValues(
@@ -205,7 +205,7 @@ fun AuthorDetailScreen(
                             .fillMaxSize()
                             .padding(horizontal = 0.dp)
                     ) {
-                        albumSections.forEachIndexed { index, section ->
+                        bookSections.forEachIndexed { index, section ->
                             if (section.tracks.isEmpty()) return@forEachIndexed
 
                             stickyHeader(key = "artist_album_${section.bookId}_${section.title}_header") {
@@ -247,7 +247,7 @@ fun AuthorDetailScreen(
                             item(key = "artist_album_${section.bookId}_${section.title}_footer_spacing") {
                                 Spacer(
                                     modifier = Modifier.height(
-                                        if (index == albumSections.lastIndex) 24.dp else 20.dp
+                                        if (index == bookSections.lastIndex) 24.dp else 20.dp
                                     )
                                 )
                             }
@@ -281,7 +281,7 @@ fun AuthorDetailScreen(
         if (currentTrack != null) {
             val removeFromListTrigger = remember(uiState.tracks) {
                 {
-                    viewModel.removeSongFromAlbumSection(currentTrack.id)
+                    viewModel.removeTrackFromBookSection(currentTrack.id)
                 }
             }
             TrackInfoBottomSheet(
@@ -340,7 +340,7 @@ fun AuthorDetailScreen(
 
 @Composable
 private fun AlbumSectionHeader(
-    section: AuthorAlbumSection,
+    section: AuthorBookSection,
     modifier: Modifier = Modifier,
     onPlayAlbum: () -> Unit
 ) {
@@ -446,7 +446,7 @@ private fun CustomCollapsingTopBar(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                MusicIconPattern(
+                AudiobookIconPattern(
                     modifier = Modifier.fillMaxSize(),
                     collapseFraction = collapseFraction
                 )
@@ -483,7 +483,7 @@ private fun CustomCollapsingTopBar(
                 onClick = onBackPressed,
                 colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
             ) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
 
             // Box contenedor para el tÃ­tulo
@@ -539,14 +539,14 @@ private fun CustomCollapsingTopBar(
                         alpha = fabScale
                     }
             ) {
-                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play album")
+                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play book")
             }
         }
     }
 }
 
 @Composable
-private fun MusicIconPattern(modifier: Modifier = Modifier, collapseFraction: Float) {
+private fun AudiobookIconPattern(modifier: Modifier = Modifier, collapseFraction: Float) {
     val color1 = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
     val color2 = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
 

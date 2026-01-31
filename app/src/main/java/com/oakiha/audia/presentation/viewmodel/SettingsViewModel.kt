@@ -63,7 +63,7 @@ data class SettingsUiState(
 data class FailedSongInfo(
     val id: String,
     val title: String,
-    val artist: String
+    val author: String
 )
 
 data class LyricsRefreshProgress(

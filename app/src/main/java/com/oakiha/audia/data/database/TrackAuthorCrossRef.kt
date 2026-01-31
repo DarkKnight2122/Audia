@@ -14,11 +14,11 @@ import androidx.room.Relation
  * and an artist can have multiple songs.
  */
 @Entity(
-    tableName = "song_artist_cross_ref",
+    tableName = "track_author_cross_ref",
     primaryKeys = ["song_id", "artist_id"],
     indices = [
         Index(value = ["song_id"]),
-        Index(value = ["artist_id"]),
+        Index(value = ["author_id"]),
         Index(value = ["is_primary"])
     ],
     foreignKeys = [
@@ -31,14 +31,14 @@ import androidx.room.Relation
         ForeignKey(
             entity = AuthorEntity::class,
             parentColumns = ["id"],
-            childColumns = ["artist_id"],
+            childColumns = ["author_id"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class TrackAuthorCrossRef(
-    @ColumnInfo(name = "song_id") val trackId: Long,
-    @ColumnInfo(name = "artist_id") val authorId: Long,
+    @ColumnInfo(name = "track_id") val trackId: Long,
+    @ColumnInfo(name = "author_id") val authorId: Long,
     @ColumnInfo(name = "is_primary", defaultValue = "0") val isPrimary: Boolean = false
 )
 
@@ -65,7 +65,7 @@ data class TrackWithArtists(
  * Used for queries that need to retrieve an artist along with their songs.
  */
 data class AuthorWithSongs(
-    @Embedded val artist: AuthorEntity,
+    @Embedded val author: AuthorEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
@@ -82,6 +82,6 @@ data class AuthorWithSongs(
  * Data class for retrieving the primary artist of a song efficiently.
  */
 data class PrimaryArtistInfo(
-    @ColumnInfo(name = "artist_id") val authorId: Long,
+    @ColumnInfo(name = "author_id") val authorId: Long,
     @ColumnInfo(name = "name") val artistName: String
 )

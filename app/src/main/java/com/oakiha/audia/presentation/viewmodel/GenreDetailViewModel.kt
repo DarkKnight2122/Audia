@@ -92,10 +92,10 @@ class GenreDetailViewModel @Inject constructor(
             .forEach { (artistName, artistSongs) ->
                 newGroupedList.add(GroupedTrackListItem.ArtistHeader(artistName))
                 artistSongs.groupBy { it.book }
-                    .forEach { (albumName, albumSongs) ->
-                        val bookArtUri = albumSongs.firstOrNull()?.bookArtUriString
+                    .forEach { (albumName, bookTracks) ->
+                        val bookArtUri = bookTracks.firstOrNull()?.bookArtUriString
                         newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, bookArtUri))
-                        albumSongs.forEach { song ->
+                        bookTracks.forEach { song ->
                             newGroupedList.add(GroupedTrackListItem.SongItem(song))
                         }
                     }

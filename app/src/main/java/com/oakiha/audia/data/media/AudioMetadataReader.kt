@@ -10,7 +10,7 @@ import java.io.FileOutputStream
 
 data class AudioMetadata(
     val title: String?,
-    val artist: String?,
+    val author: String?,
     val bookArtist: String?,
     val album: String?,
     val genre: String?,

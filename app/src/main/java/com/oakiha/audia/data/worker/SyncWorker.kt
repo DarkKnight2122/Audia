@@ -748,7 +748,7 @@ constructor(
             val authorId: Long,
             val filePath: String,
             val title: String,
-            val artist: String,
+            val author: String,
             val album: String,
             val bookArtist: String?,
             val duration: Long,

@@ -489,7 +489,7 @@ private fun CollapsingAlbumTopBar(
                         alpha = fabScale
                     }
             ) {
-                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play album")
+                Icon(Icons.Rounded.Shuffle, contentDescription = "Shuffle play book")
             }
         }
     }

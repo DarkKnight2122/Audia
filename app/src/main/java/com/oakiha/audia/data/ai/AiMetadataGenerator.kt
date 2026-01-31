@@ -15,7 +15,7 @@ import kotlin.Result
 @Serializable
 data class TrackMetadata(
     val title: String? = null,
-    val artist: String? = null,
+    val author: String? = null,
     val album: String? = null,
     val genre: String? = null
 )

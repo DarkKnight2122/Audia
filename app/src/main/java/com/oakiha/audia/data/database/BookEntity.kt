@@ -8,19 +8,19 @@ import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
-    tableName = "albums",
+    tableName = "books",
     indices = [
         Index(value = ["title"], unique = false),
-        Index(value = ["artist_id"], unique = false), // Para buscar Ã¡lbumes por artista
-        Index(value = ["artist_name"], unique = false) // Nuevo Ã­ndice para bÃºsquedas por nombre de artista del Ã¡lbum
+        Index(value = ["author_id"], unique = false), // Para buscar Ã¡lbumes por artista
+        Index(value = ["author_name"], unique = false) // Nuevo Ã­ndice para bÃºsquedas por nombre de artista del Ã¡lbum
     ]
 )
 data class BookEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "artist_name") val artistName: String, // Nombre del artista del Ã¡lbum
-    @ColumnInfo(name = "artist_id") val authorId: Long, // ID del artista principal del Ã¡lbum (si aplica)
-    @ColumnInfo(name = "album_art_uri_string") val bookArtUriString: String?,
+    @ColumnInfo(name = "author_name") val artistName: String, // Nombre del artista del Ã¡lbum
+    @ColumnInfo(name = "author_id") val authorId: Long, // ID del artista principal del Ã¡lbum (si aplica)
+    @ColumnInfo(name = "book_art_uri_string") val bookArtUriString: String?,
     @ColumnInfo(name = "song_count") val trackCount: Int,
     @ColumnInfo(name = "year") val year: Int
 )

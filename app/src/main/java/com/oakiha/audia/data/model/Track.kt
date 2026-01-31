@@ -13,7 +13,7 @@ data class Track(
      * - With multi-artist parsing enabled by default, this typically contains only the primary artist for backward compatibility.
      * For accurate display of all artists, use the [artists] list and [displayAuthor] property.
      */
-    val artist: String,
+    val author: String,
     val authorId: Long, // Primary artist ID for backward compatibility
     val artists: List<AuthorRef> = emptyList(), // All artists for multi-artist support
     val album: String,
