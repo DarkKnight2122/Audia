@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia
+package com.oakiha.audia
 
 import android.Manifest
 import android.content.ComponentName

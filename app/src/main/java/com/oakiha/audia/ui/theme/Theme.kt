@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia.ui.theme
+package com.oakiha.audia.ui.theme
 
 import android.app.Activity
 import android.os.Build

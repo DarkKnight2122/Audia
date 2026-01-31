@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia
+package com.oakiha.audia
 
 import android.content.Intent
 import android.net.Uri

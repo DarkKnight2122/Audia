@@ -8,7 +8,7 @@ import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.utils.CrashHandler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
-import android.os.StrictMode
+import android.os.StrictMode // Importar StrictMode
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import androidx.hilt.work.HiltWorkerFactory
@@ -24,19 +24,40 @@ class AudioBookApp : Application(), ImageLoaderFactory, Configuration.Provider {
     @Inject
     lateinit var imageLoader: dagger.Lazy<ImageLoader>
 
+    // AÃ‘ADE EL COMPANION OBJECT
     companion object {
-        const val NOTIFICATION_CHANNEL_ID = ""AudioBookPlayer_music_channel""
+        const val NOTIFICATION_CHANNEL_ID = "AudioBookPlayer_music_channel"
     }
 
     override fun onCreate() {
         super.onCreate()
         
+        // Install crash handler to catch and save uncaught exceptions
         CrashHandler.install(this)
+
+//        if (BuildConfig.DEBUG) {
+//            Timber.plant(Timber.DebugTree())
+//            StrictMode.setThreadPolicy(
+//                StrictMode.ThreadPolicy.Builder()
+//                    .detectDiskReads()
+//                    .detectDiskWrites()
+//                    .detectNetwork()
+//                    .penaltyLog()
+//                    .build()
+//            )
+//            StrictMode.setVmPolicy(
+//                StrictMode.VmPolicy.Builder()
+//                    .detectLeakedSqlLiteObjects()
+//                    .detectLeakedClosableObjects()
+//                    .penaltyLog()
+//                    .build()
+//            )
+//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                ""AudioBookPlayer Music Playback"",
+                "AudioBookPlayer Music Playback",
                 NotificationManager.IMPORTANCE_LOW
             )
             val notificationManager = getSystemService(NotificationManager::class.java)
@@ -48,8 +69,10 @@ class AudioBookApp : Application(), ImageLoaderFactory, Configuration.Provider {
         return imageLoader.get()
     }
 
+    // 3. Sobrescribe el mÃ©todo para proveer la configuraciÃ³n de WorkManager
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
 }

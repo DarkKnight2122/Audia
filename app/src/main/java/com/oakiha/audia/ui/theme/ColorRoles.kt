@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia.ui.theme
+package com.oakiha.audia.ui.theme
 
 import android.graphics.Bitmap
 import android.util.LruCache

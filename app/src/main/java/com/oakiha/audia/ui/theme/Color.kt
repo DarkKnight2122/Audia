@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia.ui.theme
+package com.oakiha.audia.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
