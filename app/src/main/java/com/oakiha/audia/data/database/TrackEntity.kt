@@ -68,9 +68,9 @@ fun TrackEntity.toTrack(): Track {
         author = this.artistName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         authors = emptyList(), // Will be populated from junction table when needed
-        album = this.bookName.normalizeMetadataTextOrEmpty(),
+        book = this.albumName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookAuthor = this.bookArtist?.normalizeMetadataText(),
+        bookArtist = this.bookAuthor?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -107,9 +107,9 @@ fun TrackEntity.toTrackWithAuthorRefs(artists: List<AuthorEntity>, crossRefs: Li
         author = this.artistName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         authors = artistRefs,
-        album = this.bookName.normalizeMetadataTextOrEmpty(),
+        book = this.albumName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookAuthor = this.bookArtist?.normalizeMetadataText(),
+        bookArtist = this.bookAuthor?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -139,7 +139,7 @@ fun Track.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Stri
         title = this.title,
         artistName = this.author,
         authorId = this.authorId,
-        bookAuthor = this.bookArtist,
+        bookArtist = this.bookAuthor,
         albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
@@ -165,7 +165,7 @@ fun Track.toEntityWithoutPaths(): TrackEntity {
         title = this.title,
         artistName = this.author,
         authorId = this.authorId,
-        bookAuthor = this.bookArtist,
+        bookArtist = this.bookAuthor,
         albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
@@ -182,5 +182,6 @@ fun Track.toEntityWithoutPaths(): TrackEntity {
         sampleRate = this.sampleRate
     )
 }
+
 
 
