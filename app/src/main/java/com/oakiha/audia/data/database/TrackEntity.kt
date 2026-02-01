@@ -70,7 +70,7 @@ fun TrackEntity.toTrack(): Track {
         authors = emptyList(), // Will be populated from junction table when needed
         book = this.albumName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookArtist = this.bookAuthor?.normalizeMetadataText(),
+        bookAuthor = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -109,7 +109,7 @@ fun TrackEntity.toTrackWithAuthorRefs(artists: List<AuthorEntity>, crossRefs: Li
         authors = artistRefs,
         book = this.albumName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookArtist = this.bookAuthor?.normalizeMetadataText(),
+        bookAuthor = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -182,6 +182,7 @@ fun Track.toEntityWithoutPaths(): TrackEntity {
         sampleRate = this.sampleRate
     )
 }
+
 
 
 
