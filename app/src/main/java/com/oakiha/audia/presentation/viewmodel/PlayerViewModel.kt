@@ -1547,7 +1547,7 @@ class PlayerViewModel @Inject constructor(
             }
             
             if (validSongs.isEmpty()) {
-                _toastEvents.emit(context.getString(R.string.no_valid_songs))
+                _toastEvents.emit(context.getString(R.string.no_valid_tracks))
                 return@launch
             }
             

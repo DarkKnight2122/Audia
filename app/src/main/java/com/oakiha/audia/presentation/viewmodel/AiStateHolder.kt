@@ -122,7 +122,7 @@ class AiStateHolder @Inject constructor(
                             dismissAiPlaylistSheet()
                         }
                     } else {
-                        _aiError.value = context.getString(R.string.ai_no_songs_found)
+                        _aiError.value = context.getString(R.string.ai_no_tracks_found)
                     }
                 }.onFailure { error ->
                     _aiError.value = if (error.message?.contains("API Key") == true) {
@@ -176,7 +176,7 @@ class AiStateHolder @Inject constructor(
                         dailyMixStateHolder.setDailyMixSongs(generatedSongs)
                         toastEmitter?.invoke(context.getString(R.string.ai_daily_mix_updated))
                     } else {
-                        toastEmitter?.invoke(context.getString(R.string.ai_no_songs_for_mix))
+                        toastEmitter?.invoke(context.getString(R.string.ai_no_tracks_for_mix))
                     }
                 }.onFailure { error ->
                     _aiError.value = error.message

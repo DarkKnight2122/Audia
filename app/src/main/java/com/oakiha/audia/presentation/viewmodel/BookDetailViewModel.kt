@@ -43,7 +43,7 @@ class BookDetailViewModel @Inject constructor(
             if (bookId != null) {
                 loadAlbumData(bookId)
             } else {
-                _uiState.update { it.copy(error = context.getString(R.string.invalid_album_id), isLoading = false) }
+                _uiState.update { it.copy(error = context.getString(R.string.invalid_book_id), isLoading = false) }
             }
         } else {
             _uiState.update { it.copy(error = context.getString(R.string.book_id_not_found), isLoading = false) }
@@ -74,7 +74,7 @@ class BookDetailViewModel @Inject constructor(
                     .catch { e ->
                         emit(
                             BookDetailUiState(
-                                error = context.getString(R.string.error_loading_album, e.localizedMessage ?: ""),
+                                error = context.getString(R.string.error_loading_book, e.localizedMessage ?: ""),
                                 isLoading = false
                             )
                         )
@@ -86,7 +86,7 @@ class BookDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        error = context.getString(R.string.error_loading_album, e.localizedMessage ?: ""),
+                        error = context.getString(R.string.error_loading_book, e.localizedMessage ?: ""),
                         isLoading = false
                     )
                 }

@@ -831,9 +831,9 @@ private fun ErrorContent(
 //
 //@Composable
 //private fun DialogHeader(currentTrack: Track?) {
-//    val title = currentTrack?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_song_title)
-//    val author = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_artist)
-//    val book = currentTrack?.book.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_album)
+//    val title = currentTrack?.title.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_track_title)
+//    val author = currentTrack?.displayAuthor.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_author)
+//    val book = currentTrack?.book.takeUnless { it.isNullOrBlank() } ?: stringResource(R.string.unknown_book)
 //
 //    Row(
 //        modifier = Modifier

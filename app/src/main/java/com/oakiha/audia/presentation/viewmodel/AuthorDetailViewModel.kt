@@ -57,7 +57,7 @@ class AuthorDetailViewModel @Inject constructor(
             if (authorId != null) {
                 loadAuthorData(authorId)
             } else {
-                _uiState.update { it.copy(error = context.getString(R.string.invalid_artist_id), isLoading = false) }
+                _uiState.update { it.copy(error = context.getString(R.string.invalid_author_id), isLoading = false) }
             }
         } else {
             _uiState.update { it.copy(error = context.getString(R.string.author_id_not_found), isLoading = false) }
@@ -85,7 +85,7 @@ class AuthorDetailViewModel @Inject constructor(
                         )
                     } else {
                         AuthorDetailUiState(
-                            error = context.getString(R.string.could_not_find_artist),
+                            error = context.getString(R.string.could_not_find_author),
                             isLoading = false
                         )
                     }
@@ -94,7 +94,7 @@ class AuthorDetailViewModel @Inject constructor(
                         emit(
                             AuthorDetailUiState(
                                 error = context.getString(
-                                    R.string.error_loading_artist,
+                                    R.string.error_loading_author,
                                     e.localizedMessage ?: ""
                                 ), isLoading = false
                             )
@@ -125,7 +125,7 @@ class AuthorDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        error = context.getString(R.string.error_loading_artist, e.localizedMessage ?: ""),
+                        error = context.getString(R.string.error_loading_author, e.localizedMessage ?: ""),
                         isLoading = false
                     )
                 }
