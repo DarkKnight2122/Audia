@@ -1155,7 +1155,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songsList: List<Track> = withContext(Dispatchers.IO) {
-                    audiobookRepository.getTracksForAlbum(book.id).first()
+                    audiobookRepository.getTracksForBook(book.id).first()
                 }
 
                 if (songsList.isNotEmpty()) {
@@ -1181,7 +1181,7 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songsList: List<Track> = withContext(Dispatchers.IO) {
-                    audiobookRepository.getTracksForArtist(author.id).first()
+                    audiobookRepository.getTracksForAuthor(author.id).first()
                 }
 
                 if (songsList.isNotEmpty()) {
@@ -2704,5 +2704,6 @@ class PlayerViewModel @Inject constructor(
         }
     }
 }
+
 
 

@@ -55,7 +55,7 @@ class BookDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val albumDetailsFlow = audiobookRepository.getBookById(id)
-                val bookTracksFlow = audiobookRepository.getTracksForAlbum(id)
+                val bookTracksFlow = audiobookRepository.getTracksForBook(id)
 
                 combine(albumDetailsFlow, bookTracksFlow) { book, tracks ->
                     if (book != null) {
@@ -103,4 +103,5 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 }
+
 

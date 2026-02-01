@@ -115,13 +115,13 @@ class AudiobookRepositoryImpl @Inject constructor(
         return getTracks().map { tracks ->
             tracks.groupBy { it.bookId }
                 .map { (bookId, tracksInBook) ->
-                    val first = tracksInBook.first()
+                    val first = tracksInAuthor.first()
                     Book(
                         id = bookId,
                         title = first.book,
                         author = first.author, // Or bookArtist if available
                         bookArtUriString = first.bookArtUriString,
-                        trackCount = tracksInBook.size,
+                        trackCount = tracksInAuthor.size,
                         year = first.year
                     )
                 }
@@ -139,11 +139,11 @@ class AudiobookRepositoryImpl @Inject constructor(
         return getTracks().map { tracks ->
             tracks.groupBy { it.authorId }
                 .map { (authorId, tracksInAuthor) ->
-                    val first = tracksInBook.first()
+                    val first = tracksInAuthor.first()
                     Author(
                         id = authorId,
                         name = first.author,
-                        trackCount = tracksInBook.size
+                        trackCount = tracksInAuthor.size
                     )
                 }
                 .sortedBy { it.name.lowercase() }
@@ -204,7 +204,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getAllUniqueAlbumArtUris(): Flow<List<Uri>> {
-        return audiobookDao.getAllUniqueAlbumArtUrisFromSongs().map { uriStrings ->
+        return audiobookDao.getAllUniqueAlbumArtUrisFromTracks().map { uriStrings ->
             uriStrings.mapNotNull { it.toUri() }
         }.flowOn(Dispatchers.IO)
     }
@@ -552,18 +552,17 @@ class AudiobookRepositoryImpl @Inject constructor(
     override suspend fun deleteById(id: Long) {
         audiobookDao.deleteById(id)
     }
+
+    override suspend fun getAllTracksOnce(): List<Track> {
+        return getTracks().first()
+    }
+
+    override suspend fun getAllBooksOnce(): List<Book> {
+        return getBooks().first()
+    }
+
+    override suspend fun getAllAuthorsOnce(): List<Author> {
+        return getAuthors().first()
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

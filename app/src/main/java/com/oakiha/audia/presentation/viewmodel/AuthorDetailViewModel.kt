@@ -70,7 +70,7 @@ class AuthorDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val artistDetailsFlow = audiobookRepository.getAuthorById(id)
-                val artistSongsFlow = audiobookRepository.getTracksForArtist(id)
+                val artistSongsFlow = audiobookRepository.getTracksForAuthor(id)
 
                 combine(artistDetailsFlow, artistSongsFlow) { author, tracks ->
                     Log.d("AuthorDebug", "loadAuthorData: id=$id found=${author != null} tracks=${tracks.size}")
@@ -180,4 +180,5 @@ private fun buildBookSections(tracks: List<Track>): List<AuthorBookSection> {
 
     return withYearSorted + withoutYearSorted
 }
+
 

@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.paging
+﻿package com.oakiha.audia.data.paging
 
 import android.content.ContentUris
 import android.content.Context
@@ -128,7 +128,7 @@ class MediaStorePagingSource(
                         authors = emptyList(),
                         book = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
                         bookId = bookId,
-                        bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
+                        bookAuthor = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
                         path = path,
                         contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString(),
                         bookArtUriString = ContentUris.withAppendedId(
@@ -156,3 +156,4 @@ class MediaStorePagingSource(
         return tracks
     }
 }
+

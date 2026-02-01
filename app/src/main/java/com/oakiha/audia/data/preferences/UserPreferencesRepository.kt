@@ -642,7 +642,7 @@ constructor(
                 preferences[PreferencesKeys.FAVORITE_SONG_IDS] ?: emptySet()
             }
 
-    val playlistSongOrderModesFlow: Flow<Map<String, String>> =
+    val playlistTrackOrderModesFlow: Flow<Map<String, String>> =
             dataStore.data.map { preferences ->
                 val serializedModes = preferences[PreferencesKeys.PLAYLIST_SONG_ORDER_MODES]
                 if (serializedModes.isNullOrBlank()) {
@@ -1486,5 +1486,6 @@ constructor(
         }
     }
 }
+
 
 
