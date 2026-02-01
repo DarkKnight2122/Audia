@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.playlist
+﻿package com.oakiha.audia.data.playlist
 
 import android.content.Context
 import android.net.Uri
@@ -23,12 +23,12 @@ class M3uManager @Inject constructor(
         var playlistName = "Imported Playlist"
 
         // Pre-load all tracks once for efficient lookup (fixes performance issue with large M3U files)
-        val allTracks = audiobookRepository.getAudioFiles().first()
+        val allTracks = audiobookRepository.getTracks().first()
         
         // Build lookup maps for fast matching
-        val songsByPath = allTracks.associateBy { it.path }
-        val songsByFileName = allTracks.groupBy { it.path.substringAfterLast("/") }
-        val songsByContentUriFileName = allTracks.groupBy { it.contentUriString.substringAfterLast("/") }
+        val tracksByPath = allTracks.associateBy { it.path }
+        val tracksByFileName = allTracks.groupBy { it.path.substringAfterLast("/") }
+        val tracksByContentUriFileName = allTracks.groupBy { it.contentUriString.substringAfterLast("/") }
 
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
@@ -44,16 +44,16 @@ class M3uManager @Inject constructor(
                     // We need to find a track in our database that matches this path
                     
                     // First try exact path match from pre-loaded map
-                    val songByPath = songsByPath[trimmedLine]
-                    if (songByPath != null) {
-                        trackIds.add(songByPath.id)
+                    val trackByPath = tracksByPath[trimmedLine]
+                    if (trackByPath != null) {
+                        trackIds.add(trackByPath.id)
                     } else {
                         // Try to match by filename if path doesn't match exactly
                         val fileName = trimmedLine.substringAfterLast("/")
-                        val matchedSong = songsByFileName[fileName]?.firstOrNull()
-                            ?: songsByContentUriFileName[fileName]?.firstOrNull()
-                        if (matchedSong != null) {
-                            trackIds.add(matchedSong.id)
+                        val matchedTrack = tracksByFileName[fileName]?.firstOrNull()
+                            ?: tracksByContentUriFileName[fileName]?.firstOrNull()
+                        if (matchedTrack != null) {
+                            trackIds.add(matchedTrack.id)
                         }
                     }
                 }
@@ -81,3 +81,4 @@ class M3uManager @Inject constructor(
         return sb.toString()
     }
 }
+

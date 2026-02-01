@@ -58,19 +58,19 @@ class LibraryStateHolder @Inject constructor(
     val isLoadingCategories = _isLoadingCategories.asStateFlow()
 
     // Sort Options
-    private val _currentTrackSortOption = MutableStateFlow<SortOption>(SortOption.SongDefaultOrder)
+    private val _currentTrackSortOption = MutableStateFlow<SortOption>(SortOption.TrackDefaultOrder)
     val currentTrackSortOption = _currentTrackSortOption.asStateFlow()
 
-    private val _currentAlbumSortOption = MutableStateFlow<SortOption>(SortOption.AlbumTitleAZ)
+    private val _currentAlbumSortOption = MutableStateFlow<SortOption>(SortOption.BookTitleAZ)
     val currentAlbumSortOption = _currentAlbumSortOption.asStateFlow()
 
-    private val _currentArtistSortOption = MutableStateFlow<SortOption>(SortOption.ArtistNameAZ)
+    private val _currentArtistSortOption = MutableStateFlow<SortOption>(SortOption.AuthorNameAZ)
     val currentArtistSortOption = _currentArtistSortOption.asStateFlow()
 
     private val _currentFolderSortOption = MutableStateFlow<SortOption>(SortOption.FolderNameAZ)
     val currentFolderSortOption = _currentFolderSortOption.asStateFlow()
 
-    private val _currentFavoriteSortOption = MutableStateFlow<SortOption>(SortOption.LikedSongTitleAZ)
+    private val _currentFavoriteSortOption = MutableStateFlow<SortOption>(SortOption.LikedTrackTitleAZ)
     val currentFavoriteSortOption = _currentFavoriteSortOption.asStateFlow()
 
 
@@ -127,17 +127,17 @@ class LibraryStateHolder @Inject constructor(
         // Initial load of sort preferences
         scope.launch {
             val songSortKey = userPreferencesRepository.tracksSortOptionFlow.first()
-            _currentTrackSortOption.value = SortOption.SONGS.find { it.storageKey == songSortKey } ?: SortOption.SongDefaultOrder
+            _currentTrackSortOption.value = SortOption.TRACKS.find { it.storageKey == songSortKey } ?: SortOption.TrackDefaultOrder
 
             val albumSortKey = userPreferencesRepository.booksSortOptionFlow.first()
-            _currentAlbumSortOption.value = SortOption.ALBUMS.find { it.storageKey == albumSortKey } ?: SortOption.AlbumTitleAZ
+            _currentAlbumSortOption.value = SortOption.BOOKS.find { it.storageKey == albumSortKey } ?: SortOption.BookTitleAZ
             
             val artistSortKey = userPreferencesRepository.authorsSortOptionFlow.first()
-            _currentArtistSortOption.value = SortOption.ARTISTS.find { it.storageKey == artistSortKey } ?: SortOption.ArtistNameAZ
+            _currentArtistSortOption.value = SortOption.AUTHORS.find { it.storageKey == artistSortKey } ?: SortOption.AuthorNameAZ
             
             
             val likedSortKey = userPreferencesRepository.likedSongsSortOptionFlow.first()
-            _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedSongDateLiked
+            _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedTrackDateLiked
         }
     }
 
@@ -246,12 +246,12 @@ class LibraryStateHolder @Inject constructor(
             _currentTrackSortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.SongTitleAZ -> _allTracks.value.sortedBy { it.title.lowercase() }
-                SortOption.SongTitleZA -> _allTracks.value.sortedByDescending { it.title.lowercase() }
-                SortOption.SongArtist -> _allTracks.value.sortedBy { it.author.lowercase() }
-                SortOption.SongAlbum -> _allTracks.value.sortedBy { it.book.lowercase() }
-                SortOption.SongDateAdded -> _allTracks.value.sortedByDescending { it.dateAdded }
-                SortOption.SongDuration -> _allTracks.value.sortedBy { it.duration }
+                SortOption.TrackTitleAZ -> _allTracks.value.sortedBy { it.title.lowercase() }
+                SortOption.TrackTitleZA -> _allTracks.value.sortedByDescending { it.title.lowercase() }
+                SortOption.TrackAuthor -> _allTracks.value.sortedBy { it.author.lowercase() }
+                SortOption.TrackBook -> _allTracks.value.sortedBy { it.book.lowercase() }
+                SortOption.TrackDateAdded -> _allTracks.value.sortedByDescending { it.dateAdded }
+                SortOption.TrackDuration -> _allTracks.value.sortedBy { it.duration }
                 else -> _allTracks.value // Default or unhandled
             }
             _allTracks.value = sorted.toImmutableList()
@@ -266,12 +266,12 @@ class LibraryStateHolder @Inject constructor(
             _currentAlbumSortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.AlbumTitleAZ -> _albums.value.sortedBy { it.title.lowercase() }
-                SortOption.AlbumTitleZA -> _albums.value.sortedByDescending { it.title.lowercase() }
-                SortOption.AlbumArtist -> _albums.value.sortedBy { it.author.lowercase() }
-                SortOption.AlbumReleaseYear -> _albums.value.sortedByDescending { it.year }
-                SortOption.AlbumSizeAsc -> _albums.value.sortedWith(compareBy<Book> { it.trackCount }.thenBy { it.title.lowercase() })
-                SortOption.AlbumSizeDesc -> _albums.value.sortedWith(compareByDescending<Book> { it.trackCount }.thenBy { it.title.lowercase() })
+                SortOption.BookTitleAZ -> _albums.value.sortedBy { it.title.lowercase() }
+                SortOption.BookTitleZA -> _albums.value.sortedByDescending { it.title.lowercase() }
+                SortOption.BookAuthor -> _albums.value.sortedBy { it.author.lowercase() }
+                SortOption.BookReleaseYear -> _albums.value.sortedByDescending { it.year }
+                SortOption.BookSizeAsc -> _albums.value.sortedWith(compareBy<Book> { it.trackCount }.thenBy { it.title.lowercase() })
+                SortOption.BookSizeDesc -> _albums.value.sortedWith(compareByDescending<Book> { it.trackCount }.thenBy { it.title.lowercase() })
                  else -> _albums.value
             }
             _albums.value = sorted.toImmutableList()
@@ -286,8 +286,8 @@ class LibraryStateHolder @Inject constructor(
             _currentArtistSortOption.value = sortOption
 
             val sorted = when (sortOption) {
-                SortOption.ArtistNameAZ -> _artists.value.sortedBy { it.name.lowercase() }
-                SortOption.ArtistNameZA -> _artists.value.sortedByDescending { it.name.lowercase() }
+                SortOption.AuthorNameAZ -> _artists.value.sortedBy { it.name.lowercase() }
+                SortOption.AuthorNameZA -> _artists.value.sortedByDescending { it.name.lowercase() }
                 else -> _artists.value
             }
             _artists.value = sorted.toImmutableList()
@@ -342,5 +342,6 @@ class LibraryStateHolder @Inject constructor(
 private fun androidx.compose.ui.graphics.Color.toHexString(): String {
     return String.format("#%08X", this.toArgb())
 }
+
 
 

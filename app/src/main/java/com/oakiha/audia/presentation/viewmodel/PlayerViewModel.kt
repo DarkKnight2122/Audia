@@ -425,9 +425,9 @@ class PlayerViewModel @Inject constructor(
         currentLibraryTabId.map { tabId ->
             Trace.beginSection("PlayerViewModel.availableSortOptionsMapping")
             val options = when (tabId) {
-                LibraryTabId.SONGS -> SortOption.SONGS
-                LibraryTabId.ALBUMS -> SortOption.ALBUMS
-                LibraryTabId.ARTISTS -> SortOption.ARTISTS
+                LibraryTabId.SONGS -> SortOption.TRACKS
+                LibraryTabId.ALBUMS -> SortOption.BOOKS
+                LibraryTabId.ARTISTS -> SortOption.AUTHORS
                 LibraryTabId.PLAYLISTS -> SortOption.PLAYLISTS
                 LibraryTabId.FOLDERS -> SortOption.FOLDERS
                 LibraryTabId.LIKED -> SortOption.LIKED
@@ -437,7 +437,7 @@ class PlayerViewModel @Inject constructor(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = SortOption.SONGS
+            initialValue = SortOption.TRACKS
         )
 
     val isSyncingStateFlow: StateFlow<Boolean> = syncManager.isSyncing
@@ -514,11 +514,11 @@ class PlayerViewModel @Inject constructor(
     ) { ids: Set<String>, allTracksList: List<Track>, sortOption: SortOption ->
         val favoriteSongsList = allTracksList.filter { track -> ids.contains(track.id) }
         when (sortOption) {
-            SortOption.LikedSongTitleAZ -> favoriteSongsList.sortedBy { it.title.lowercase() }
-            SortOption.LikedSongTitleZA -> favoriteSongsList.sortedByDescending { it.title.lowercase() }
-            SortOption.LikedSongArtist -> favoriteSongsList.sortedBy { it.author.lowercase() }
-            SortOption.LikedSongAlbum -> favoriteSongsList.sortedBy { it.book.lowercase() }
-            SortOption.LikedSongDateLiked -> favoriteSongsList.sortedByDescending { it.id }
+            SortOption.LikedTrackTitleAZ -> favoriteSongsList.sortedBy { it.title.lowercase() }
+            SortOption.LikedTrackTitleZA -> favoriteSongsList.sortedByDescending { it.title.lowercase() }
+            SortOption.LikedTrackAuthor -> favoriteSongsList.sortedBy { it.author.lowercase() }
+            SortOption.LikedTrackBook -> favoriteSongsList.sortedBy { it.book.lowercase() }
+            SortOption.LikedTrackDateLiked -> favoriteSongsList.sortedByDescending { it.id }
             else -> favoriteSongsList
         }.toImmutableList()
     }
@@ -725,23 +725,23 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             val initialSongSort = resolveSortOption(
                 userPreferencesRepository.tracksSortOptionFlow.first(),
-                SortOption.SONGS,
-                SortOption.SongTitleAZ
+                SortOption.TRACKS,
+                SortOption.TrackTitleAZ
             )
             val initialAlbumSort = resolveSortOption(
                 userPreferencesRepository.booksSortOptionFlow.first(),
-                SortOption.ALBUMS,
-                SortOption.AlbumTitleAZ
+                SortOption.BOOKS,
+                SortOption.BookTitleAZ
             )
             val initialArtistSort = resolveSortOption(
                 userPreferencesRepository.authorsSortOptionFlow.first(),
-                SortOption.ARTISTS,
-                SortOption.ArtistNameAZ
+                SortOption.AUTHORS,
+                SortOption.AuthorNameAZ
             )
             val initialLikedSort = resolveSortOption(
                 userPreferencesRepository.likedSongsSortOptionFlow.first(),
                 SortOption.LIKED,
-                SortOption.LikedSongDateLiked
+                SortOption.LikedTrackDateLiked
             )
 
             _playerUiState.update {
@@ -2704,4 +2704,5 @@ class PlayerViewModel @Inject constructor(
         }
     }
 }
+
 

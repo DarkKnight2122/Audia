@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -82,7 +82,7 @@ class SleepTimerStateHolder @Inject constructor(
         this.toastEmitter = { msg -> scope.launch { toastEmitter(msg) } }
         this.mediaControllerProvider = mediaControllerProvider
         this.currentTrackIdProvider = currentTrackIdProvider
-        this.trackTitleResolver = songTitleResolver
+        this.songTitleResolver = songTitleResolver
     }
 
     /**
@@ -297,3 +297,4 @@ class SleepTimerStateHolder @Inject constructor(
         songTitleResolver = null
     }
 }
+

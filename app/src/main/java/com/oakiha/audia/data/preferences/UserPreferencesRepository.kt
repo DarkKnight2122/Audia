@@ -826,7 +826,7 @@ constructor(
         }
     }
 
-    suspend fun reorderSongsInPlaylist(playlistId: String, newSongOrderIds: List<String>) {
+    suspend fun reorderTracksInPlaylist(playlistId: String, newSongOrderIds: List<String>) {
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
         val index = currentPlaylists.indexOfFirst { it.id == playlistId }
         if (index != -1) {
@@ -922,8 +922,8 @@ constructor(
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.SONGS_SORT_OPTION],
-                                SortOption.SONGS,
-                                SortOption.SongTitleAZ
+                                SortOption.TRACKS,
+                                SortOption.TrackTitleAZ
                         )
                         .storageKey
             }
@@ -932,8 +932,8 @@ constructor(
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.ALBUMS_SORT_OPTION],
-                                SortOption.ALBUMS,
-                                SortOption.AlbumTitleAZ
+                                SortOption.BOOKS,
+                                SortOption.BookTitleAZ
                         )
                         .storageKey
             }
@@ -942,8 +942,8 @@ constructor(
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.ARTISTS_SORT_OPTION],
-                                SortOption.ARTISTS,
-                                SortOption.ArtistNameAZ
+                                SortOption.AUTHORS,
+                                SortOption.AuthorNameAZ
                         )
                         .storageKey
             }
@@ -963,7 +963,7 @@ constructor(
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.LIKED_SONGS_SORT_OPTION],
                                 SortOption.LIKED,
-                                SortOption.LikedSongDateLiked
+                                SortOption.LikedTrackDateLiked
                         )
                         .storageKey
             }
@@ -1005,16 +1005,16 @@ constructor(
             val songsMigrated = preferences[PreferencesKeys.SONGS_SORT_OPTION_MIGRATED] ?: false
             val rawSongSort = preferences[PreferencesKeys.SONGS_SORT_OPTION]
             val resolvedSongSort =
-                    SortOption.fromStorageKey(rawSongSort, SortOption.SONGS, SortOption.SongTitleAZ)
+                    SortOption.fromStorageKey(rawSongSort, SortOption.TRACKS, SortOption.TrackTitleAZ)
             val shouldForceSongDefault =
                     !songsMigrated &&
                             (rawSongSort.isNullOrBlank() ||
-                                    rawSongSort == SortOption.SongTitleZA.storageKey ||
-                                    rawSongSort == SortOption.SongTitleZA.displayName)
+                                    rawSongSort == SortOption.TrackTitleZA.storageKey ||
+                                    rawSongSort == SortOption.TrackTitleZA.displayName)
 
             preferences[PreferencesKeys.SONGS_SORT_OPTION] =
                     if (shouldForceSongDefault) {
-                        SortOption.SongTitleAZ.storageKey
+                        SortOption.TrackTitleAZ.storageKey
                     } else {
                         resolvedSongSort.storageKey
                     }
@@ -1025,20 +1025,20 @@ constructor(
             migrateSortPreference(
                     preferences,
                     PreferencesKeys.SONGS_SORT_OPTION,
-                    SortOption.SONGS,
-                    SortOption.SongTitleAZ
+                    SortOption.TRACKS,
+                    SortOption.TrackTitleAZ
             )
             migrateSortPreference(
                     preferences,
                     PreferencesKeys.ALBUMS_SORT_OPTION,
-                    SortOption.ALBUMS,
-                    SortOption.AlbumTitleAZ
+                    SortOption.BOOKS,
+                    SortOption.BookTitleAZ
             )
             migrateSortPreference(
                     preferences,
                     PreferencesKeys.ARTISTS_SORT_OPTION,
-                    SortOption.ARTISTS,
-                    SortOption.ArtistNameAZ
+                    SortOption.AUTHORS,
+                    SortOption.AuthorNameAZ
             )
             migrateSortPreference(
                     preferences,
@@ -1050,7 +1050,7 @@ constructor(
                     preferences,
                     PreferencesKeys.LIKED_SONGS_SORT_OPTION,
                     SortOption.LIKED,
-                    SortOption.LikedSongDateLiked
+                    SortOption.LikedTrackDateLiked
             )
         }
     }
@@ -1486,3 +1486,4 @@ constructor(
         }
     }
 }
+

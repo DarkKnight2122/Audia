@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.model
+﻿package com.oakiha.audia.data.model
 
 import androidx.compose.runtime.Immutable
 
@@ -8,12 +8,12 @@ enum class LibraryTabId(
     val title: String,
     val defaultSort: SortOption
 ) {
-    SONGS("SONGS", "SONGS", SortOption.SongTitleAZ),
-    ALBUMS("ALBUMS", "ALBUMS", SortOption.AlbumTitleAZ),
-    ARTISTS("ARTIST", "ARTIST", SortOption.ArtistNameAZ),
+    SONGS("SONGS", "SONGS", SortOption.TrackTitleAZ),
+    ALBUMS("ALBUMS", "ALBUMS", SortOption.BookTitleAZ),
+    ARTISTS("ARTIST", "ARTIST", SortOption.AuthorNameAZ),
     PLAYLISTS("PLAYLISTS", "PLAYLISTS", SortOption.PlaylistNameAZ),
     FOLDERS("FOLDERS", "FOLDERS", SortOption.FolderNameAZ),
-    LIKED("LIKED", "LIKED", SortOption.LikedSongDateLiked);
+    LIKED("LIKED", "LIKED", SortOption.LikedTrackDateLiked);
 
     companion object {
         fun fromStorageKey(key: String): LibraryTabId =
@@ -23,3 +23,4 @@ enum class LibraryTabId(
 
 fun String.toLibraryTabIdOrNull(): LibraryTabId? =
     LibraryTabId.entries.firstOrNull { it.storageKey == this }
+

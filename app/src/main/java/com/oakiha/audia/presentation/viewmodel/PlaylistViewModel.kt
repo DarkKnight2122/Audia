@@ -51,7 +51,7 @@ data class PlaylistUiState(
     //Sort option
     val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
     val currentPlaylistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
-    val PlaylistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val playlistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
     val playlistOrderModes: Map<String, PlaylistTracksOrderMode> = emptyMap()
 )
 
@@ -777,10 +777,12 @@ class PlaylistViewModel @Inject constructor(
         return if (value == MANUAL_ORDER_MODE) {
             PlaylistTracksOrderMode.Manual
         } else {
-            val option = SortOption.fromStorageKey(value, SortOption.SONGS, SortOption.TrackTitleAZ)
+            val option = SortOption.fromStorageKey(value, SortOption.TRACKS, SortOption.TrackTitleAZ)
             PlaylistTracksOrderMode.Sorted(option)
         }
     }
 }
+
+
 
 

@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.library
+﻿package com.oakiha.audia.presentation.library
 
 import com.oakiha.audia.data.model.SortOption
 import kotlinx.serialization.decodeFromString
@@ -17,30 +17,30 @@ enum class LibraryTabId(
         stableKey = "SONGS",
         label = "SONGS",
         sortOptions = listOf(
-            SortOption.SongTitleAZ,
-            SortOption.SongTitleZA,
-            SortOption.SongArtist,
-            SortOption.SongAlbum,
-            SortOption.SongDateAdded,
-            SortOption.SongDuration
+            SortOption.TrackTitleAZ,
+            SortOption.TrackTitleZA,
+            SortOption.TrackAuthor,
+            SortOption.TrackBook,
+            SortOption.TrackDateAdded,
+            SortOption.TrackDuration
         )
     ),
     Albums(
         stableKey = "ALBUMS",
         label = "ALBUMS",
         sortOptions = listOf(
-            SortOption.AlbumTitleAZ,
-            SortOption.AlbumTitleZA,
-            SortOption.AlbumArtist,
-            SortOption.AlbumReleaseYear
+            SortOption.BookTitleAZ,
+            SortOption.BookTitleZA,
+            SortOption.BookAuthor,
+            SortOption.BookReleaseYear
         )
     ),
     Artists(
         stableKey = "ARTIST",
         label = "ARTIST",
         sortOptions = listOf(
-            SortOption.ArtistNameAZ,
-            SortOption.ArtistNameZA
+            SortOption.AuthorNameAZ,
+            SortOption.AuthorNameZA
         )
     ),
     Playlists(
@@ -64,11 +64,11 @@ enum class LibraryTabId(
         stableKey = "LIKED",
         label = "LIKED",
         sortOptions = listOf(
-            SortOption.LikedSongTitleAZ,
-            SortOption.LikedSongTitleZA,
-            SortOption.LikedSongArtist,
-            SortOption.LikedSongAlbum,
-            SortOption.LikedSongDateLiked
+            SortOption.LikedTrackTitleAZ,
+            SortOption.LikedTrackTitleZA,
+            SortOption.LikedTrackAuthor,
+            SortOption.LikedTrackBook,
+            SortOption.LikedTrackDateLiked
         )
     );
 
@@ -89,3 +89,4 @@ internal fun decodeLibraryTabOrder(orderJson: String?): List<LibraryTabId> {
     LibraryTabId.defaultOrder.forEach { ordered.add(it) }
     return ordered.toList()
 }
+

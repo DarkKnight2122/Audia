@@ -654,9 +654,9 @@ fun SearchResultsList(
 
     val groupedResults = results.groupBy { item ->
         when (item) {
-            is SearchResultItem.SongItem -> SearchFilterType.SONGS
-            is SearchResultItem.AlbumItem -> SearchFilterType.ALBUMS
-            is SearchResultItem.ArtistItem -> SearchFilterType.ARTISTS
+            is SearchResultItem.TrackItem -> SearchFilterType.SONGS
+            is SearchResultItem.BookItem -> SearchFilterType.ALBUMS
+            is SearchResultItem.AuthorItem -> SearchFilterType.ARTISTS
             is SearchResultItem.PlaylistItem -> SearchFilterType.PLAYLISTS
         }
     }
@@ -699,9 +699,9 @@ fun SearchResultsList(
                     key = { index ->
                         val item = itemsForSection[index]
                         when (item) {
-                            is SearchResultItem.SongItem -> "song_${item.track.id}"
-                            is SearchResultItem.AlbumItem -> "album_${item.book.id}"
-                            is SearchResultItem.ArtistItem -> "artist_${item.author.id}"
+                            is SearchResultItem.TrackItem -> "song_${item.track.id}"
+                            is SearchResultItem.BookItem -> "album_${item.book.id}"
+                            is SearchResultItem.AuthorItem -> "artist_${item.author.id}"
                             is SearchResultItem.PlaylistItem -> "playlist_${item.playlist.id}_${index}"
                         }
                     }
@@ -709,7 +709,7 @@ fun SearchResultsList(
                     val item = itemsForSection[index]
                     Box(modifier = Modifier.padding(bottom = 12.dp)) {
                         when (item) {
-                            is SearchResultItem.SongItem -> {
+                            is SearchResultItem.TrackItem -> {
                                 val rememberedOnClick = remember(item.track, playerViewModel, onItemSelected) {
                                     {
                                         playerViewModel.showAndPlaySong(item.track)
@@ -725,7 +725,7 @@ fun SearchResultsList(
                                 )
                             }
 
-                            is SearchResultItem.AlbumItem -> {
+                            is SearchResultItem.BookItem -> {
                                 val onPlayClick = remember(item.book, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
@@ -742,14 +742,14 @@ fun SearchResultsList(
                                         onItemSelected()
                                     }
                                 }
-                                SearchResultAlbumItem(
+                                SearchResultBookItem(
                                     book = item.book,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
                             }
 
-                            is SearchResultItem.ArtistItem -> {
+                            is SearchResultItem.AuthorItem -> {
                                 val onPlayClick = remember(item.author, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
@@ -766,7 +766,7 @@ fun SearchResultsList(
                                         onItemSelected()
                                     }
                                 }
-                                SearchResultArtistItem(
+                                SearchResultAuthorItem(
                                     author = item.author,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
@@ -818,7 +818,7 @@ fun SearchResultsList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultAlbumItem(
+fun SearchResultBookItem(
     book: Book,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
@@ -894,7 +894,7 @@ fun SearchResultAlbumItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultArtistItem(
+fun SearchResultAuthorItem(
     author: Author,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
@@ -1076,4 +1076,5 @@ fun SearchFilterChip(
          }
     )
 }
+
 

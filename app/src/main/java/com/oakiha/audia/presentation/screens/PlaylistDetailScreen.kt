@@ -107,7 +107,7 @@ import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import com.oakiha.audia.presentation.components.NavBarContentHeight
 import com.oakiha.audia.presentation.components.PlaylistBottomSheet
-import com.oakiha.audia.presentation.components.QueuePlaylistSongItem
+import com.oakiha.audia.presentation.components.QueuePlaylistTrackItem
 import com.oakiha.audia.presentation.components.TrackPickerBottomSheet
 import com.oakiha.audia.presentation.components.SmartImage
 import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
@@ -117,7 +117,7 @@ import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel.Companion.FOLDER_PLAYLIST_PREFIX
 import com.oakiha.audia.ui.theme.GoogleSansRounded
-import com.oakiha.audia.presentation.viewmodel.PlaylistSongsOrderMode
+import com.oakiha.audia.presentation.viewmodel.PlaylistTracksOrderMode
 import com.oakiha.audia.utils.formatTotalDuration
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import sh.calvin.reorderable.ReorderableItem
@@ -147,7 +147,7 @@ fun PlaylistDetailScreen(
     val context = LocalContext.current
     val currentPlaylist = uiState.currentPlaylistDetails
     val isFolderPlaylist = currentPlaylist?.id?.startsWith(FOLDER_PLAYLIST_PREFIX) == true
-    val songsInPlaylist = uiState.currentPlaylistSongs
+    val songsInPlaylist = uiState.currentPlaylistTracks
 
     LaunchedEffect(playlistId) {
         playlistViewModel.loadPlaylistDetails(playlistId)
@@ -211,7 +211,7 @@ fun PlaylistDetailScreen(
     LaunchedEffect(reorderableState.isAnyItemDragging, isFolderPlaylist) {
         if (!isFolderPlaylist && !reorderableState.isAnyItemDragging && lastMovedFrom != null && lastMovedTo != null) {
             currentPlaylist?.let {
-                playlistViewModel.reorderSongsInPlaylist(it.id, lastMovedFrom!!, lastMovedTo!!)
+                playlistViewModel.reorderTracksInPlaylist(it.id, lastMovedFrom!!, lastMovedTo!!)
             }
             lastMovedFrom = null
             lastMovedTo = null
@@ -563,7 +563,7 @@ fun PlaylistDetailScreen(
                                     label = "scale"
                                 )
 
-                                QueuePlaylistSongItem(
+                                QueuePlaylistTrackItem(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 0.dp)
@@ -869,26 +869,26 @@ fun PlaylistDetailScreen(
 
     if (isSortSheetVisible) {
         // Check if playlist is in Manual mode (which corresponds to Default Order)
-        val isManualMode = uiState.playlistSongsOrderMode is PlaylistSongsOrderMode.Manual
-        val rawOption = uiState.currentPlaylistSongsSortOption
+        val isManualMode = uiState.PlaylistTracksOrderMode is PlaylistTracksOrderMode.Manual
+        val rawOption = uiState.currentPlaylistTracksSortOption
         // If in Manual mode, show SongDefaultOrder as selected; otherwise use the stored sort option
         val currentSortOption = if (isManualMode) {
-            SortOption.SongDefaultOrder
+            SortOption.TrackDefaultOrder
         } else if ((isFolderPlaylist || currentPlaylist != null) && rawOption != null) {
             rawOption
         } else {
-            SortOption.SongTitleAZ
+            SortOption.TrackTitleAZ
         }
 
         // Build options list inline to avoid potential static initialization issues
         val songSortOptions = listOf(
-            SortOption.SongDefaultOrder,
-            SortOption.SongTitleAZ,
-            SortOption.SongTitleZA,
-            SortOption.SongArtist,
-            SortOption.SongAlbum,
-            SortOption.SongDateAdded,
-            SortOption.SongDuration
+            SortOption.TrackDefaultOrder,
+            SortOption.TrackTitleAZ,
+            SortOption.TrackTitleZA,
+            SortOption.TrackAuthor,
+            SortOption.TrackBook,
+            SortOption.TrackDateAdded,
+            SortOption.TrackDuration
         )
 
         LibrarySortBottomSheet(
@@ -976,4 +976,5 @@ fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
+
 
