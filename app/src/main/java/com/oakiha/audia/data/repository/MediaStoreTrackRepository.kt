@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.repository
+﻿package com.oakiha.audia.data.repository
 
 import android.content.ContentUris
 import android.content.Context
@@ -45,7 +45,7 @@ class MediaStoreTrackRepository @Inject constructor(
     }
 
     private suspend fun getFavoriteIds(): Set<Long> {
-        return favoritesDao.getFavoriteSongIdsOnce().toSet()
+        return favoritesDao.getFavoriteTrackIdsOnce().toSet()
     }
 
     private fun normalizePath(path: String): String = File(path).absolutePath
@@ -59,20 +59,20 @@ class MediaStoreTrackRepository @Inject constructor(
 
     override fun getTracks(): Flow<List<Track>> = combine(
         mediaStoreObserver.mediaStoreChanges.onStart { emit(Unit) },
-        favoritesDao.getFavoriteSongIds(),
+        favoritesDao.getFavoriteTrackIds(),
         userPreferencesRepository.allowedDirectoriesFlow,
         userPreferencesRepository.blockedDirectoriesFlow
     ) { _, favoriteIds, allowedDirs, blockedDirs ->
         // Triggered by mediaStore change or favorites change or directory config change
-        fetchSongsFromMediaStore(favoriteIds.toSet(), allowedDirs.toList(), blockedDirs.toList())
+        fetchTracksFromMediaStore(favoriteIds.toSet(), allowedDirs.toList(), blockedDirs.toList())
     }.flowOn(Dispatchers.IO)
 
-    private suspend fun fetchSongsFromMediaStore(
+    private suspend fun fetchTracksFromMediaStore(
         favoriteIds: Set<Long>,
         allowedDirs: List<String>,
         blockedDirs: List<String>
     ): List<Track> = withContext(Dispatchers.IO) {
-        val songs = mutableListOf<Track>()
+        val tracks = mutableListOf<Track>()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -168,7 +168,7 @@ class MediaStoreTrackRepository @Inject constructor(
                         bitrate = null,
                         sampleRate = null
                     )
-                    songs.add(song)
+                    tracks.add(track)
                 }
             }
         } catch (e: Exception) {
@@ -222,22 +222,22 @@ class MediaStoreTrackRepository @Inject constructor(
         return genreMap
     }
 
-    override fun getTracksByAlbum(bookId: Long): Flow<List<Track>> {
+    override fun getTracksByBook(bookId: Long): Flow<List<Track>> {
          // Reusing getTracks() and filtering might be inefficient for one album, 
          // but consistent with the reactive source of truth.
          // Optimization: Create specific query flow if needed.
-         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(bookId)) { songs, id ->
-             songs.filter { it.bookId == id }
+         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(bookId)) { tracks, id ->
+             tracks.filter { it.bookId == id }
          }
     }
 
-    override fun getTracksByArtist(authorId: Long): Flow<List<Track>> {
-        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(authorId)) { songs, id ->
-            songs.filter { it.authorId == id }
+    override fun getTracksByAuthor(authorId: Long): Flow<List<Track>> {
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(authorId)) { tracks, id ->
+            tracks.filter { it.authorId == id }
         }
     }
 
-    override suspend fun searchSongs(query: String): List<Track> {
+    override suspend fun searchTracks(query: String): List<Track> {
         val allTracks = getTracks().first() // Snapshot
         return allTracks.filter { 
             it.title.contains(query, true) || it.author.contains(query, true) 
@@ -245,13 +245,13 @@ class MediaStoreTrackRepository @Inject constructor(
     }
 
     override fun getTrackById(trackId: Long): Flow<Track?> {
-        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(trackId)) { songs, id ->
-            songs.find { it.id == id.toString() }
+        return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(trackId)) { tracks, id ->
+            tracks.find { it.id == id.toString() }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Track>> {
+    override fun getPaginatedTracks(): Flow<androidx.paging.PagingData<Track>> {
         return combine(
             mediaStoreObserver.mediaStoreChanges.onStart { emit(Unit) },
             userPreferencesRepository.allowedDirectoriesFlow,
@@ -259,7 +259,7 @@ class MediaStoreTrackRepository @Inject constructor(
         ) { _, allowedDirs, blockedDirs ->
             Triple(allowedDirs, blockedDirs, Unit)
         }.flatMapLatest { (allowedDirs, blockedDirs, _) ->
-             val musicIds = getFilteredSongIds(allowedDirs.toList(), blockedDirs.toList())
+             val trackIds = getFilteredTrackIds(allowedDirs.toList(), blockedDirs.toList())
              val genreMap = getTrackIdToGenreMap(context.contentResolver) // Potentially expensive, optimize if needed
              
              androidx.paging.Pager(
@@ -269,13 +269,13 @@ class MediaStoreTrackRepository @Inject constructor(
                      initialLoadSize = 50
                  ),
                  pagingSourceFactory = {
-                     com.oakiha.audia.data.paging.MediaStorePagingSource(context, musicIds, genreMap)
+                     com.oakiha.audia.data.paging.MediaStorePagingSource(context, trackIds, genreMap)
                  }
              ).flow
         }.flowOn(Dispatchers.IO)
     }
 
-    private suspend fun getFilteredSongIds(allowedDirs: List<String>, blockedDirs: List<String>): List<Long> = withContext(Dispatchers.IO) {
+    private suspend fun getFilteredTrackIds(allowedDirs: List<String>, blockedDirs: List<String>): List<Long> = withContext(Dispatchers.IO) {
         val ids = mutableListOf<Long>()
         val projection = arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DATA)
         val selection = getBaseSelection()
@@ -299,8 +299,7 @@ class MediaStoreTrackRepository @Inject constructor(
 
                 while (cursor.moveToNext()) {
                     val path = cursor.getString(pathCol)
-                    if (isFilterActive) {
-                    if (isFilterActive) {
+                    if (isFilterActive) { {
                         val lastSlashIndex = path.lastIndexOf('/')
                         val parentPath = if (lastSlashIndex != -1) path.substring(0, lastSlashIndex) else ""
                         if (resolver.isBlocked(parentPath)) {
@@ -317,3 +316,7 @@ class MediaStoreTrackRepository @Inject constructor(
         ids
     }
 }
+
+
+
+

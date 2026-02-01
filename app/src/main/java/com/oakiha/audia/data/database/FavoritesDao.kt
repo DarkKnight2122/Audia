@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -18,8 +18,9 @@ interface FavoritesDao {
     suspend fun isFavorite(trackId: Long): Boolean?
 
     @Query("SELECT trackId FROM favorites WHERE isFavorite = 1")
-    fun getFavoriteSongIds(): Flow<List<Long>>
+    fun getFavoriteTrackIds(): Flow<List<Long>>
 
     @Query("SELECT trackId FROM favorites WHERE isFavorite = 1")
-    suspend fun getFavoriteSongIdsOnce(): List<Long>
+    suspend fun getFavoriteTrackIdsOnce(): List<Long>
 }
+
