@@ -37,27 +37,27 @@ import javax.inject.Inject
 
 data class PlaylistUiState(
     val playlists: List<Playlist> = emptyList(),
-    val currentPlaylistSongs: List<Track> = emptyList(),
+    val currentPlaylistTracks: List<Track> = emptyList(),
     val currentPlaylistDetails: Playlist? = null,
     val isLoading: Boolean = false,
     val playlistNotFound: Boolean = false,
 
     // Para el diÃƒÂ¡logo/pantalla de selecciÃƒÂ³n de canciones
-    val songSelectionPage: Int = 1, // Nuevo: para rastrear la pÃƒÂ¡gina actual de selecciÃƒÂ³n
-    val songSelectionForPlaylist: List<Track> = emptyList(),
-    val isLoadingSongSelection: Boolean = false,
-    val canLoadMoreSongsForSelection: Boolean = true, // Nuevo: para saber si hay mÃƒÂ¡s canciones para cargar
+    val trackSelectionPage: Int = 1, // Nuevo: para rastrear la pÃƒÂ¡gina actual de selecciÃƒÂ³n
+    val trackSelectionForPlaylist: List<Track> = emptyList(),
+    val isLoadingTrackSelection: Boolean = false,
+    val canLoadMoreTracksForSelection: Boolean = true, // Nuevo: para saber si hay mÃƒÂ¡s canciones para cargar
 
     //Sort option
     val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
-    val currentPlaylistSongsSortOption: SortOption = SortOption.SongTitleAZ,
-    val playlistSongsOrderMode: PlaylistSongsOrderMode = PlaylistSongsOrderMode.Sorted(SortOption.SongTitleAZ),
-    val playlistOrderModes: Map<String, PlaylistSongsOrderMode> = emptyMap()
+    val currentPlaylistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
+    val PlaylistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val playlistOrderModes: Map<String, PlaylistTracksOrderMode> = emptyMap()
 )
 
-sealed class PlaylistSongsOrderMode {
-    object Manual : PlaylistSongsOrderMode()
-    data class Sorted(val option: SortOption) : PlaylistSongsOrderMode()
+sealed class PlaylistTracksOrderMode {
+    object Manual : PlaylistTracksOrderMode()
+    data class Sorted(val option: SortOption) : PlaylistTracksOrderMode()
 }
 
 @HiltViewModel
@@ -75,7 +75,7 @@ class PlaylistViewModel @Inject constructor(
     val playlistCreationEvent: SharedFlow<Boolean> = _playlistCreationEvent.asSharedFlow()
 
     companion object {
-        private const val SONG_SELECTION_PAGE_SIZE =
+        private const val TRACK_SELECTION_PAGE_SIZE =
             100 // Cargar 100 canciones a la vez para el selector
         const val FOLDER_PLAYLIST_PREFIX = "folder_playlist:"
         private const val MANUAL_ORDER_MODE = "manual"
@@ -92,13 +92,13 @@ class PlaylistViewModel @Inject constructor(
 
     init {
         loadPlaylistsAndInitialSortOption()
-        loadMoreSongsForSelection(isInitialLoad = true)
+        loadMoreTracksForSelection(isInitialLoad = true)
         observePlaylistOrderModes()
     }
 
     private fun observePlaylistOrderModes() {
         viewModelScope.launch {
-            userPreferencesRepository.playlistSongOrderModesFlow.collect { storedModes ->
+            userPreferencesRepository.playlistTrackOrderModesFlow.collect { storedModes ->
                 val resolvedModes = storedModes.mapValues { (_, value) ->
                     decodeOrderMode(value)
                 }
@@ -140,14 +140,14 @@ class PlaylistViewModel @Inject constructor(
     }
 
     // Nueva funciÃƒÂ³n para cargar canciones para el selector de forma paginada
-    fun loadMoreSongsForSelection(isInitialLoad: Boolean = false) {
+    fun loadMoreTracksForSelection(isInitialLoad: Boolean = false) {
         val currentState = _uiState.value
-        if (currentState.isLoadingSongSelection && !isInitialLoad) {
-            Log.d("PlaylistVM", "loadMoreSongsForSelection: Already loading. Skipping.")
+        if (currentState.isLoadingTrackSelection && !isInitialLoad) {
+            Log.d("PlaylistVM", "loadMoreTracksForSelection: Already loading. Skipping.")
             return
         }
-        if (!currentState.canLoadMoreSongsForSelection && !isInitialLoad) {
-            Log.d("PlaylistVM", "loadMoreSongsForSelection: Cannot load more. Skipping.")
+        if (!currentState.canLoadMoreTracksForSelection && !isInitialLoad) {
+            Log.d("PlaylistVM", "loadMoreTracksForSelection: Cannot load more. Skipping.")
             return
         }
 
@@ -156,46 +156,46 @@ class PlaylistViewModel @Inject constructor(
 
             _uiState.update {
                 it.copy(
-                    isLoadingSongSelection = true,
-                    songSelectionPage = initialPageForLoad // Establecer la pÃƒÂ¡gina correcta antes de la llamada
+                    isLoadingTrackSelection = true,
+                    trackSelectionPage = initialPageForLoad // Establecer la pÃƒÂ¡gina correcta antes de la llamada
                 )
             }
 
-            // Usar el songSelectionPage del estado que acabamos de actualizar para la llamada al repo
+            // Usar el trackSelectionPage del estado que acabamos de actualizar para la llamada al repo
             val pageToLoad = _uiState.value.trackSelectionPage // Esta ahora es la pÃƒÂ¡gina correcta
 
             Log.d(
                 "PlaylistVM",
-                "Loading tracks for selection. Page: $pageToLoad, PageSize: $SONG_SELECTION_PAGE_SIZE"
+                "Loading tracks for selection. Page: $pageToLoad, PageSize: $TRACK_SELECTION_PAGE_SIZE"
             )
 
             try {
                 // Colectar la lista de canciones del Flow en un hilo de IO
-                val actualNewSongsList: List<Track> =
+                val actualNewtracksList: List<Track> =
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
                         audiobookRepository.getTracks().first()
                     }
-                Log.d("PlaylistVM", "Loaded ${actualNewSongsList.size} tracks for selection.")
+                Log.d("PlaylistVM", "Loaded ${actualNewtracksList.size} tracks for selection.")
 
                 // La actualizaciÃƒÂ³n del UI se hace en el hilo principal (contexto por defecto de viewModelScope.launch)
                 _uiState.update { currentStateAfterLoad ->
                     val updatedSongSelectionList = if (isInitialLoad) {
-                        actualNewSongsList
+                        actualNewtracksList
                     } else {
                         // Evitar duplicados si por alguna razÃƒÂ³n se recarga la misma pÃƒÂ¡gina
                         val currentTrackIds =
                             currentStateAfterLoad.trackSelectionForPlaylist.map { it.id }.toSet()
                         val uniqueNewSongs =
-                            actualNewSongsList.filterNot { currentTrackIds.contains(it.id) }
+                            actualNewtracksList.filterNot { currentTrackIds.contains(it.id) }
                         currentStateAfterLoad.trackSelectionForPlaylist + uniqueNewSongs
                     }
 
                     currentStateAfterLoad.copy(
-                        songSelectionForPlaylist = updatedSongSelectionList,
-                        isLoadingSongSelection = false,
-                        canLoadMoreSongsForSelection = actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE,
+                        trackSelectionForPlaylist = updatedSongSelectionList,
+                        isLoadingTrackSelection = false,
+                        canLoadMoreTracksForSelection = actualNewtracksList.size == TRACK_SELECTION_PAGE_SIZE,
                         // Incrementar la pÃƒÂ¡gina solo si se cargaron canciones y se espera que haya mÃƒÂ¡s
-                        songSelectionPage = if (actualNewSongsList.isNotEmpty() && actualNewSongsList.size == SONG_SELECTION_PAGE_SIZE) {
+                        trackSelectionPage = if (actualNewtracksList.isNotEmpty() && actualNewtracksList.size == TRACK_SELECTION_PAGE_SIZE) {
                             currentStateAfterLoad.trackSelectionPage + 1
                         } else {
                             currentStateAfterLoad.trackSelectionPage // No incrementar si no hay mÃƒÂ¡s o si la carga fue parcial
@@ -206,7 +206,7 @@ class PlaylistViewModel @Inject constructor(
                 Log.e("PlaylistVM", "Error loading tracks for selection. Page: $pageToLoad", e)
                 _uiState.update {
                     it.copy(
-                        isLoadingSongSelection = false
+                        isLoadingTrackSelection = false
                     )
                 }
             }
@@ -222,7 +222,7 @@ class PlaylistViewModel @Inject constructor(
                     isLoading = true,
                     playlistNotFound = false,
                     currentPlaylistDetails = if (shouldKeepExisting) it.currentPlaylistDetails else null,
-                    currentPlaylistSongs = if (shouldKeepExisting) it.currentPlaylistSongs else emptyList()
+                    currentPlaylistTracks = if (shouldKeepExisting) it.currentPlaylistTracks else emptyList()
                 )
             } // Resetear detalles y canciones
             try {
@@ -232,18 +232,18 @@ class PlaylistViewModel @Inject constructor(
                     val folder = findFolder(folderPath, folders)
 
                     if (folder != null) {
-                        val songsList = folder.collectAllSongs()
+                        val tracksList = folder.collectAllSongs()
                         val pseudoPlaylist = Playlist(
                             id = playlistId,
                             name = folder.name,
-                            trackIds = songsList.map { it.id }
+                            trackIds = tracksList.map { it.id }
                         )
 
                         _uiState.update {
                             it.copy(
                                 currentPlaylistDetails = pseudoPlaylist,
-                                currentPlaylistSongs = applySortToSongs(songsList, it.currentPlaylistSongsSortOption),
-                                playlistSongsOrderMode = PlaylistSongsOrderMode.Sorted(it.currentPlaylistSongsSortOption),
+                                currentPlaylistTracks = applySortToTracks(tracksList, it.currentPlaylistTracksSortOption),
+                                PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(it.currentPlaylistTracksSortOption),
                                 isLoading = false,
                                 playlistNotFound = false
                             )
@@ -255,7 +255,7 @@ class PlaylistViewModel @Inject constructor(
                                 isLoading = false,
                                 playlistNotFound = true,
                                 currentPlaylistDetails = null,
-                                currentPlaylistSongs = emptyList()
+                                currentPlaylistTracks = emptyList()
                             )
                         }
                     }
@@ -266,26 +266,26 @@ class PlaylistViewModel @Inject constructor(
 
                     if (playlist != null) {
                         val orderMode = _uiState.value.playlistOrderModes[playlistId]
-                            ?: PlaylistSongsOrderMode.Manual
+                            ?: PlaylistTracksOrderMode.Manual
 
                         // Colectar la lista de canciones del Flow devuelto por el repositorio en un hilo de IO
-                        val songsList: List<Track> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        val tracksList: List<Track> = withContext(kotlinx.coroutines.Dispatchers.IO) {
                             audiobookRepository.getTracksByIds(playlist.trackIds).first()
                         }
 
-                        val orderedSongs = when (orderMode) {
-                            is PlaylistSongsOrderMode.Sorted -> applySortToSongs(songsList, orderMode.option)
-                            PlaylistSongsOrderMode.Manual -> songsList
+                        val orderedTracks = when (orderMode) {
+                            is PlaylistTracksOrderMode.Sorted -> applySortToTracks(tracksList, orderMode.option)
+                            PlaylistTracksOrderMode.Manual -> tracksList
                         }
 
                         // La actualizaciÃƒÂ³n del UI se hace en el hilo principal
                         _uiState.update {
                             it.copy(
                                 currentPlaylistDetails = playlist,
-                                currentPlaylistSongs = orderedSongs,
-                                currentPlaylistSongsSortOption = (orderMode as? PlaylistSongsOrderMode.Sorted)?.option
-                                    ?: it.currentPlaylistSongsSortOption,
-                                playlistSongsOrderMode = orderMode,
+                                currentPlaylistTracks = orderedTracks,
+                                currentPlaylistTracksSortOption = (orderMode as? PlaylistTracksOrderMode.Sorted)?.option
+                                    ?: it.currentPlaylistTracksSortOption,
+                                PlaylistTracksOrderMode = orderMode,
                                 playlistOrderModes = it.playlistOrderModes + (playlistId to orderMode),
                                 isLoading = false,
                                 playlistNotFound = false
@@ -298,7 +298,7 @@ class PlaylistViewModel @Inject constructor(
                                 isLoading = false,
                                 playlistNotFound = true,
                                 currentPlaylistDetails = null,
-                                currentPlaylistSongs = emptyList()
+                                currentPlaylistTracks = emptyList()
                             )
                         } // Mantener isLoading en false
                         // Opcional: podrÃƒÂ­as establecer un error o un estado especÃƒÂ­fico de "no encontrado"
@@ -311,7 +311,7 @@ class PlaylistViewModel @Inject constructor(
                         isLoading = false,
                         playlistNotFound = true,
                         currentPlaylistDetails = null,
-                        currentPlaylistSongs = emptyList()
+                        currentPlaylistTracks = emptyList()
                     )
                 }
             }
@@ -632,30 +632,30 @@ class PlaylistViewModel @Inject constructor(
             userPreferencesRepository.removeSongFromPlaylist(playlistId, trackIdToRemove)
             if (_uiState.value.currentPlaylistDetails?.id == playlistId) {
                 _uiState.update {
-                    it.copy(currentPlaylistSongs = it.currentPlaylistSongs.filterNot { s -> s.id == trackIdToRemove })
+                    it.copy(currentPlaylistTracks = it.currentPlaylistTracks.filterNot { s -> s.id == trackIdToRemove })
                 }
             }
         }
     }
 
-    fun reorderSongsInPlaylist(playlistId: String, fromIndex: Int, toIndex: Int) {
+    fun reorderTracksInPlaylist(playlistId: String, fromIndex: Int, toIndex: Int) {
         if (isFolderPlaylistId(playlistId)) return
         viewModelScope.launch {
-            val currentTracks = _uiState.value.currentPlaylistSongs.toMutableList()
+            val currentTracks = _uiState.value.currentPlaylistTracks.toMutableList()
             if (fromIndex in currentTracks.indices && toIndex in currentTracks.indices) {
                 val item = currentTracks.removeAt(fromIndex)
                 currentTracks.add(toIndex, item)
-                val newSongOrderIds = currentTracks.map { it.id }
-                userPreferencesRepository.reorderSongsInPlaylist(playlistId, newSongOrderIds)
+                val newTrackOrderIds = currentTracks.map { it.id }
+                userPreferencesRepository.reorderTracksInPlaylist(playlistId, newTrackOrderIds)
                 userPreferencesRepository.setPlaylistSongOrderMode(
                     playlistId,
                     MANUAL_ORDER_MODE
                 )
                 _uiState.update {
-                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
+                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistTracksOrderMode.Manual)
                     it.copy(
-                        currentPlaylistSongs = currentTracks,
-                        playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
+                        currentPlaylistTracks = currentTracks,
+                        PlaylistTracksOrderMode = PlaylistTracksOrderMode.Manual,
                         playlistOrderModes = updatedModes
                     )
                 }
@@ -685,8 +685,8 @@ class PlaylistViewModel @Inject constructor(
     fun sortPlaylistSongs(sortOption: SortOption) {
         val playlistId = _uiState.value.currentPlaylistDetails?.id
         
-        // If SongDefaultOrder is selected, reload the playlist to get original order
-        if (sortOption == SortOption.SongDefaultOrder) {
+        // If TrackDefaultOrder is selected, reload the playlist to get original order
+        if (sortOption == SortOption.TrackDefaultOrder) {
             if (playlistId != null) {
                 viewModelScope.launch {
                     // Set order mode to Manual (which preserves original order)
@@ -701,27 +701,27 @@ class PlaylistViewModel @Inject constructor(
             return
         }
 
-        val currentTracks = _uiState.value.currentPlaylistSongs
-        val sortedSongs = when (sortOption) {
-            SortOption.SongTitleAZ -> currentTracks.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> currentTracks.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> currentTracks.sortedBy { it.author.lowercase() }
-            SortOption.SongAlbum -> currentTracks.sortedBy { it.book.lowercase() }
-            SortOption.SongDuration -> currentTracks.sortedBy { it.duration }
-            SortOption.SongDateAdded -> currentTracks.sortedByDescending { it.dateAdded }
+        val currentTracks = _uiState.value.currentPlaylistTracks
+        val sortedTracks = when (sortOption) {
+            SortOption.TrackTitleAZ -> currentTracks.sortedBy { it.title.lowercase() }
+            SortOption.TrackTitleZA -> currentTracks.sortedByDescending { it.title.lowercase() }
+            SortOption.TrackAuthor -> currentTracks.sortedBy { it.author.lowercase() }
+            SortOption.TrackBook -> currentTracks.sortedBy { it.book.lowercase() }
+            SortOption.TrackDuration -> currentTracks.sortedBy { it.duration }
+            SortOption.TrackDateAdded -> currentTracks.sortedByDescending { it.dateAdded }
             else -> currentTracks
         }
 
         _uiState.update {
             val updatedModes = if (playlistId != null) {
-                it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Sorted(sortOption))
+                it.playlistOrderModes + (playlistId to PlaylistTracksOrderMode.Sorted(sortOption))
             } else {
                 it.playlistOrderModes
             }
             it.copy(
-                currentPlaylistSongs = sortedSongs,
-                currentPlaylistSongsSortOption = sortOption,
-                playlistSongsOrderMode = PlaylistSongsOrderMode.Sorted(sortOption),
+                currentPlaylistTracks = sortedTracks,
+                currentPlaylistTracksSortOption = sortOption,
+                PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(sortOption),
                 playlistOrderModes = updatedModes
             )
         }
@@ -761,25 +761,26 @@ class PlaylistViewModel @Inject constructor(
         return tracks + subFolders.flatMap { it.collectAllSongs() }
     }
 
-    private fun applySortToSongs(tracks: List<Track>, sortOption: SortOption): List<Track> {
+    private fun applySortToTracks(tracks: List<Track>, sortOption: SortOption): List<Track> {
         return when (sortOption) {
-            SortOption.SongTitleAZ -> tracks.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> tracks.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> tracks.sortedBy { it.author.lowercase() }
-            SortOption.SongAlbum -> tracks.sortedBy { it.book.lowercase() }
-            SortOption.SongDuration -> tracks.sortedBy { it.duration }
-            SortOption.SongDateAdded -> tracks.sortedByDescending { it.dateAdded }
+            SortOption.TrackTitleAZ -> tracks.sortedBy { it.title.lowercase() }
+            SortOption.TrackTitleZA -> tracks.sortedByDescending { it.title.lowercase() }
+            SortOption.TrackAuthor -> tracks.sortedBy { it.author.lowercase() }
+            SortOption.TrackBook -> tracks.sortedBy { it.book.lowercase() }
+            SortOption.TrackDuration -> tracks.sortedBy { it.duration }
+            SortOption.TrackDateAdded -> tracks.sortedByDescending { it.dateAdded }
             else -> tracks
         }
     }
 
-    private fun decodeOrderMode(value: String): PlaylistSongsOrderMode {
+    private fun decodeOrderMode(value: String): PlaylistTracksOrderMode {
         return if (value == MANUAL_ORDER_MODE) {
-            PlaylistSongsOrderMode.Manual
+            PlaylistTracksOrderMode.Manual
         } else {
-            val option = SortOption.fromStorageKey(value, SortOption.SONGS, SortOption.SongTitleAZ)
-            PlaylistSongsOrderMode.Sorted(option)
+            val option = SortOption.fromStorageKey(value, SortOption.SONGS, SortOption.TrackTitleAZ)
+            PlaylistTracksOrderMode.Sorted(option)
         }
     }
 }
+
 

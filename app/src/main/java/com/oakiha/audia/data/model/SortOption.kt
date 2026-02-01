@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.model
+﻿package com.oakiha.audia.data.model
 
 import androidx.compose.runtime.Immutable
 
@@ -6,39 +6,39 @@ import androidx.compose.runtime.Immutable
 @Immutable
 sealed class SortOption(val storageKey: String, val displayName: String) {
     // Track Sort Options
-    object SongDefaultOrder : SortOption("song_default_order", "Default Order")
-    object SongTitleAZ : SortOption("song_title_az", "Title (A-Z)")
-    object SongTitleZA : SortOption("song_title_za", "Title (Z-A)")
-    object SongArtist : SortOption("song_artist", "Author")
-    object SongAlbum : SortOption("song_album", "Book")
-    object SongDateAdded : SortOption("song_date_added", "Date Added")
-    object SongDuration : SortOption("song_duration", "Duration")
+    object TrackDefaultOrder : SortOption("song_default_order", "Default Order")
+    object TrackTitleAZ : SortOption("song_title_az", "Title (A-Z)")
+    object TrackTitleZA : SortOption("song_title_za", "Title (Z-A)")
+    object TrackAuthor : SortOption("song_artist", "Author")
+    object TrackBook : SortOption("song_album", "Book")
+    object TrackDateAdded : SortOption("song_date_added", "Date Added")
+    object TrackDuration : SortOption("song_duration", "Duration")
 
     // Book Sort Options
-    object AlbumTitleAZ : SortOption("album_title_az", "Title (A-Z)")
-    object AlbumTitleZA : SortOption("album_title_za", "Title (Z-A)")
-    object AlbumArtist : SortOption("album_artist", "Author")
-    object AlbumReleaseYear : SortOption("album_release_year", "Release Year")
-    object AlbumSizeAsc : SortOption("album_size_asc", "Fewest Songs")
-    object AlbumSizeDesc : SortOption("album_size_desc", "Most Songs")
+    object BookTitleAZ : SortOption("album_title_az", "Title (A-Z)")
+    object BookTitleZA : SortOption("album_title_za", "Title (Z-A)")
+    object BookAuthor : SortOption("album_artist", "Author")
+    object BookReleaseYear : SortOption("album_release_year", "Release Year")
+    object BookSizeAsc : SortOption("album_size_asc", "Fewest TRACKS")
+    object BookSizeDesc : SortOption("album_size_desc", "Most TRACKS")
 
     // Author Sort Options
-    object ArtistNameAZ : SortOption("artist_name_az", "Name (A-Z)")
-    object ArtistNameZA : SortOption("artist_name_za", "Name (Z-A)")
-    // object ArtistNumSongs : SortOption("artist_num_songs", "Number of Songs") // Requires ViewModel change & data
+    object AuthorNameAZ : SortOption("artist_name_az", "Name (A-Z)")
+    object AuthorNameZA : SortOption("artist_name_za", "Name (Z-A)")
+    // object ArtistNumTRACKS : SortOption("artist_num_TRACKS", "Number of TRACKS") // Requires ViewModel change & data
 
     // Playlist Sort Options
     object PlaylistNameAZ : SortOption("playlist_name_az", "Name (A-Z)")
     object PlaylistNameZA : SortOption("playlist_name_za", "Name (Z-A)")
     object PlaylistDateCreated : SortOption("playlist_date_created", "Date Created")
-    // object PlaylistNumSongs : SortOption("playlist_num_songs", "Number of Songs") // Requires ViewModel change & data
+    // object PlaylistNumTRACKS : SortOption("playlist_num_TRACKS", "Number of TRACKS") // Requires ViewModel change & data
 
-    // Liked Sort Options (similar to Songs)
-    object LikedSongTitleAZ : SortOption("liked_title_az", "Title (A-Z)")
-    object LikedSongTitleZA : SortOption("liked_title_za", "Title (Z-A)")
-    object LikedSongArtist : SortOption("liked_artist", "Author")
-    object LikedSongAlbum : SortOption("liked_album", "Book")
-    object LikedSongDateLiked : SortOption("liked_date_liked", "Date Liked")
+    // Liked Sort Options (similar to TRACKS)
+    object LikedTrackTitleAZ : SortOption("liked_title_az", "Title (A-Z)")
+    object LikedTrackTitleZA : SortOption("liked_title_za", "Title (Z-A)")
+    object LikedTrackAuthor : SortOption("liked_artist", "Author")
+    object LikedTrackBook : SortOption("liked_album", "Book")
+    object LikedTrackDateLiked : SortOption("liked_date_liked", "Date Liked")
 
     // Folder Sort Options
     object FolderNameAZ : SortOption("folder_name_az", "Name (A-Z)")
@@ -46,31 +46,31 @@ sealed class SortOption(val storageKey: String, val displayName: String) {
 
     companion object {
 
-        val SONGS: List<SortOption> by lazy {
+        val TRACKS: List<SortOption> by lazy {
              listOf(
-                SongDefaultOrder,
-                SongTitleAZ,
-                SongTitleZA,
-                SongArtist,
-                SongAlbum,
-                SongDateAdded,
-                SongDuration
+                TrackDefaultOrder,
+                TrackTitleAZ,
+                TrackTitleZA,
+                TrackAuthor,
+                TrackBook,
+                TrackDateAdded,
+                TrackDuration
             )
         }
-        val ALBUMS: List<SortOption> by lazy {
+        val BOOKS: List<SortOption> by lazy {
             listOf(
-                AlbumTitleAZ,
-                AlbumTitleZA,
-                AlbumArtist,
-                AlbumReleaseYear,
-                AlbumSizeAsc,
-                AlbumSizeDesc
+                BookTitleAZ,
+                BookTitleZA,
+                BookAuthor,
+                BookReleaseYear,
+                BookSizeAsc,
+                BookSizeDesc
             )
         }
-        val ARTISTS: List<SortOption> by lazy {
+        val AUTHORS: List<SortOption> by lazy {
             listOf(
-                ArtistNameAZ,
-                ArtistNameZA
+                AuthorNameAZ,
+                AuthorNameZA
             )
         }
         val PLAYLISTS: List<SortOption> by lazy {
@@ -88,11 +88,11 @@ sealed class SortOption(val storageKey: String, val displayName: String) {
         }
         val LIKED: List<SortOption> by lazy {
             listOf(
-                LikedSongTitleAZ,
-                LikedSongTitleZA,
-                LikedSongArtist,
-                LikedSongAlbum,
-                LikedSongDateLiked
+                LikedTrackTitleAZ,
+                LikedTrackTitleZA,
+                LikedTrackAuthor,
+                LikedTrackBook,
+                LikedTrackDateLiked
             )
         }
 
@@ -119,3 +119,4 @@ sealed class SortOption(val storageKey: String, val displayName: String) {
         }
     }
 }
+
