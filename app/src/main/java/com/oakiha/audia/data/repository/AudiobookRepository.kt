@@ -24,7 +24,7 @@ interface AudiobookRepository {
      * Returns paginated tracks for efficient display of large libraries.
      * @return Flow of PagingData<Track> for use with LazyPagingItems.
      */
-    fun getPaginatedSongs(): Flow<PagingData<Track>>
+    fun getPaginatedTracks(): Flow<PagingData<Track>>
 
     /**
      * Returns the count of tracks in the library.
@@ -38,7 +38,7 @@ interface AudiobookRepository {
      * @param limit Maximum number of tracks to return.
      * @return List of randomly selected tracks.
      */
-    suspend fun getRandomSongs(limit: Int): List<Track>
+    suspend fun getRandomTracks(limit: Int): List<Track>
 
     /**
      * Obtiene la lista de ÃƒÂ¡lbumes filtrada.
@@ -62,13 +62,13 @@ interface AudiobookRepository {
      * Obtiene la lista completa de ÃƒÂ¡lbumes una sola vez.
      * @return Lista de objetos Book.
      */
-    suspend fun getAllAlbumsOnce(): List<Book>
+    suspend fun getAllBooksOnce(): List<Book>
 
     /**
      * Obtiene la lista completa de artistas una sola vez.
      * @return Lista de objetos Author.
      */
-    suspend fun getAllArtistsOnce(): List<Author>
+    suspend fun getAllAuthorsOnce(): List<Author>
 
     /**
      * Obtiene un ÃƒÂ¡lbum especÃƒÂ­fico por su ID.
@@ -88,14 +88,14 @@ interface AudiobookRepository {
      * @param bookId El ID del ÃƒÂ¡lbum.
      * @return Flow que emite una lista de objetos Track pertenecientes al ÃƒÂ¡lbum.
      */
-    fun getTracksForAlbum(bookId: Long): Flow<List<Track>>
+    fun getTracksForBook(bookId: Long): Flow<List<Track>>
 
     /**
      * Obtiene la lista de canciones para un artista especÃƒÂ­fico (NO paginada para la cola de reproducciÃƒÂ³n).
      * @param authorId El ID del artista.
      * @return Flow que emite una lista de objetos Track pertenecientes al artista.
      */
-    fun getTracksForArtist(authorId: Long): Flow<List<Track>>
+    fun getTracksForAuthor(authorId: Long): Flow<List<Track>>
 
     /**
      * Obtiene una lista de canciones por sus IDs.
@@ -196,5 +196,6 @@ interface AudiobookRepository {
 
     suspend fun deleteById(id: Long)
 }
+
 
 
