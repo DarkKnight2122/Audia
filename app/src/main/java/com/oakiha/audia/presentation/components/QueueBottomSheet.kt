@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.components
+﻿package com.oakiha.audia.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -617,7 +617,7 @@ fun QueueBottomSheet(
                                     label = "scaleAnimation"
                                 )
 
-                                QueuePlaylistSongItem(
+                                QueuePlaylistTrackItem(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 0.dp)
@@ -734,7 +734,7 @@ fun QueueBottomSheet(
                         ),
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevaciÃƒÂ³n flat
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp) // Opcional: para igualar elevaciÃƒÆ’Ã‚Â³n flat
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
@@ -1526,7 +1526,7 @@ private fun QueueMiniPlayer(
             SmartImage(
                 model = track.bookArtUriString ?: R.drawable.rounded_book_24,
                 shape = albumShape,
-                contentDescription = "CarÃƒÂ¡tula",
+                contentDescription = "CarÃƒÆ’Ã‚Â¡tula",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(albumShape),
@@ -1593,7 +1593,7 @@ private fun QueueMiniPlayer(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun QueuePlaylistSongItem(
+fun QueuePlaylistTrackItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     track: Track,
@@ -1817,7 +1817,7 @@ fun QueuePlaylistSongItem(
                     SmartImage(
                         model = track.bookArtUriString,
                         shape = albumShape,
-                        contentDescription = "CarÃƒÂ¡tula",
+                        contentDescription = "CarÃƒÆ’Ã‚Â¡tula",
                         modifier = Modifier
                             .size(42.dp)
                             .clip(albumShape),
@@ -1914,3 +1914,4 @@ data class QueueUiItem(
     val uniqueId: String = java.util.UUID.randomUUID().toString(),
     val track: Track
 )
+

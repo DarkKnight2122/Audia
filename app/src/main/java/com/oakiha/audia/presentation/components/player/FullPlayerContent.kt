@@ -1,4 +1,5 @@
-package com.oakiha.audia.presentation.components.player
+﻿package com.oakiha.audia.presentation.components.player
+import com.oakiha.audia.data.model.AppThemeStyle
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -244,11 +245,11 @@ fun FullPlayerContent(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 
-    // LÃƒÂ³gica para el botÃƒÂ³n de Lyrics en el reproductor expandido
+    // LÃƒÆ’Ã‚Â³gica para el botÃƒÆ’Ã‚Â³n de Lyrics en el reproductor expandido
     val onLyricsClick = {
         val lyrics = lyricsProvider()
         if (lyrics?.synced.isNullOrEmpty() && lyrics?.plain.isNullOrEmpty()) {
-            // Si no hay letra, mostramos el diÃƒÂ¡logo para buscar
+            // Si no hay letra, mostramos el diÃƒÆ’Ã‚Â¡logo para buscar
             showFetchLyricsDialog = true
         } else {
             // Si hay letra, mostramos el sheet directamente
@@ -261,7 +262,7 @@ fun FullPlayerContent(
             uiState = lyricsSearchUiState,
             currentTrack = track, // Use 'track' which is derived from args/retained
             onConfirm = { forcePick ->
-                // El usuario confirma, iniciamos la bÃƒÂºsqueda
+                // El usuario confirma, iniciamos la bÃƒÆ’Ã‚Âºsqueda
                 playerViewModel.fetchLyricsForCurrentSong(forcePick)
             },
             onPickResult = { result ->
@@ -271,7 +272,7 @@ fun FullPlayerContent(
                 playerViewModel.searchLyricsManually(title, author)
             },
             onDismiss = {
-                // El usuario cancela o cierra el diÃƒÂ¡logo
+                // El usuario cancela o cierra el diÃƒÆ’Ã‚Â¡logo
                 showFetchLyricsDialog = false
                 playerViewModel.resetLyricsSearchState()
             },
@@ -281,7 +282,7 @@ fun FullPlayerContent(
         )
     }
 
-    // Observador para reaccionar al resultado de la bÃƒÂºsqueda de letras
+    // Observador para reaccionar al resultado de la bÃƒÆ’Ã‚Âºsqueda de letras
     LaunchedEffect(lyricsSearchUiState) {
         when (val state = lyricsSearchUiState) {
             is LyricsSearchUiState.Success -> {
@@ -619,13 +620,13 @@ fun FullPlayerContent(
                     navigationIcon = {
                         Box(
                             modifier = Modifier
-                                // Ancho total = 14dp de padding + 42dp del botÃƒÂ³n
+                                // Ancho total = 14dp de padding + 42dp del botÃƒÆ’Ã‚Â³n
                                 .width(56.dp)
                                 .height(42.dp),
-                            // 2. Alinea el contenido (el botÃƒÂ³n) al final (derecha) y centrado verticalmente
+                            // 2. Alinea el contenido (el botÃƒÆ’Ã‚Â³n) al final (derecha) y centrado verticalmente
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            // 3. Tu botÃƒÂ³n circular original, sin cambios
+                            // 3. Tu botÃƒÆ’Ã‚Â³n circular original, sin cambios
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -729,7 +730,7 @@ fun FullPlayerContent(
                                             Spacer(Modifier.width(8.dp))
                                             AnimatedContent(
                                                 targetState = when {
-                                                    isCastConnecting -> "ConnectingÃ¢â‚¬Â¦"
+                                                    isCastConnecting -> "ConnectingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦"
                                                     isRemotePlaybackActive && selectedRouteName != null -> selectedRouteName ?: ""
                                                     else -> ""
                                                 },
@@ -1656,5 +1657,6 @@ private fun BottomToggleRow(
         }
     }
 }
+
 
 
