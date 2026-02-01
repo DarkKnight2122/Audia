@@ -115,13 +115,13 @@ class AudiobookRepositoryImpl @Inject constructor(
         return getTracks().map { tracks ->
             tracks.groupBy { it.bookId }
                 .map { (bookId, tracksInBook) ->
-                    val first = tracksInAuthor.first()
+                    val first = tracksInBook.first()
                     Book(
                         id = bookId,
                         title = first.book,
                         author = first.author, // Or bookArtist if available
                         bookArtUriString = first.bookArtUriString,
-                        trackCount = tracksInAuthor.size,
+                        trackCount = tracksInBook.size,
                         year = first.year
                     )
                 }
@@ -203,8 +203,8 @@ class AudiobookRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAllUniqueAlbumArtUris(): Flow<List<Uri>> {
-        return audiobookDao.getAllUniqueAlbumArtUrisFromTracks().map { uriStrings ->
+    override fun getAllUniqueBookArtUris(): Flow<List<Uri>> {
+        return audiobookDao.getAllUniqueBookArtUris().map { uriStrings ->
             uriStrings.mapNotNull { it.toUri() }
         }.flowOn(Dispatchers.IO)
     }
@@ -553,16 +553,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.deleteById(id)
     }
 
-    override suspend fun getAllTracksOnce(): List<Track> {
-        return getTracks().first()
-    }
-
-    override suspend fun getAllBooksOnce(): List<Book> {
-        return getBooks().first()
-    }
-
-    override suspend fun getAllAuthorsOnce(): List<Author> {
-        return getAuthors().first()
-    }
+    
 
 }
+

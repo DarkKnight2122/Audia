@@ -51,7 +51,7 @@ data class PlaylistUiState(
     //Sort option
     val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
     val currentPlaylistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
-    val playlistTracksOrderMode: playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val playlistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
     val playlistOrderModes: Map<String, PlaylistTracksOrderMode> = emptyMap()
 )
 
@@ -782,6 +782,7 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 }
+
 
 
 

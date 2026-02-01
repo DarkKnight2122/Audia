@@ -119,7 +119,7 @@ interface AudiobookRepository {
      */
     suspend fun getAllUniqueAudioDirectories(): Set<String>
 
-    fun getAllUniqueAlbumArtUris(): Flow<List<Uri>> // Nuevo para precarga de temas
+    fun getAllUniqueBookArtUris(): Flow<List<Uri>> // Nuevo para precarga de temas
 
     suspend fun invalidateCachesDependentOnAllowedDirectories() // Nuevo para precarga de temas
 
@@ -196,6 +196,7 @@ interface AudiobookRepository {
 
     suspend fun deleteById(id: Long)
 }
+
 
 
 
