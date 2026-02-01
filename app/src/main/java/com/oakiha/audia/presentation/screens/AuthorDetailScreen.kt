@@ -316,7 +316,7 @@ fun AuthorDetailScreen(
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(currentTrack, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
+                    playerViewModel.editTrackMetadata(currentTrack, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
                 },
                 generateAiMetadata = { fields ->
                     playerViewModel.generateAiMetadata(currentTrack, fields)

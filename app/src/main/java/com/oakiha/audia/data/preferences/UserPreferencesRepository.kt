@@ -627,7 +627,7 @@ constructor(
             FullPlayerLoadingTweaks(
                 delayAll = delayAll,
                 delayAlbumCarousel = delayAlbum,
-                delaySongMetadata = delayMetadata,
+                delayTrackMetadata = delayMetadata,
                 delayProgressBar = delayProgress,
                 delayControls = delayControls,
                 showPlaceholders = preferences[PreferencesKeys.FULL_PLAYER_PLACEHOLDERS] ?: false,
@@ -1204,7 +1204,7 @@ constructor(
         }
     }
 
-    suspend fun setDelaySongMetadata(enabled: Boolean) {
+    suspend fun setDelayTrackMetadata(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.FULL_PLAYER_DELAY_METADATA] = enabled
         }
@@ -1455,17 +1455,17 @@ constructor(
      * Controls the maximum resolution for album artwork displayed in the full player.
      * Thumbnails in lists always use low resolution (256px) for optimal performance.
      */
-    val bookArtQualityFlow: Flow<AlbumArtQuality> =
+    val bookArtQualityFlow: Flow<BookArtQuality> =
         dataStore.data.map { preferences ->
             preferences[PreferencesKeys.ALBUM_ART_QUALITY]
                 ?.let { 
-                    try { AlbumArtQuality.valueOf(it) } 
-                    catch (e: Exception) { AlbumArtQuality.ORIGINAL }
+                    try { BookArtQuality.valueOf(it) } 
+                    catch (e: Exception) { BookArtQuality.ORIGINAL }
                 }
                 ?: BookArtQuality.ORIGINAL
         }
 
-    suspend fun setAlbumArtQuality(quality: BookArtQuality) {
+    suspend fun setBookArtQuality(quality: BookArtQuality) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALBUM_ART_QUALITY] = quality.name
         }

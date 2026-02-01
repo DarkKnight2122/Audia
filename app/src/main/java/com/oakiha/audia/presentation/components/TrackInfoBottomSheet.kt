@@ -63,7 +63,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.core.net.toUri
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oakiha.audia.data.ai.SongMetadata
+import com.oakiha.audia.data.ai.TrackMetadata
 import com.oakiha.audia.data.media.CoverArtUpdate
 import com.oakiha.audia.ui.theme.MontserratFamily
 import java.io.File
@@ -83,7 +83,7 @@ fun TrackInfoBottomSheet(
     onNavigateToAlbum: () -> Unit,
     onNavigateToArtist: () -> Unit,
     onEditSong: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<SongMetadata>,
+    generateAiMetadata: suspend (List<String>) -> Result<TrackMetadata>,
     removeFromListTrigger: () -> Unit
 ) {
     val context = LocalContext.current

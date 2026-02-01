@@ -18,7 +18,7 @@ import com.oakiha.audia.presentation.components.scoped.PrefetchBookNeighbors
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.first
 
-import com.oakiha.audia.data.preferences.AlbumArtQuality
+import com.oakiha.audia.data.preferences.BookArtQuality
 
 // ====== TIPOS/STATE DEL CARRUSEL (wrapper para mantener compatibilidad) ======
 
@@ -41,7 +41,7 @@ fun AlbumCarouselSection(
     modifier: Modifier = Modifier,
     carouselStyle: String = CarouselStyle.NO_PEEK,
     itemSpacing: Dp = 8.dp,
-    bookArtQuality: BookArtQuality = AlbumArtQuality.MEDIUM
+    bookArtQuality: BookArtQuality = BookArtQuality.MEDIUM
 ) {
     if (queue.isEmpty()) return
 

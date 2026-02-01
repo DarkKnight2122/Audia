@@ -225,7 +225,7 @@ fun QueueBottomSheet(
 
     val stablePlayerState by viewModel.stablePlayerState.collectAsState()
 
-    val albumColorSchemePair by viewModel.currentAlbumArtColorSchemePair.collectAsState()
+    val albumColorSchemePair by viewModel.currentBookArtColorSchemePair.collectAsState()
     val isDark = isSystemInDarkTheme()
     val albumColorScheme = remember(albumColorSchemePair, isDark) {
         albumColorSchemePair?.let { pair -> if (isDark) pair.dark else pair.light }

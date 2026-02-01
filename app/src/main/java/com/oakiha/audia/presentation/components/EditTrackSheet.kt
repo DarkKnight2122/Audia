@@ -92,7 +92,7 @@ fun EditTrackSheet(
     track: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
+    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
     val transitionState = remember { MutableTransitionState(false) }
     transitionState.targetState = visible
@@ -127,7 +127,7 @@ private fun EditSongContent(
     track: Track,
     onDismiss: () -> Unit,
     onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
-    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.SongMetadata>
+    generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
     var title by remember { mutableStateOf(song.title) }
     var artist by remember { mutableStateOf(song.displayAuthor) }

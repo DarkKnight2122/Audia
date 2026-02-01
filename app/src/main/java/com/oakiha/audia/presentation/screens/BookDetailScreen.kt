@@ -313,7 +313,7 @@ fun BookDetailScreen(
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(
+                    playerViewModel.editTrackMetadata(
                         currentTrack,
                         newTitle,
                         newArtist,

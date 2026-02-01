@@ -260,7 +260,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
     var currentAlbums = mutableListOf<AlbumData>()
     var currentAlbumSongs = mutableListOf<Track>()
     var currentAlbumName: String? = null
-    var currentAlbumArt: String? = null
+    var currentBookArt: String? = null
 
     for (item in groupedSongs) {
         when (item) {
@@ -270,7 +270,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                     // Save current album if exists
                     if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                         currentAlbums.add(
-                            AlbumData(currentAlbumName!!, currentAlbumArt, currentAlbumSongs.toList())
+                            AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
                         )
                     }
                     sections.add(
@@ -287,20 +287,20 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                 currentAlbums.clear()
                 currentAlbumSongs.clear()
                 currentAlbumName = null
-                currentAlbumArt = null
+                currentBookArt = null
             }
 
             is GroupedTrackListItem.AlbumHeader -> {
                 // Save previous album if exists
                 if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                     currentAlbums.add(
-                        AlbumData(currentAlbumName!!, currentAlbumArt, currentAlbumSongs.toList())
+                        AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
                     )
                 }
 
                 // Start new album
                 currentAlbumName = item.name
-                currentAlbumArt = item.bookArtUri
+                currentBookArt = item.bookArtUri
                 currentAlbumSongs.clear()
             }
 
@@ -314,7 +314,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
     if (currentArtist != null) {
         if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
             currentAlbums.add(
-                AlbumData(currentAlbumName!!, currentAlbumArt, currentAlbumSongs.toList())
+                AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
             )
         }
         sections.add(

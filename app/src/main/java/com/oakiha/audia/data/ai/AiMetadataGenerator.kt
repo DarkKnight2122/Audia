@@ -31,7 +31,7 @@ class AiMetadataGenerator @Inject constructor(
     suspend fun generate(
         track: Track,
         fieldsToComplete: List<String>
-    ): Result<SongMetadata> {
+    ): Result<TrackMetadata> {
         return try {
             val apiKey = userPreferencesRepository.geminiApiKey.first()
             if (apiKey.isBlank()) {
@@ -83,7 +83,7 @@ class AiMetadataGenerator @Inject constructor(
 
             Timber.d("AI Response: $responseText")
             val cleanedJson = cleanJson(responseText)
-            val metadata = json.decodeFromString<SongMetadata>(cleanedJson)
+            val metadata = json.decodeFromString<TrackMetadata>(cleanedJson)
 
             Result.success(metadata)
         } catch (e: SerializationException) {

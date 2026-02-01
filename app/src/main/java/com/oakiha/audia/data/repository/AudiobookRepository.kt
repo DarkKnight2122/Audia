@@ -154,7 +154,7 @@ interface AudiobookRepository {
      * @param trackId El ID de la canciÃ³n.
      * @return Flow que emite el objeto Song o null si no se encuentra.
      */
-    fun getTrack(trackId: String): Flow<Song?>
+    fun getTrack(trackId: String): Flow<Track?>
     fun getArtistById(authorId: Long): Flow<Artist?>
     fun getArtistsForSong(trackId: Long): Flow<List<Author>>
 

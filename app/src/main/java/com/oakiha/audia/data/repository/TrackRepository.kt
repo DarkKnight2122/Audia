@@ -8,6 +8,6 @@ interface TrackRepository {
     fun getTracksByAlbum(bookId: Long): Flow<List<Track>>
     fun getTracksByArtist(authorId: Long): Flow<List<Track>>
     suspend fun searchSongs(query: String): List<Track>
-    fun getTrackById(trackId: Long): Flow<Song?>
+    fun getTrackById(trackId: Long): Flow<Track?>
     fun getPaginatedSongs(): Flow<androidx.paging.PagingData<Track>>
 }

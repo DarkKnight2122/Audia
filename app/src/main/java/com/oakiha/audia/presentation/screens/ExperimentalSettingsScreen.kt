@@ -199,7 +199,7 @@ fun ExperimentalSettingsScreen(
                             val delayAllEnabled = uiState.fullPlayerLoadingTweaks.delayAll
                             val appearThresholdPercent = uiState.fullPlayerLoadingTweaks.contentAppearThresholdPercent
                             val isAnyDelayEnabled = uiState.fullPlayerLoadingTweaks.let {
-                                it.delayAll || it.delayAlbumCarousel || it.delaySongMetadata || it.delayProgressBar || it.delayControls
+                                it.delayAll || it.delayAlbumCarousel || it.delayTrackMetadata || it.delayProgressBar || it.delayControls
                             }
 
                             SwitchSettingItem(
@@ -234,8 +234,8 @@ fun ExperimentalSettingsScreen(
                             SwitchSettingItem(
                                 title = "Song metadata",
                                 subtitle = "Delay title, artist, and lyrics/queue actions.",
-                                checked = uiState.fullPlayerLoadingTweaks.delaySongMetadata,
-                                onCheckedChange = settingsViewModel::setDelaySongMetadata,
+                                checked = uiState.fullPlayerLoadingTweaks.delayTrackMetadata,
+                                onCheckedChange = settingsViewModel::setDelayTrackMetadata,
                                 enabled = !delayAllEnabled,
                                 leadingIcon = {
                                     Icon(
@@ -410,14 +410,14 @@ fun ExperimentalSettingsScreen(
                            // For simplicity and quick access as requested ("selector or slider"), let's use a segmented style or a simple list of options.
                            
                            // Using a loop to create selectable items for each enum value
-                           com.oakiha.audia.data.preferences.AlbumArtQuality.entries.forEach { quality ->
+                           com.oakiha.audia.data.preferences.BookArtQuality.entries.forEach { quality ->
                                val isSelected = quality == bookArtQuality
                                
                                Surface(
                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
                                    shape = RoundedCornerShape(12.dp),
                                    modifier = Modifier.fillMaxWidth(),
-                                   onClick = { settingsViewModel.setAlbumArtQuality(quality) }
+                                   onClick = { settingsViewModel.setBookArtQuality(quality) }
                                ) {
                                    Row(
                                        modifier = Modifier

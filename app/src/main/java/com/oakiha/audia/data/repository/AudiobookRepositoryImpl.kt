@@ -365,7 +365,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         return@withContext newFav
     }
 
-    override fun getTrack(trackId: String): Flow<Song?> {
+    override fun getTrack(trackId: String): Flow<Track?> {
         val id = trackId.toLongOrNull() ?: return flowOf(null)
         return audiobookDao.getTrackById(id).map { it?.toTrack() }.flowOn(Dispatchers.IO)
     }

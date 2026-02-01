@@ -8,7 +8,7 @@ import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.LibraryNavigationMode
 import com.oakiha.audia.data.preferences.ThemePreference
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
-import com.oakiha.audia.data.preferences.AlbumArtQuality
+import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.data.repository.LyricsRepository
 import com.oakiha.audia.data.repository.AudiobookRepository
@@ -54,7 +54,7 @@ data class SettingsUiState(
     val appRebrandDialogShown: Boolean = false,
     val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
     // Developer Options
-    val bookArtQuality: BookArtQuality = AlbumArtQuality.MEDIUM,
+    val bookArtQuality: BookArtQuality = BookArtQuality.MEDIUM,
     val tapBackgroundClosesPlayer: Boolean = true,
     val immersiveLyricsEnabled: Boolean = false,
     val immersiveLyricsTimeout: Long = 4000L
@@ -414,9 +414,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setDelaySongMetadata(enabled: Boolean) {
+    fun setDelayTrackMetadata(enabled: Boolean) {
         viewModelScope.launch {
-            userPreferencesRepository.setDelaySongMetadata(enabled)
+            userPreferencesRepository.setDelayTrackMetadata(enabled)
         }
     }
 
@@ -590,8 +590,8 @@ class SettingsViewModel @Inject constructor(
 
     // ===== Developer Options =====
 
-    val bookArtQuality: StateFlow<AlbumArtQuality> = userPreferencesRepository.bookArtQualityFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AlbumArtQuality.MEDIUM)
+    val bookArtQuality: StateFlow<BookArtQuality> = userPreferencesRepository.bookArtQualityFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BookArtQuality.MEDIUM)
 
     val useSmoothCorners: StateFlow<Boolean> = userPreferencesRepository.useSmoothCornersFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -599,9 +599,9 @@ class SettingsViewModel @Inject constructor(
     val tapBackgroundClosesPlayer: StateFlow<Boolean> = userPreferencesRepository.tapBackgroundClosesPlayerFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    fun setAlbumArtQuality(quality: BookArtQuality) {
+    fun setBookArtQuality(quality: BookArtQuality) {
         viewModelScope.launch {
-            userPreferencesRepository.setAlbumArtQuality(quality)
+            userPreferencesRepository.setBookArtQuality(quality)
         }
     }
 

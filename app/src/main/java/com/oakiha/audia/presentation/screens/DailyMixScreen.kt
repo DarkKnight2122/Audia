@@ -110,7 +110,7 @@ fun DailyMixScreen(
     val lazyListState = rememberLazyListState()
 
     var showSongInfoSheet by remember { mutableStateOf(false) }
-    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) }
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) }
     var showDailyMixMenu by remember { mutableStateOf(false) }
 
     if (showDailyMixMenu) {
@@ -190,7 +190,7 @@ fun DailyMixScreen(
                 showSongInfoSheet = false
             },
             onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                playerViewModel.editSongMetadata(song, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
+                playerViewModel.editTrackMetadata(song, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
             },
             generateAiMetadata = { fields ->
                 playerViewModel.generateAiMetadata(song, fields)

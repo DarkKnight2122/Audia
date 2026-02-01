@@ -127,7 +127,7 @@ fun SearchScreen(
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState()
     var showTrackInfoBottomSheet by remember { mutableStateOf(false) }
-    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) }
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) }
 
     // Perform search whenever searchQuery, active state, or filter changes
     LaunchedEffect(searchQuery, active, currentFilter) {
@@ -464,7 +464,7 @@ fun SearchScreen(
                     showTrackInfoBottomSheet = false
                 },
                 onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                    playerViewModel.editSongMetadata(
+                    playerViewModel.editTrackMetadata(
                         currentTrack,
                         newTitle,
                         newArtist,

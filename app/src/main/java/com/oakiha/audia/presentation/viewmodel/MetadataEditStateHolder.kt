@@ -89,7 +89,7 @@ class MetadataEditStateHolder @Inject constructor(
         // essentially mirroring logic in ViewModel
         val parsedLyrics = normalizedLyrics?.let { LyricsUtils.parseLyrics(it) }
 
-        val result = songMetadataEditor.editSongMetadata(
+        val result = songMetadataEditor.editTrackMetadata(
             newTitle = newTitle,
             newArtist = newArtist,
             newAlbum = newAlbum,
@@ -166,7 +166,7 @@ class MetadataEditStateHolder @Inject constructor(
                 // VM's deleteFromDevice calls removeSong -> toggleFavorite(false) -> updates lists.
                 // It does NOT explicitly call repository.deleteSong() because MediaStore/FileObserver handles it?
                 // Or maybe explicit deletion IS needed but VM logic (Line 3687) says "removeSong(song)".
-                // removeSong(3698) toggles favorites and updates _masterAllSongs. It implies memory update.
+                // removeSong(3698) toggles favorites and updates _masterAllTracks. It implies memory update.
                 // FileDeletionUtils deletes the physical file. The MediaScanner should eventually pick it up, 
                 // but for immediate UI responsiveness, manual update is good.
                 // Also, AudiobookRepository.deleteById(id) exists.

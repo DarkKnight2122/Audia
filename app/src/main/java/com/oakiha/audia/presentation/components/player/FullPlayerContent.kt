@@ -104,7 +104,7 @@ import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.Track
-import com.oakiha.audia.data.preferences.AlbumArtQuality
+import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.AppThemeStyle
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
@@ -431,8 +431,8 @@ fun FullPlayerContent(
     }
 
     @Composable
-    fun SongMetadataSection() {
-        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delaySongMetadata
+    fun TrackMetadataSection() {
+        val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayTrackMetadata
 
         DelayedContent(
             shouldDelay = shouldDelay,
@@ -449,7 +449,7 @@ fun FullPlayerContent(
                 }
             }
         ) {
-            SongMetadataDisplaySection(
+            TrackMetadataDisplaySection(
                 modifier = Modifier
                     .padding(start = 0.dp),
                 onClickLyrics = onLyricsClick,
@@ -496,7 +496,7 @@ fun FullPlayerContent(
             AlbumCoverSection()
 
             Box(Modifier.align(Alignment.Start)) {
-                SongMetadataSection()
+                TrackMetadataSection()
             }
 
             PlayerProgressSection()
@@ -534,7 +534,7 @@ fun FullPlayerContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                SongMetadataSection()
+                TrackMetadataSection()
 
                 PlayerProgressSection()
 
@@ -905,7 +905,7 @@ fun FullPlayerContent(
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SongMetadataDisplaySection(
+private fun TrackMetadataDisplaySection(
     track: Track?,
     currentTrackArtists: List<Author>,
     expansionFractionProvider: () -> Float,

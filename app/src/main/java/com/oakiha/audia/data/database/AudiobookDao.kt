@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
@@ -55,7 +55,7 @@ interface AudiobookDao {
     @Query("DELETE FROM tracks WHERE id IN (:trackIds)")
     suspend fun deleteSongsByIds(trackIds: List<Long>)
 
-    @Query("DELETE FROM track_author_cross_ref WHERE song_id IN (:trackIds)")
+    @Query("DELETE FROM track_author_cross_ref WHERE track_id IN (:trackIds)")
     suspend fun deleteCrossRefsBySongIds(trackIds: List<Long>)
 
     /**
@@ -77,16 +77,16 @@ interface AudiobookDao {
                 deleteSongsByIds(chunk)
             }
         }
-        
+
         // Upsert artists, albums, and songs (REPLACE strategy handles updates)
         insertArtists(artists)
         insertAlbums(albums)
-        
+
         // Insert songs in chunks to allow concurrent reads
         songs.chunked(SONG_BATCH_SIZE).forEach { chunk ->
             insertSongs(chunk)
         }
-        
+
         // Delete old cross-refs for updated songs and insert new ones
         val updatedSongIds = songs.map { it.id }
         updatedSongIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
@@ -95,7 +95,7 @@ interface AudiobookDao {
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
             insertTrackAuthorCrossRefs(chunk)
         }
-        
+
         // Clean up orphaned albums and artists
         deleteOrphanedAlbums()
         deleteOrphanedArtists()
@@ -140,10 +140,10 @@ interface AudiobookDao {
     @Query("""
         SELECT * FROM tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
-        AND (title LIKE '%' || :query || '%' OR artist_name LIKE '%' || :query || '%')
+        AND (title LIKE '%' || :query || '%' OR author_name LIKE '%' || :query || '%')
         ORDER BY title ASC
     """)
-    fun searchSongs(
+    fun searchTracks(
         query: String,
         allowedParentDirs: List<String>,
         applyDirectoryFilter: Boolean
@@ -179,7 +179,7 @@ interface AudiobookDao {
         allowedParentDirs: List<String> = emptyList(),
         applyDirectoryFilter: Boolean = false
     ): Flow<List<TrackEntity>>
-    
+
     // --- Paginated Queries for Large Libraries ---
     /**
      * Returns a PagingSource for songs, enabling efficient pagination for large libraries.
@@ -197,8 +197,8 @@ interface AudiobookDao {
 
     // --- Album Queries ---
     @Query("""
-        SELECT DISTINCT albums.* FROM books
-        INNER JOIN tracks ON books.id = songs.book_id
+        SELECT DISTINCT books.* FROM books
+        INNER JOIN tracks ON books.id = tracks.book_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
         ORDER BY books.title ASC
     """)
@@ -218,8 +218,8 @@ interface AudiobookDao {
 
     // Version of getAlbums that returns a List for one-shot reads
     @Query("""
-        SELECT DISTINCT albums.* FROM books
-        INNER JOIN tracks ON books.id = songs.book_id
+        SELECT DISTINCT books.* FROM books
+        INNER JOIN tracks ON books.id = tracks.book_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
         ORDER BY books.title ASC
     """)
@@ -232,10 +232,10 @@ interface AudiobookDao {
     fun getAlbumsByArtistId(authorId: Long): Flow<List<BookEntity>>
 
     @Query("""
-        SELECT DISTINCT albums.* FROM books
-        INNER JOIN tracks ON books.id = songs.book_id
+        SELECT DISTINCT books.* FROM books
+        INNER JOIN tracks ON books.id = tracks.book_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
-        AND (books.title LIKE '%' || :query || '%' OR books.author_name LIKE '%' || :query || '%')
+        AND (books.title LIKE '%' || :query || '%' OR books.author_name LIKE '%' || :query || '%')        
         ORDER BY books.title ASC
     """)
     fun searchAlbums(
@@ -246,8 +246,8 @@ interface AudiobookDao {
 
     // --- Artist Queries ---
     @Query("""
-        SELECT DISTINCT artists.* FROM authors
-        INNER JOIN tracks ON authors.id = songs.author_id
+        SELECT DISTINCT authors.* FROM authors
+        INNER JOIN tracks ON authors.id = tracks.author_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
         ORDER BY authors.name ASC
     """)
@@ -273,8 +273,8 @@ interface AudiobookDao {
 
     // Version of getArtists that returns a List for one-shot reads
     @Query("""
-        SELECT DISTINCT artists.* FROM authors
-        INNER JOIN tracks ON authors.id = songs.author_id
+        SELECT DISTINCT authors.* FROM authors
+        INNER JOIN tracks ON authors.id = tracks.author_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
         ORDER BY authors.name ASC
     """)
@@ -290,8 +290,8 @@ interface AudiobookDao {
     suspend fun getAllArtistsListRaw(): List<AuthorEntity>
 
     @Query("""
-        SELECT DISTINCT artists.* FROM authors
-        INNER JOIN tracks ON authors.id = songs.author_id
+        SELECT DISTINCT authors.* FROM authors
+        INNER JOIN tracks ON authors.id = tracks.author_id
         WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
         AND authors.name LIKE '%' || :query || '%'
         ORDER BY authors.name ASC
@@ -346,13 +346,13 @@ interface AudiobookDao {
 
     // --- Combined Queries (Potentially useful for more complex scenarios) ---
     // E.g., Get all album art URIs from songs (could be useful for theme preloading from SSoT)
-    @Query("SELECT DISTINCT album_art_uri_string FROM tracks WHERE album_art_uri_string IS NOT NULL")
+    @Query("SELECT DISTINCT book_art_uri_string FROM tracks WHERE book_art_uri_string IS NOT NULL")
     fun getAllUniqueAlbumArtUrisFromSongs(): Flow<List<String>>
 
-    @Query("DELETE FROM books WHERE id NOT IN (SELECT DISTINCT album_id FROM tracks)")
+    @Query("DELETE FROM books WHERE id NOT IN (SELECT DISTINCT book_id FROM tracks)")
     suspend fun deleteOrphanedAlbums()
 
-    @Query("DELETE FROM authors WHERE id NOT IN (SELECT DISTINCT artist_id FROM tracks)")
+    @Query("DELETE FROM authors WHERE id NOT IN (SELECT DISTINCT author_id FROM tracks)")
     suspend fun deleteOrphanedArtists()
 
     // --- Favorite Operations ---
@@ -371,8 +371,8 @@ interface AudiobookDao {
         return newStatus
     }
 
-    @Query("UPDATE tracks SET title = :title, artist_name = :artist, album_name = :album, genre = :genre, lyrics = :lyrics, track_number = :trackNumber WHERE id = :trackId")
-    suspend fun updateSongMetadata(
+    @Query("UPDATE tracks SET title = :title, author_name = :artist, book_name = :album, genre = :genre, lyrics = :lyrics, track_number = :trackNumber WHERE id = :trackId")
+    suspend fun updateTrackMetadata(
         trackId: Long,
         title: String,
         artist: String,
@@ -382,7 +382,7 @@ interface AudiobookDao {
         trackNumber: Int
     )
 
-    @Query("UPDATE tracks SET album_art_uri_string = :bookArtUri WHERE id = :trackId")
+    @Query("UPDATE tracks SET book_art_uri_string = :bookArtUri WHERE id = :trackId")
     suspend fun updateSongAlbumArt(trackId: Long, bookArtUri: String?)
 
     @Query("UPDATE tracks SET lyrics = :lyrics WHERE id = :trackId")
@@ -397,7 +397,7 @@ interface AudiobookDao {
     @Query("SELECT * FROM tracks")
     suspend fun getAllTracksList(): List<TrackEntity>
 
-    @Query("SELECT album_art_uri_string FROM tracks WHERE id=:id")
+    @Query("SELECT book_art_uri_string FROM tracks WHERE id=:id")
     suspend fun getAlbumArtUriById(id: Long) : String?
 
     @Query("DELETE FROM tracks WHERE id=:id")
@@ -436,10 +436,10 @@ interface AudiobookDao {
      * Get all artists for a specific song using the junction table.
      */
     @Query("""
-        SELECT artists.* FROM authors
+        SELECT authors.* FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
         WHERE track_author_cross_ref.track_id = :trackId
-        ORDER BY song_artist_cross_ref.is_primary DESC, authors.name ASC
+        ORDER BY track_author_cross_ref.is_primary DESC, authors.name ASC
     """)
     fun getArtistsForSong(trackId: Long): Flow<List<AuthorEntity>>
 
@@ -447,10 +447,10 @@ interface AudiobookDao {
      * Get all artists for a specific song (one-shot).
      */
     @Query("""
-        SELECT artists.* FROM authors
+        SELECT authors.* FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
         WHERE track_author_cross_ref.track_id = :trackId
-        ORDER BY song_artist_cross_ref.is_primary DESC, authors.name ASC
+        ORDER BY track_author_cross_ref.is_primary DESC, authors.name ASC
     """)
     suspend fun getArtistsForSongList(trackId: Long): List<AuthorEntity>
 
@@ -458,7 +458,7 @@ interface AudiobookDao {
      * Get all songs for a specific artist using the junction table.
      */
     @Query("""
-        SELECT songs.* FROM tracks
+        SELECT tracks.* FROM tracks
         INNER JOIN track_author_cross_ref ON tracks.id = track_author_cross_ref.track_id
         WHERE track_author_cross_ref.author_id = :authorId
         ORDER BY tracks.title ASC
@@ -469,7 +469,7 @@ interface AudiobookDao {
      * Get all songs for a specific artist (one-shot).
      */
     @Query("""
-        SELECT songs.* FROM tracks
+        SELECT tracks.* FROM tracks
         INNER JOIN track_author_cross_ref ON tracks.id = track_author_cross_ref.track_id
         WHERE track_author_cross_ref.author_id = :authorId
         ORDER BY tracks.title ASC
@@ -486,9 +486,9 @@ interface AudiobookDao {
      * Get the primary artist for a song.
      */
     @Query("""
-        SELECT authors.id AS artist_id, authors.name FROM authors
+        SELECT authors.id AS author_id, authors.name FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
-        WHERE track_author_cross_ref.track_id = :trackId AND song_artist_cross_ref.is_primary = 1
+        WHERE track_author_cross_ref.track_id = :trackId AND track_author_cross_ref.is_primary = 1
         LIMIT 1
     """)
     suspend fun getPrimaryArtistForSong(trackId: Long): PrimaryArtistInfo?
@@ -515,7 +515,7 @@ interface AudiobookDao {
      */
     @Query("""
         SELECT DISTINCT authors.id, authors.name, authors.image_url,
-               (SELECT COUNT(*) FROM track_author_cross_ref 
+               (SELECT COUNT(*) FROM track_author_cross_ref
                 INNER JOIN tracks ON track_author_cross_ref.track_id = tracks.id
                 WHERE track_author_cross_ref.author_id = authors.id
                 AND (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))) AS track_count
@@ -571,7 +571,7 @@ interface AudiobookDao {
         private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more
         private const val CROSS_REF_FIELDS_PER_OBJECT = 3
         val CROSS_REF_BATCH_SIZE: Int = SQLITE_MAX_VARIABLE_NUMBER / CROSS_REF_FIELDS_PER_OBJECT
-        
+
         /**
          * Batch size for song inserts during incremental sync.
          * Allows database reads to interleave with writes for better UX.

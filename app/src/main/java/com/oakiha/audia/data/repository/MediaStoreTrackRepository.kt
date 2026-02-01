@@ -244,7 +244,7 @@ class MediaStoreTrackRepository @Inject constructor(
         }
     }
 
-    override fun getTrackById(trackId: Long): Flow<Song?> {
+    override fun getTrackById(trackId: Long): Flow<Track?> {
         return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(trackId)) { songs, id ->
             songs.find { it.id == id.toString() }
         }

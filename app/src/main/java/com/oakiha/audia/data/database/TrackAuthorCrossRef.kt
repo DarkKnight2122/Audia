@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -9,15 +9,15 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 /**
- * Junction table for many-to-many relationship between tracks and artists.
- * Enables multi-artist support where a song can have multiple artists
- * and an artist can have multiple songs.
+ * Junction table for many-to-many relationship between tracks and authors.
+ * Enables multi-author support where a track can have multiple authors
+ * and an author can have multiple tracks.
  */
 @Entity(
     tableName = "track_author_cross_ref",
-    primaryKeys = ["song_id", "artist_id"],
+    primaryKeys = ["track_id", "author_id"],
     indices = [
-        Index(value = ["song_id"]),
+        Index(value = ["track_id"]),
         Index(value = ["author_id"]),
         Index(value = ["is_primary"])
     ],
@@ -25,7 +25,7 @@ import androidx.room.Relation
         ForeignKey(
             entity = TrackEntity::class,
             parentColumns = ["id"],
-            childColumns = ["song_id"],
+            childColumns = ["track_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -43,8 +43,8 @@ data class TrackAuthorCrossRef(
 )
 
 /**
- * Data class representing a song with all its associated artists.
- * Used for queries that need to retrieve a song along with its artists.
+ * Data class representing a track with all its associated authors.
+ * Used for queries that need to retrieve a track along with its authors.
  */
 data class TrackWithArtists(
     @Embedded val track: TrackEntity,
@@ -53,16 +53,16 @@ data class TrackWithArtists(
         entityColumn = "id",
         associateBy = Junction(
             value = TrackAuthorCrossRef::class,
-            parentColumn = "song_id",
-            entityColumn = "artist_id"
+            parentColumn = "track_id",
+            entityColumn = "author_id"
         )
     )
     val artists: List<AuthorEntity>
 )
 
 /**
- * Data class representing an artist with all their songs.
- * Used for queries that need to retrieve an artist along with their songs.
+ * Data class representing an author with all their tracks.
+ * Used for queries that need to retrieve an author along with their tracks.
  */
 data class AuthorWithSongs(
     @Embedded val author: AuthorEntity,
@@ -71,15 +71,15 @@ data class AuthorWithSongs(
         entityColumn = "id",
         associateBy = Junction(
             value = TrackAuthorCrossRef::class,
-            parentColumn = "artist_id",
-            entityColumn = "song_id"
+            parentColumn = "author_id",
+            entityColumn = "track_id"
         )
     )
     val songs: List<TrackEntity>
 )
 
 /**
- * Data class for retrieving the primary artist of a song efficiently.
+ * Data class for retrieving the primary author of a track efficiently.
  */
 data class PrimaryArtistInfo(
     @ColumnInfo(name = "author_id") val authorId: Long,

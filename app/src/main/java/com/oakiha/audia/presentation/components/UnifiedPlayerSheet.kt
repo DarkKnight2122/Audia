@@ -810,7 +810,7 @@ fun UnifiedPlayerSheet(
     }
 
     var internalIsKeyboardVisible by remember { mutableStateOf(false) }
-    var selectedTrackForInfo by remember { mutableStateOf<Song?>(null) } // State for the selected song info
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) } // State for the selected song info
 
     val imeInsets = WindowInsets.ime
     LaunchedEffect(imeInsets, density) {
@@ -830,7 +830,7 @@ fun UnifiedPlayerSheet(
             selectedTrackForInfo != null
     )
 
-    // val currentAlbumColorSchemePair by playerViewModel.currentAlbumArtColorSchemePair.collectAsState() // Replaced by activePlayerColorSchemePair
+    // val currentAlbumColorSchemePair by playerViewModel.currentBookArtColorSchemePair.collectAsState() // Replaced by activePlayerColorSchemePair
     val activePlayerSchemePair by playerViewModel.activePlayerColorSchemePair.collectAsState()
     val isDarkTheme = LocalAudioBookPlayerDarkTheme.current
     val systemColorScheme = MaterialTheme.colorScheme // This is the standard M3 theme
@@ -1523,7 +1523,7 @@ fun UnifiedPlayerSheet(
                                         }
                                     },
                                     onEditSong = { title, artist, album, genre, lyrics, trackNumber, coverArtUpdate ->
-                                        playerViewModel.editSongMetadata(liveSong, title, artist, album, genre, lyrics, trackNumber, coverArtUpdate)
+                                        playerViewModel.editTrackMetadata(liveSong, title, artist, album, genre, lyrics, trackNumber, coverArtUpdate)
                                          selectedTrackForInfo = null
                                     },
                                     generateAiMetadata = { fields -> playerViewModel.generateAiMetadata(liveSong, fields) },

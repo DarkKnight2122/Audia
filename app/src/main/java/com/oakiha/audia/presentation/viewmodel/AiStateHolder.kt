@@ -5,7 +5,7 @@ import com.oakiha.audia.R
 import com.oakiha.audia.data.DailyMixManager
 import com.oakiha.audia.data.ai.AiMetadataGenerator
 import com.oakiha.audia.data.ai.AiPlaylistGenerator
-import com.oakiha.audia.data.ai.SongMetadata
+import com.oakiha.audia.data.ai.TrackMetadata
 import com.oakiha.audia.data.preferences.UserPreferencesRepository
 import com.oakiha.audia.data.model.Track
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -188,7 +188,7 @@ class AiStateHolder @Inject constructor(
         }
     }
 
-    suspend fun generateAiMetadata(track: Track, fields: List<String>): Result<SongMetadata> {
+    suspend fun generateAiMetadata(track: Track, fields: List<String>): Result<TrackMetadata> {
         _isGeneratingMetadata.value = true
         return try {
             aiMetadataGenerator.generate(song, fields)

@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -19,25 +19,25 @@ interface EngagementDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertEngagements(engagements: List<TrackEngagementEntity>)
 
-    @Query("SELECT * FROM song_engagements WHERE song_id = :trackId")
+    @Query("SELECT * FROM track_engagements WHERE track_id = :trackId")
     suspend fun getEngagement(trackId: String): TrackEngagementEntity?
 
-    @Query("SELECT * FROM song_engagements")
+    @Query("SELECT * FROM track_engagements")
     suspend fun getAllEngagements(): List<TrackEngagementEntity>
 
-    @Query("SELECT * FROM song_engagements")
+    @Query("SELECT * FROM track_engagements")
     fun getAllEngagementsFlow(): Flow<List<TrackEngagementEntity>>
 
-    @Query("SELECT play_count FROM song_engagements WHERE song_id = :trackId")
+    @Query("SELECT play_count FROM track_engagements WHERE track_id = :trackId")
     suspend fun getPlayCount(trackId: String): Int?
 
-    @Query("DELETE FROM song_engagements WHERE song_id = :trackId")
+    @Query("DELETE FROM track_engagements WHERE track_id = :trackId")
     suspend fun deleteEngagement(trackId: String)
 
-    @Query("DELETE FROM song_engagements WHERE song_id NOT IN (SELECT CAST(id AS TEXT) FROM songs)")
+    @Query("DELETE FROM track_engagements WHERE track_id NOT IN (SELECT CAST(id AS TEXT) FROM tracks)")
     suspend fun deleteOrphanedEngagements()
 
-    @Query("DELETE FROM song_engagements")
+    @Query("DELETE FROM track_engagements")
     suspend fun clearAllEngagements()
 
     /**
@@ -45,9 +45,9 @@ interface EngagementDao {
      * More efficient than read-modify-write pattern.
      */
     @Query("""
-        INSERT INTO song_engagements (song_id, play_count, total_play_duration_ms, last_played_timestamp)
+        INSERT INTO track_engagements (track_id, play_count, total_play_duration_ms, last_played_timestamp) 
         VALUES (:trackId, 1, :durationMs, :timestamp)
-        ON CONFLICT(song_id) DO UPDATE SET
+        ON CONFLICT(track_id) DO UPDATE SET
             play_count = play_count + 1,
             total_play_duration_ms = total_play_duration_ms + :durationMs,
             last_played_timestamp = :timestamp
@@ -55,8 +55,8 @@ interface EngagementDao {
     suspend fun recordPlay(trackId: String, durationMs: Long, timestamp: Long)
 
     /**
-     * Get top songs by play count for quick access.
+     * Get top tracks by play count for quick access.
      */
-    @Query("SELECT * FROM song_engagements ORDER BY play_count DESC LIMIT :limit")
-    suspend fun getTopPlayedSongs(limit: Int): List<TrackEngagementEntity>
+    @Query("SELECT * FROM track_engagements ORDER BY play_count DESC LIMIT :limit")
+    suspend fun getTopPlayedTracks(limit: Int): List<TrackEngagementEntity>
 }

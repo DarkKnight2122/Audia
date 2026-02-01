@@ -30,8 +30,8 @@ class ThemeStateHolder @Inject constructor(
 
     private var scope: CoroutineScope? = null
 
-    private val _currentAlbumArtColorSchemePair = MutableStateFlow<ColorSchemePair?>(null)
-    val currentAlbumArtColorSchemePair: StateFlow<ColorSchemePair?> = _currentAlbumArtColorSchemePair.asStateFlow()
+    private val _currentBookArtColorSchemePair = MutableStateFlow<ColorSchemePair?>(null)
+    val currentBookArtColorSchemePair: StateFlow<ColorSchemePair?> = _currentBookArtColorSchemePair.asStateFlow()
 
     private val _lavaLampColors = MutableStateFlow<ImmutableList<Color>>(persistentListOf())
     val lavaLampColors: StateFlow<ImmutableList<Color>> = _lavaLampColors.asStateFlow()
@@ -39,7 +39,7 @@ class ThemeStateHolder @Inject constructor(
     private val playerThemePreference = userPreferencesRepository.playerThemePreferenceFlow
 
     val activePlayerColorSchemePair: StateFlow<ColorSchemePair?> = combine(
-        playerThemePreference, _currentAlbumArtColorSchemePair
+        playerThemePreference, _currentBookArtColorSchemePair
     ) { playerPref, albumScheme ->
         when (playerPref) {
             com.oakiha.audia.data.preferences.ThemePreference.ALBUM_ART -> albumScheme
@@ -63,15 +63,15 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    private var currentAlbumArtUri: String? = null
+    private var currentBookArtUri: String? = null
 
     suspend fun extractAndGenerateColorScheme(bookArtUriAsUri: Uri?, currentTrackUriString: String?, isPreload: Boolean = false) {
         Trace.beginSection("ThemeStateHolder.extractAndGenerateColorScheme")
         try {
             if (bookArtUriAsUri == null) {
                 if (!isPreload && currentTrackUriString == null) {
-                    _currentAlbumArtColorSchemePair.value = null
-                    currentAlbumArtUri = null
+                    _currentBookArtColorSchemePair.value = null
+                    currentBookArtUri = null
                 }
                 return
             }
@@ -81,13 +81,13 @@ class ThemeStateHolder @Inject constructor(
             val schemePair = colorSchemeProcessor.getOrGenerateColorScheme(uriString)
 
             if (!isPreload && currentTrackUriString == uriString) {
-                _currentAlbumArtColorSchemePair.value = schemePair
-                currentAlbumArtUri = uriString
+                _currentBookArtColorSchemePair.value = schemePair
+                currentBookArtUri = uriString
             }
         } catch (e: Exception) {
             if (!isPreload && bookArtUriAsUri != null && currentTrackUriString == bookArtUriAsUri.toString()) {
-                _currentAlbumArtColorSchemePair.value = null
-                currentAlbumArtUri = null
+                _currentBookArtColorSchemePair.value = null
+                currentBookArtUri = null
             }
         } finally {
             Trace.endSection()
@@ -136,7 +136,7 @@ class ThemeStateHolder @Inject constructor(
 
     suspend fun forceRegenerateColorScheme(uriString: String) {
          android.util.Log.d("ThemeStateHolder", "forceRegenerateColorScheme called for: $uriString")
-         android.util.Log.d("ThemeStateHolder", "Current tracked global URI: $currentAlbumArtUri")
+         android.util.Log.d("ThemeStateHolder", "Current tracked global URI: $currentBookArtUri")
          
          colorSchemeProcessor.invalidateScheme(uriString)
          
@@ -150,9 +150,9 @@ class ThemeStateHolder @Inject constructor(
          
          // Also update the main current album art scheme if it matches the one we are tracking
          // We use equality check. If they are the same string object or equal content.
-         if (currentAlbumArtUri == uriString) {
+         if (currentBookArtUri == uriString) {
              android.util.Log.d("ThemeStateHolder", "Updating global color scheme flow directly.")
-             _currentAlbumArtColorSchemePair.value = newScheme
+             _currentBookArtColorSchemePair.value = newScheme
          } else {
              android.util.Log.d("ThemeStateHolder", "Global URI did not match. Skipping global update.")
          }

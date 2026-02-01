@@ -21,7 +21,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Locale
 
-private const val TAG = "SongMetadataEditor"
+private const val TAG = "TrackMetadataEditor"
 private const val METADATA_EDIT_TIMEOUT_MS = 30_000L
 
 /**
@@ -87,7 +87,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
         return parent.canWrite()
     }
 
-    fun editSongMetadata(
+    fun editTrackMetadata(
         trackId: Long,
         newTitle: String,
         newArtist: String,
@@ -101,7 +101,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
         val validationError = validateMetadataInput(newTitle, newArtist, newAlbum, newGenre, newLyrics)
         if (validationError != null) {
             Timber.w("Metadata validation failed: $validationError")
-            return SongMetadataEditResult(
+            return TrackMetadataEditResult(
                 success = false,
                 updatedAlbumArtUri = null,
                 error = MetadataEditError.INVALID_INPUT,
@@ -119,7 +119,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             val filePath = getFilePathFromMediaStore(trackId)
             if (filePath == null) {
                 Log.e(TAG, "Could not get file path for trackId: $trackId")
-                return SongMetadataEditResult(
+                return TrackMetadataEditResult(
                     success = false,
                     updatedAlbumArtUri = null,
                     error = MetadataEditError.FILE_NOT_FOUND,
@@ -130,7 +130,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             // Check write permissions before attempting edit
             if (!checkFileWritePermission(filePath)) {
                 Log.e(TAG, "No write permission for file: $filePath")
-                return SongMetadataEditResult(
+                return TrackMetadataEditResult(
                     success = false,
                     updatedAlbumArtUri = null,
                     error = MetadataEditError.NO_WRITE_PERMISSION,
@@ -168,7 +168,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
 
             if (!fileUpdateSuccess) {
                 Log.e(TAG, "Failed to update file metadata for trackId: $trackId")
-                return SongMetadataEditResult(
+                return TrackMetadataEditResult(
                     success = false,
                     updatedAlbumArtUri = null,
                     error = MetadataEditError.TAGLIB_ERROR,
@@ -194,7 +194,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             // 3. Update local database and save cover art preview
             var storedCoverArtUri: String? = null
             runBlocking {
-                audiobookDao.updateSongMetadata(
+                audiobookDao.updateTrackMetadata(
                     trackId,
                     newTitle,
                     newArtist,
@@ -216,11 +216,11 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             forceMediaRescan(filePath)
 
             Log.e(TAG, "METADATA_EDIT: Successfully updated metadata for trackId: $trackId")
-            SongMetadataEditResult(success = true, updatedAlbumArtUri = storedCoverArtUri)
+            TrackMetadataEditResult(success = true, updatedAlbumArtUri = storedCoverArtUri)
 
         } catch (e: SecurityException) {
             Timber.e(e, "Security exception editing metadata for trackId: $trackId")
-            SongMetadataEditResult(
+            TrackMetadataEditResult(
                 success = false,
                 updatedAlbumArtUri = null,
                 error = MetadataEditError.NO_WRITE_PERMISSION,
@@ -228,7 +228,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             )
         } catch (e: IOException) {
             Timber.e(e, "IO exception editing metadata for trackId: $trackId")
-            SongMetadataEditResult(
+            TrackMetadataEditResult(
                 success = false,
                 updatedAlbumArtUri = null,
                 error = MetadataEditError.IO_ERROR,
@@ -236,7 +236,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             )
         } catch (e: OutOfMemoryError) {
             Timber.e(e, "OOM editing metadata for trackId: $trackId")
-            SongMetadataEditResult(
+            TrackMetadataEditResult(
                 success = false,
                 updatedAlbumArtUri = null,
                 error = MetadataEditError.FILE_CORRUPTED,
@@ -250,7 +250,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
                 e.message?.contains("unsupported", ignoreCase = true) == true -> MetadataEditError.UNSUPPORTED_FORMAT
                 else -> MetadataEditError.UNKNOWN
             }
-            SongMetadataEditResult(
+            TrackMetadataEditResult(
                 success = false,
                 updatedAlbumArtUri = null,
                 error = errorType,
