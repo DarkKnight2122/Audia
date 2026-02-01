@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.media
+﻿package com.oakiha.audia.data.media
 
 import android.content.Context
 import androidx.media3.common.MediaItem
@@ -44,9 +44,9 @@ class MediaMapper @Inject constructor(
         return Track(
             id = id,
             title = title,
-            artist = artist,
+            author = author,
             authorId = -1L, // unknown from just MediaItem typically
-            album = album,
+            book = book,
             bookId = bookId,
             path = "", // local path unknown from URI usually
             contentUriString = contentUri,
@@ -59,3 +59,4 @@ class MediaMapper @Inject constructor(
         )
     }
 }
+

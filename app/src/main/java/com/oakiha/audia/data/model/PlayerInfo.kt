@@ -1,11 +1,11 @@
-package com.oakiha.audia.data.model
+﻿package com.oakiha.audia.data.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient // Para campos que no queremos serializar
 
 @Serializable
 data class QueueItem(
-    val id: Long, // ID Ãºnico de la canciÃ³n
+    val id: Long, // ID ÃƒÂºnico de la canciÃƒÂ³n
     val bookArtBitmapData: ByteArray?
 ) {
     override fun equals(other: Any?): Boolean {
@@ -32,8 +32,8 @@ data class QueueItem(
 
 @Serializable
 data class PlayerInfo(
-    val songTitle: String = "",
-    val artistName: String = "",
+    val trackTitle: String = "",
+    val authorName: String = "",
     val isPlaying: Boolean = false,
     val bookArtUri: String? = null,
     val bookArtBitmapData: ByteArray? = null,
@@ -69,8 +69,8 @@ data class PlayerInfo(
     }
 
     override fun hashCode(): Int {
-        var result = songTitle.hashCode()
-        result = 31 * result + artistName.hashCode()
+        var result = trackTitle.hashCode()
+        result = 31 * result + authorName.hashCode()
         result = 31 * result + isPlaying.hashCode()
         result = 31 * result + (bookArtUri?.hashCode() ?: 0)
         result = 31 * result + (bookArtBitmapData?.contentHashCode() ?: 0)
@@ -82,3 +82,4 @@ data class PlayerInfo(
         return result
     }
 }
+

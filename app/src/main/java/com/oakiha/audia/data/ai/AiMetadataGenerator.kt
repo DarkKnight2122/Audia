@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.ai
+﻿package com.oakiha.audia.data.ai
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.oakiha.audia.data.model.Track
@@ -63,13 +63,13 @@ class AiMetadataGenerator @Inject constructor(
             }
             """.trimIndent()
 
-            val albumInfo = if (song.book.isNotBlank()) "Album: \"${song.book}\"" else ""
+            val albumInfo = if (track.book.isNotBlank()) "Album: \"${track.book}\"" else ""
 
             val fullPrompt = """
             $systemPrompt
 
-            Song title: "${song.title}"
-            Song artist: "${song.displayAuthor}"
+            Song title: "${track.title}"
+            Song artist: "${track.displayAuthor}"
             $albumInfo
             Fields to complete: [$fieldsJson]
             """.trimIndent()
@@ -95,3 +95,4 @@ class AiMetadataGenerator @Inject constructor(
         }
     }
 }
+

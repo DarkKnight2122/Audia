@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.media
+﻿package com.oakiha.audia.data.media
 
 import android.content.ContentUris
 import android.content.ContentValues
@@ -207,7 +207,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
                 coverArtUpdate?.let { update ->
                     storedCoverArtUri = saveCoverArtPreview(trackId, update)
                     storedCoverArtUri?.let { coverUri ->
-                        audiobookDao.updateSongAlbumArt(trackId, coverUri)
+                        audiobookDao.updateTrackBookArt(trackId, coverUri)
                     }
                 }
             }
@@ -692,3 +692,4 @@ data class CoverArtUpdate(
         return result
     }
 }
+

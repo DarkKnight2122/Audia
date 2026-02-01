@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.media
+﻿package com.oakiha.audia.data.media
 
 import android.content.Context
 import android.net.Uri
@@ -12,7 +12,7 @@ data class AudioMetadata(
     val title: String?,
     val author: String?,
     val bookArtist: String?,
-    val album: String?,
+    val book: String?,
     val genre: String?,
     val durationMs: Long?,
     val trackNumber: Int?,
@@ -85,9 +85,9 @@ object AudioMetadataReader {
 
                 AudioMetadata(
                     title = title,
-                    artist = artist,
+                    author = author,
                     bookArtist = bookArtist,
-                    album = album,
+                    book = book,
                     genre = genre,
                     durationMs = durationMs,
                     trackNumber = trackNumber,
@@ -103,3 +103,4 @@ object AudioMetadataReader {
         }
     }
 }
+

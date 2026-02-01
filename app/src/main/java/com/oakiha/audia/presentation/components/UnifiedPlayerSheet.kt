@@ -1,4 +1,4 @@
-@file:kotlin.OptIn(ExperimentalMaterial3Api::class)
+﻿@file:kotlin.OptIn(ExperimentalMaterial3Api::class)
 
 package com.oakiha.audia.presentation.components
 
@@ -138,7 +138,7 @@ val MiniPlayerHeight = 64.dp
 const val ANIMATION_DURATION_MS = 255
 
 private data class SaveQueueOverlayData(
-    val songs: List<Track>,
+    val tracks: List<Track>,
     val defaultName: String,
     val onConfirm: (String, Set<String>) -> Unit,
 )
@@ -884,7 +884,7 @@ fun UnifiedPlayerSheet(
     val expandedY = rememberUpdatedState(sheetExpandedTargetY)
     val canShow = rememberUpdatedState(showPlayerContentArea)
     val miniH = rememberUpdatedState(miniPlayerContentHeightPx)
-    val dens = rememberUpdatedState(LocalDensity.current) // opcional; Ãºtil para thresholds
+    val dens = rememberUpdatedState(LocalDensity.current) // opcional; ÃƒÂºtil para thresholds
 
     if (actuallyShowSheetContent) {
         Surface(
@@ -1188,7 +1188,7 @@ fun UnifiedPlayerSheet(
                                                     .zIndex(miniPlayerZIndex)
                                             ) {
                                                 MiniPlayerContentInternal(
-                                                    song = currentTrackNonNull, // Use non-null version
+                                                    track = currentTrackNonNull, // Use non-null version
                                                     cornerRadiusAlb = (overallSheetTopCornerRadius.value * 0.5).dp,
                                                     isPlaying = infrequentPlayerState.isPlaying, // from top-level stablePlayerState
                                                     isCastConnecting = isCastConnecting,
@@ -1366,10 +1366,10 @@ fun UnifiedPlayerSheet(
                             }
 
                                 val onDimissQueueRequest = remember { { animateQueueSheet(false) } }
-                                val onQueueSongInfoClick = remember { { track: Track -> selectedTrackForInfo = song } }
+                                val onQueueSongInfoClick = remember { { track: Track -> selectedTrackForInfo = track } }
                                 val onPlayQueueSong = remember(currentPlaybackQueue, currentQueueSourceName) {
                                     { track: Track -> 
-                                        playerViewModel.playSongs(currentPlaybackQueue, song, currentQueueSourceName)
+                                        playerViewModel.playSongs(currentPlaybackQueue, track, currentQueueSourceName)
                                     }
                                 }
                                 val onRemoveQueueSong = remember { { id: String -> playerViewModel.removeSongFromQueue(id) } }
@@ -1451,10 +1451,10 @@ fun UnifiedPlayerSheet(
 
                             // Show TrackInfoBottomSheet when a song is selected
                             selectedTrackForInfo?.let { staticSong ->
-                                // Observar cambios en la canciÃ³n (metadata o favorite status) reactivamente
+                                // Observar cambios en la canciÃƒÂ³n (metadata o favorite status) reactivamente
                                 val liveSongState by remember(staticSong.id) {
                                     playerViewModel.observeSong(staticSong.id)
-                                        .map { it ?: staticSong } // Si no estÃ¡ en la librerÃ­a, usar la estÃ¡tica como fallback
+                                        .map { it ?: staticSong } // Si no estÃƒÂ¡ en la librerÃƒÂ­a, usar la estÃƒÂ¡tica como fallback
                                 }.collectAsState(initial = staticSong)
 
                                 val liveSong = liveSongState ?: staticSong
@@ -1486,7 +1486,7 @@ fun UnifiedPlayerSheet(
                                         // Maybe we can skip this or implement if simple.
                                         // TrackInfoBottomSheet usually handles the UI for it? No, it has onAddToPlayList callback.
                                         // Let's leave it empty or log for now if we don't have a ready handler
-                                        Log.d("UnifiedPlayerSheet", "Add to playlist clicked for ${liveSong.title}")
+                                        Log.d("UnifiedPlayerSheet", "Add to playlist clicked for ${livetrack.title}")
                                          selectedTrackForInfo = null
                                     },
                                     onDeleteFromDevice = { activity, songToDelete, onResult ->
@@ -1561,7 +1561,7 @@ fun UnifiedPlayerSheet(
 
         pendingSaveQueueOverlay?.let { overlay ->
             SaveQueueAsPlaylistSheet(
-                songs = overlay.tracks,
+                tracks = overlay.tracks,
                 defaultName = overlay.defaultName,
                 onDismiss = { pendingSaveQueueOverlay = null },
                 onConfirm = { name, selectedIds ->
@@ -1602,7 +1602,7 @@ private fun CastConnectingDialog() {
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Estamos transfiriendo la reproducciÃ³n. It may take a few seconds to disconnect or reconnect.",
+                        text = "Estamos transfiriendo la reproducciÃƒÂ³n. It may take a few seconds to disconnect or reconnect.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -1643,8 +1643,8 @@ private fun MiniPlayerContentInternal(
     ) {
         Box(contentAlignment = Alignment.Center) {
             SmartImage(
-                model = song.bookArtUriString,
-                contentDescription = "Cover of ${song.title}",
+                model = track.bookArtUriString,
+                contentDescription = "Cover of ${track.title}",
                 shape = CircleShape,
                 targetSize = Size(150, 150),
                 modifier = Modifier
@@ -1679,12 +1679,12 @@ private fun MiniPlayerContentInternal(
             )
 
             AutoScrollingText(
-                text = if (isCastConnecting) "Connecting to deviceâ€¦" else song.title,
+                text = if (isCastConnecting) "Connecting to deviceÃ¢â‚¬Â¦" else track.title,
                 style = titleStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer
             )
             AutoScrollingText(
-                text = song.displayAuthor,
+                text = track.displayAuthor,
                 style = artistStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer
             )
@@ -1762,3 +1762,4 @@ private fun MiniPlayerContentInternal(
         }
     }
 }
+
