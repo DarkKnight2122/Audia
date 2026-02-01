@@ -58,9 +58,6 @@ interface AudiobookDao {
     @Query("DELETE FROM track_author_cross_ref WHERE track_id IN (:trackIds)")
     suspend fun deleteCrossRefsByTrackIds(trackIds: List<Long>)
 
-    /**
-     * Incrementally sync music data: upsert new/modified songs and remove deleted ones.
-     */
     @Transaction
     suspend fun incrementalSyncAudiobookData(
         tracks: List<TrackEntity>,
@@ -364,7 +361,7 @@ interface AudiobookDao {
         WHERE track_author_cross_ref.track_id = :trackId AND track_author_cross_ref.is_primary = 1
         LIMIT 1
     """)
-    suspend fun getPrimaryAuthorForTrack(trackId: Long): PrimaryArtistInfo?
+    suspend fun getPrimaryAuthorForTrack(trackId: Long): PrimaryAuthorInfo?
 
     @Query("SELECT COUNT(*) FROM track_author_cross_ref WHERE author_id = :authorId")
     suspend fun getTrackCountForAuthor(authorId: Long): Int
