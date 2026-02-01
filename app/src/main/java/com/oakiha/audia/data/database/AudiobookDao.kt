@@ -102,7 +102,6 @@ interface AudiobookDao {
     }
 
     // --- Song Queries ---
-    // Updated getTracks to potentially filter by parent_directory_path
     @Query("""
         SELECT * FROM tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -119,7 +118,6 @@ interface AudiobookDao {
     @Query("SELECT * FROM tracks WHERE file_path = :path LIMIT 1")
     suspend fun getTrackByPath(path: String): TrackEntity?
 
-    //@Query("SELECT * FROM tracks WHERE id IN (:trackIds)")
     @Query("""
         SELECT * FROM tracks
         WHERE id IN (:trackIds)
@@ -155,10 +153,6 @@ interface AudiobookDao {
     @Query("SELECT COUNT(*) FROM tracks")
     suspend fun getTrackCountOnce(): Int
 
-    /**
-     * Returns random songs for efficient shuffle without loading all songs into memory.
-     * Uses SQLite RANDOM() for true randomness.
-     */
     @Query("""
         SELECT * FROM tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -180,11 +174,6 @@ interface AudiobookDao {
         applyDirectoryFilter: Boolean = false
     ): Flow<List<TrackEntity>>
 
-    // --- Paginated Queries for Large Libraries ---
-    /**
-     * Returns a PagingSource for songs, enabling efficient pagination for large libraries.
-     * Room auto-generates the PagingSource implementation.
-     */
     @Query("""
         SELECT * FROM tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -216,7 +205,6 @@ interface AudiobookDao {
     @Query("SELECT COUNT(*) FROM books")
     fun getAlbumCount(): Flow<Int>
 
-    // Version of getAlbums that returns a List for one-shot reads
     @Query("""
         SELECT DISTINCT books.* FROM books
         INNER JOIN tracks ON books.id = tracks.book_id
@@ -256,9 +244,6 @@ interface AudiobookDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<AuthorEntity>>
 
-    /**
-     * Unfiltered list of all artists (including those only reachable via cross-refs).
-     */
     @Query("SELECT * FROM authors ORDER BY name ASC")
     fun getAllArtistsRaw(): Flow<List<AuthorEntity>>
 
@@ -271,7 +256,6 @@ interface AudiobookDao {
     @Query("SELECT COUNT(*) FROM authors")
     fun getArtistCount(): Flow<Int>
 
-    // Version of getArtists that returns a List for one-shot reads
     @Query("""
         SELECT DISTINCT authors.* FROM authors
         INNER JOIN tracks ON authors.id = tracks.author_id
@@ -283,9 +267,6 @@ interface AudiobookDao {
         applyDirectoryFilter: Boolean
     ): List<AuthorEntity>
 
-    /**
-     * Unfiltered list of all artists (one-shot).
-     */
     @Query("SELECT * FROM authors ORDER BY name ASC")
     suspend fun getAllArtistsListRaw(): List<AuthorEntity>
 
@@ -316,7 +297,6 @@ interface AudiobookDao {
     suspend fun getMaxArtistId(): Long?
 
     // --- Genre Queries ---
-    // Example: Get all songs for a specific genre
     @Query("""
         SELECT * FROM tracks
         WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -340,12 +320,9 @@ interface AudiobookDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<TrackEntity>>
 
-    // Example: Get all unique genre names
     @Query("SELECT DISTINCT genre FROM tracks WHERE genre IS NOT NULL AND genre != '' ORDER BY genre ASC")
     fun getUniqueGenres(): Flow<List<String>>
 
-    // --- Combined Queries (Potentially useful for more complex scenarios) ---
-    // E.g., Get all album art URIs from songs (could be useful for theme preloading from SSoT)
     @Query("SELECT DISTINCT book_art_uri_string FROM tracks WHERE book_art_uri_string IS NOT NULL")
     fun getAllUniqueAlbumArtUrisFromSongs(): Flow<List<String>>
 
@@ -362,10 +339,9 @@ interface AudiobookDao {
     @Query("SELECT is_favorite FROM tracks WHERE id = :trackId")
     suspend fun getFavoriteStatus(trackId: Long): Boolean?
 
-    // Transaction to toggle favorite status
     @Transaction
     suspend fun toggleFavoriteStatus(trackId: Long): Boolean {
-        val currentStatus = getFavoriteStatus(trackId) ?: false // Default to false if not found (should not happen for existing song)
+        val currentStatus = getFavoriteStatus(trackId) ?: false
         val newStatus = !currentStatus
         setFavoriteStatus(trackId, newStatus)
         return newStatus
@@ -412,7 +388,7 @@ interface AudiobookDao {
     """)
     suspend fun getAudioMetadataById(id: Long): AudioMeta?
 
-    // ===== Song-Artist Cross Reference (Junction Table) Operations =====
+    // ===== Track-Author Cross Reference (Junction Table) Operations =====
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTrackAuthorCrossRefs(crossRefs: List<TrackAuthorCrossRef>)
@@ -432,9 +408,6 @@ interface AudiobookDao {
     @Query("DELETE FROM track_author_cross_ref WHERE author_id = :authorId")
     suspend fun deleteCrossRefsForArtist(authorId: Long)
 
-    /**
-     * Get all artists for a specific song using the junction table.
-     */
     @Query("""
         SELECT authors.* FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
@@ -443,9 +416,6 @@ interface AudiobookDao {
     """)
     fun getArtistsForSong(trackId: Long): Flow<List<AuthorEntity>>
 
-    /**
-     * Get all artists for a specific song (one-shot).
-     */
     @Query("""
         SELECT authors.* FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
@@ -454,9 +424,6 @@ interface AudiobookDao {
     """)
     suspend fun getArtistsForSongList(trackId: Long): List<AuthorEntity>
 
-    /**
-     * Get all songs for a specific artist using the junction table.
-     */
     @Query("""
         SELECT tracks.* FROM tracks
         INNER JOIN track_author_cross_ref ON tracks.id = track_author_cross_ref.track_id
@@ -465,9 +432,6 @@ interface AudiobookDao {
     """)
     fun getTracksForArtist(authorId: Long): Flow<List<TrackEntity>>
 
-    /**
-     * Get all songs for a specific artist (one-shot).
-     */
     @Query("""
         SELECT tracks.* FROM tracks
         INNER JOIN track_author_cross_ref ON tracks.id = track_author_cross_ref.track_id
@@ -476,15 +440,9 @@ interface AudiobookDao {
     """)
     suspend fun getTracksForArtistList(authorId: Long): List<TrackEntity>
 
-    /**
-     * Get the cross-references for a specific song.
-     */
     @Query("SELECT * FROM track_author_cross_ref WHERE track_id = :trackId")
     suspend fun getCrossRefsForSong(trackId: Long): List<TrackAuthorCrossRef>
 
-    /**
-     * Get the primary artist for a song.
-     */
     @Query("""
         SELECT authors.id AS author_id, authors.name FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
@@ -493,15 +451,9 @@ interface AudiobookDao {
     """)
     suspend fun getPrimaryArtistForSong(trackId: Long): PrimaryArtistInfo?
 
-    /**
-     * Get song count for an artist from the junction table.
-     */
     @Query("SELECT COUNT(*) FROM track_author_cross_ref WHERE author_id = :authorId")
     suspend fun getTrackCountForArtist(authorId: Long): Int
 
-    /**
-     * Get all artists with their song counts computed from the junction table.
-     */
     @Query("""
         SELECT authors.id, authors.name, authors.image_url,
                (SELECT COUNT(*) FROM track_author_cross_ref WHERE track_author_cross_ref.author_id = authors.id) AS track_count
@@ -510,9 +462,6 @@ interface AudiobookDao {
     """)
     fun getArtistsWithSongCounts(): Flow<List<AuthorEntity>>
 
-    /**
-     * Get all artists with song counts, filtered by allowed directories.
-     */
     @Query("""
         SELECT DISTINCT authors.id, authors.name, authors.image_url,
                (SELECT COUNT(*) FROM track_author_cross_ref
@@ -530,9 +479,6 @@ interface AudiobookDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<AuthorEntity>>
 
-    /**
-     * Clear all music data including cross-references.
-     */
     @Transaction
     suspend fun clearAllMusicDataWithCrossRefs() {
         clearAllTrackAuthorCrossRefs()
@@ -541,10 +487,6 @@ interface AudiobookDao {
         clearAllArtists()
     }
 
-    /**
-     * Insert music data with cross-references in a single transaction.
-     * Uses chunked inserts for cross-refs to avoid SQLite variable limits.
-     */
     @Transaction
     suspend fun insertMusicDataWithCrossRefs(
         songs: List<TrackEntity>,
@@ -555,27 +497,18 @@ interface AudiobookDao {
         insertArtists(artists)
         insertAlbums(albums)
         insertSongs(songs)
-        // Insert cross-refs in chunks to avoid SQLite variable limit.
-        // Each TrackAuthorCrossRef has 3 fields, so batch size is calculated accordingly.
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
             insertTrackAuthorCrossRefs(chunk)
         }
     }
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTrackAuthorCrossRefs(crossRefs: List<TrackAuthorCrossRef>)
+
     companion object {
-        /**
-         * SQLite has a limit on the number of variables per statement (default 999, higher in newer versions).
-         * Each TrackAuthorCrossRef insert uses 3 variables (trackId, authorId, isPrimary).
-         * The batch size is calculated so that batchSize * 3 <= SQLITE_MAX_VARIABLE_NUMBER.
-         */
-        private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more
+        private const val SQLITE_MAX_VARIABLE_NUMBER = 999 
         private const val CROSS_REF_FIELDS_PER_OBJECT = 3
         val CROSS_REF_BATCH_SIZE: Int = SQLITE_MAX_VARIABLE_NUMBER / CROSS_REF_FIELDS_PER_OBJECT
-
-        /**
-         * Batch size for song inserts during incremental sync.
-         * Allows database reads to interleave with writes for better UX.
-         */
         const val SONG_BATCH_SIZE = 500
     }
 }
