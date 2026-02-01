@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -16,24 +16,24 @@ import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
         Index(value = ["title"], unique = false),
         Index(value = ["book_id"], unique = false),
         Index(value = ["author_id"], unique = false),
-        Index(value = ["author_name"], unique = false), // Nuevo Ã­ndice para bÃºsquedas por nombre de artista
+        Index(value = ["author_name"], unique = false), // Nuevo ÃƒÂ­ndice para bÃƒÂºsquedas por nombre de artista
         Index(value = ["genre"], unique = false),
-        Index(value = ["parent_directory_path"], unique = false) // Ãndice para filtrado por directorio
+        Index(value = ["parent_directory_path"], unique = false) // ÃƒÂndice para filtrado por directorio
     ],
     foreignKeys = [
         ForeignKey(
             entity = BookEntity::class,
             parentColumns = ["id"],
             childColumns = ["book_id"],
-            onDelete = ForeignKey.CASCADE // Si un Ã¡lbum se borra, sus canciones tambiÃ©n
+            onDelete = ForeignKey.CASCADE // Si un ÃƒÂ¡lbum se borra, sus canciones tambiÃƒÂ©n
         ),
         ForeignKey(
             entity = AuthorEntity::class,
             parentColumns = ["id"],
             childColumns = ["author_id"],
-            onDelete = ForeignKey.SET_NULL // Si un artista se borra, el artist_id de la canciÃ³n se pone a null
-                                          // o podrÃ­as elegir CASCADE si las canciones no deben existir sin artista.
-                                          // SET_NULL es mÃ¡s flexible si las canciones pueden ser de "Unknown Author".
+            onDelete = ForeignKey.SET_NULL // Si un artista se borra, el artist_id de la canciÃƒÂ³n se pone a null
+                                          // o podrÃƒÂ­as elegir CASCADE si las canciones no deben existir sin artista.
+                                          // SET_NULL es mÃƒÂ¡s flexible si las canciones pueden ser de "Unknown Author".
         )
     ]
 )
@@ -65,12 +65,12 @@ fun TrackEntity.toTrack(): Track {
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.authorName.normalizeMetadataTextOrEmpty(),
+        author = this.artistName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
-        artists = emptyList(), // Will be populated from junction table when needed
+        authors = emptyList(), // Will be populated from junction table when needed
         album = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookArtist = this.bookArtist?.normalizeMetadataText(),
+        bookAuthor = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -90,7 +90,7 @@ fun TrackEntity.toTrack(): Track {
 /**
  * Converts a TrackEntity to Song with artists from the junction table.
  */
-fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Track {
+fun TrackEntity.toTrackWithAuthorRefs(artists: List<AuthorEntity>, crossRefs: List<TrackAuthorCrossRef>): Track {
     val crossRefByArtistId = crossRefs.associateBy { it.authorId }
     val artistRefs = artists.map { artist ->
         val crossRef = crossRefByArtistId[artist.id]
@@ -104,12 +104,12 @@ fun TrackEntity.toTrackWithArtistRefs(artists: List<AuthorEntity>, crossRefs: Li
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        artist = this.authorName.normalizeMetadataTextOrEmpty(),
+        author = this.artistName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
-        artists = artistRefs,
+        authors = artistRefs,
         album = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookArtist = this.bookArtist?.normalizeMetadataText(),
+        bookAuthor = this.bookArtist?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -131,15 +131,15 @@ fun List<TrackEntity>.toTracks(): List<Track> {
 }
 
 // El modelo Song usa id como String, pero la entidad lo necesita como Long (de MediaStore)
-// El modelo Song no tiene filePath, asÃ­ que no se puede mapear desde ahÃ­ directamente.
-// filePath y parentDirectoryPath se poblarÃ¡n desde MediaStore en el SyncWorker.
-fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: String): TrackEntity {
+// El modelo Song no tiene filePath, asÃƒÂ­ que no se puede mapear desde ahÃƒÂ­ directamente.
+// filePath y parentDirectoryPath se poblarÃƒÂ¡n desde MediaStore en el SyncWorker.
+fun Track.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: String): TrackEntity {
     return TrackEntity(
         id = this.id.toLong(), // Asumiendo que el ID del modelo Song puede convertirse a Long
         title = this.title,
         artistName = this.author,
         authorId = this.authorId,
-        bookArtist = this.bookArtist,
+        bookAuthor = this.bookArtist,
         albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
@@ -157,15 +157,15 @@ fun Song.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Strin
     )
 }
 
-// Sobrecarga o alternativa si los paths no estÃ¡n disponibles o no son necesarios al convertir de Modelo a Entidad
+// Sobrecarga o alternativa si los paths no estÃƒÂ¡n disponibles o no son necesarios al convertir de Modelo a Entidad
 // (menos probable que se use si la entidad siempre requiere los paths)
-fun Song.toEntityWithoutPaths(): TrackEntity {
+fun Track.toEntityWithoutPaths(): TrackEntity {
     return TrackEntity(
         id = this.id.toLong(),
         title = this.title,
         artistName = this.author,
         authorId = this.authorId,
-        bookArtist = this.bookArtist,
+        bookAuthor = this.bookArtist,
         albumName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
@@ -182,3 +182,5 @@ fun Song.toEntityWithoutPaths(): TrackEntity {
         sampleRate = this.sampleRate
     )
 }
+
+

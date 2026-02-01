@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.model
+﻿package com.oakiha.audia.data.model
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
@@ -15,10 +15,10 @@ data class Track(
      */
     val author: String,
     val authorId: Long, // Primary artist ID for backward compatibility
-    val artists: List<AuthorRef> = emptyList(), // All artists for multi-artist support
-    val album: String,
+    val authors: List<AuthorRef> = emptyList(), // All artists for multi-artist support
+    val book: String,
     val bookId: Long,
-    val bookArtist: String? = null, // Album artist from metadata
+    val bookAuthor: String? = null, // Album artist from metadata
     val path: String, // Added for direct file system access
     val contentUriString: String,
     val bookArtUriString: String?,
@@ -44,33 +44,33 @@ data class Track(
      */
     val displayAuthor: String
         get() {
-            if (artists.isNotEmpty()) {
-                return artists.sortedByDescending { it.isPrimary }.joinToString(", ") { it.name }
+            if (authors.isNotEmpty()) {
+                return authors.sortedByDescending { it.isPrimary }.joinToString(", ") { it.name }
             }
-            val split = artist.splitArtistsByDelimiters(defaultArtistDelimiters)
-            return if (split.isNotEmpty()) split.joinToString(", ") else artist
+            val split = author.splitArtistsByDelimiters(defaultArtistDelimiters)
+            return if (split.isNotEmpty()) split.joinToString(", ") else author
         }
 
     /**
      * Returns the primary artist from the artists list,
      * or creates one from the legacy artist field.
      */
-    val primaryArtist: AuthorRef
-        get() = artists.find { it.isPrimary }
-            ?: artists.firstOrNull()
-            ?: AuthorRef(id = authorId, name = artist, isPrimary = true)
+    val primaryAuthor: AuthorRef
+        get() = authors.find { it.isPrimary }
+            ?: authors.firstOrNull()
+            ?: AuthorRef(id = authorId, name = author, isPrimary = true)
 
     companion object {
-        fun emptySong(): Track {
+        fun emptyTrack(): Track {
             return Track(
                 id = "-1",
                 title = "",
-                artist = "",
+                author = "",
                 authorId = -1L,
-                artists = emptyList(),
-                album = "",
+                authors = emptyList(),
+                book = "",
                 bookId = -1L,
-                bookArtist = null,
+                bookAuthor = null,
                 path = "",
                 contentUriString = "",
                 bookArtUriString = null,
@@ -89,3 +89,4 @@ data class Track(
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.database
+﻿package com.oakiha.audia.data.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -9,7 +9,7 @@ import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 
 @Entity(
     tableName = "authors",
-    indices = [Index(value = ["name"], unique = false)] // Ãndice en el nombre para bÃºsquedas rÃ¡pidas
+    indices = [Index(value = ["name"], unique = false)] // ÃƒÂndice en el nombre para bÃƒÂºsquedas rÃƒÂ¡pidas
 )
 data class AuthorEntity(
     @PrimaryKey val id: Long,
@@ -18,7 +18,7 @@ data class AuthorEntity(
     @ColumnInfo(name = "image_url") val imageUrl: String? = null
 )
 
-fun AuthorEntity.toArtist(): Author {
+fun AuthorEntity.toAuthor(): Author {
     return Author(
         id = this.id,
         name = this.name.normalizeMetadataTextOrEmpty(),
@@ -27,11 +27,11 @@ fun AuthorEntity.toArtist(): Author {
     )
 }
 
-fun List<AuthorEntity>.toArtists(): List<Author> {
-    return this.map { it.toArtist() }
+fun List<AuthorEntity>.toAuthors(): List<Author> {
+    return this.map { it.toAuthor() }
 }
 
-fun Artist.toEntity(): AuthorEntity {
+fun Author.toEntity(): AuthorEntity {
     return AuthorEntity(
         id = this.id,
         name = this.name,
@@ -39,3 +39,4 @@ fun Artist.toEntity(): AuthorEntity {
         imageUrl = this.imageUrl
     )
 }
+

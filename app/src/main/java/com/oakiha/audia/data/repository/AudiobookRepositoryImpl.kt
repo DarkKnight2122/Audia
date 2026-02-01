@@ -39,10 +39,10 @@ import com.oakiha.audia.data.model.Genre
 import com.oakiha.audia.data.database.TrackEntity
 import com.oakiha.audia.data.database.TrackAuthorCrossRef
 import com.oakiha.audia.data.database.AuthorEntity
-import com.oakiha.audia.data.database.toAlbum
-import com.oakiha.audia.data.database.toArtist
+import com.oakiha.audia.data.database.toBook
+import com.oakiha.audia.data.database.toAuthor
 import com.oakiha.audia.data.database.toTrack
-import com.oakiha.audia.data.database.toTrackWithArtistRefs
+import com.oakiha.audia.data.database.toTrackWithAuthorRefs
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.LyricsSourcePreference
 import com.oakiha.audia.data.model.SyncedLine
@@ -223,14 +223,14 @@ class AudiobookRepositoryImpl @Inject constructor(
     override fun searchBooks(query: String): Flow<List<Book>> {
        if (query.isBlank()) return flowOf(emptyList())
        return audiobookDao.searchBooks(query, emptyList(), false).map { entities ->
-           entities.map { it.toAlbum() }
+           entities.map { it.toBook() }
        }.flowOn(Dispatchers.IO)
     }
 
     override fun searchAuthors(query: String): Flow<List<Author>> {
         if (query.isBlank()) return flowOf(emptyList())
         return audiobookDao.searchAuthors(query, emptyList(), false).map { entities ->
-            entities.map { it.toArtist() }
+            entities.map { it.toAuthor() }
         }.flowOn(Dispatchers.IO)
     }
 
@@ -346,11 +346,11 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllAlbumsOnce(): List<Book> = withContext(Dispatchers.IO) {
-        audiobookDao.getAllBooksOnce(emptyList(), false).map { it.toAlbum() }
+        audiobookDao.getAllBooksOnce(emptyList(), false).map { it.toBook() }
     }
 
     override suspend fun getAllArtistsOnce(): List<Author> = withContext(Dispatchers.IO) {
-        audiobookDao.getAllAuthorsRawOnce().map { it.toArtist() }
+        audiobookDao.getAllAuthorsRawOnce().map { it.toAuthor() }
     }
 
     override suspend fun toggleFavoriteStatus(trackId: String): Boolean = withContext(Dispatchers.IO) {
@@ -553,6 +553,8 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.deleteById(id)
     }
 }
+
+
 
 
 

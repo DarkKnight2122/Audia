@@ -1,4 +1,4 @@
-package com.oakiha.audia.data.model
+﻿package com.oakiha.audia.data.model
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
@@ -16,7 +16,7 @@ data class Book(
         fun empty() = Book(
             id = -1,
             title = "",
-            artist = "",
+            author = "",
             year = 0,
             bookArtUriString = null,
             trackCount = 0
@@ -51,3 +51,4 @@ data class AuthorRef(
     val name: String,
     val isPrimary: Boolean = false
 )
+
