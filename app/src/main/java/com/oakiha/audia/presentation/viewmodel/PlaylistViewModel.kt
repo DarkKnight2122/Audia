@@ -51,7 +51,7 @@ data class PlaylistUiState(
     //Sort option
     val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
     val currentPlaylistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
-    val playlistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val playlistTracksOrderMode: playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
     val playlistOrderModes: Map<String, PlaylistTracksOrderMode> = emptyMap()
 )
 
@@ -243,7 +243,7 @@ class PlaylistViewModel @Inject constructor(
                             it.copy(
                                 currentPlaylistDetails = pseudoPlaylist,
                                 currentPlaylistTracks = applySortToTracks(tracksList, it.currentPlaylistTracksSortOption),
-                                PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(it.currentPlaylistTracksSortOption),
+                                playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(it.currentPlaylistTracksSortOption),
                                 isLoading = false,
                                 playlistNotFound = false
                             )
@@ -285,7 +285,7 @@ class PlaylistViewModel @Inject constructor(
                                 currentPlaylistTracks = orderedTracks,
                                 currentPlaylistTracksSortOption = (orderMode as? PlaylistTracksOrderMode.Sorted)?.option
                                     ?: it.currentPlaylistTracksSortOption,
-                                PlaylistTracksOrderMode = orderMode,
+                                playlistTracksOrderMode = orderMode,
                                 playlistOrderModes = it.playlistOrderModes + (playlistId to orderMode),
                                 isLoading = false,
                                 playlistNotFound = false
@@ -655,7 +655,7 @@ class PlaylistViewModel @Inject constructor(
                     val updatedModes = it.playlistOrderModes + (playlistId to PlaylistTracksOrderMode.Manual)
                     it.copy(
                         currentPlaylistTracks = currentTracks,
-                        PlaylistTracksOrderMode = PlaylistTracksOrderMode.Manual,
+                        playlistTracksOrderMode = PlaylistTracksOrderMode.Manual,
                         playlistOrderModes = updatedModes
                     )
                 }
@@ -721,7 +721,7 @@ class PlaylistViewModel @Inject constructor(
             it.copy(
                 currentPlaylistTracks = sortedTracks,
                 currentPlaylistTracksSortOption = sortOption,
-                PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(sortOption),
+                playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(sortOption),
                 playlistOrderModes = updatedModes
             )
         }
@@ -782,6 +782,7 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 }
+
 
 
 

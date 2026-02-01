@@ -150,7 +150,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         }.flowOn(Dispatchers.Default)
     }
 
-    override fun getTracksForAlbum(bookId: Long): Flow<List<Track>> {
+    override fun getTracksForBook(bookId: Long): Flow<List<Track>> {
         return getTracks().map { tracks ->
             tracks.filter { it.bookId == bookId }
                 .sortedBy { it.trackNumber }
@@ -176,7 +176,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getTracksForArtist(authorId: Long): Flow<List<Track>> {
+    override fun getTracksForAuthor(authorId: Long): Flow<List<Track>> {
         return getTracks().map { tracks ->
             tracks.filter { it.authorId == authorId }
                 .sortedBy { it.title }
@@ -345,11 +345,11 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.getAllTracksOnce().map { it.toTrack() }
     }
 
-    override suspend fun getAllAlbumsOnce(): List<Book> = withContext(Dispatchers.IO) {
+    override suspend fun getAllBooksOnce(): List<Book> = withContext(Dispatchers.IO) {
         audiobookDao.getAllBooksOnce(emptyList(), false).map { it.toBook() }
     }
 
-    override suspend fun getAllArtistsOnce(): List<Author> = withContext(Dispatchers.IO) {
+    override suspend fun getAllAuthorsOnce(): List<Author> = withContext(Dispatchers.IO) {
         audiobookDao.getAllAuthorsRawOnce().map { it.toAuthor() }
     }
 
@@ -553,6 +553,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.deleteById(id)
     }
 }
+
 
 
 

@@ -291,9 +291,9 @@ fun SearchScreen(
                                 //verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 SearchFilterChip(SearchFilterType.ALL, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.SONGS, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.ALBUMS, currentFilter, playerViewModel)
-                                SearchFilterChip(SearchFilterType.ARTISTS, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.TRACKS, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.BOOKS, currentFilter, playerViewModel)
+                                SearchFilterChip(SearchFilterType.AUTHORS, currentFilter, playerViewModel)
                                 SearchFilterChip(SearchFilterType.PLAYLISTS, currentFilter, playerViewModel)
                             }
 
@@ -397,9 +397,9 @@ fun SearchScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             SearchFilterChip(SearchFilterType.ALL, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.SONGS, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.ALBUMS, currentFilter, playerViewModel)
-                            SearchFilterChip(SearchFilterType.ARTISTS, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.TRACKS, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.BOOKS, currentFilter, playerViewModel)
+                            SearchFilterChip(SearchFilterType.AUTHORS, currentFilter, playerViewModel)
                             SearchFilterChip(SearchFilterType.PLAYLISTS, currentFilter, playerViewModel)
                         }
                         SearchResultsList(
@@ -654,17 +654,17 @@ fun SearchResultsList(
 
     val groupedResults = results.groupBy { item ->
         when (item) {
-            is SearchResultItem.TrackItem -> SearchFilterType.SONGS
-            is SearchResultItem.BookItem -> SearchFilterType.ALBUMS
-            is SearchResultItem.AuthorItem -> SearchFilterType.ARTISTS
+            is SearchResultItem.TrackItem -> SearchFilterType.TRACKS
+            is SearchResultItem.BookItem -> SearchFilterType.BOOKS
+            is SearchResultItem.AuthorItem -> SearchFilterType.AUTHORS
             is SearchResultItem.PlaylistItem -> SearchFilterType.PLAYLISTS
         }
     }
 
     val sectionOrder = listOf(
-        SearchFilterType.SONGS,
-        SearchFilterType.ALBUMS,
-        SearchFilterType.ARTISTS,
+        SearchFilterType.TRACKS,
+        SearchFilterType.BOOKS,
+        SearchFilterType.AUTHORS,
         SearchFilterType.PLAYLISTS
     )
 
@@ -685,9 +685,9 @@ fun SearchResultsList(
                 item(key = "header_${filterType.name}") {
                     SearchResultSectionHeader(
                         title = when (filterType) {
-                            SearchFilterType.SONGS -> "Songs"
-                            SearchFilterType.ALBUMS -> "Albums"
-                            SearchFilterType.ARTISTS -> "Artists"
+                            SearchFilterType.TRACKS -> "Songs"
+                            SearchFilterType.BOOKS -> "Albums"
+                            SearchFilterType.AUTHORS -> "Artists"
                             SearchFilterType.PLAYLISTS -> "Playlists"
                             else -> "Results"
                         }
@@ -1076,5 +1076,6 @@ fun SearchFilterChip(
          }
     )
 }
+
 
 
