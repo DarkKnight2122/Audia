@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -80,7 +80,7 @@ fun LibraryTracksTab(
             ) {
                 items(12) { // Show 12 skeleton items
                     EnhancedTrackListItem(
-                        song = Track.emptyTrack(),
+                        track = Track.emptyTrack(),
                         isPlaying = false,
                         isLoading = true,
                         isCurrentSong = false,
@@ -169,7 +169,7 @@ fun LibraryTracksTab(
                             }
 
                             EnhancedTrackListItem(
-                                song = song,
+                                track = song,
                                 isPlaying = isPlayingThisSong,
                                 isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
                                 isLoading = false,
@@ -196,3 +196,4 @@ fun LibraryTracksTab(
         }
     }
 }
+

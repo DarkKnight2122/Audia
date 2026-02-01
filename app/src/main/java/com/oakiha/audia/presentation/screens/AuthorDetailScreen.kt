@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+﻿@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.oakiha.audia.presentation.screens
 
@@ -94,7 +94,7 @@ fun AuthorDetailScreen(
         playerViewModel.collapsePlayerSheet()
     }
 
-    // --- LÃ³gica del Header Colapsable ---
+    // --- LÃƒÂ³gica del Header Colapsable ---
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val minTopBarHeight = 64.dp + statusBarHeight
     val maxTopBarHeight = 300.dp
@@ -160,7 +160,7 @@ fun AuthorDetailScreen(
             }
         }
     }
-    // --- Fin de la lÃ³gica del Header ---
+    // --- Fin de la lÃƒÂ³gica del Header ---
 
     BackHandler(enabled = playerSheetState == PlayerSheetState.EXPANDED) {
         playerViewModel.collapsePlayerSheet()
@@ -227,9 +227,7 @@ fun AuthorDetailScreen(
                                 items = section.tracks,
                                 key = { _, song -> "artist_album_${section.bookId}_song_${song.id}" }
                             ) { songIndex, song ->
-                                EnhancedTrackListItem(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    song = song,
+                                EnhancedTrackListItem(modifier = Modifier.padding(horizontal = 16.dp), track = song,
                                     isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
                                     isPlaying = stablePlayerState.isPlaying,
                                     onMoreOptionsClick = {
@@ -256,8 +254,7 @@ fun AuthorDetailScreen(
 
                     }
 
-                    CustomCollapsingTopBar(
-                        artist = artist,
+                    CustomCollapsingTopBar(author = author,
                         songsCount = songs.size,
                         collapseFraction = collapseFraction,
                         headerHeight = currentTopBarHeightDp,
@@ -369,7 +366,7 @@ private fun AlbumSectionHeader(
                 val subtitle = buildString {
                     section.year?.takeIf { it > 0 }?.let {
                         append(it.toString())
-                        append(" â€¢ ")
+                        append(" Ã¢â‚¬Â¢ ")
                     }
                     append("${section.tracks.size} songs")
                 }
@@ -396,8 +393,7 @@ private fun AlbumSectionHeader(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CustomCollapsingTopBar(
-    artist: Author,
+private fun CustomCollapsingTopBar(author: Author,
     songsCount: Int,
     collapseFraction: Float, // 0.0 = expandido, 1.0 = colapsado
     headerHeight: Dp,
@@ -428,20 +424,20 @@ private fun CustomCollapsingTopBar(
             .height(headerHeight)
             .background(surfaceColor.copy(alpha = backgroundAlpha))
     ) {
-        // --- Contenido del Header (visible cuando estÃ¡ expandido) ---
+        // --- Contenido del Header (visible cuando estÃƒÂ¡ expandido) ---
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = headerContentAlpha }
         ) {
             // Artist artwork or fallback pattern
-            if (!artist.imageUrl.isNullOrEmpty()) {
+            if (!author.imageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(artist.imageUrl)
+                        .data(author.imageUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription = artist.name,
+                    contentDescription = author.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -486,7 +482,7 @@ private fun CustomCollapsingTopBar(
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
 
-            // Box contenedor para el tÃ­tulo
+            // Box contenedor para el tÃƒÂ­tulo
             Box(
                 modifier = Modifier
                     .align(animatedTitleAlignment)
@@ -505,8 +501,8 @@ private fun CustomCollapsingTopBar(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = artist.name,
-                        style = MaterialTheme.typography.headlineMedium.copy(
+                        text = author.name,
+                        style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = (-1).sp, lineHeight = 32.sp, 
                             fontSize = 26.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
                         ),
@@ -526,7 +522,7 @@ private fun CustomCollapsingTopBar(
                 }
             }
 
-            // BotÃ³n de Play
+            // BotÃƒÂ³n de Play
             LargeExtendedFloatingActionButton(
                 onClick = onPlayClick,
                 shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
@@ -589,3 +585,7 @@ private fun AudiobookIconPattern(modifier: Modifier = Modifier, collapseFraction
         )
     }
 }
+
+
+
+

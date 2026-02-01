@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -177,10 +177,10 @@ fun PlaylistDetailScreen(
     }
 
     val selectedTrackForInfo by playerViewModel.selectedTrackForInfo.collectAsState()
-    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃ­
+    val favoriteTrackIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteTrackIds aquÃƒÂ­
     val stableOnMoreOptionsClick: (Track) -> Unit = remember {
-        { song ->
-            playerViewModel.selectSongForInfo(song)
+        { track ->
+            playerViewModel.selectSongForInfo(track)
             showTrackInfoBottomSheet = true
         }
     }
@@ -244,7 +244,7 @@ fun PlaylistDetailScreen(
                 subtitle = {
                     Text(
                         modifier = Modifier.padding(start = 8.dp),
-                        text = "${songsInPlaylist.size} songs â€¢ ${
+                        text = "${songsInPlaylist.size} songs Ã¢â‚¬Â¢ ${
                             formatTotalDuration(
                                 songsInPlaylist
                             )
@@ -553,10 +553,10 @@ fun PlaylistDetailScreen(
                     ) {
                         itemsIndexed(
                             localReorderableSongs,
-                            key = { _, item -> item.id }) { _, song ->
+                            key = { _, item -> item.id }) { _, track ->
                             ReorderableItem(
                                 state = reorderableState,
-                                key = song.id,
+                                key = track.id,
                             ) { isDragging ->
                                 val scale by animateFloatAsState(
                                     if (isDragging) 1.05f else 1f,
@@ -574,19 +574,19 @@ fun PlaylistDetailScreen(
                                     onClick = {
                                         playerViewModel.playSongs(
                                             localReorderableSongs,
-                                            song,
+                                            track,
                                             currentPlaylist.name,
                                             currentPlaylist.id
                                         )
                                     },
-                                    song = song,
-                                    isCurrentSong = playerStableState.currentTrack?.id == song.id,
+                                    track = track,
+                                    isCurrentSong = playerStableState.currentTrack?.id == track.id,
                                     isPlaying = playerStableState.isPlaying,
                                     isDragging = isDragging,
                                     onRemoveClick = {
                                         if (!isFolderPlaylist) {
                                             currentPlaylist.let {
-                                                playlistViewModel.removeSongFromPlaylist(it.id, song.id)
+                                                playlistViewModel.removeSongFromPlaylist(it.id, track.id)
                                             }
                                         }
                                     },
@@ -784,10 +784,10 @@ fun PlaylistDetailScreen(
 
     if (showTrackInfoBottomSheet && selectedTrackForInfo != null) {
         val currentTrack = selectedTrackForInfo
-        val isFavorite = remember(currentTrack?.id, favoriteIds) {
+        val isFavorite = remember(currentTrack?.id, favoriteTrackIds) {
             derivedStateOf {
                 currentTrack?.let {
-                    favoriteIds.contains(
+                    favoriteTrackIds.contains(
                         it.id
                     )
                 }
@@ -976,3 +976,4 @@ fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
+

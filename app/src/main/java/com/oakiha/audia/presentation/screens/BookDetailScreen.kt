@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+﻿@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.oakiha.audia.presentation.screens
 
@@ -241,8 +241,7 @@ fun BookDetailScreen(
                         .padding(horizontal = 16.dp)
                 ) {
                     items(songs, key = { song -> "album_song_${song.id}" }) { song ->
-                        EnhancedTrackListItem(
-                            song = song,
+                        EnhancedTrackListItem(track = song,
                             isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
                             isPlaying = stablePlayerState.isPlaying,
                             onMoreOptionsClick = {
@@ -254,7 +253,7 @@ fun BookDetailScreen(
                     }
                 }
                 CollapsingAlbumTopBar(
-                    album = album,
+                    book = book,
                     songsCount = songs.size,
                     collapseFraction = collapseFraction,
                     headerHeight = currentTopBarHeightDp,
@@ -458,7 +457,7 @@ private fun CollapsingAlbumTopBar(
                 ) {
                     Text(
                         text = album.title,
-                        style = MaterialTheme.typography.headlineMedium.copy(
+                        style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = (-1).sp, lineHeight = 32.sp, 
                             fontSize = 26.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
                         ),
@@ -468,7 +467,7 @@ private fun CollapsingAlbumTopBar(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${album.author} â€¢ $songsCount songs",
+                        text = "${album.author} Ã¢â‚¬Â¢ $songsCount songs",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -494,3 +493,5 @@ private fun CollapsingAlbumTopBar(
         }
     }
 }
+
+

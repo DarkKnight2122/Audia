@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+﻿@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.oakiha.audia.presentation.screens
 
@@ -196,10 +196,10 @@ fun LibraryScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     playlistViewModel: PlaylistViewModel = hiltViewModel()
 ) {
-    // La recolecciÃƒÂ³n de estados de alto nivel se mantiene mÃƒÂ­nima.
+    // La recolecciÃƒÆ’Ã‚Â³n de estados de alto nivel se mantiene mÃƒÆ’Ã‚Â­nima.
     val context = LocalContext.current // Added context
     val lastTabIndex by playerViewModel.lastLibraryTabIndexFlow.collectAsState()
-    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃƒÂ­
+    val favoriteIds by playerViewModel.favoriteTrackIds.collectAsState() // Reintroducir favoriteIds aquÃƒÆ’Ã‚Â­
     val scope = rememberCoroutineScope() // Mantener si se usa para acciones de UI
     val syncManager = playerViewModel.syncManager
     var isRefreshing by remember { mutableStateOf(false) }
@@ -273,7 +273,7 @@ fun LibraryScreen(
             }
         }
     }
-    // La lÃƒÂ³gica de carga diferida (lazy loading) se mantiene.
+    // La lÃƒÆ’Ã‚Â³gica de carga diferida (lazy loading) se mantiene.
     LaunchedEffect(Unit) {
         Trace.beginSection("LibraryScreen.InitialTabLoad")
         playerViewModel.onLibraryTabSelected(lastTabIndex)
@@ -399,14 +399,14 @@ fun LibraryScreen(
             )
         }
     ) { innerScaffoldPadding ->
-        Box( // Box para permitir superposiciÃƒÂ³n del indicador de carga
+        Box( // Box para permitir superposiciÃƒÆ’Ã‚Â³n del indicador de carga
             modifier = Modifier
                 .padding(top = innerScaffoldPadding.calculateTopPadding())
                 .fillMaxSize()
         ) {
             Column(
                 modifier = Modifier
-                    // .padding(innerScaffoldPadding) // El padding ya estÃƒÂ¡ en el Box contenedor
+                    // .padding(innerScaffoldPadding) // El padding ya estÃƒÆ’Ã‚Â¡ en el Box contenedor
                     .background(brush = Brush.verticalGradient(gradientColors))
                     .fillMaxSize()
             ) {
@@ -477,7 +477,7 @@ fun LibraryScreen(
                     // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        // OPTIMIZACIÃƒâ€œN: La lÃƒÂ³gica de ordenamiento ahora es mÃƒÂ¡s eficiente.
+                        // OPTIMIZACIÃƒÆ’Ã¢â‚¬Å“N: La lÃƒÆ’Ã‚Â³gica de ordenamiento ahora es mÃƒÆ’Ã‚Â¡s eficiente.
                         val availableSortOptions by playerViewModel.availableSortOptions.collectAsState()
                         val sanitizedSortOptions = remember(availableSortOptions, currentTabId) {
                             val cleaned = availableSortOptions.filterIsInstance<SortOption>()
@@ -991,13 +991,13 @@ fun LibraryNavigationPill(
 
     val pillRadius = 26.dp
     val innerRadius = 4.dp
-    // Radio para cuando estÃƒÂ¡ expandido/seleccionado (fully round)
+    // Radio para cuando estÃƒÆ’Ã‚Â¡ expandido/seleccionado (fully round)
     val expandedRadius = 60.dp
 
-    // AnimaciÃƒÂ³n Esquina Flecha (Internal):
+    // AnimaciÃƒÆ’Ã‚Â³n Esquina Flecha (Internal):
     // Depende de 'isExpanded':
-    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÂ¡ndose visualmente.
-    // - false: Stays straight (innerRadius) pareciendo unida al tÃƒÂ­tulo.
+    // - true: Se vuelve redonda (expandedRadius/pillRadius) separÃƒÆ’Ã‚Â¡ndose visualmente.
+    // - false: Stays straight (innerRadius) pareciendo unida al tÃƒÆ’Ã‚Â­tulo.
     val animatedArrowCorner by animateDpAsState(
         targetValue = if (isExpanded) pillRadius else innerRadius,
         label = "ArrowCornerAnimation"
@@ -1072,7 +1072,7 @@ fun LibraryNavigationPill(
             }
         }
 
-        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÂºn estado) ---
+        // --- PARTE 2: FLECHA (Cambia de forma segÃƒÆ’Ã‚Âºn estado) ---
         Surface(
             shape = RoundedCornerShape(
                 topStart = animatedArrowCorner, // Anima entre 4.dp y 26.dp
@@ -1107,7 +1107,7 @@ fun LibraryNavigationPill(
                 Icon(
                     modifier = Modifier.rotate(arrowRotation),
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expandir menÃƒÂº",
+                    contentDescription = "Expandir menÃƒÆ’Ã‚Âº",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -1144,7 +1144,7 @@ private fun LibraryTabSwitcherSheet(
             )
             Text(
                 text = "Jump directly to any tab or reorder them.",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-0.3).sp, lineHeight = 18.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -1422,10 +1422,10 @@ fun LibraryFoldersTab(
 
                             items(songsToShow, key = { "song_${it.id}" }) { song ->
                                 EnhancedTrackListItem(
-                                    song = song,
-                                    isPlaying = stablePlayerState.currentTrack?.id == song.id && stablePlayerState.isPlaying,
-                                    isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
-                                    onMoreOptionsClick = { onMoreOptionsClick(song) },
+                                    track = song,
+                                    isPlaying = stablePlayerState.currentTrack?.id == track.id && stablePlayerState.isPlaying,
+                                    isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
+                                    onMoreOptionsClick = { onMoreOptionsClick(track) },
                                     onClick = {
                                         val songIndex = songsToShow.indexOf(song)
                                         if (songIndex != -1) {
@@ -1525,7 +1525,7 @@ private fun AudiobookFolder.collectAllSongs(): List<Track> {
     return songs + subFolders.flatMap { it.collectAllSongs() }
 }
 
-// NUEVA PestaÃƒÂ±a para Favoritos
+// NUEVA PestaÃƒÆ’Ã‚Â±a para Favoritos
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryFavoritesTab(
@@ -1600,12 +1600,12 @@ fun LibraryFavoritesTab(
                 ) {
                     items(favoriteSongs, key = { "fav_${it.id}" }) { song ->
                         val isPlayingThisSong =
-                            song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
+                            track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                         EnhancedTrackListItem(
-                            song = song,
-                            isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                            track = song,
+                            isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                             isPlaying = isPlayingThisSong,
-                            onMoreOptionsClick = { onMoreOptionsClick(song) },
+                            onMoreOptionsClick = { onMoreOptionsClick(track) },
                             onClick = {
                                 playerViewModel.showAndPlaySong(
                                     song,
@@ -1677,7 +1677,7 @@ fun LibraryTracksTab(
     } else {
         // Determine content based on loading state and data availability
         when {
-            isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃƒÂ¡ cubierto arriba, pero es bueno para claridad
+            isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃƒÆ’Ã‚Â¡ cubierto arriba, pero es bueno para claridad
                 val allTracksPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -1710,7 +1710,7 @@ fun LibraryTracksTab(
                     ) {
                         items(15) {
                             EnhancedTrackListItem(
-                                song = Track.emptyTrack(), isPlaying = false, isLoading = true,
+                                track = Track.emptyTrack(), isPlaying = false, isLoading = true,
                                 isCurrentSong = songs.isNotEmpty() && stablePlayerState.currentTrack == Track.emptyTrack(),
                                 onMoreOptionsClick = {}, onClick = {}
                             )
@@ -1779,13 +1779,13 @@ fun LibraryTracksTab(
                             item(key = "songs_top_spacer") { Spacer(Modifier.height(0.dp)) }
                             items(songs, key = { "song_${it.id}" }) { song ->
                                 val isPlayingThisSong =
-                                    song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
+                                    track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
 
                                 // Estabilizar lambdas
                                 val rememberedOnMoreOptionsClick: (Track) -> Unit =
                                     remember(onMoreOptionsClick) {
-                                        // Esta es la lambda que `remember` ejecutarÃƒÂ¡ para producir el valor recordado.
-                                        // El valor recordado es la propia funciÃƒÂ³n `onMoreOptionsClick` (o una lambda que la llama).
+                                        // Esta es la lambda que `remember` ejecutarÃƒÆ’Ã‚Â¡ para producir el valor recordado.
+                                        // El valor recordado es la propia funciÃƒÆ’Ã‚Â³n `onMoreOptionsClick` (o una lambda que la llama).
                                         { trackFromListItem -> // Esta es la lambda (Track) -> Unit que se recuerda
                                             onMoreOptionsClick(trackFromListItem)
                                         }
@@ -1795,9 +1795,9 @@ fun LibraryTracksTab(
                                 }
 
                                 EnhancedTrackListItem(
-                                    song = song,
+                                    track = song,
                                     isPlaying = isPlayingThisSong,
-                                    isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                                    isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     isLoading = false,
                                     onMoreOptionsClick = rememberedOnMoreOptionsClick,
                                     onClick = rememberedOnClick
@@ -1872,7 +1872,7 @@ fun LibraryTracksTabPaginated(
             ) {
                 items(12) { // Show 12 skeleton items to fill the screen
                     EnhancedTrackListItem(
-                        song = Track.emptyTrack(),
+                        track = Track.emptyTrack(),
                         isPlaying = false,
                         isLoading = true,
                         isCurrentSong = false,
@@ -1970,7 +1970,7 @@ fun LibraryTracksTabPaginated(
                         ) { index ->
                             val track = paginatedSongs[index]
                             if (song != null) {
-                                val isPlayingThisSong = song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
+                                val isPlayingThisSong = track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                                 
                                 val rememberedOnMoreOptionsClick: (Track) -> Unit = remember(onMoreOptionsClick) {
                                     { trackFromListItem -> onMoreOptionsClick(trackFromListItem) }
@@ -1980,9 +1980,9 @@ fun LibraryTracksTabPaginated(
                                 }
                                 
                                 EnhancedTrackListItem(
-                                    song = song,
+                                    track = song,
                                     isPlaying = isPlayingThisSong,
-                                    isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                                    isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     isLoading = false,
                                     onMoreOptionsClick = rememberedOnMoreOptionsClick,
                                     onClick = rememberedOnClick
@@ -1990,7 +1990,7 @@ fun LibraryTracksTabPaginated(
                             } else {
                                 // Placeholder while loading
                                 EnhancedTrackListItem(
-                                    song = Track.emptyTrack(),
+                                    track = Track.emptyTrack(),
                                     isPlaying = false,
                                     isLoading = true,
                                     isCurrentSong = false,
@@ -2042,7 +2042,7 @@ fun EnhancedTrackListItem(
     onMoreOptionsClick: (Track) -> Unit,
     onClick: () -> Unit
 ) {
-    // Animamos el radio de las esquinas basÃƒÂ¡ndonos en si la canciÃƒÂ³n es la actual.
+    // Animamos el radio de las esquinas basÃƒÆ’Ã‚Â¡ndonos en si la canciÃƒÆ’Ã‚Â³n es la actual.
     val animatedCornerRadius by animateDpAsState(
         targetValue = if (isCurrentSong && !isLoading) 50.dp else 22.dp,
         animationSpec = tween(durationMillis = 400),
@@ -2178,8 +2178,8 @@ fun EnhancedTrackListItem(
                 ) {
                     // Usando tu composable SmartImage
                     SmartImage(
-                        model = song.bookArtUriString,
-                        contentDescription = song.title,
+                        model = track.bookArtUriString,
+                        contentDescription = track.title,
                         shape = albumShape,
                         targetSize = Size(168, 168), // 56dp * 3 (para densidad xxhdpi)
                         modifier = Modifier.fillMaxSize()
@@ -2193,16 +2193,16 @@ fun EnhancedTrackListItem(
                 ) {
                     if (applyTextMarquee) {
                         AutoScrollingTextOnDemand(
-                            text = song.title,
-                            style = MaterialTheme.typography.bodyLarge,
+                            text = track.title,
+                            style = MaterialTheme.typography.bodyLarge.copy(letterSpacing = (-0.5).sp, lineHeight = 20.sp),
                             gradientEdgeColor = containerColor,
                             expansionFractionProvider = { 1f },
                         )
 
                     } else {
                         Text(
-                            text = song.title,
-                            style = MaterialTheme.typography.bodyLarge,
+                            text = track.title,
+                            style = MaterialTheme.typography.bodyLarge.copy(letterSpacing = (-0.5).sp, lineHeight = 20.sp),
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             color = contentColor,
@@ -2212,7 +2212,7 @@ fun EnhancedTrackListItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = song.displayAuthor,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-0.3).sp, lineHeight = 18.sp),
                         color = contentColor.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -2229,7 +2229,7 @@ fun EnhancedTrackListItem(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 FilledIconButton(
-                    onClick = { onMoreOptionsClick(song) },
+                    onClick = { onMoreOptionsClick(track) },
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = mvContentColor,
                         contentColor = mvContainerColor
@@ -2240,7 +2240,7 @@ fun EnhancedTrackListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.MoreVert,
-                        contentDescription = "More options for ${song.title}",
+                        contentDescription = "More options for ${track.title}",
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -2380,7 +2380,7 @@ fun LibraryAlbumsTab(
                             album = album,
                             albumColorSchemePairFlow = albumSpecificColorSchemeFlow,
                             onClick = rememberedOnClick,
-                            isLoading = isLoading && albums.isEmpty() // Shimmer solo si estÃƒÂ¡ cargando Y la lista estÃƒÂ¡ vacÃƒÂ­a
+                            isLoading = isLoading && albums.isEmpty() // Shimmer solo si estÃƒÆ’Ã‚Â¡ cargando Y la lista estÃƒÆ’Ã‚Â¡ vacÃƒÆ’Ã‚Â­a
                         )
                     }
                 }
@@ -2410,7 +2410,7 @@ fun AlbumGridItemRedesigned(
     val albumColorSchemePair by albumColorSchemePairFlow.collectAsState()
     val systemIsDark = LocalAudioBookPlayerDarkTheme.current
 
-    // 1. ObtÃƒÂ©n el colorScheme del tema actual aquÃƒÂ­, en el scope Composable.
+    // 1. ObtÃƒÆ’Ã‚Â©n el colorScheme del tema actual aquÃƒÆ’Ã‚Â­, en el scope Composable.
     val currentMaterialColorScheme = MaterialTheme.colorScheme
 
     val itemDesignColorScheme = remember(albumColorSchemePair, systemIsDark, currentMaterialColorScheme) {
@@ -2487,10 +2487,10 @@ fun AlbumGridItemRedesigned(
                     var isLoadingImage by remember { mutableStateOf(true) }
                     SmartImage(
                         model = album.bookArtUriString,
-                        contentDescription = "CarÃƒÂ¡tula de ${album.title}",
+                        contentDescription = "CarÃƒÆ’Ã‚Â¡tula de ${album.title}",
                         contentScale = ContentScale.Crop,
-                            // Reducido el tamaÃƒÂ±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
-                            // ContentScale.Crop se encargarÃƒÂ¡ de ajustar la imagen al aspect ratio.
+                            // Reducido el tamaÃƒÆ’Ã‚Â±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
+                            // ContentScale.Crop se encargarÃƒÆ’Ã‚Â¡ de ajustar la imagen al aspect ratio.
                             targetSize = Size(256, 256),
                         modifier = Modifier
                             .aspectRatio(3f / 2f)
@@ -2736,3 +2736,5 @@ fun LibraryPlaylistsTab(
         playerViewModel = playerViewModel,
     )
 }
+
+

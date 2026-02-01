@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
@@ -155,7 +155,7 @@ fun GenreDetailScreen(
                     onClick = {
                         if (uiState.tracks.isNotEmpty()) {
                             val randomSong = uiState.tracks.random()
-                            playerViewModel.showAndPlaySong(randomSong, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
+                            playerViewModel.showAndPlaySong(randomtrack, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -213,12 +213,12 @@ fun GenreDetailScreen(
                         items(sections, key = { it.id }) { section ->
                             when (section) {
                                 is SectionData.ArtistSection -> {
-                                    ArtistSectionCard(
-                                        artistName = section.authorName,
+                                    AuthorSectionCard(
+                                        authorName = section.authorName,
                                         albums = section.books,
-                                        onSongClick = { song ->
+                                        onSongClick = { track ->
                                             playerViewModel.showAndPlaySong(
-                                                song,
+                                                track,
                                                 uiState.tracks,
                                                 uiState.genre?.name ?: "Genre"
                                             )
@@ -242,7 +242,7 @@ private sealed class SectionData {
 
     data class AuthorSection(
         override val id: String,
-        val artistName: String,
+        val authorName: String,
         val albums: List<AlbumData>
     ) : SectionData()
 }
@@ -264,7 +264,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 
     for (item in groupedSongs) {
         when (item) {
-            is GroupedTrackListItem.ArtistHeader -> {
+            is GroupedTrackListItem.AuthorHeader -> {
                 // Save previous artist section if exists
                 if (currentArtist != null) {
                     // Save current album if exists
@@ -274,9 +274,9 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                         )
                     }
                     sections.add(
-                        SectionData.ArtistSection(
-                            id = "artist_${currentArtist}",
-                            artistName = currentArtist!!,
+                        SectionData.AuthorSection(
+                            id = "author_${currentArtist}",
+                            authorName = currentArtist!!,
                             albums = currentAlbums.toList()
                         )
                     )
@@ -318,9 +318,9 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
             )
         }
         sections.add(
-            SectionData.ArtistSection(
-                id = "artist_${currentArtist}",
-                artistName = currentArtist!!,
+            SectionData.AuthorSection(
+                id = "author_${currentArtist}",
+                authorName = currentArtist!!,
                 albums = currentAlbums.toList()
             )
         )
@@ -331,8 +331,8 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ArtistSectionCard(
-    artistName: String,
+private fun AuthorSectionCard(
+    authorName: String,
     albums: List<AlbumData>,
     onSongClick: (Track) -> Unit
 ) {
@@ -462,10 +462,10 @@ private fun AlbumSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             //contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            items(album.tracks, key = { it.id }) { song ->
+            items(album.songs, key = { it.id }) { track ->
                 SquareSongCard(
-                    song = song,
-                    onClick = { onSongClick(song) }
+                    track = track,
+                    onClick = { onSongClick(track) }
                 )
             }
         }
@@ -514,8 +514,8 @@ private fun SquareSongCard(
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     SmartImage(
-                        model = song.bookArtUriString,
-                        contentDescription = "Album art for ${song.title}",
+                        model = track.bookArtUriString,
+                        contentDescription = "Album art for ${track.title}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
@@ -526,7 +526,7 @@ private fun SquareSongCard(
 
                 // Song Info
                 Text(
-                    text = song.title,
+                    text = track.title,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -543,7 +543,7 @@ private fun SquareSongCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    song.duration.let { duration ->
+                    track.duration.let { duration ->
                         Text(
                             text = formatDuration(duration),
                             style = MaterialTheme.typography.labelSmall,
@@ -562,3 +562,4 @@ private fun SquareSongCard(
         }
     }
 }
+

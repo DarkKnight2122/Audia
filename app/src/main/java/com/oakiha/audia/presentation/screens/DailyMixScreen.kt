@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -156,24 +156,24 @@ fun DailyMixScreen(
         val track = selectedTrackForInfo!!
         val removeFromListTrigger = remember(dailyMixSongs) {
             {
-                playerViewModel.removeFromDailyMix(song.id)
+                playerViewModel.removeFromDailyMix(track.id)
             }
         }
         TrackInfoBottomSheet(
-            song = song,
-            isFavorite = favoriteTrackIds.contains(song.id),
-            onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(song) },
+            track = track,
+            isFavorite = favoriteTrackIds.contains(track.id),
+            onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(track) },
             onDismiss = { showSongInfoSheet = false },
             onPlaySong = {
-                playerViewModel.showAndPlaySong(song, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false)
+                playerViewModel.showAndPlaySong(track, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false)
                 showSongInfoSheet = false
             },
             onAddToQueue = {
-                playerViewModel.addSongToQueue(song)
+                playerViewModel.addSongToQueue(track)
                 showSongInfoSheet = false
             },
             onAddNextToQueue = {
-                playerViewModel.addSongNextToQueue(song)
+                playerViewModel.addSongNextToQueue(track)
                 showSongInfoSheet = false
             },
             onAddToPlayList = {
@@ -182,7 +182,7 @@ fun DailyMixScreen(
             onDeleteFromDevice = playerViewModel::deleteFromDevice,
             onNavigateToAlbum = {
                 // Assuming Screen object has a method to create a route
-                navController.navigate(Screen.BookDetail.createRoute(song.bookId))
+                navController.navigate(Screen.BookDetail.createRoute(track.bookId))
                 showSongInfoSheet = false
             },
             onNavigateToArtist = {
@@ -190,10 +190,10 @@ fun DailyMixScreen(
                 showSongInfoSheet = false
             },
             onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
-                playerViewModel.editTrackMetadata(song, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
+                playerViewModel.editTrackMetadata(track, newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate)
             },
             generateAiMetadata = { fields ->
-                playerViewModel.generateAiMetadata(song, fields)
+                playerViewModel.generateAiMetadata(track, fields)
             },
             removeFromListTrigger = removeFromListTrigger
         )
@@ -203,7 +203,7 @@ fun DailyMixScreen(
 
             PlaylistBottomSheet(
                 playlistUiState = playlistUiState,
-                song = song,
+                track = track,
                 onDismiss = { showPlaylistBottomSheet = false },
                 bottomBarHeight = bottomBarHeightDp,
                 playerViewModel = playerViewModel,
@@ -302,10 +302,10 @@ fun DailyMixScreen(
                     EnhancedTrackListItem(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        song = song,
-                        isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
-                        isPlaying = currentTrackId == song.id && isPlaying,
-                        onClick = { playerViewModel.showAndPlaySong(song, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false) },
+                        track = song,
+                        isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
+                        isPlaying = currentTrackId == track.id && isPlaying,
+                        onClick = { playerViewModel.showAndPlaySong(track, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false) },
                         onMoreOptionsClick = {
                             selectedTrackForInfo = it
                             showSongInfoSheet = true
@@ -421,9 +421,9 @@ private fun ExpressiveDailyMixHeader(
                     }
                     val shape = threeShapeSwitch(index, thirdShapeCornerRadius = 30.dp)
 
-                    // --- INICIO DE LA CORRECCIÃƒâ€œN ---
+                    // --- INICIO DE LA CORRECCIÃƒÆ’Ã¢â‚¬Å“N ---
                     if (index == 2) {
-                        // Para la 3ra imagen, usamos Modifier.layout para controlar la mediciÃƒÂ³n y el posicionamiento.
+                        // Para la 3ra imagen, usamos Modifier.layout para controlar la mediciÃƒÆ’Ã‚Â³n y el posicionamiento.
                         Box(
                             modifier = Modifier.layout { measurable, constraints ->
                                 // 1. Medimos el contenido (la imagen) para que sea un cuadrado perfecto de `size` x `size`,
@@ -432,8 +432,8 @@ private fun ExpressiveDailyMixHeader(
                                     Constraints.fixed(width = size.roundToPx(), height = size.roundToPx())
                                 )
 
-                                // 2. Le decimos al Row que nuestro layout ocuparÃƒÂ¡ el ancho que ÃƒÂ©l nos dio (`constraints.maxWidth`),
-                                // de esta forma no empujamos a los otros elementos. La altura serÃƒÂ¡ la de nuestro cuadrado.
+                                // 2. Le decimos al Row que nuestro layout ocuparÃƒÆ’Ã‚Â¡ el ancho que ÃƒÆ’Ã‚Â©l nos dio (`constraints.maxWidth`),
+                                // de esta forma no empujamos a los otros elementos. La altura serÃƒÆ’Ã‚Â¡ la de nuestro cuadrado.
                                 layout(constraints.maxWidth, placeable.height) {
                                     // 3. Colocamos nuestro contenido cuadrado (`placeable`) dentro del espacio asignado.
                                     // Lo centramos horizontalmente para que se desborde por ambos lados si es necesario.
@@ -452,12 +452,12 @@ private fun ExpressiveDailyMixHeader(
                                     model = artUrl ?: R.drawable.rounded_book_24,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize() // Llena el tamaÃƒÂ±o cuadrado que le dimos.
+                                    modifier = Modifier.fillMaxSize() // Llena el tamaÃƒÆ’Ã‚Â±o cuadrado que le dimos.
                                 )
                             }
                         }
                     } else {
-                        // LÃƒÂ³gica original para las otras dos imÃƒÂ¡genes
+                        // LÃƒÆ’Ã‚Â³gica original para las otras dos imÃƒÆ’Ã‚Â¡genes
                         Box(
                             modifier = Modifier
                                 .size(size)
@@ -472,7 +472,7 @@ private fun ExpressiveDailyMixHeader(
                             )
                         }
                     }
-                    // --- FIN DE LA CORRECCIÃƒâ€œN ---
+                    // --- FIN DE LA CORRECCIÃƒÆ’Ã¢â‚¬Å“N ---
                 }
             }
         }
@@ -508,12 +508,12 @@ private fun ExpressiveDailyMixHeader(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Daily Mix", style = MaterialTheme.typography.headlineLarge,
+                    text = "Daily Mix", style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = (-1.2).sp, lineHeight = 38.sp),
                     fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${songs.size} Songs • ${formatDuration(totalDuration)}",
+                    text = "${songs.size} Songs â€¢ ${formatDuration(totalDuration)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
@@ -537,3 +537,5 @@ private fun ExpressiveDailyMixHeader(
     }
     Trace.endSection()
 }
+
+

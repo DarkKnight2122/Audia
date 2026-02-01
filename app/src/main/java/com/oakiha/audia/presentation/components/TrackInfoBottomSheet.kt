@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.components
+﻿package com.oakiha.audia.presentation.components
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -149,7 +149,7 @@ fun TrackInfoBottomSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                // Fila para la carÃ¡tula del Ã¡lbum y el tÃ­tulo
+                // Fila para la carÃƒÂ¡tula del ÃƒÂ¡lbum y el tÃƒÂ­tulo
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -158,7 +158,7 @@ fun TrackInfoBottomSheet(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SmartImage(
-                        model = song.bookArtUriString,
+                        model = track.bookArtUriString,
                         contentDescription = "Album Art",
                         shape = bookArtShape,
                         modifier = Modifier.size(80.dp),
@@ -174,7 +174,7 @@ fun TrackInfoBottomSheet(
                             modifier = Modifier.padding(end = 4.dp),
                             //fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Light,
-                            text = song.title
+                            text = track.title
                         )
                     }
                     FilledTonalIconButton(
@@ -197,7 +197,7 @@ fun TrackInfoBottomSheet(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Fila de botones de acciÃ³n con altura intrÃ­nseca
+                // Fila de botones de acciÃƒÂ³n con altura intrÃƒÂ­nseca
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -223,7 +223,7 @@ fun TrackInfoBottomSheet(
                         }
                     )
 
-                    // BotÃ³n de Favorito Modificado con animaciÃ³n y altura
+                    // BotÃƒÂ³n de Favorito Modificado con animaciÃƒÂ³n y altura
                     FilledIconButton(
                         modifier = Modifier
                             .weight(0.25f)
@@ -242,7 +242,7 @@ fun TrackInfoBottomSheet(
                         )
                     }
 
-                    // BotÃ³n de Compartir Modificado con altura
+                    // BotÃƒÂ³n de Compartir Modificado con altura
                     FilledTonalIconButton(
                         modifier = Modifier
                             .weight(0.25f)
@@ -251,17 +251,17 @@ fun TrackInfoBottomSheet(
                             try {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "audio/*" // Tipo MIME para archivos de audio
-                                    putExtra(Intent.EXTRA_STREAM, song.contentUriString.toUri())
+                                    putExtra(Intent.EXTRA_STREAM, track.contentUriString.toUri())
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necesario para URIs de contenido
                                 }
                                 // Inicia el chooser para que el usuario elija la app para compartir
                                 context.startActivity(Intent.createChooser(shareIntent, "Share Song File Via"))
                             } catch (e: Exception) {
-                                // Manejar el caso donde la URI es invÃ¡lida o no hay app para compartir
+                                // Manejar el caso donde la URI es invÃƒÂ¡lida o no hay app para compartir
                                 Toast.makeText(context, "Could not share song: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
                         },
-                        shape = CircleShape // Mantenemos CircleShape para el botÃ³n de compartir
+                        shape = CircleShape // Mantenemos CircleShape para el botÃƒÂ³n de compartir
                     ) {
                         Icon(
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
@@ -281,12 +281,12 @@ fun TrackInfoBottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // BotÃ³n de AÃ±adir al Final de la Cola
+                    // BotÃƒÂ³n de AÃƒÂ±adir al Final de la Cola
                     FilledTonalButton(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.4f)
-                            .heightIn(min = 66.dp), // Altura mÃ­nima recomendada para botones
+                            .heightIn(min = 66.dp), // Altura mÃƒÂ­nima recomendada para botones
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -301,7 +301,7 @@ fun TrackInfoBottomSheet(
                         Spacer(Modifier.width(14.dp))
                         Text("Add to Queue")
                     }
-                    // BotÃ³n de AÃ±adir Next en la Cola
+                    // BotÃƒÂ³n de AÃƒÂ±adir Next en la Cola
                     FilledTonalButton(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -329,7 +329,7 @@ fun TrackInfoBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         //.weight(0.5f)
-                        .heightIn(min = 66.dp), // Altura mÃ­nima recomendada para botones
+                        .heightIn(min = 66.dp), // Altura mÃƒÂ­nima recomendada para botones
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -378,22 +378,22 @@ fun TrackInfoBottomSheet(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // SecciÃ³n de Detalles
+                // SecciÃƒÂ³n de Detalles
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     ListItem(
                         modifier = Modifier.clip(shape = listItemShape),
-                        headlineContent = { Text("Duration") },
-                        supportingContent = { Text(formatDuration(song.duration)) },
+                        headlineContent = { Text(text = "Duration") },
+                        supportingContent = { Text(text = formatDuration(track.duration)) },
                         leadingContent = { Icon(Icons.Rounded.Schedule, contentDescription = "Duration icon") }
                     )
 
-                    if (!song.genre.isNullOrEmpty()) {
+                    if (!track.genre.isNullOrEmpty()) {
                         ListItem(
                             modifier = Modifier.clip(shape = listItemShape),
-                            headlineContent = { Text("Genre") },
-                            supportingContent = { Text(song.genre) }, // Safe call si es nullOrEmpty
+                            headlineContent = { Text(text = "Genre") },
+                            supportingContent = { Text(text = track.genre) }, // Safe call si es nullOrEmpty
                             leadingContent = { Icon(Icons.Rounded.MusicNote, contentDescription = "Genre icon") }
                         )
                     }
@@ -402,8 +402,8 @@ fun TrackInfoBottomSheet(
                         modifier = Modifier
                             .clip(shape = listItemShape)
                             .clickable(onClick = onNavigateToAlbum),
-                        headlineContent = { Text("Album") },
-                        supportingContent = { Text(song.book) },
+                        headlineContent = { Text(text = "Album") },
+                        supportingContent = { Text(text = track.book) },
                         leadingContent = { Icon(Icons.Rounded.Album, contentDescription = "Album icon") }
                     )
 
@@ -411,15 +411,15 @@ fun TrackInfoBottomSheet(
                         modifier = Modifier
                             .clip(shape = listItemShape)
                             .clickable(onClick = onNavigateToArtist),
-                        headlineContent = { Text("Artist") },
-                        supportingContent = { Text(song.displayAuthor) },
+                        headlineContent = { Text(text = "Artist") },
+                        supportingContent = { Text(text = track.displayAuthor) },
                         leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Artist icon") }
                     )
                     ListItem(
                         modifier = Modifier
                             .clip(shape = listItemShape),
-                        headlineContent = { Text("Path") },
-                        supportingContent = { Text(song.path) },
+                        headlineContent = { Text(text = "Path") },
+                        supportingContent = { Text(text = track.path) },
                         leadingContent = { Icon(Icons.Rounded.AudioFile, contentDescription = "File icon") }
                     )
                 }
@@ -472,3 +472,4 @@ fun TrackInfoBottomSheet(
         generateAiMetadata = generateAiMetadata
     )
 }
+

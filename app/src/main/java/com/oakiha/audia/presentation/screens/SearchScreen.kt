@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.screens
+﻿package com.oakiha.audia.presentation.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -200,7 +200,7 @@ fun SearchScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // CORREGIDO: Agregamos un padding mÃƒÂ­nimo para evitar crashes
+            // CORREGIDO: Agregamos un padding mÃƒÆ’Ã‚Â­nimo para evitar crashes
             val safePadding = maxOf(0.dp, searchbarHorizontalPadding)
 
             Box(
@@ -717,7 +717,7 @@ fun SearchResultsList(
                                     }
                                 }
                                 EnhancedTrackListItem(
-                                    song = item.track,
+                                    track = item.track,
                                     isPlaying = isPlaying,
                                     isCurrentSong = currentPlayingSongId == item.track.id,
                                     onMoreOptionsClick = onSongMoreOptionsClick,
@@ -1037,14 +1037,14 @@ fun SearchResultPlaylistItem(
 @Composable
 fun SearchFilterChip(
     filterType: SearchFilterType,
-    currentFilter: SearchFilterType, // Este valor deberÃƒÂ­a provenir del estado de tu PlayerViewModel
+    currentFilter: SearchFilterType, // Este valor deberÃƒÆ’Ã‚Â­a provenir del estado de tu PlayerViewModel
     playerViewModel: PlayerViewModel,
     modifier: Modifier = Modifier
 ) {
     val selected = filterType == currentFilter
 
     FilterChip(
-        selected = selected, // FilterChip tiene un parÃƒÂ¡metro 'selected'
+        selected = selected, // FilterChip tiene un parÃƒÆ’Ã‚Â¡metro 'selected'
         onClick = { playerViewModel.updateSearchFilter(filterType) },
         label = { Text(filterType.name.lowercase().replaceFirstChar { it.titlecase() }) },
         modifier = modifier,
@@ -1076,3 +1076,4 @@ fun SearchFilterChip(
          }
     )
 }
+
