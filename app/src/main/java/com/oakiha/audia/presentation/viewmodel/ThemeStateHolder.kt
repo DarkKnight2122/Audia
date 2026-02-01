@@ -101,7 +101,7 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    // LRU Cache for individual album schemes
+    // LRU Cache for individual book schemes
     private val individualAlbumColorSchemes = object : LinkedHashMap<String, MutableStateFlow<ColorSchemePair?>>(
         32, 0.75f, true
     ) {
@@ -110,7 +110,7 @@ class ThemeStateHolder @Inject constructor(
         }
     }
 
-    fun getAlbumColorSchemeFlow(uriString: String): StateFlow<ColorSchemePair?> {
+    fun getBookColorSchemeFlow(uriString: String): StateFlow<ColorSchemePair?> {
         val existingFlow = individualAlbumColorSchemes[uriString]
         if (existingFlow != null) return existingFlow.asStateFlow()
 
@@ -148,7 +148,7 @@ class ThemeStateHolder @Inject constructor(
              activeFlow.value = newScheme
          }
          
-         // Also update the main current album art scheme if it matches the one we are tracking
+         // Also update the main current book art scheme if it matches the one we are tracking
          // We use equality check. If they are the same string object or equal content.
          if (currentBookArtUri == uriString) {
              android.util.Log.d("ThemeStateHolder", "Updating global color scheme flow directly.")

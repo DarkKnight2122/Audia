@@ -144,10 +144,10 @@ class MediaStoreTrackRepository @Inject constructor(
                     val track = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
-                        artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
+                        author = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
                         authorId = cursor.getLong(authorIdCol),
-                        artists = emptyList(), // TODO: Secondary query for Multi-Artist or split string
-                        album = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
+                        authors = emptyList(), // TODO: Secondary query for Multi-Author or split string
+                        book = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
                         bookId = bookId,
                         bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
                         path = path,
@@ -174,7 +174,7 @@ class MediaStoreTrackRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("MediaStoreTrackRepository", "Error querying MediaStore", e)
         }
-        songs
+        tracks
     }
 
     private fun getTrackIdToGenreMap(contentResolver: android.content.ContentResolver): Map<Long, String> {
@@ -204,7 +204,7 @@ class MediaStoreTrackRepository @Inject constructor(
                                 if (audioIdCol != -1) {
                                     while (membersCursor.moveToNext()) {
                                         val trackId = membersCursor.getLong(audioIdCol)
-                                        // If a song has multiple genres, this simple map keeps the last one found.
+                                        // If a track has multiple genres, this simple map keeps the last one found.
                                         // Could be improved to join them if needed.
                                         genreMap[trackId] = genreName 
                                     }
@@ -223,7 +223,7 @@ class MediaStoreTrackRepository @Inject constructor(
     }
 
     override fun getTracksByBook(bookId: Long): Flow<List<Track>> {
-         // Reusing getTracks() and filtering might be inefficient for one album, 
+         // Reusing getTracks() and filtering might be inefficient for one book, 
          // but consistent with the reactive source of truth.
          // Optimization: Create specific query flow if needed.
          return getTracks().flowOn(Dispatchers.IO).combine(kotlinx.coroutines.flow.flowOf(bookId)) { tracks, id ->

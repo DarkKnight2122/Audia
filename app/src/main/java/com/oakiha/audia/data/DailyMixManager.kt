@@ -109,7 +109,7 @@ class DailyMixManager @Inject constructor(
         }
 
         val raw = runCatching { legacyScoresFile.readText() }
-            .onFailure { Log.e(TAG, "Failed to read legacy song scores file", it) }
+            .onFailure { Log.e(TAG, "Failed to read legacy track scores file", it) }
             .getOrNull()
             ?.takeIf { it.isNotBlank() }
             ?: return mutableMapOf()
@@ -118,7 +118,7 @@ class DailyMixManager @Inject constructor(
             val element = gson.fromJson(raw, JsonElement::class.java)
             parseEngagementElement(element)
         }.getOrElse { throwable ->
-            Log.e(TAG, "Failed to parse legacy song scores file", throwable)
+            Log.e(TAG, "Failed to parse legacy track scores file", throwable)
             mutableMapOf()
         }
     }
@@ -219,7 +219,7 @@ class DailyMixManager @Inject constructor(
     }
 
     /**
-     * Records a song play using Room's atomic upsert operation.
+     * Records a track play using Room's atomic upsert operation.
      * More efficient than JSON read-modify-write.
      */
     fun recordPlay(
@@ -423,8 +423,8 @@ class DailyMixManager @Inject constructor(
             val filler = allTracks
                 .filterNot { orderedResult.any { selected -> selected.id == it.id } }
                 .shuffled(random)
-            for (song in filler) {
-                orderedResult.add(song)
+            for (track in filler) {
+                orderedResult.add(track)
                 if (orderedResult.size >= limit) break
             }
         }

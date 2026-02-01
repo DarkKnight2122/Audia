@@ -38,7 +38,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
@@ -226,8 +226,8 @@ fun LibraryScreen(
     var showTabSwitcherSheet by remember { mutableStateOf(false) }
 
     val stableOnMoreOptionsClick: (Track) -> Unit = remember {
-        { song ->
-            playerViewModel.selectSongForInfo(song)
+        { track ->
+            playerViewModel.selectSongForInfo(track)
             showTrackInfoBottomSheet = true
         }
     }
@@ -601,7 +601,7 @@ fun LibraryScreen(
                                     val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
                                     
                                     LibraryTracksTab(
-                                        songs = allTracks,
+                                        tracks = allTracks,
                                         isLoading = isLoading,
                                         stablePlayerState = stablePlayerState,
                                         playerViewModel = playerViewModel,
@@ -612,7 +612,7 @@ fun LibraryScreen(
                                     )
                                 }
                                 LibraryTabId.ALBUMS -> {
-                                    val albums by remember {
+                                    val books by remember {
                                         playerViewModel.playerUiState
                                             .map { it.books }
                                             .distinctUntilChanged()
@@ -622,7 +622,7 @@ fun LibraryScreen(
                                         playerViewModel.playerUiState
                                             .map { it.isLoadingLibraryCategories }
                                             .distinctUntilChanged()
-                                    }.collectAsState(initial = albums.isEmpty())
+                                    }.collectAsState(initial = books.isEmpty())
 
                                     val stableOnAlbumClick: (Long) -> Unit = remember(navController) {
                                         { bookId: Long ->
@@ -630,7 +630,7 @@ fun LibraryScreen(
                                         }
                                     }
                                     LibraryAlbumsTab(
-                                        albums = albums,
+                                        books = books,
                                         isLoading = isLoading,
                                         playerViewModel = playerViewModel,
                                         bottomBarHeight = bottomBarHeightDp,
@@ -641,7 +641,7 @@ fun LibraryScreen(
                                 }
 
                                 LibraryTabId.ARTISTS -> {
-                                    val artists by remember {
+                                    val authors by remember {
                                         playerViewModel.playerUiState
                                             .map { it.authors }
                                             .distinctUntilChanged()
@@ -651,10 +651,10 @@ fun LibraryScreen(
                                         playerViewModel.playerUiState
                                             .map { it.isLoadingLibraryCategories }
                                             .distinctUntilChanged()
-                                    }.collectAsState(initial = artists.isEmpty())
+                                    }.collectAsState(initial = authors.isEmpty())
 
                                     LibraryArtistsTab(
-                                        artists = artists,
+                                        authors = authors,
                                         isLoading = isLoading,
                                         playerViewModel = playerViewModel,
                                         bottomBarHeight = bottomBarHeightDp,
@@ -727,8 +727,8 @@ fun LibraryScreen(
                                                     )
                                                 )
                                             },
-                                            onPlaySong = { song, queue ->
-                                                playerViewModel.showAndPlaySong(song, queue, currentFolder?.name ?: "Folder")
+                                            onPlaySong = { track, queue ->
+                                                playerViewModel.showAndPlaySong(track, queue, currentFolder?.name ?: "Folder")
                                             },
                                             onMoreOptionsClick = stableOnMoreOptionsClick,
                                             isPlaylistView = playerUiState.isFoldersPlaylistView,
@@ -891,7 +891,7 @@ fun LibraryScreen(
 
         if (currentTrack != null) {
             TrackInfoBottomSheet(
-                song = currentTrack,
+                track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     // Directly use PlayerViewModel's method to toggle, which should handle UserPreferencesRepository
@@ -938,7 +938,7 @@ fun LibraryScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentTrack,
+                    track = currentTrack,
                     onDismiss = { showPlaylistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
@@ -1270,7 +1270,7 @@ fun LibraryFoldersTab(
     onNavigateBack: () -> Unit,
     onFolderClick: (String) -> Unit,
     onFolderAsPlaylistClick: (AudiobookFolder) -> Unit,
-    onPlaySong: (Song, List<Track>) -> Unit,
+    onPlaySong: (Track, List<Track>) -> Unit,
     stablePlayerState: StablePlayerState,
     bottomBarHeight: Dp,
     onMoreOptionsClick: (Track) -> Unit,
@@ -1329,10 +1329,10 @@ fun LibraryFoldersTab(
         }.toImmutableList()
 
         val songsToShow = remember(activeFolder, currentSortOption) {
-            val songs = activeFolder?.tracks ?: emptyList()
+            val tracks = activeFolder?.tracks ?: emptyList()
             when (currentSortOption) {
-                SortOption.FolderNameZA -> songs.sortedByDescending { it.title.lowercase() }
-                else -> songs.sortedBy { it.title.lowercase() }
+                SortOption.FolderNameZA -> tracks.sortedByDescending { it.title.lowercase() }
+                else -> tracks.sortedBy { it.title.lowercase() }
             }
         }.toImmutableList()
         val shouldShowLoading = isLoading && itemsToShow.isEmpty() && songsToShow.isEmpty() && isRoot
@@ -1420,19 +1420,19 @@ fun LibraryFoldersTab(
                                 }
                             }
 
-                            items(songsToShow, key = { "song_${it.id}" }) { song ->
+                            items(songsToShow, key = { "song_${it.id}" }) { track ->
                                 EnhancedTrackListItem(
-                                    track = song,
+                                    track = track,
                                     isPlaying = stablePlayerState.currentTrack?.id == track.id && stablePlayerState.isPlaying,
                                     isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     onMoreOptionsClick = { onMoreOptionsClick(track) },
                                     onClick = {
-                                        val songIndex = songsToShow.indexOf(song)
+                                        val songIndex = songsToShow.indexOf(track)
                                         if (songIndex != -1) {
                                             val songsToPlay =
                                                 songsToShow.subList(songIndex, songsToShow.size)
                                                     .toList()
-                                            onPlaySong(song, songsToPlay)
+                                            onPlaySong(track, songsToPlay)
                                         }
                                     }
                                 )
@@ -1462,7 +1462,7 @@ fun FolderPlaylistItem(folder: AudiobookFolder, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             PlaylistArtCollage(
-                songs = previewSongs,
+                tracks = previewSongs,
                 modifier = Modifier.size(48.dp)
             )
 
@@ -1522,7 +1522,7 @@ private fun flattenFolders(folders: List<AudiobookFolder>): List<AudiobookFolder
 }
 
 private fun AudiobookFolder.collectAllSongs(): List<Track> {
-    return songs + subFolders.flatMap { it.collectAllSongs() }
+    return tracks + subFolders.flatMap { it.collectAllSongs() }
 }
 
 // NUEVA PestaÃƒÆ’Ã‚Â±a para Favoritos
@@ -1559,8 +1559,8 @@ fun LibraryFavoritesTab(
             ) {
                 Icon(Icons.Filled.FavoriteBorder, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
-                Text("No liked songs yet.", style = MaterialTheme.typography.titleMedium)
-                Text("Touch the heart icon in the player to add songs.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                Text("No liked tracks yet.", style = MaterialTheme.typography.titleMedium)
+                Text("Touch the heart icon in the player to add tracks.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             }
         }
     } else {
@@ -1598,17 +1598,17 @@ fun LibraryFavoritesTab(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
                 ) {
-                    items(favoriteSongs, key = { "fav_${it.id}" }) { song ->
+                    items(favoriteSongs, key = { "fav_${it.id}" }) { track ->
                         val isPlayingThisSong =
                             track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                         EnhancedTrackListItem(
-                            track = song,
+                            track = track,
                             isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                             isPlaying = isPlayingThisSong,
                             onMoreOptionsClick = { onMoreOptionsClick(track) },
                             onClick = {
                                 playerViewModel.showAndPlaySong(
-                                    song,
+                                    track,
                                     favoriteSongs,
                                     "Liked Songs"
                                 )
@@ -1624,7 +1624,7 @@ fun LibraryFavoritesTab(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryTracksTab(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     isLoadingInitial: Boolean,
     // isLoadingMore: Boolean, // Removed
     // canLoadMore: Boolean, // Removed
@@ -1640,14 +1640,14 @@ fun LibraryTracksTab(
     val imageLoader = context.imageLoader
 
     // Prefetching logic for LibraryTracksTab
-    LaunchedEffect(songs, listState) {
+    LaunchedEffect(tracks, listState) {
         snapshotFlow { listState.layoutInfo }
             .distinctUntilChanged()
             .collect { layoutInfo ->
                 val visibleItemsInfo = layoutInfo.visibleItemsInfo
-                if (visibleItemsInfo.isNotEmpty() && songs.isNotEmpty()) {
+                if (visibleItemsInfo.isNotEmpty() && tracks.isNotEmpty()) {
                     val lastVisibleItemIndex = visibleItemsInfo.last().index
-                    val totalItemsCount = songs.size
+                    val totalItemsCount = tracks.size
                     val prefetchThreshold = 10 // Start prefetching when 10 items are left
                     val prefetchCount = 20    // Prefetch next 20 items
 
@@ -1656,8 +1656,8 @@ fun LibraryTracksTab(
                          val endIndexToPrefetch = (startIndexToPrefetch + prefetchCount).coerceAtMost(totalItemsCount)
 
                         (startIndexToPrefetch until endIndexToPrefetch).forEach { indexToPrefetch ->
-                            val track = songs.getOrNull(indexToPrefetch)
-                            song?.bookArtUriString?.let { uri ->
+                            val track = tracks.getOrNull(indexToPrefetch)
+                            track?.bookArtUriString?.let { uri ->
                                 val request = ImageRequest.Builder(context)
                                     .data(uri)
                                     .size(Size(168, 168)) // Same size as in EnhancedTrackListItem
@@ -1670,14 +1670,14 @@ fun LibraryTracksTab(
             }
     }
 
-    if (isLoadingInitial && songs.isEmpty()) {
+    if (isLoadingInitial && tracks.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoadingIndicator() // O Shimmer para la lista completa
         }
     } else {
         // Determine content based on loading state and data availability
         when {
-            isLoadingInitial && songs.isEmpty() -> { // Este caso ya estÃƒÆ’Ã‚Â¡ cubierto arriba, pero es bueno para claridad
+            isLoadingInitial && tracks.isEmpty() -> { // Este caso ya estÃƒÆ’Ã‚Â¡ cubierto arriba, pero es bueno para claridad
                 val allTracksPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -1711,7 +1711,7 @@ fun LibraryTracksTab(
                         items(15) {
                             EnhancedTrackListItem(
                                 track = Track.emptyTrack(), isPlaying = false, isLoading = true,
-                                isCurrentSong = songs.isNotEmpty() && stablePlayerState.currentTrack == Track.emptyTrack(),
+                                isCurrentSong = tracks.isNotEmpty() && stablePlayerState.currentTrack == Track.emptyTrack(),
                                 onMoreOptionsClick = {}, onClick = {}
                             )
                         }
@@ -1719,7 +1719,7 @@ fun LibraryTracksTab(
                 }
             }
 
-            songs.isEmpty() && !isLoadingInitial -> { // canLoadMore removed from condition
+            tracks.isEmpty() && !isLoadingInitial -> { // canLoadMore removed from condition
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -1777,7 +1777,7 @@ fun LibraryTracksTab(
                             contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
                         ) {
                             item(key = "songs_top_spacer") { Spacer(Modifier.height(0.dp)) }
-                            items(songs, key = { "song_${it.id}" }) { song ->
+                            items(tracks, key = { "song_${it.id}" }) { track ->
                                 val isPlayingThisSong =
                                     track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
 
@@ -1790,12 +1790,12 @@ fun LibraryTracksTab(
                                             onMoreOptionsClick(trackFromListItem)
                                         }
                                     }
-                                val rememberedOnClick: () -> Unit = remember(song) {
-                                    { playerViewModel.showAndPlaySong(song) }
+                                val rememberedOnClick: () -> Unit = remember(track) {
+                                    { playerViewModel.showAndPlaySong(track) }
                                 }
 
                                 EnhancedTrackListItem(
-                                    track = song,
+                                    track = track,
                                     isPlaying = isPlayingThisSong,
                                     isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     isLoading = false,
@@ -1803,7 +1803,7 @@ fun LibraryTracksTab(
                                     onClick = rememberedOnClick
                                 )
                             }
-                            // isLoadingMore indicator removed as all songs are loaded at once.
+                            // isLoadingMore indicator removed as all tracks are loaded at once.
                             // if (isLoadingMore) {
                             //     item {
                             //         Box(
@@ -1834,7 +1834,7 @@ fun LibraryTracksTab(
 
 /**
  * Paginated version of LibraryTracksTab using Paging 3 for efficient memory usage.
- * Displays songs in pages, loading only what's needed for the current viewport.
+ * Displays tracks in pages, loading only what's needed for the current viewport.
  */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -1890,7 +1890,7 @@ fun LibraryTracksTabPaginated(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Error loading songs", style = MaterialTheme.typography.titleMedium)
+                    Text("Error loading tracks", style = MaterialTheme.typography.titleMedium)
                     Text(
                         error.localizedMessage ?: "Unknown error",
                         style = MaterialTheme.typography.bodySmall,
@@ -1966,21 +1966,21 @@ fun LibraryTracksTabPaginated(
                         items(
                             count = paginatedSongs.itemCount,
                             key = paginatedSongs.itemKey { "song_${it.id}" },
-                            contentType = paginatedSongs.itemContentType { "song" }
+                            contentType = paginatedSongs.itemContentType { "track" }
                         ) { index ->
                             val track = paginatedSongs[index]
-                            if (song != null) {
+                            if (track != null) {
                                 val isPlayingThisSong = track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                                 
                                 val rememberedOnMoreOptionsClick: (Track) -> Unit = remember(onMoreOptionsClick) {
                                     { trackFromListItem -> onMoreOptionsClick(trackFromListItem) }
                                 }
-                                val rememberedOnClick: () -> Unit = remember(song) {
-                                    { playerViewModel.showAndPlaySong(song) }
+                                val rememberedOnClick: () -> Unit = remember(track) {
+                                    { playerViewModel.showAndPlaySong(track) }
                                 }
                                 
                                 EnhancedTrackListItem(
-                                    track = song,
+                                    track = track,
                                     isPlaying = isPlayingThisSong,
                                     isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     isLoading = false,
@@ -2143,7 +2143,7 @@ fun EnhancedTrackListItem(
             }
         }
     } else {
-        // Actual Song Item Layout
+        // Actual Track Item Layout
         var applyTextMarquee by remember { mutableStateOf(false) }
 
         Surface(
@@ -2211,7 +2211,7 @@ fun EnhancedTrackListItem(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = song.displayAuthor,
+                        text = track.displayAuthor,
                         style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-0.3).sp, lineHeight = 18.sp),
                         color = contentColor.copy(alpha = 0.7f),
                         maxLines = 1,
@@ -2252,7 +2252,7 @@ fun EnhancedTrackListItem(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryAlbumsTab(
-    albums: ImmutableList<Book>,
+    books: ImmutableList<Book>,
     isLoading: Boolean,
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
@@ -2265,14 +2265,14 @@ fun LibraryAlbumsTab(
     val imageLoader = context.imageLoader
 
     // Prefetching logic for LibraryAlbumsTab
-    LaunchedEffect(albums, gridState) {
+    LaunchedEffect(books, gridState) {
         snapshotFlow { gridState.layoutInfo }
             .distinctUntilChanged()
             .collect { layoutInfo ->
                 val visibleItemsInfo = layoutInfo.visibleItemsInfo
-                if (visibleItemsInfo.isNotEmpty() && albums.isNotEmpty()) {
+                if (visibleItemsInfo.isNotEmpty() && books.isNotEmpty()) {
                     val lastVisibleItemIndex = visibleItemsInfo.last().index
-                    val totalItemsCount = albums.size
+                    val totalItemsCount = books.size
                     val prefetchThreshold = 5 // Start prefetching when 5 items are left to be displayed from current visible ones
                     val prefetchCount = 10 // Prefetch next 10 items
 
@@ -2281,8 +2281,8 @@ fun LibraryAlbumsTab(
                         val endIndexToPrefetch = (startIndexToPrefetch + prefetchCount).coerceAtMost(totalItemsCount)
 
                         (startIndexToPrefetch until endIndexToPrefetch).forEach { indexToPrefetch ->
-                            val book = albums.getOrNull(indexToPrefetch)
-                            album?.bookArtUriString?.let { uri ->
+                            val book = books.getOrNull(indexToPrefetch)
+                            book?.bookArtUriString?.let { uri ->
                                 val request = ImageRequest.Builder(context)
                                     .data(uri)
                                     .size(Size(256, 256)) // Same size as in AlbumGridItemRedesigned
@@ -2295,7 +2295,7 @@ fun LibraryAlbumsTab(
             }
     }
 
-    if (isLoading && albums.isEmpty()) {
+    if (isLoading && books.isEmpty()) {
         // Show skeleton grid during loading
         LazyVerticalGrid(
             modifier = Modifier
@@ -2320,20 +2320,20 @@ fun LibraryAlbumsTab(
             }
             items(8) { // Show 8 skeleton items (4 rows x 2 columns)
                 AlbumGridItemRedesigned(
-                    album = Album.empty(),
+                    book = Book.empty(),
                     albumColorSchemePairFlow = MutableStateFlow(null),
                     onClick = {},
                     isLoading = true
                 )
             }
         }
-    } else if (albums.isEmpty() && !isLoading) { // canLoadMore removed
+    } else if (books.isEmpty() && !isLoading) { // canLoadMore removed
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Filled.Album, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                Text("No albums found.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Filled.Book, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                Text("No books found.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     } else {
@@ -2372,15 +2372,15 @@ fun LibraryAlbumsTab(
                     item(key = "albums_top_spacer", span = { GridItemSpan(maxLineSpan) }) {
                         Spacer(Modifier.height(4.dp))
                     }
-                    items(albums, key = { "album_${it.id}" }) { album ->
+                    items(books, key = { "album_${it.id}" }) { book ->
                         val albumSpecificColorSchemeFlow =
-                            playerViewModel.themeStateHolder.getAlbumColorSchemeFlow(album.bookArtUriString ?: "")
-                        val rememberedOnClick = remember(album.id) { { onAlbumClick(album.id) } }
+                            playerViewModel.themeStateHolder.getBookColorSchemeFlow(book.bookArtUriString ?: "")
+                        val rememberedOnClick = remember(book.id) { { onAlbumClick(book.id) } }
                         AlbumGridItemRedesigned(
-                            album = album,
+                            book = book,
                             albumColorSchemePairFlow = albumSpecificColorSchemeFlow,
                             onClick = rememberedOnClick,
-                            isLoading = isLoading && albums.isEmpty() // Shimmer solo si estÃƒÆ’Ã‚Â¡ cargando Y la lista estÃƒÆ’Ã‚Â¡ vacÃƒÆ’Ã‚Â­a
+                            isLoading = isLoading && books.isEmpty() // Shimmer solo si estÃƒÆ’Ã‚Â¡ cargando Y la lista estÃƒÆ’Ã‚Â¡ vacÃƒÆ’Ã‚Â­a
                         )
                     }
                 }
@@ -2402,7 +2402,7 @@ fun LibraryAlbumsTab(
 
 @Composable
 fun AlbumGridItemRedesigned(
-    album: Book,
+    book: Book,
     albumColorSchemePairFlow: StateFlow<ColorSchemePair?>,
     onClick: () -> Unit,
     isLoading: Boolean = false
@@ -2486,8 +2486,8 @@ fun AlbumGridItemRedesigned(
                 Box(contentAlignment = Alignment.BottomStart) {
                     var isLoadingImage by remember { mutableStateOf(true) }
                     SmartImage(
-                        model = album.bookArtUriString,
-                        contentDescription = "CarÃƒÆ’Ã‚Â¡tula de ${album.title}",
+                        model = book.bookArtUriString,
+                        contentDescription = "CarÃƒÆ’Ã‚Â¡tula de ${book.title}",
                         contentScale = ContentScale.Crop,
                             // Reducido el tamaÃƒÆ’Ã‚Â±o para mejorar el rendimiento del scroll, como se sugiere en el informe.
                             // ContentScale.Crop se encargarÃƒÆ’Ã‚Â¡ de ajustar la imagen al aspect ratio.
@@ -2526,15 +2526,15 @@ fun AlbumGridItemRedesigned(
                         .padding(12.dp)
                 ) {
                     Text(
-                        album.title,
+                        book.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = onGradientColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(album.author, style = MaterialTheme.typography.bodySmall, color = onGradientColor.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("${album.trackCount} Songs", style = MaterialTheme.typography.bodySmall, color = onGradientColor.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(book.author, style = MaterialTheme.typography.bodySmall, color = onGradientColor.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("${book.trackCount} Songs", style = MaterialTheme.typography.bodySmall, color = onGradientColor.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -2544,8 +2544,8 @@ fun AlbumGridItemRedesigned(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryArtistsTab(
-    artists: ImmutableList<Author>,
-    isLoading: Boolean, // This now represents the loading state for all artists
+    authors: ImmutableList<Author>,
+    isLoading: Boolean, // This now represents the loading state for all authors
     // canLoadMore: Boolean, // Removed
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
@@ -2554,7 +2554,7 @@ fun LibraryArtistsTab(
     onRefresh: () -> Unit
 ) {
     val listState = rememberLazyListState()
-    if (isLoading && artists.isEmpty()) {
+    if (isLoading && authors.isEmpty()) {
         // Show skeleton list during loading
         LazyColumn(
             modifier = Modifier
@@ -2575,14 +2575,14 @@ fun LibraryArtistsTab(
             item(key = "skeleton_top_spacer") { Spacer(Modifier.height(4.dp)) }
             items(10) { // Show 10 skeleton items
                 ArtistListItem(
-                    artist = Artist.empty(),
+                    author = Author.empty(),
                     onClick = {},
                     isLoading = true
                 )
             }
         }
     }
-    else if (artists.isEmpty() && !isLoading) { /* ... No artists ... */ } // canLoadMore removed
+    else if (authors.isEmpty() && !isLoading) { /* ... No authors ... */ } // canLoadMore removed
     else {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -2619,12 +2619,12 @@ fun LibraryArtistsTab(
                     item(key = "artists_top_spacer") {
                         Spacer(Modifier.height(4.dp))
                     }
-                    items(artists, key = { "artist_${it.id}" }) { artist ->
-                        val rememberedOnClick = remember(artist) { { onArtistClick(artist.id) } }
-                        ArtistListItem(artist = artist, onClick = rememberedOnClick)
+                    items(authors, key = { "artist_${it.id}" }) { author ->
+                        val rememberedOnClick = remember(author) { { onArtistClick(author.id) } }
+                        ArtistListItem(author = author, onClick = rememberedOnClick)
                     }
-                    // "Load more" indicator removed as all artists are loaded at once
-                    // if (isLoading && artists.isNotEmpty()) {
+                    // "Load more" indicator removed as all authors are loaded at once
+                    // if (isLoading && authors.isNotEmpty()) {
                     //     item { Box(Modifier
                     //         .fillMaxWidth()
                     //         .padding(16.dp), Alignment.Center) { CircularProgressIndicator() } }
@@ -2647,7 +2647,7 @@ fun LibraryArtistsTab(
 }
 
 @Composable
-fun ArtistListItem(artist: Author, onClick: () -> Unit, isLoading: Boolean = false) {
+fun ArtistListItem(author: Author, onClick: () -> Unit, isLoading: Boolean = false) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -2687,13 +2687,13 @@ fun ArtistListItem(artist: Author, onClick: () -> Unit, isLoading: Boolean = fal
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (!artist.imageUrl.isNullOrEmpty()) {
+                    if (!author.imageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(artist.imageUrl)
+                                .data(author.imageUrl)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = artist.name,
+                            contentDescription = author.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -2708,8 +2708,8 @@ fun ArtistListItem(artist: Author, onClick: () -> Unit, isLoading: Boolean = fal
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(artist.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("${artist.trackCount} Songs", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(author.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("${author.trackCount} Songs", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

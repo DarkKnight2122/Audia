@@ -55,7 +55,7 @@ class QueueStateHolder @Inject constructor() {
     }
     
     /**
-     * Create a shuffled version of a queue, keeping the current song at the start.
+     * Create a shuffled version of a queue, keeping the current track at the start.
      */
     fun createShuffledQueue(
         currentQueue: List<Track>,
@@ -75,27 +75,27 @@ class QueueStateHolder @Inject constructor() {
     /**
      * Prepares a list for shuffled playback.
      * 1. Saves original queue.
-     * 2. Picks a random start song.
-     * 3. Creates a shuffled list starting with that song.
+     * 2. Picks a random start track.
+     * 3. Creates a shuffled list starting with that track.
      */
-    fun prepareShuffledQueue(songs: List<Track>, queueName: String): Pair<List<Track>, Track>? {
-        if (songs.isEmpty()) return null
+    fun prepareShuffledQueue(tracks: List<Track>, queueName: String): Pair<List<Track>, Track>? {
+        if (tracks.isEmpty()) return null
         
-        val startSong = songs.random()
-        saveOriginalQueueState(songs, queueName)
+        val startSong = tracks.random()
+        saveOriginalQueueState(tracks, queueName)
         
-        val otherSongs = songs.filter { it.id != startSong.id }.shuffled()
+        val otherSongs = tracks.filter { it.id != startSong.id }.shuffled()
         val shuffledQueue = listOf(startSong) + otherSongs
         
         return Pair(shuffledQueue, startSong)
     }
 
     /**
-     * Prepares a list for shuffled playback with a specific start song.
+     * Prepares a list for shuffled playback with a specific start track.
      */
-    fun prepareShuffledQueueWithStart(songs: List<Track>, startSong: Track, queueName: String): List<Track> {
-         saveOriginalQueueState(songs, queueName)
-         val otherSongs = songs.filter { it.id != startSong.id }.shuffled()
+    fun prepareShuffledQueueWithStart(tracks: List<Track>, startSong: Track, queueName: String): List<Track> {
+         saveOriginalQueueState(tracks, queueName)
+         val otherSongs = tracks.filter { it.id != startSong.id }.shuffled()
          return listOf(startSong) + otherSongs
     }
 }

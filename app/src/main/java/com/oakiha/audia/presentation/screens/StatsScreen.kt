@@ -112,7 +112,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.outlined.Book
 import com.oakiha.audia.utils.shapes.RoundedStarShape
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.PlayCircleOutline
@@ -189,7 +189,7 @@ fun StatsScreen(
     val tabIndicatorExtraSpacing = 8.dp
     val tabContentSpacing = 20.dp
     var selectedTimelineMetric by rememberSaveable { mutableStateOf(TimelineMetric.ListeningTime) }
-    var selectedCategoryDimension by rememberSaveable { mutableStateOf(CategoryDimension.Song) }
+    var selectedCategoryDimension by rememberSaveable { mutableStateOf(CategoryDimension.Track) }
 
     Box(
         modifier = Modifier
@@ -847,19 +847,19 @@ private enum class CategoryDimension(
         highlightTitle = "Top genre"
     ),
     Author(
-        displayName = "Artist",
-        cardTitle = "Listening by artist",
-        highlightTitle = "Top artist"
+        displayName = "Author",
+        cardTitle = "Listening by author",
+        highlightTitle = "Top author"
     ),
     Book(
-        displayName = "Album",
-        cardTitle = "Listening by album",
-        highlightTitle = "Top album"
+        displayName = "Book",
+        cardTitle = "Listening by book",
+        highlightTitle = "Top book"
     ),
     Track(
-        displayName = "Song",
-        cardTitle = "Listening by song",
-        highlightTitle = "Top song"
+        displayName = "Track",
+        cardTitle = "Listening by track",
+        highlightTitle = "Top track"
     )
 }
 
@@ -990,7 +990,7 @@ private fun CategoryMetricsSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Compare how you listen across genres, artists, albums, and songs.",
+                text = "Compare how you listen across genres, authors, books, and tracks.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1035,11 +1035,11 @@ private fun CategoryMetricsSection(
                     CategoryMetricEntry(
                         label = it.genre,
                         durationMs = it.totalDurationMs,
-                        supporting = "${it.playCount} plays â€¢ ${it.uniqueArtists} artists"
+                        supporting = "${it.playCount} plays â€¢ ${it.uniqueArtists} authors"
                     )
                 }
 
-                CategoryDimension.Artist -> summary?.topArtists.orEmpty().map {
+                CategoryDimension.Author -> summary?.topArtists.orEmpty().map {
                     CategoryMetricEntry(
                         label = it.author,
                         durationMs = it.totalDurationMs,
@@ -1047,7 +1047,7 @@ private fun CategoryMetricsSection(
                     )
                 }
 
-                CategoryDimension.Album -> summary?.topAlbums.orEmpty().map {
+                CategoryDimension.Book -> summary?.topAlbums.orEmpty().map {
                     CategoryMetricEntry(
                         label = it.book,
                         durationMs = it.totalDurationMs,
@@ -1055,7 +1055,7 @@ private fun CategoryMetricsSection(
                     )
                 }
 
-                CategoryDimension.Song -> summary?.topSongs.orEmpty().map {
+                CategoryDimension.Track -> summary?.topSongs.orEmpty().map {
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
                         if (it.author.isNotBlank()) {
@@ -1366,21 +1366,21 @@ private fun TopArtistsCard(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Top artists",
+                text = "Top authors",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val artists = summary?.topArtists.orEmpty()
-            if (artists.isEmpty()) {
+            val authors = summary?.topArtists.orEmpty()
+            if (authors.isEmpty()) {
                 StatsEmptyState(
                     icon = Icons.Outlined.MusicNote,
-                    title = "No top artists",
-                    subtitle = "Keep listening and your favorite artists will show up here."
+                    title = "No top authors",
+                    subtitle = "Keep listening and your favorite authors will show up here."
                 )
             } else {
-                val maxDuration = artists.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
+                val maxDuration = authors.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    artists.forEachIndexed { index, artistSummary ->
+                    authors.forEachIndexed { index, artistSummary ->
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1463,21 +1463,21 @@ private fun TopAlbumsCard(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Top albums",
+                text = "Top books",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val albums = summary?.topAlbums.orEmpty()
-            if (albums.isEmpty()) {
+            val books = summary?.topAlbums.orEmpty()
+            if (books.isEmpty()) {
                 StatsEmptyState(
-                    icon = Icons.Outlined.Album,
-                    title = "No top albums",
+                    icon = Icons.Outlined.Book,
+                    title = "No top books",
                     subtitle = "Albums you revisit often will appear here."
                 )
             } else {
-                val maxDuration = albums.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
+                val maxDuration = books.maxOf { it.totalDurationMs }.coerceAtLeast(1L)
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    albums.forEachIndexed { index, albumSummary ->
+                    books.forEachIndexed { index, albumSummary ->
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1541,13 +1541,13 @@ private fun SongStatsCard(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val songs = summary?.tracks.orEmpty()
-            var showAll by rememberSaveable(songs) { mutableStateOf(songs.size <= 8) }
-            val displayedSongs = remember(songs, showAll) {
-                if (showAll || songs.size <= 8) songs else songs.take(8)
+            val tracks = summary?.tracks.orEmpty()
+            var showAll by rememberSaveable(tracks) { mutableStateOf(tracks.size <= 8) }
+            val displayedSongs = remember(tracks, showAll) {
+                if (showAll || tracks.size <= 8) tracks else tracks.take(8)
             }
-            val maxDuration = songs.maxOfOrNull { it.totalDurationMs }?.coerceAtLeast(1L) ?: 1L
-            val positions = remember(songs) { songs.mapIndexed { index, song -> song.trackId to index }.toMap() }
+            val maxDuration = tracks.maxOfOrNull { it.totalDurationMs }?.coerceAtLeast(1L) ?: 1L
+            val positions = remember(tracks) { tracks.mapIndexed { index, track -> track.trackId to index }.toMap() }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -1559,10 +1559,10 @@ private fun SongStatsCard(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (songs.size > 8) {
+                if (tracks.size > 8) {
                     TextButton(onClick = { showAll = !showAll }) {
                         Text(
-                            text = if (showAll || songs.size <= 8) "Show top" else "Show all",
+                            text = if (showAll || tracks.size <= 8) "Show top" else "Show all",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -1570,7 +1570,7 @@ private fun SongStatsCard(
                 }
             }
 
-            if (songs.isEmpty()) {
+            if (tracks.isEmpty()) {
                 StatsEmptyState(
                     icon = Icons.Outlined.MusicNote,
                     title = "No top tracks",
@@ -1579,7 +1579,7 @@ private fun SongStatsCard(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     displayedSongs.forEach { songSummary ->
-                        val position = positions[songSummary.trackId] ?: songs.indexOf(songSummary)
+                        val position = positions[songSummary.trackId] ?: tracks.indexOf(songSummary)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,

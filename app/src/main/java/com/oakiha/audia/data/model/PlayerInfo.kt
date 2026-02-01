@@ -51,8 +51,8 @@ data class PlayerInfo(
 
         other as PlayerInfo
 
-        if (songTitle != other.trackTitle) return false
-        if (artistName != other.authorName) return false
+        if (trackTitle != other.trackTitle) return false
+        if (authorName != other.authorName) return false
         if (isPlaying != other.isPlaying) return false
         if (bookArtUri != other.bookArtUri) return false
         if (bookArtBitmapData != null) {

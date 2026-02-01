@@ -15,7 +15,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * PagingSource that loads songs from MediaStore based on a pre-filtered list of IDs.
+ * PagingSource that loads tracks from MediaStore based on a pre-filtered list of IDs.
  * This ensures complex directory filtering is applied correctly before paging.
  */
 class MediaStorePagingSource(
@@ -55,10 +55,10 @@ class MediaStorePagingSource(
         val idsToLoad = filteredIds.subList(start, end)
         
         // Query MediaStore for details of these IDs
-        val songs = fetchSongDetails(idsToLoad)
+        val tracks = fetchSongDetails(idsToLoad)
 
-        // Sort songs to match the order of idsToLoad (because "IN" query doesn't guarantee order)
-        val songsMap = songs.associateBy { it.id.toLong() }
+        // Sort tracks to match the order of idsToLoad (because "IN" query doesn't guarantee order)
+        val songsMap = tracks.associateBy { it.id.toLong() }
         val orderedSongs = idsToLoad.mapNotNull { songsMap[it] }
 
         val nextKey = if (end < filteredIds.size) pageIndex + 1 else null
@@ -72,8 +72,8 @@ class MediaStorePagingSource(
     }
 
     private fun fetchSongDetails(ids: List<Long>): List<Track> {
-        val songs = mutableListOf<Track>()
-        if (ids.isEmpty()) return songs
+        val tracks = mutableListOf<Track>()
+        if (ids.isEmpty()) return tracks
 
         val selection = "${MediaStore.Audio.Media._ID} IN (${ids.joinToString(",")})"
         
@@ -123,10 +123,10 @@ class MediaStorePagingSource(
                     val track = Track(
                         id = id.toString(),
                         title = cursor.getString(titleCol).normalizeMetadataTextOrEmpty(),
-                        artist = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
+                        author = cursor.getString(artistCol).normalizeMetadataTextOrEmpty(),
                         authorId = cursor.getLong(authorIdCol),
-                        artists = emptyList(),
-                        album = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
+                        authors = emptyList(),
+                        book = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
                         bookId = bookId,
                         bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
                         path = path,
@@ -147,12 +147,12 @@ class MediaStorePagingSource(
                         bitrate = null,
                         sampleRate = null
                     )
-                    songs.add(song)
+                    tracks.add(track)
                 }
             }
         } catch (e: Exception) {
             // Log error
         }
-        return songs
+        return tracks
     }
 }

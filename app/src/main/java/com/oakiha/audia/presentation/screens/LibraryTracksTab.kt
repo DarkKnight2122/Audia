@@ -46,7 +46,7 @@ import kotlinx.collections.immutable.ImmutableList
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LibraryTracksTab(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     isLoading: Boolean,
     stablePlayerState: StablePlayerState,
     playerViewModel: PlayerViewModel,
@@ -60,7 +60,7 @@ fun LibraryTracksTab(
 
     // Handle different loading states
     when {
-        isLoading && songs.isEmpty() -> {
+        isLoading && tracks.isEmpty() -> {
             // Initial loading - show skeleton placeholders
             LazyColumn(
                 modifier = Modifier
@@ -90,7 +90,7 @@ fun LibraryTracksTab(
                 }
             }
         }
-        !isLoading && songs.isEmpty() -> {
+        !isLoading && tracks.isEmpty() -> {
             // Empty state
             Box(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -148,30 +148,30 @@ fun LibraryTracksTab(
                         item(key = "songs_top_spacer") { Spacer(Modifier.height(0.dp)) }
 
                         items(
-                            items = songs,
+                            items = tracks,
                             key = { "song_${it.id}" },
-                            contentType = { "song" }
-                        ) { song ->
-                            val isPlayingThisSong = song.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
+                            contentType = { "track" }
+                        ) { track ->
+                            val isPlayingThisSong = track.id == stablePlayerState.currentTrack?.id && stablePlayerState.isPlaying
                             
                             val rememberedOnMoreOptionsClick: (Track) -> Unit = remember(onMoreOptionsClick) {
                                 { trackFromListItem -> onMoreOptionsClick(trackFromListItem) }
                             }
-                            val rememberedOnClick: () -> Unit = remember(song) {
+                            val rememberedOnClick: () -> Unit = remember(track) {
                                 { 
                                   // Play using showAndPlaySong but passing the SORTED list as queue
-                                  // Important: We should pass 'songs' as the queue context
+                                  // Important: We should pass 'tracks' as the queue context
                                   // But showAndPlaySong might expect paginated logic in VM?
-                                  // PlayerViewModel logic: showAndPlaySong(song, queue, name).
-                                  // Usually calls playSongs(queue, song). If we pass 'songs', it plays in sorted order!
-                                  playerViewModel.showAndPlaySong(song, songs, "Library") 
+                                  // PlayerViewModel logic: showAndPlaySong(track, queue, name).
+                                  // Usually calls playSongs(queue, track). If we pass 'tracks', it plays in sorted order!
+                                  playerViewModel.showAndPlaySong(track, tracks, "Library") 
                                 }
                             }
 
                             EnhancedTrackListItem(
-                                track = song,
+                                track = track,
                                 isPlaying = isPlayingThisSong,
-                                isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                                isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                 isLoading = false,
                                 onMoreOptionsClick = rememberedOnMoreOptionsClick,
                                 onClick = rememberedOnClick

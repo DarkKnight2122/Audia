@@ -199,7 +199,7 @@ class SleepTimerStateHolder @Inject constructor(
 
         if (enable) {
             if (currentTrackId == null) {
-                scope.launch { toastEmitter?.invoke("Cannot enable End of Track: No active song.") }
+                scope.launch { toastEmitter?.invoke("Cannot enable End of Track: No active track.") }
                 return
             }
 
@@ -210,7 +210,7 @@ class SleepTimerStateHolder @Inject constructor(
             sleepTimerJob?.cancel()
             _sleepTimerEndTimeMillis.value = null
 
-            // Monitor for song changes
+            // Monitor for track changes
             eotSongMonitorJob?.cancel()
             eotSongMonitorJob = scope.launch {
                 currentTrackIdProvider?.invoke()?.collect { newSongId ->
@@ -221,7 +221,7 @@ class SleepTimerStateHolder @Inject constructor(
                         val oldSongTitle = songTitleResolver?.invoke(EotStateHolder.eotTargetTrackId.value) ?: "Previous track"
                         val newSongTitle = songTitleResolver?.invoke(newSongId) ?: "Current track"
 
-                        toastEmitter?.invoke("End of Track timer deactivated: song changed from $oldSongTitle to $newSongTitle.")
+                        toastEmitter?.invoke("End of Track timer deactivated: track changed from $oldSongTitle to $newSongTitle.")
                         cancelSleepTimer(suppressDefaultToast = true)
 
                         eotSongMonitorJob?.cancel()

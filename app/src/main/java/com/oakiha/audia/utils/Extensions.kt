@@ -45,7 +45,7 @@ fun String?.normalizeMetadataTextOrEmpty(): String {
 }
 
 /**
- * Escape sequence for delimiters in artist names.
+ * Escape sequence for delimiters in author names.
  * Use double backslash (\\) before a delimiter to prevent splitting at that position.
  * Example: "AC\\\\DC" with delimiter "/" won't split, but "Artist1/Artist2" will.
  */
@@ -57,17 +57,17 @@ private const val ESCAPE_SEQUENCE = "\\\\"
 private const val ESCAPE_PLACEHOLDER = "\u0000ESCAPED\u0000"
 
 /**
- * Splits an artist string by the given delimiters, respecting escaped delimiters.
+ * Splits an author string by the given delimiters, respecting escaped delimiters.
  * 
  * @param delimiters List of delimiter strings to split by (e.g., ["/", ";", ","])
- * @return List of individual artist names, trimmed and with escaped delimiters restored.
+ * @return List of individual author names, trimmed and with escaped delimiters restored.
  *         Returns a single-element list with the original string if no splitting occurs.
  *
  * Examples:
  * - "Artist1/Artist2".splitArtistsByDelimiters(listOf("/")) -> ["Artist1", "Artist2"]
  * - "AC\\DC".splitArtistsByDelimiters(listOf("/")) -> ["AC/DC"] (escaped)
  * - "A/B;C".splitArtistsByDelimiters(listOf("/", ";")) -> ["A", "B", "C"]
- * - "  Artist  ".splitArtistsByDelimiters(listOf("/")) -> ["Artist"] (trimmed)
+ * - "  Author  ".splitArtistsByDelimiters(listOf("/")) -> ["Author"] (trimmed)
  */
 fun String.splitArtistsByDelimiters(delimiters: List<String>): List<String> {
     if (delimiters.isEmpty() || this.isBlank()) {
@@ -112,10 +112,10 @@ fun String.splitArtistsByDelimiters(delimiters: List<String>): List<String> {
 }
 
 /**
- * Joins a list of artist names into a display string.
+ * Joins a list of author names into a display string.
  * 
- * @param separator The separator to use between artist names (default: ", ")
- * @return A formatted string with all artist names joined.
+ * @param separator The separator to use between author names (default: ", ")
+ * @return A formatted string with all author names joined.
  */
 fun List<String>.joinArtistsForDisplay(separator: String = ", "): String {
     return this.joinToString(separator)

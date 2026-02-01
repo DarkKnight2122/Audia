@@ -186,7 +186,7 @@ fun DailyMixScreen(
                 showSongInfoSheet = false
             },
             onNavigateToArtist = {
-                // TODO: Implement navigation to artist screen. Might require finding artist by name.
+                // TODO: Implement navigation to author screen. Might require finding author by name.
                 showSongInfoSheet = false
             },
             onEditSong = { newTitle, newArtist, newAlbum, newGenre, newLyrics, newTrackNumber, coverArtUpdate ->
@@ -233,7 +233,7 @@ fun DailyMixScreen(
             ) {
                 item(key = "daily_mix_header") {
                     ExpressiveDailyMixHeader(
-                        songs = dailyMixSongs,
+                        tracks = dailyMixSongs,
                         scrollState = lazyListState,
                         onShowMenu = { playerViewModel.showAiPlaylistSheet() }
                     )
@@ -298,11 +298,11 @@ fun DailyMixScreen(
                     }
                 }
 
-                items(dailyMixSongs, key = { it.id }) { song ->
+                items(dailyMixSongs, key = { it.id }) { track ->
                     EnhancedTrackListItem(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        track = song,
+                        track = track,
                         isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                         isPlaying = currentTrackId == track.id && isPlaying,
                         onClick = { playerViewModel.showAndPlaySong(track, dailyMixSongs, "Daily Mix", isVoluntaryPlay = false) },
@@ -376,13 +376,13 @@ fun DailyMixScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ExpressiveDailyMixHeader(
-    songs: List<Track>,
+    tracks: List<Track>,
     scrollState: LazyListState,
     onShowMenu: () -> Unit
 ) {
     Trace.beginSection("ExpressiveDailyMixHeader.Composition")
-    val bookArts = remember(songs) { songs.map { it.bookArtUriString }.distinct().take(3) }
-    val totalDuration = remember(songs) { songs.sumOf { it.duration } }
+    val bookArts = remember(tracks) { tracks.map { it.bookArtUriString }.distinct().take(3) }
+    val totalDuration = remember(tracks) { tracks.sumOf { it.duration } }
 
     val parallaxOffset by remember { derivedStateOf { if (scrollState.firstVisibleItemIndex == 0) scrollState.firstVisibleItemScrollOffset * 0.5f else 0f } }
 
@@ -513,7 +513,7 @@ private fun ExpressiveDailyMixHeader(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${songs.size} Songs â€¢ ${formatDuration(totalDuration)}",
+                    text = "${tracks.size} Songs â€¢ ${formatDuration(totalDuration)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )

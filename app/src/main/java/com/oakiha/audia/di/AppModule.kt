@@ -1,4 +1,4 @@
-package com.oakiha.audia.di
+﻿package com.oakiha.audia.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -100,7 +100,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÃ‰TODO
+    fun provideSearchHistoryDao(database: AudioBookDatabase): SearchHistoryDao { // NUEVO MÃƒâ€°TODO
         return database.searchHistoryDao()
     }
 
@@ -197,7 +197,7 @@ object AppModule {
         searchHistoryDao: SearchHistoryDao,
         audiobookDao: AudiobookDao,
         lyricsRepository: LyricsRepository,
-        songRepository: com.oakiha.audia.data.repository.TrackRepository,
+        trackRepository: com.oakiha.audia.data.repository.TrackRepository,
         favoritesDao: FavoritesDao
     ): AudiobookRepository {
         return AudiobookRepositoryImpl(
@@ -206,7 +206,7 @@ object AppModule {
             searchHistoryDao = searchHistoryDao,
             audiobookDao = audiobookDao,
             lyricsRepository = lyricsRepository,
-            songRepository = songRepository,
+            trackRepository = trackRepository,
             favoritesDao = favoritesDao
         )
     }
@@ -286,7 +286,7 @@ object AppModule {
     }
 
     /**
-     * Provee una instancia de OkHttpClient con timeouts para bÃºsquedas de lyrics.
+     * Provee una instancia de OkHttpClient con timeouts para bÃƒÂºsquedas de lyrics.
      * Includes DNS resolver, modern TLS, connection pool, and retry logic.
      */
     @Provides
@@ -389,7 +389,7 @@ object AppModule {
     }
 
     /**
-     * Provee el repositorio de imÃ¡genes de artistas.
+     * Provee el repositorio de imÃƒÂ¡genes de artistas.
      */
     @Provides
     @Singleton
@@ -400,3 +400,4 @@ object AppModule {
         return AuthorImageRepository(deezerApiService, audiobookDao)
     }
 }
+

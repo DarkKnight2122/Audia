@@ -276,7 +276,7 @@ fun LyricsSheet(
                                 showSaveLyricsDialog = false
                                 saveLyricsToFile(
                                     context = context,
-                                    song = currentTrack!!,
+                                    track = currentTrack!!,
                                     lyrics = lyrics!!,
                                     preferSynced = true
                                 )
@@ -293,7 +293,7 @@ fun LyricsSheet(
                                 showSaveLyricsDialog = false
                                 saveLyricsToFile(
                                     context = context,
-                                    song = currentTrack!!,
+                                    track = currentTrack!!,
                                     lyrics = lyrics!!,
                                     preferSynced = false
                                 )
@@ -419,9 +419,9 @@ fun LyricsSheet(
                         // .fillMaxWidth() removed to allow wrapping
                         .wrapContentWidth(),
                     label = "headerAnimation"
-                ) { song ->
+                ) { track ->
                     LyricsTrackInfo(
-                        song = song,
+                        track = track,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(
@@ -1062,9 +1062,9 @@ internal suspend fun animateToSnapIndex(
 }
 
 /**
- * Saves lyrics to a .lrc file in the same directory as the song.
+ * Saves lyrics to a .lrc file in the same directory as the track.
  * @param context The Android context.
- * @param song The song whose lyrics are being saved.
+ * @param track The track whose lyrics are being saved.
  * @param lyrics The lyrics to save.
  * @param preferSynced Whether to prefer synced lyrics over plain.
  */
@@ -1075,7 +1075,7 @@ private fun saveLyricsToFile(
     preferSynced: Boolean
 ) {
     try {
-        val songFile = File(song.path)
+        val songFile = File(track.path)
         val songDir = songFile.parentFile
         
         if (songDir == null || !songDir.exists()) {
@@ -1087,7 +1087,7 @@ private fun saveLyricsToFile(
             return
         }
         
-        // Create .lrc filename based on song filename
+        // Create .lrc filename based on track filename
         val songNameWithoutExtension = songFile.nameWithoutExtension
         val lrcFileName = "$songNameWithoutExtension.lrc"
         val lrcFile = File(songDir, lrcFileName)
@@ -1129,7 +1129,7 @@ private fun LyricsTrackInfo(
     backgroundColor: Color,
     contentColor: Color
 ) {
-    if (song == null) return
+    if (track == null) return
 
     val albumShape = CircleShape
 //    val albumShape = AbsoluteSmoothCornerShape(
@@ -1160,7 +1160,7 @@ private fun LyricsTrackInfo(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SmartImage(
-            model = song.bookArtUriString ?: R.drawable.rounded_book_24,
+            model = track.bookArtUriString ?: R.drawable.rounded_book_24,
             shape = albumShape,
             contentDescription = "Cover Art",
             modifier = Modifier
@@ -1178,7 +1178,7 @@ private fun LyricsTrackInfo(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = song.title,
+                text = track.title,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = contentColor,
@@ -1188,7 +1188,7 @@ private fun LyricsTrackInfo(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = song.displayAuthor,
+                text = track.displayAuthor,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = contentColor.copy(alpha = 0.7f),
                     //textGeometricTransform = TextGeometricTransform(scaleX = (0.9f)),

@@ -15,7 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MusicNote
@@ -191,7 +191,7 @@ fun AuthorDetailScreen(
                 }
                 uiState.author != null -> {
                     val author = uiState.author!!
-                    val songs = uiState.tracks
+                    val tracks = uiState.tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
 
                     val bookSections = uiState.bookSections
@@ -225,16 +225,16 @@ fun AuthorDetailScreen(
 
                             itemsIndexed(
                                 items = section.tracks,
-                                key = { _, song -> "artist_album_${section.bookId}_song_${song.id}" }
-                            ) { songIndex, song ->
-                                EnhancedTrackListItem(modifier = Modifier.padding(horizontal = 16.dp), track = song,
-                                    isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                                key = { _, track -> "artist_album_${section.bookId}_song_${track.id}" }
+                            ) { songIndex, track ->
+                                EnhancedTrackListItem(modifier = Modifier.padding(horizontal = 16.dp), track = track,
+                                    isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                                     isPlaying = stablePlayerState.isPlaying,
                                     onMoreOptionsClick = {
-                                        playerViewModel.selectSongForInfo(song)
+                                        playerViewModel.selectSongForInfo(track)
                                         showTrackInfoBottomSheet = true
                                     },
-                                    onClick = { playerViewModel.showAndPlaySong(song, section.tracks) }
+                                    onClick = { playerViewModel.showAndPlaySong(track, section.tracks) }
                                 )
 
                                 if (songIndex != section.tracks.lastIndex) {
@@ -255,14 +255,14 @@ fun AuthorDetailScreen(
                     }
 
                     CustomCollapsingTopBar(author = author,
-                        songsCount = songs.size,
+                        songsCount = tracks.size,
                         collapseFraction = collapseFraction,
                         headerHeight = currentTopBarHeightDp,
                         onBackPressed = { navController.popBackStack() },
                         onPlayClick = {
-                            if (songs.isNotEmpty()) {
-                                val randomSong = songs.random()
-                                playerViewModel.showAndPlaySong(randomSong, songs) }
+                            if (tracks.isNotEmpty()) {
+                                val randomSong = tracks.random()
+                                playerViewModel.showAndPlaySong(randomSong, tracks) }
                         }
                     )
                 }
@@ -282,7 +282,7 @@ fun AuthorDetailScreen(
                 }
             }
             TrackInfoBottomSheet(
-                song = currentTrack,
+                track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     playerViewModel.toggleFavoriteSpecificSong(currentTrack)
@@ -325,7 +325,7 @@ fun AuthorDetailScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentTrack,
+                    track = currentTrack,
                     onDismiss = { showPlaylistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
@@ -368,7 +368,7 @@ private fun AlbumSectionHeader(
                         append(it.toString())
                         append(" Ã¢â‚¬Â¢ ")
                     }
-                    append("${section.tracks.size} songs")
+                    append("${section.tracks.size} tracks")
                 }
                 Text(
                     text = subtitle,
@@ -430,7 +430,7 @@ private fun CustomCollapsingTopBar(author: Author,
                 .fillMaxSize()
                 .graphicsLayer { alpha = headerContentAlpha }
         ) {
-            // Artist artwork or fallback pattern
+            // Author artwork or fallback pattern
             if (!author.imageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -513,7 +513,7 @@ private fun CustomCollapsingTopBar(author: Author,
                     )
 
                     Text(
-                        text = "$songsCount songs",
+                        text = "$songsCount tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -559,7 +559,7 @@ private fun AudiobookIconPattern(modifier: Modifier = Modifier, collapseFraction
                 (-40).dp, collapseFraction), y = lerp(50.dp, 90.dp, collapseFraction)).size(50.dp).graphicsLayer { rotationZ = lerp(5f, 45f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )
         Icon(
-            imageVector = Icons.Rounded.Album,
+            imageVector = Icons.Rounded.Book,
             contentDescription = null, tint = color2,
             modifier = Modifier.align(Alignment.CenterEnd).offset(x = lerp((-40).dp, 20.dp, collapseFraction), y = lerp(-50.dp, -90.dp, collapseFraction)).size(70.dp).graphicsLayer { rotationZ = lerp(20f, -10f, collapseFraction); scaleX = 1f - collapseFraction; scaleY = 1f - collapseFraction }
         )

@@ -25,7 +25,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QueueMusic
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -82,7 +82,7 @@ fun TrackInfoBottomSheet(
     onDeleteFromDevice: (activity: Activity, track: Track, onResult: (Boolean) -> Unit) -> Unit,
     onNavigateToAlbum: () -> Unit,
     onNavigateToArtist: () -> Unit,
-    onEditSong: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    onEditSong: (title: String, author: String, book: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<TrackMetadata>,
     removeFromListTrigger: () -> Unit
 ) {
@@ -159,7 +159,7 @@ fun TrackInfoBottomSheet(
                 ) {
                     SmartImage(
                         model = track.bookArtUriString,
-                        contentDescription = "Album Art",
+                        contentDescription = "Book Art",
                         shape = bookArtShape,
                         modifier = Modifier.size(80.dp),
                         contentScale = ContentScale.Crop
@@ -190,7 +190,7 @@ fun TrackInfoBottomSheet(
                         Icon(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             imageVector = Icons.Rounded.Edit,
-                            contentDescription = "Edit song metadata"
+                            contentDescription = "Edit track metadata"
                         )
                     }
                 }
@@ -213,7 +213,7 @@ fun TrackInfoBottomSheet(
                         elevation = FloatingActionButtonDefaults.elevation(0.dp),
                         shape = playButtonShape, // Usa tu forma personalizada
                         icon = {
-                            Icon(Icons.Rounded.PlayArrow, contentDescription = "Play song")
+                            Icon(Icons.Rounded.PlayArrow, contentDescription = "Play track")
                         },
                         text = {
                             Text(
@@ -255,10 +255,10 @@ fun TrackInfoBottomSheet(
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necesario para URIs de contenido
                                 }
                                 // Inicia el chooser para que el usuario elija la app para compartir
-                                context.startActivity(Intent.createChooser(shareIntent, "Share Song File Via"))
+                                context.startActivity(Intent.createChooser(shareIntent, "Share Track File Via"))
                             } catch (e: Exception) {
                                 // Manejar el caso donde la URI es invÃƒÂ¡lida o no hay app para compartir
-                                Toast.makeText(context, "Could not share song: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Could not share track: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
                         },
                         shape = CircleShape // Mantenemos CircleShape para el botÃƒÂ³n de compartir
@@ -266,7 +266,7 @@ fun TrackInfoBottomSheet(
                         Icon(
                             modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
                             imageVector = Icons.Rounded.Share,
-                            contentDescription = "Share song file"
+                            contentDescription = "Share track file"
                         )
                     }
                 }
@@ -359,7 +359,7 @@ fun TrackInfoBottomSheet(
                 shape = CircleShape,
                 onClick = {
                     (context as? Activity)?.let { activity ->
-                        onDeleteFromDevice(activity, song) { result ->
+                        onDeleteFromDevice(activity, track) { result ->
                             if (result) {
                                 removeFromListTrigger()
                                 onDismiss()
@@ -402,18 +402,18 @@ fun TrackInfoBottomSheet(
                         modifier = Modifier
                             .clip(shape = listItemShape)
                             .clickable(onClick = onNavigateToAlbum),
-                        headlineContent = { Text(text = "Album") },
+                        headlineContent = { Text(text = "Book") },
                         supportingContent = { Text(text = track.book) },
-                        leadingContent = { Icon(Icons.Rounded.Album, contentDescription = "Album icon") }
+                        leadingContent = { Icon(Icons.Rounded.Book, contentDescription = "Book icon") }
                     )
 
                     ListItem(
                         modifier = Modifier
                             .clip(shape = listItemShape)
                             .clickable(onClick = onNavigateToArtist),
-                        headlineContent = { Text(text = "Artist") },
+                        headlineContent = { Text(text = "Author") },
                         supportingContent = { Text(text = track.displayAuthor) },
-                        leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Artist icon") }
+                        leadingContent = { Icon(Icons.Rounded.Person, contentDescription = "Author icon") }
                     )
                     ListItem(
                         modifier = Modifier
@@ -463,10 +463,10 @@ fun TrackInfoBottomSheet(
 
     EditTrackSheet(
         visible = showEditSheet,
-        song = song,
+        track = track,
         onDismiss = { showEditSheet = false },
-        onSave = { title, artist, album, genre, lyrics, trackNumber, coverArt ->
-            onEditSong(title, artist, album, genre, lyrics, trackNumber, coverArt)
+        onSave = { title, author, book, genre, lyrics, trackNumber, coverArt ->
+            onEditSong(title, author, book, genre, lyrics, trackNumber, coverArt)
             showEditSheet = false
         },
         generateAiMetadata = generateAiMetadata

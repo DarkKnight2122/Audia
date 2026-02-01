@@ -44,20 +44,20 @@ data class Config(val size: Dp, val width: Dp, val height: Dp, val align: Alignm
  */
 @Composable
 fun BookArtCollage(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     modifier: Modifier = Modifier,
     height: Dp = 400.dp,
     padding: Dp = 0.dp,
     onSongClick: (Track) -> Unit,
 ) {
     val context = LocalContext.current
-    val songsToShow = remember(songs) {
-        (songs.take(6) + List(6 - songs.size.coerceAtMost(6)) { null }).toImmutableList()
+    val songsToShow = remember(tracks) {
+        (tracks.take(6) + List(6 - tracks.size.coerceAtMost(6)) { null }).toImmutableList()
     }
 
     val requests = remember(songsToShow) {
-        songsToShow.map { song ->
-            song?.bookArtUriString?.let {
+        songsToShow.map { track ->
+            track?.bookArtUriString?.let {
                 ImageRequest.Builder(context)
                     .data(it)
                     .dispatcher(Dispatchers.IO)
@@ -95,7 +95,7 @@ fun BookArtCollage(
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth().height(boxMaxHeight * 0.6f)) {
                     topConfigs.forEachIndexed { idx, cfg ->
-                        songsToShow.getOrNull(idx)?.let { song ->
+                        songsToShow.getOrNull(idx)?.let { track ->
                             SmartImage(
                                 model = requests[idx],
                                 contentDescription = null,
@@ -108,7 +108,7 @@ fun BookArtCollage(
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null
-                                    ) { onSongClick(song) }
+                                    ) { onSongClick(track) }
                                     .background(shape = cfg.shape, color = MaterialTheme.colorScheme.surfaceContainerHigh)
                                     .clip(cfg.shape)
                             )
@@ -117,7 +117,7 @@ fun BookArtCollage(
                 }
                 Box(Modifier.fillMaxWidth().height(boxMaxHeight * 0.4f)) {
                     bottomConfigs.forEachIndexed { j, cfg ->
-                        songsToShow.getOrNull(j + 3)?.let { song ->
+                        songsToShow.getOrNull(j + 3)?.let { track ->
                             SmartImage(
                                 model = requests[j + 3],
                                 contentDescription = null,
@@ -130,7 +130,7 @@ fun BookArtCollage(
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null
-                                    ) { onSongClick(song) }
+                                    ) { onSongClick(track) }
                                     .clip(cfg.shape)
                             )
                         }
@@ -139,7 +139,7 @@ fun BookArtCollage(
             }
         }
 
-        if (songs.isEmpty()) {
+        if (tracks.isEmpty()) {
             Box(Modifier.matchParentSize(), contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(R.drawable.rounded_audiobook_note_24),

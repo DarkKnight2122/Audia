@@ -302,7 +302,7 @@ class PlaybackStateHolder @Inject constructor(
                     val originalQueue = queueStateHolder.originalQueueOrder
                     val currentPosition = player.currentPosition
                     
-                    // Find where the current song is in the original queue
+                    // Find where the current track is in the original queue
                     val currentTrackId = currentTrack?.id
                     val originalIndex = originalQueue.indexOfFirst { it.id == currentTrackId }.takeIf { it >= 0 }
 

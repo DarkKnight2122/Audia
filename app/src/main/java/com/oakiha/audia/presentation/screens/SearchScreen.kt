@@ -138,9 +138,9 @@ fun SearchScreen(
         }
     }
     val searchResults = uiState.searchResults
-    val handleSongMoreOptionsClick: (Track) -> Unit = { song ->
-        selectedTrackForInfo = song
-        playerViewModel.selectSongForInfo(song)
+    val handleSongMoreOptionsClick: (Track) -> Unit = { track ->
+        selectedTrackForInfo = track
+        playerViewModel.selectSongForInfo(track)
         showTrackInfoBottomSheet = true
     }
 
@@ -432,7 +432,7 @@ fun SearchScreen(
 
         if (currentTrack != null) {
             TrackInfoBottomSheet(
-                song = currentTrack,
+                track = currentTrack,
                 isFavorite = isFavorite,
                 removeFromListTrigger = removeFromListTrigger,
                 onToggleFavorite = {
@@ -484,7 +484,7 @@ fun SearchScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentTrack,
+                    track = currentTrack,
                     onDismiss = { showPlaylistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel,
@@ -729,7 +729,7 @@ fun SearchResultsList(
                                 val onPlayClick = remember(item.book, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Album clicked: ${item.book.title}")
+                                            .d("Book clicked: ${item.book.title}")
                                         playerViewModel.playAlbum(item.book)
                                         onItemSelected()
                                     }
@@ -743,7 +743,7 @@ fun SearchResultsList(
                                     }
                                 }
                                 SearchResultAlbumItem(
-                                    album = item.book,
+                                    book = item.book,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
@@ -753,7 +753,7 @@ fun SearchResultsList(
                                 val onPlayClick = remember(item.author, playerViewModel, onItemSelected) {
                                     {
                                         Timber.tag("SearchScreen")
-                                            .d("Artist clicked: ${item.author.name}")
+                                            .d("Author clicked: ${item.author.name}")
                                         playerViewModel.playArtist(item.author)
                                         onItemSelected()
                                     }
@@ -767,7 +767,7 @@ fun SearchResultsList(
                                     }
                                 }
                                 SearchResultArtistItem(
-                                    artist = item.author,
+                                    author = item.author,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )
@@ -819,7 +819,7 @@ fun SearchResultsList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultAlbumItem(
-    album: Book,
+    book: Book,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -851,8 +851,8 @@ fun SearchResultAlbumItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SmartImage(
-                model = album.bookArtUriString,
-                contentDescription = "Album Art: ${album.title}",
+                model = book.bookArtUriString,
+                contentDescription = "Book Art: ${book.title}",
                 modifier = Modifier
                     .size(56.dp)
                     .clip(itemShape)
@@ -863,14 +863,14 @@ fun SearchResultAlbumItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = album.title,
+                    text = book.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = album.author,
+                    text = book.author,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -886,7 +886,7 @@ fun SearchResultAlbumItem(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Album", modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Book", modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -895,7 +895,7 @@ fun SearchResultAlbumItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultArtistItem(
-    artist: Author,
+    author: Author,
     onOpenClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
@@ -928,7 +928,7 @@ fun SearchResultArtistItem(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.rounded_author_24),
-                contentDescription = "Artist",
+                contentDescription = "Author",
                 modifier = Modifier
                     .size(56.dp)
                     .background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
@@ -938,14 +938,14 @@ fun SearchResultArtistItem(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = artist.name,
+                    text = author.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${artist.trackCount} Songs",
+                    text = "${author.trackCount} Songs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -959,7 +959,7 @@ fun SearchResultArtistItem(
                     contentColor = MaterialTheme.colorScheme.onTertiary
                 )
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Artist", modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = "Play Author", modifier = Modifier.size(24.dp))
             }
         }
     }

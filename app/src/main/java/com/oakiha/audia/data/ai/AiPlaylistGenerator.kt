@@ -65,15 +65,15 @@ class AiPlaylistGenerator @Inject constructor(
             val sampleSize = max(minLength, 80).coerceAtMost(200)
             val songSample = samplingPool.shuffled().take(sampleSize)
 
-            val availableSongsJson = songSample.joinToString(separator = ",\n") { song ->
-                // Calculate score for each song. This might be slow if it's a real-time calculation.
-                val score = dailyMixManager.getScore(song.id)
+            val availableSongsJson = songSample.joinToString(separator = ",\n") { track ->
+                // Calculate score for each track. This might be slow if it's a real-time calculation.
+                val score = dailyMixManager.getScore(track.id)
                 """
                 {
-                    "id": "${song.id}",
-                    "title": "${song.title.replace("\"", "'")}",
-                    "artist": "${song.displayAuthor.replace("\"", "'")}",
-                    "genre": "${song.genre?.replace("\"", "'") ?: "unknown"}",
+                    "id": "${track.id}",
+                    "title": "${track.title.replace("\"", "'")}",
+                    "author": "${track.displayAuthor.replace("\"", "'")}",
+                    "genre": "${track.genre?.replace("\"", "'") ?: "unknown"}",
                     "relevance_score": $score
                 }
                 """.trimIndent()
@@ -85,16 +85,16 @@ class AiPlaylistGenerator @Inject constructor(
             // Build the task-specific instructions
             val taskInstructions = """
             Your task is to create a playlist for a user based on their prompt.
-            You will be given a user's request, a desired playlist length range, and a list of available songs with their metadata.
+            You will be given a user's request, a desired playlist length range, and a list of available tracks with their metadata.
 
             Instructions:
             1. Analyze the user's prompt to understand the desired mood, genre, or theme. This is the MOST IMPORTANT factor.
-            2. Select songs from the provided list that best match the user's request.
+            2. Select tracks from the provided list that best match the user's request.
             3. The `relevance_score` is a secondary factor. Use it to break ties or to choose between tracks that equally match the prompt. Do NOT prioritize it over the prompt match.
-            4. The final playlist should have a number of songs between `min_length` and `max_length`. It does not have to be the maximum.
-            5. Your response MUST be ONLY a valid JSON array of song IDs. Do not include any other text, explanations, or markdown formatting.
+            4. The final playlist should have a number of tracks between `min_length` and `max_length`. It does not have to be the maximum.
+            5. Your response MUST be ONLY a valid JSON array of track IDs. Do not include any other text, explanations, or markdown formatting.
 
-            Example response for a playlist of 3 songs:
+            Example response for a playlist of 3 tracks:
             ["song_id_1", "song_id_2", "song_id_3"]
             """.trimIndent()
 
@@ -107,7 +107,7 @@ class AiPlaylistGenerator @Inject constructor(
             User's request: "$userPrompt"
             Minimum playlist length: $minLength
             Maximum playlist length: $maxLength
-            Available songs:
+            Available tracks:
             [
             $availableSongsJson
             ]
@@ -118,7 +118,7 @@ class AiPlaylistGenerator @Inject constructor(
 
             val trackIds = extractPlaylistSongIds(responseText)
 
-            // Map the returned IDs to the actual Song objects
+            // Map the returned IDs to the actual Track objects
             val songMap = allTracks.associateBy { it.id }
             val generatedPlaylist = trackIds.mapNotNull { songMap[it] }
 

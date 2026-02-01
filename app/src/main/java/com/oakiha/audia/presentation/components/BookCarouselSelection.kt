@@ -121,15 +121,15 @@ fun AlbumCarouselSection(
             carouselWidth = availableWidth // Pass the full width for layout calculations
         ) { index ->
             val track = queue[index]
-            key(song.id) {
+            key(track.id) {
                 Box(
                     Modifier
                         .fillMaxSize()
                         .aspectRatio(1f)
                 ) { // Enforce 1:1 aspect ratio for the item itself
                     OptimizedBookArt(
-                        uri = song.bookArtUriString,
-                        title = song.title,
+                        uri = track.bookArtUriString,
+                        title = track.title,
                         modifier = Modifier.fillMaxSize(),
                         targetSize = targetSize
                     )

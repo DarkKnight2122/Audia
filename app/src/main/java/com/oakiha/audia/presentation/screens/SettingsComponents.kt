@@ -522,7 +522,7 @@ fun RefreshLyricsItem(
                             color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                            text = "Automatically fetch lyrics for all songs using lrclib.",
+                            text = "Automatically fetch lyrics for all tracks using lrclib.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -553,7 +553,7 @@ fun RefreshLyricsItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                         text =
-                                "Processing ${progress.currentCount} of ${progress.totalSongs} songs",
+                                "Processing ${progress.currentCount} of ${progress.totalSongs} tracks",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

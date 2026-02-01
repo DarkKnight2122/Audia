@@ -48,7 +48,7 @@ class AiStateHolder @Inject constructor(
     
     // Callbacks to interact with PlayerViewModel/UI
     private var toastEmitter: ((String) -> Unit)? = null
-    private var playSongsCallback: ((List<Track>, Song, String) -> Unit)? = null // songs, startSong, queueName
+    private var playSongsCallback: ((List<Track>, Track, String) -> Unit)? = null // tracks, startSong, queueName
     private var openPlayerSheetCallback: (() -> Unit)? = null
 
     fun initialize(
@@ -56,7 +56,7 @@ class AiStateHolder @Inject constructor(
         allTracksProvider: () -> List<Track>,
         favoriteTrackIdsProvider: () -> Set<String>,
         toastEmitter: (String) -> Unit,
-        playSongsCallback: (List<Track>, Song, String) -> Unit,
+        playSongsCallback: (List<Track>, Track, String) -> Unit,
         openPlayerSheetCallback: () -> Unit
     ) {
         this.scope = scope
@@ -191,7 +191,7 @@ class AiStateHolder @Inject constructor(
     suspend fun generateAiMetadata(track: Track, fields: List<String>): Result<TrackMetadata> {
         _isGeneratingMetadata.value = true
         return try {
-            aiMetadataGenerator.generate(song, fields)
+            aiMetadataGenerator.generate(track, fields)
         } finally {
             _isGeneratingMetadata.value = false
         }

@@ -45,8 +45,8 @@ object AppThemeMode {
 }
 
 /**
- * Album art quality settings for developer options.
- * Controls maximum resolution for album artwork in player view.
+ * Book art quality settings for developer options.
+ * Controls maximum resolution for book artwork in player view.
  * Thumbnails in lists always use low resolution for performance.
  * 
  * @property maxSize Maximum size in pixels (0 = original size)
@@ -127,7 +127,7 @@ constructor(
         val FULL_PLAYER_PLACEHOLDER_TRANSPARENT = booleanPreferencesKey("full_player_placeholder_transparent")
         val FULL_PLAYER_DELAY_THRESHOLD = intPreferencesKey("full_player_delay_threshold_percent")
 
-        // Multi-Artist Settings
+        // Multi-Author Settings
         val ARTIST_DELIMITERS = stringPreferencesKey("artist_delimiters")
         val GROUP_BY_ALBUM_ARTIST = booleanPreferencesKey("group_by_album_artist")
         val ARTIST_SETTINGS_RESCAN_REQUIRED =
@@ -160,7 +160,7 @@ constructor(
         // Library Sync
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         
-        // Lyrics Sync Offset per song (Map<trackId, offsetMs> as JSON)
+        // Lyrics Sync Offset per track (Map<trackId, offsetMs> as JSON)
         val LYRICS_SYNC_OFFSETS = stringPreferencesKey("lyrics_sync_offsets_json")
         
         // Lyrics Source Preference
@@ -319,7 +319,7 @@ constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.PERSISTENT_SHUFFLE_ENABLED] = enabled }
     }
 
-    // ===== Multi-Artist Settings =====
+    // ===== Multi-Author Settings =====
 
     val artistDelimitersFlow: Flow<List<String>> =
             dataStore.data.map { preferences ->
@@ -398,7 +398,7 @@ constructor(
     // ===== Lyrics Sync Offset Settings =====
     
     /**
-     * Lyrics sync offset per song in milliseconds.
+     * Lyrics sync offset per track in milliseconds.
      * Stored as a JSON map: { "trackId": offsetMs, ... }
      * Positive values = lyrics appear later (use when lyrics are ahead of audio)
      * Negative values = lyrics appear earlier (use when lyrics are behind audio)
@@ -492,7 +492,7 @@ constructor(
 
     // ===== End Lyrics Source Preference Settings =====
 
-    // ===== End Multi-Artist Settings =====
+    // ===== End Multi-Author Settings =====
 
     val globalTransitionSettingsFlow: Flow<TransitionSettings> =
             dataStore.data.map { preferences ->
@@ -586,7 +586,7 @@ constructor(
     val playerThemePreferenceFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 preferences[PreferencesKeys.PLAYER_THEME_PREFERENCE]
-                        ?: ThemePreference.ALBUM_ART // Default to Album Art
+                        ?: ThemePreference.ALBUM_ART // Default to Book Art
             }
 
     val appThemeModeFlow: Flow<String> =
@@ -753,8 +753,8 @@ constructor(
     }
 
     /*
-     * @param playlistIds playlistIds Ids of playlists to add the song to
-     * will remove song from the playlists which are not in playlistIds
+     * @param playlistIds playlistIds Ids of playlists to add the track to
+     * will remove track from the playlists which are not in playlistIds
      * */
     suspend fun addOrRemoveSongFromPlaylists(
             trackId: String,
@@ -809,7 +809,7 @@ constructor(
         val currentPlaylists = userPlaylistsFlow.first().toMutableList()
         var updated = false
 
-        // Iterate through all playlists and remove the song
+        // Iterate through all playlists and remove the track
         currentPlaylists.forEachIndexed { index, playlist ->
             if (playlist.trackIds.contains(trackId)) {
                 currentPlaylists[index] =
@@ -1106,7 +1106,7 @@ constructor(
         const val DEFAULT_SYSTEM_PROMPT =
                 "You are a helpful AI assistant integrated into a music player app. You help users create perfect playlists based on their request."
 
-        /** Default delimiters for splitting multi-artist tags */
+        /** Default delimiters for splitting multi-author tags */
         val DEFAULT_ARTIST_DELIMITERS = listOf("/", ";", ",", "+", "&")
     }
 
@@ -1451,8 +1451,8 @@ constructor(
     // ===== Developer Options =====
     
     /**
-     * Album art quality for player view.
-     * Controls the maximum resolution for album artwork displayed in the full player.
+     * Book art quality for player view.
+     * Controls the maximum resolution for book artwork displayed in the full player.
      * Thumbnails in lists always use low resolution (256px) for optimal performance.
      */
     val bookArtQualityFlow: Flow<BookArtQuality> =

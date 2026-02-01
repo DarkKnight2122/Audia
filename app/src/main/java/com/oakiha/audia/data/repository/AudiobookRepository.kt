@@ -16,98 +16,98 @@ import kotlinx.coroutines.flow.Flow
 interface AudiobookRepository {
     /**
      * Obtiene la lista de archivos de audio (canciones) filtrada por directorios permitidos.
-     * @return Flow que emite una lista completa de objetos Song.
+     * @return Flow que emite una lista completa de objetos Track.
      */
     fun getTracks(): Flow<List<Track>> // Existing Flow for reactive updates
     
     /**
-     * Returns paginated songs for efficient display of large libraries.
+     * Returns paginated tracks for efficient display of large libraries.
      * @return Flow of PagingData<Track> for use with LazyPagingItems.
      */
     fun getPaginatedSongs(): Flow<PagingData<Track>>
 
     /**
-     * Returns the count of songs in the library.
-     * @return Flow emitting the current song count.
+     * Returns the count of tracks in the library.
+     * @return Flow emitting the current track count.
      */
     fun getTrackCountFlow(): Flow<Int>
 
     /**
-     * Returns a random selection of songs for efficient shuffle.
+     * Returns a random selection of tracks for efficient shuffle.
      * Uses database-level RANDOM() for performance.
-     * @param limit Maximum number of songs to return.
-     * @return List of randomly selected songs.
+     * @param limit Maximum number of tracks to return.
+     * @return List of randomly selected tracks.
      */
     suspend fun getRandomSongs(limit: Int): List<Track>
 
     /**
      * Obtiene la lista de ÃƒÂ¡lbumes filtrada.
-     * @return Flow que emite una lista completa de objetos Album.
+     * @return Flow que emite una lista completa de objetos Book.
      */
-    fun getAlbums(): Flow<List<Book>> // Existing Flow for reactive updates
+    fun getBooks(): Flow<List<Book>> // Existing Flow for reactive updates
 
     /**
      * Obtiene la lista de artistas filtrada.
-     * @return Flow que emite una lista completa de objetos Artist.
+     * @return Flow que emite una lista completa de objetos Author.
      */
-    fun getArtists(): Flow<List<Author>> // Existing Flow for reactive updates
+    fun getAuthors(): Flow<List<Author>> // Existing Flow for reactive updates
 
     /**
      * Obtiene la lista completa de canciones una sola vez.
-     * @return Lista de objetos Song.
+     * @return Lista de objetos Track.
      */
     suspend fun getAllTracksOnce(): List<Track>
 
     /**
      * Obtiene la lista completa de ÃƒÂ¡lbumes una sola vez.
-     * @return Lista de objetos Album.
+     * @return Lista de objetos Book.
      */
     suspend fun getAllAlbumsOnce(): List<Book>
 
     /**
      * Obtiene la lista completa de artistas una sola vez.
-     * @return Lista de objetos Artist.
+     * @return Lista de objetos Author.
      */
     suspend fun getAllArtistsOnce(): List<Author>
 
     /**
      * Obtiene un ÃƒÂ¡lbum especÃƒÂ­fico por su ID.
      * @param id El ID del ÃƒÂ¡lbum.
-     * @return Flow que emite el objeto Album o null si no se encuentra.
+     * @return Flow que emite el objeto Book o null si no se encuentra.
      */
     fun getBookById(id: Long): Flow<Book?>
 
     /**
      * Obtiene la lista de artistas filtrada.
-     * @return Flow que emite una lista completa de objetos Artist.
+     * @return Flow que emite una lista completa de objetos Author.
      */
-    //fun getArtists(): Flow<List<Author>>
+    //fun getAuthors(): Flow<List<Author>>
 
     /**
      * Obtiene la lista de canciones para un ÃƒÂ¡lbum especÃƒÂ­fico (NO paginada para la cola de reproducciÃƒÂ³n).
      * @param bookId El ID del ÃƒÂ¡lbum.
-     * @return Flow que emite una lista de objetos Song pertenecientes al ÃƒÂ¡lbum.
+     * @return Flow que emite una lista de objetos Track pertenecientes al ÃƒÂ¡lbum.
      */
     fun getTracksForAlbum(bookId: Long): Flow<List<Track>>
 
     /**
      * Obtiene la lista de canciones para un artista especÃƒÂ­fico (NO paginada para la cola de reproducciÃƒÂ³n).
      * @param authorId El ID del artista.
-     * @return Flow que emite una lista de objetos Song pertenecientes al artista.
+     * @return Flow que emite una lista de objetos Track pertenecientes al artista.
      */
     fun getTracksForArtist(authorId: Long): Flow<List<Track>>
 
     /**
      * Obtiene una lista de canciones por sus IDs.
      * @param trackIds Lista de IDs de canciones.
-     * @return Flow que emite una lista de objetos Song correspondientes a los IDs, en el mismo orden.
+     * @return Flow que emite una lista de objetos Track correspondientes a los IDs, en el mismo orden.
      */
     fun getTracksByIds(trackIds: List<String>): Flow<List<Track>>
 
     /**
      * Obtiene una canciÃƒÂ³n por su ruta de archivo.
      * @param path Ruta del archivo.
-     * @return El objeto Song o null si no se encuentra.
+     * @return El objeto Track o null si no se encuentra.
      */
     suspend fun getTrackByPath(path: String): Track?
 
@@ -123,9 +123,9 @@ interface AudiobookRepository {
 
     suspend fun invalidateCachesDependentOnAllowedDirectories() // Nuevo para precarga de temas
 
-    fun searchSongs(query: String): Flow<List<Track>>
-    fun searchAlbums(query: String): Flow<List<Book>>
-    fun searchArtists(query: String): Flow<List<Author>>
+    fun searchTracks(query: String): Flow<List<Track>>
+    fun searchBooks(query: String): Flow<List<Book>>
+    fun searchAuthors(query: String): Flow<List<Author>>
     suspend fun searchPlaylists(query: String): List<Playlist> // Mantener suspend, ya que no hay Flow aÃƒÂºn
     fun searchAll(query: String, filterType: SearchFilterType): Flow<List<SearchResultItem>>
 
@@ -138,7 +138,7 @@ interface AudiobookRepository {
     /**
      * Obtiene la lista de canciones para un gÃƒÂ©nero especÃƒÂ­fico (placeholder implementation).
      * @param genreId El ID del gÃƒÂ©nero (e.g., "pop", "rock").
-     * @return Flow que emite una lista de objetos Song (simulada para este gÃƒÂ©nero).
+     * @return Flow que emite una lista de objetos Track (simulada para este gÃƒÂ©nero).
      */
     fun getMusicByGenre(genreId: String): Flow<List<Track>> // Changed to Flow
 
@@ -152,7 +152,7 @@ interface AudiobookRepository {
     /**
      * Obtiene una canciÃƒÂ³n especÃƒÂ­fica por su ID.
      * @param trackId El ID de la canciÃƒÂ³n.
-     * @return Flow que emite el objeto Song o null si no se encuentra.
+     * @return Flow que emite el objeto Track o null si no se encuentra.
      */
     fun getTrack(trackId: String): Flow<Track?>
     fun getAuthorById(authorId: Long): Flow<Author?>
@@ -174,17 +174,17 @@ interface AudiobookRepository {
 
     /**
      * Search for lyrics remotely, less specific than `getLyricsFromRemote` but more lenient
-     * @param song The song to search lyrics for
+     * @param track The track to search lyrics for
      * @return The search query and the results
      */
     suspend fun searchRemoteLyrics(track: Track): Result<Pair<String, List<LyricsSearchResult>>>
 
     /**
-     * Search for lyrics remotely using query provided, and not use song metadata
-     * @param query The query for searching, typically song title and artist name
+     * Search for lyrics remotely using query provided, and not use track metadata
+     * @param query The query for searching, typically track title and author name
      * @return The search query and the results
      */
-    suspend fun searchRemoteLyricsByQuery(title: String, artist: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemoteLyricsByQuery(title: String, author: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
 
     suspend fun updateLyrics(trackId: Long, lyrics: String)
 

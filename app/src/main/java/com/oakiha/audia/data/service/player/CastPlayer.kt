@@ -17,11 +17,11 @@ class CastPlayer(private val castSession: CastSession) {
     private val remoteMediaClient: RemoteMediaClient? = castSession.remoteMediaClient
 
     /**
-     * Load a queue of songs onto the Cast device.
+     * Load a queue of tracks onto the Cast device.
      * Includes a 15-second timeout to prevent stuck "Connecting..." states.
      */
     fun loadQueue(
-        songs: List<Track>,
+        tracks: List<Track>,
         startIndex: Int,
         startPosition: Long,
         repeatMode: Int,
@@ -47,8 +47,8 @@ class CastPlayer(private val castSession: CastSession) {
         }
 
         try {
-            val mediaItems = songs.map { song ->
-                song.toMediaQueueItem(serverAddress)
+            val mediaItems = tracks.map { track ->
+                track.toMediaQueueItem(serverAddress)
             }.toTypedArray()
 
             // Start 15-second timeout
@@ -93,14 +93,14 @@ class CastPlayer(private val castSession: CastSession) {
         }
     }
 
-    private fun Song.toMediaQueueItem(serverAddress: String): MediaQueueItem {
+    private fun Track.toMediaQueueItem(serverAddress: String): MediaQueueItem {
         val mediaMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
         mediaMetadata.putString(MediaMetadata.KEY_TITLE, this.title)
         mediaMetadata.putString(MediaMetadata.KEY_ARTIST, this.author)
         val artUrl = "$serverAddress/art/${this.id}"
         mediaMetadata.addImage(WebImage(Uri.parse(artUrl)))
 
-        val mediaUrl = "$serverAddress/song/${this.id}"
+        val mediaUrl = "$serverAddress/track/${this.id}"
         val mediaInfo = MediaInfo.Builder(mediaUrl)
             .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
             .setContentType("audio/mpeg")

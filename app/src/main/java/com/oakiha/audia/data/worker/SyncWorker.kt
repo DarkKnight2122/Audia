@@ -93,7 +93,7 @@ constructor(
                     var lastSyncTimestamp = userPreferencesRepository.getLastSyncTimestamp()
 
                     Timber.tag(TAG)
-                        .d("Artist parsing delimiters: $artistDelimiters, groupByAlbumArtist: $groupByAlbumArtist, rescanRequired: $rescanRequired")
+                        .d("Author parsing delimiters: $artistDelimiters, groupByAlbumArtist: $groupByAlbumArtist, rescanRequired: $rescanRequired")
 
                     // --- MEDIA SCAN PHASE ---
                     // For INCREMENTAL or FULL sync, trigger a media scan to detect new files
@@ -103,7 +103,7 @@ constructor(
                     }
 
                     // --- DELETION PHASE ---
-                    // Detect and remove deleted songs efficiently using ID comparison
+                    // Detect and remove deleted tracks efficiently using ID comparison
                     // We do this for INCREMENTAL and FULL modes. REBUILD clears everything anyway.
                     if (syncMode != SyncMode.REBUILD) {
                         val localSongIds = audiobookDao.getAllSongIds().toHashSet()
@@ -114,7 +114,7 @@ constructor(
 
                         if (deletedIds.isNotEmpty()) {
                             Timber.tag(TAG)
-                                .i("Found ${deletedIds.size} deleted songs. Removing from database...")
+                                .i("Found ${deletedIds.size} deleted tracks. Removing from database...")
                             // Chunk deletions to avoid SQLite variable limit (default 999)
                             val batchSize = 500
                             deletedIds.chunked(batchSize).forEach { chunk ->
@@ -122,7 +122,7 @@ constructor(
                                 audiobookDao.deleteCrossRefsBySongIds(chunk.toList())
                             }
                         } else {
-                            Timber.tag(TAG).d("No deleted songs found.")
+                            Timber.tag(TAG).d("No deleted tracks found.")
                         }
                     }
 
@@ -147,7 +147,7 @@ constructor(
                     Timber.tag(TAG)
                         .i("Fetching music from MediaStore (since: $fetchTimestamp seconds)...")
 
-                    // Update every 50 songs or ~5% of library
+                    // Update every 50 tracks or ~5% of library
                     val progressBatchSize = 50
 
                     val mediaStoreSongs =
@@ -167,7 +167,7 @@ constructor(
                             }
 
                     Timber.tag(TAG)
-                        .i("Fetched ${mediaStoreSongs.size} new/modified songs from MediaStore.")
+                        .i("Fetched ${mediaStoreSongs.size} new/modified tracks from MediaStore.")
 
                     // --- PROCESSING PHASE ---
                     if (mediaStoreSongs.isNotEmpty()) {
@@ -189,12 +189,12 @@ constructor(
                         val existingArtistImageUrls =
                                 allExistingArtists.associate { it.id to it.imageUrl }
                         
-                        // Load all existing artist IDs to ensure stability across incremental syncs
+                        // Load all existing author IDs to ensure stability across incremental syncs
                         val existingArtistIdMap = allExistingArtists.associate { it.name to it.id }.toMutableMap()
                         val maxArtistId = audiobookDao.getMaxArtistId() ?: 0L
 
-                        // Prepare list of existing songs to preserve user edits
-                        // We only need to check against existing songs if we are updating them
+                        // Prepare list of existing tracks to preserve user edits
+                        // We only need to check against existing tracks if we are updating them
                         val localSongsMap =
                                 if (syncMode != SyncMode.REBUILD) {
                                     audiobookDao.getAllTracksList().associateBy { it.id }
@@ -205,7 +205,7 @@ constructor(
                         val songsToProcess = mediaStoreSongs
 
                         Timber.tag(TAG)
-                            .i("Processing ${songsToProcess.size} songs for upsert. Hash: ${songsToProcess.hashCode()}")
+                            .i("Processing ${songsToProcess.size} tracks for upsert. Hash: ${songsToProcess.hashCode()}")
 
                         val songsToInsert =
                                 songsToProcess.map { mediaStoreSong ->
@@ -249,11 +249,11 @@ constructor(
                                                         )
                                                                 localSong.title
                                                         else mediaStoreSong.title,
-                                                artistName =
+                                                authorName =
                                                         if (shouldPreserveArtistName)
                                                                 localSong.authorName
                                                         else mediaStoreSong.authorName,
-                                                albumName =
+                                                bookName =
                                                         if (localSong.bookName !=
                                                                         mediaStoreSong.bookName &&
                                                                         localSong.bookName
@@ -278,9 +278,9 @@ constructor(
                                     }
                                 }
 
-                        val (correctedSongs, albums, artists, crossRefs) =
+                        val (correctedSongs, books, authors, crossRefs) =
                                 preProcessAndDeduplicateWithMultiArtist(
-                                        songs = songsToInsert,
+                                        tracks = songsToInsert,
                                         artistDelimiters = artistDelimiters,
                                         groupByAlbumArtist = groupByAlbumArtist,
                                         existingArtistImageUrls = existingArtistImageUrls,
@@ -293,17 +293,17 @@ constructor(
                         if (syncMode == SyncMode.REBUILD) {
                             audiobookDao.insertMusicDataWithCrossRefs(
                                     correctedSongs,
-                                    albums,
-                                    artists,
+                                    books,
+                                    authors,
                                     crossRefs
                             )
                         } else {
                             // incrementalSyncMusicData handles upserts efficiently
-                            // processing deleted songs was already handled at the start
+                            // processing deleted tracks was already handled at the start
                             audiobookDao.incrementalSyncMusicData(
-                                    songs = correctedSongs,
-                                    albums = albums,
-                                    artists = artists,
+                                    tracks = correctedSongs,
+                                    books = books,
+                                    authors = authors,
                                     crossRefs = crossRefs,
                                     deletedSongIds = emptyList() // Already handled
                             )
@@ -317,7 +317,7 @@ constructor(
                             .i("Synchronization finished successfully in ${endTime - startTime}ms.")
                         userPreferencesRepository.setLastSyncTimestamp(System.currentTimeMillis())
 
-                        // Count total songs for the output
+                        // Count total tracks for the output
                         val totalSongs = audiobookDao.getTrackCount().first()
 
                         // --- LRC SCANNING PHASE ---
@@ -331,9 +331,9 @@ constructor(
                                         Track(
                                                 id = entity.id.toString(),
                                                 title = entity.title,
-                                                artist = entity.authorName,
+                                                author = entity.authorName,
                                                 authorId = entity.authorId,
-                                                album = entity.bookName,
+                                                book = entity.bookName,
                                                 bookId = entity.bookId,
                                                 path = entity.filePath,
                                                 contentUriString = entity.contentUriString,
@@ -364,16 +364,16 @@ constructor(
                                         )
                                     }
 
-                            Log.i(TAG, "LRC Scan finished. Assigned lyrics to $scannedCount songs.")
+                            Log.i(TAG, "LRC Scan finished. Assigned lyrics to $scannedCount tracks.")
                         }
                         
-                        // Clean orphaned album art cache files
+                        // Clean orphaned book art cache files
                         val allSongIds = audiobookDao.getAllSongIds().toSet()
                         BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
 
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
                     } else {
-                        Log.i(TAG, "No new or modified songs found.")
+                        Log.i(TAG, "No new or modified tracks found.")
 
                         // If it was a fresh install/rebuild and we found nothing, clear everything
                         if ((syncMode == SyncMode.REBUILD || isFreshInstall) &&
@@ -395,7 +395,7 @@ constructor(
 
                         val totalSongs = audiobookDao.getTrackCount().first()
                         
-                        // Clean orphaned album art cache files
+                        // Clean orphaned book art cache files
                         val allSongIds = audiobookDao.getAllSongIds().toSet()
                         BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
                         
@@ -410,7 +410,7 @@ constructor(
             }
 
     /**
-     * Efficiently fetches ONLY the IDs of all songs in MediaStore. Used for fast deletion
+     * Efficiently fetches ONLY the IDs of all tracks in MediaStore. Used for fast deletion
      * detection.
      */
     private fun getBaseSelection(): Pair<String, Array<String>> {
@@ -432,7 +432,7 @@ constructor(
     }
 
     /**
-     * Efficiently fetches ONLY the IDs of all songs in MediaStore. Used for fast deletion
+     * Efficiently fetches ONLY the IDs of all tracks in MediaStore. Used for fast deletion
      * detection.
      */
     private fun fetchMediaStoreIds(directoryResolver: DirectoryRuleResolver): Set<Long> {
@@ -465,20 +465,20 @@ constructor(
         return ids
     }
 
-    /** Data class to hold the result of multi-artist preprocessing. */
+    /** Data class to hold the result of multi-author preprocessing. */
     private data class MultiArtistProcessResult(
-            val songs: List<TrackEntity>,
-            val albums: List<BookEntity>,
-            val artists: List<AuthorEntity>,
+            val tracks: List<TrackEntity>,
+            val books: List<BookEntity>,
+            val authors: List<AuthorEntity>,
             val crossRefs: List<TrackAuthorCrossRef>
     )
 
     /**
-     * Process songs with multi-artist support. Splits artist names by delimiters and creates proper
+     * Process tracks with multi-author support. Splits author names by delimiters and creates proper
      * cross-references.
      */
     private fun preProcessAndDeduplicateWithMultiArtist(
-            songs: List<TrackEntity>,
+            tracks: List<TrackEntity>,
             artistDelimiters: List<String>,
             groupByAlbumArtist: Boolean,
             existingArtistImageUrls: Map<Long, String?>,
@@ -493,20 +493,20 @@ constructor(
         val artistTrackCounts = mutableMapOf<Long, Int>()
         val albumMap = mutableMapOf<Pair<String, String>, Long>()
         val artistSplitCache = mutableMapOf<String, List<String>>()
-        val correctedSongs = ArrayList<TrackEntity>(songs.size)
+        val correctedSongs = ArrayList<TrackEntity>(tracks.size)
 
-        songs.forEach { song ->
-            val rawArtistName = song.authorName
+        tracks.forEach { track ->
+            val rawArtistName = track.authorName
             val songArtistNameTrimmed = rawArtistName.trim()
             val artistsForSong =
                     artistSplitCache.getOrPut(rawArtistName) {
                         rawArtistName.splitArtistsByDelimiters(artistDelimiters)
                     }
 
-            artistsForSong.forEach { artistName ->
-                val normalizedName = artistName.trim()
+            artistsForSong.forEach { authorName ->
+                val normalizedName = authorName.trim()
                 if (normalizedName.isNotEmpty() && !artistNameToId.containsKey(normalizedName)) {
-                     // Check if it's the song's primary artist and we want to preserve that ID if possible?
+                     // Check if it's the track's primary author and we want to preserve that ID if possible?
                      // Actually, just generate new ID if not found in map.
                      val id = nextArtistId.getAndIncrement()
                      artistNameToId[normalizedName] = id
@@ -516,16 +516,16 @@ constructor(
             val primaryArtistName =
                     artistsForSong.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
                             ?: songArtistNameTrimmed
-            val primaryArtistId = artistNameToId[primaryArtistName] ?: song.authorId
+            val primaryArtistId = artistNameToId[primaryArtistName] ?: track.authorId
 
-            artistsForSong.forEachIndexed { index, artistName ->
-                val normalizedName = artistName.trim()
+            artistsForSong.forEachIndexed { index, authorName ->
+                val normalizedName = authorName.trim()
                 val authorId = artistNameToId[normalizedName]
                 if (authorId != null) {
-                    val isPrimary = (index == 0) // First artist is primary
+                    val isPrimary = (index == 0) // First author is primary
                     allCrossRefs.add(
                             TrackAuthorCrossRef(
-                                    trackId = song.id,
+                                    trackId = track.id,
                                     authorId = authorId,
                                     isPrimary = isPrimary
                             )
@@ -534,10 +534,10 @@ constructor(
                 }
             }
 
-            // --- Album Logic ---
-            val rawAlbumName = song.bookName.trim()
+            // --- Book Logic ---
+            val rawAlbumName = track.bookName.trim()
             val bookIdentityArtist = if (groupByAlbumArtist) {
-                song.bookArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
+                track.bookArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
             } else {
                 primaryArtistName
             }
@@ -545,14 +545,14 @@ constructor(
             val albumKey = rawAlbumName to bookIdentityArtist
             
             if (!albumMap.containsKey(albumKey)) {
-                albumMap[albumKey] = song.bookId 
+                albumMap[albumKey] = track.bookId 
             }
-            val finalAlbumId = albumMap[albumKey] ?: song.bookId // fallback
+            val finalAlbumId = albumMap[albumKey] ?: track.bookId // fallback
 
             correctedSongs.add(
-                    song.copy(
+                    track.copy(
                             authorId = primaryArtistId,
-                            artistName = primaryArtistName,
+                            authorName = primaryArtistName,
                             bookId = finalAlbumId
                     )
             )
@@ -569,21 +569,21 @@ constructor(
             )
         }
         
-        // Re-calculate Album Entities from the corrected songs to ensure we have valid metadata (Art, Year)
+        // Re-calculate Book Entities from the corrected tracks to ensure we have valid metadata (Art, Year)
         // which isn't available in the simple albumMap (which only has ID)
         val albumEntities = correctedSongs.groupBy { it.bookId }.map { (catAlbumId, songsInAlbum) ->
              val firstSong = songsInAlbum.first()
-             // Determine Album Artist Name
+             // Determine Book Author Name
              val determinedAlbumArtist = firstSong.bookArtist?.takeIf { it.isNotBlank() } 
                  ?: firstSong.authorName
                  
-             // Determine Album Artist ID (best effort lookup)
+             // Determine Book Author ID (best effort lookup)
              val determinedAlbumArtistId = artistNameToId[determinedAlbumArtist] ?: 0L
 
              BookEntity(
                  id = catAlbumId,
                  title = firstSong.bookName,
-                 artistName = determinedAlbumArtist,
+                 authorName = determinedAlbumArtist,
                  authorId = determinedAlbumArtistId,
                  bookArtUriString = firstSong.bookArtUriString,
                  trackCount = songsInAlbum.size, 
@@ -592,9 +592,9 @@ constructor(
         }
 
         return MultiArtistProcessResult(
-                songs = correctedSongs, // Corrected songs have the right Album IDs now
-                albums = albumEntities,
-                artists = artistEntities,
+                tracks = correctedSongs, // Corrected tracks have the right Book IDs now
+                books = albumEntities,
+                authors = artistEntities,
                 crossRefs = allCrossRefs
         )
     }
@@ -638,7 +638,7 @@ constructor(
     }
 
     /**
-     * Fetches a map of Song ID -> Genre Name using the MediaStore.Audio.Genres table. This is
+     * Fetches a map of Track ID -> Genre Name using the MediaStore.Audio.Genres table. This is
      * necessary because the GENRE column in MediaStore.Audio.Media is not reliably available or
      * populated on all Android versions (especially pre-API 30).
      * 
@@ -717,7 +717,7 @@ constructor(
                                     if (audioIdCol >= 0) {
                                         while (membersCursor.moveToNext()) {
                                             val audioId = membersCursor.getLong(audioIdCol)
-                                            // If a song has multiple genres, the last one processed wins.
+                                            // If a track has multiple genres, the last one processed wins.
                                             // This is acceptable as a primary genre for display.
                                             genreMap[audioId] = genreName
                                         }
@@ -749,7 +749,7 @@ constructor(
             val filePath: String,
             val title: String,
             val author: String,
-            val album: String,
+            val book: String,
             val bookArtist: String?,
             val duration: Long,
             val trackNumber: Int,
@@ -855,14 +855,14 @@ constructor(
                                                 cursor.getString(titleCol)
                                                         .normalizeMetadataTextOrEmpty()
                                                         .ifEmpty { "Unknown Title" },
-                                        artist =
+                                        author =
                                                 cursor.getString(artistCol)
                                                         .normalizeMetadataTextOrEmpty()
-                                                        .ifEmpty { "Unknown Artist" },
-                                        album =
+                                                        .ifEmpty { "Unknown Author" },
+                                        book =
                                                 cursor.getString(albumCol)
                                                         .normalizeMetadataTextOrEmpty()
-                                                        .ifEmpty { "Unknown Album" },
+                                                        .ifEmpty { "Unknown Book" },
                                         bookArtist =
                                                 if (bookArtistCol >= 0)
                                                         cursor.getString(bookArtistCol)
@@ -884,12 +884,12 @@ constructor(
             return emptyList()
         }
 
-        // Phase 2: Parallel processing of songs
+        // Phase 2: Parallel processing of tracks
         val processedCount = AtomicInteger(0)
         val concurrencyLimit = 8 // Limit parallel operations to prevent resource exhaustion
         val semaphore = Semaphore(concurrencyLimit)
 
-        val songs = coroutineScope {
+        val tracks = coroutineScope {
             rawDataList
                     .map { raw ->
                         async {
@@ -907,7 +907,7 @@ constructor(
                                     )
                                 }
 
-                                song
+                                track
                             }
                         }
                     }
@@ -915,11 +915,11 @@ constructor(
         }
 
         Trace.endSection()
-        return songs
+        return tracks
     }
 
     /**
-     * Process a single song's raw data into a TrackEntity. This is the CPU/IO intensive work that
+     * Process a single track's raw data into a TrackEntity. This is the CPU/IO intensive work that
      * benefits from parallelization.
      */
     private suspend fun processSongData(
@@ -936,7 +936,7 @@ constructor(
         var bookArtUriString = bookArtByAlbumId[raw.bookId]
         if (deepScan) {
             bookArtUriString =
-                    BookArtUtils.getAlbumArtUri(
+                    BookArtUtils.getBookArtUri(
                             applicationContext,
                             audiobookDao,
                             raw.filePath,
@@ -950,8 +950,8 @@ constructor(
                 if (deepScan) getAudioMetadata(audiobookDao, raw.id, raw.filePath, true) else null
 
         var title = raw.title
-        var artist = raw.author
-        var album = raw.book
+        var author = raw.author
+        var book = raw.book
         var trackNumber = raw.trackNumber
         var year = raw.year
         var genre: String? = genreMap[raw.id] // Use mapped genre as default
@@ -970,8 +970,8 @@ constructor(
                 try {
                     AudioMetadataReader.read(file)?.let { meta ->
                         if (!meta.title.isNullOrBlank()) title = meta.title
-                        if (!meta.author.isNullOrBlank()) artist = meta.author
-                        if (!meta.book.isNullOrBlank()) album = meta.book
+                        if (!meta.author.isNullOrBlank()) author = meta.author
+                        if (!meta.book.isNullOrBlank()) book = meta.book
                         if (!meta.genre.isNullOrBlank()) genre = meta.genre
                         if (meta.trackNumber != null) trackNumber = meta.trackNumber
                         if (meta.year != null) year = meta.year
@@ -995,10 +995,10 @@ constructor(
         return TrackEntity(
                 id = raw.id,
                 title = title,
-                artistName = artist,
+                authorName = author,
                 authorId = raw.authorId,
                 bookArtist = raw.bookArtist,
-                albumName = album,
+                bookName = book,
                 bookId = raw.bookId,
                 contentUriString = contentUriString,
                 bookArtUriString = bookArtUriString,

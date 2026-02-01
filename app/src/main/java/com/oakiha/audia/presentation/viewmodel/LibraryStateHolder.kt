@@ -43,10 +43,10 @@ class LibraryStateHolder @Inject constructor(
     val allTracks = _allTracks.asStateFlow()
 
     private val _albums = MutableStateFlow<ImmutableList<Book>>(persistentListOf())
-    val albums = _albums.asStateFlow()
+    val books = _albums.asStateFlow()
 
     private val _artists = MutableStateFlow<ImmutableList<Author>>(persistentListOf())
-    val artists = _artists.asStateFlow()
+    val authors = _artists.asStateFlow()
 
     private val _audiobookFolders = MutableStateFlow<ImmutableList<AudiobookFolder>>(persistentListOf())
     val audiobookFolders = _audiobookFolders.asStateFlow()
@@ -77,21 +77,21 @@ class LibraryStateHolder @Inject constructor(
 
     @OptIn(ExperimentalStdlibApi::class)
     val genres: kotlinx.coroutines.flow.Flow<ImmutableList<com.oakiha.audia.data.model.Genre>> = _allTracks
-        .map { songs ->
+        .map { tracks ->
             val genreMap = mutableMapOf<String, MutableList<Track>>()
             val unknownGenreName = "Unknown Genre"
 
-            songs.forEach { song ->
-                val genreName = song.genre?.trim()
+            tracks.forEach { track ->
+                val genreName = track.genre?.trim()
                 if (genreName.isNullOrBlank()) {
-                    genreMap.getOrPut(unknownGenreName) { mutableListOf() }.add(song)
+                    genreMap.getOrPut(unknownGenreName) { mutableListOf() }.add(track)
                 } else {
-                    genreMap.getOrPut(genreName) { mutableListOf() }.add(song)
+                    genreMap.getOrPut(genreName) { mutableListOf() }.add(track)
                 }
             }
 
-            genreMap.toList().mapIndexedNotNull { index, (genreName, songs) ->
-                if (songs.isNotEmpty()) {
+            genreMap.toList().mapIndexedNotNull { index, (genreName, tracks) ->
+                if (tracks.isNotEmpty()) {
                     val id = if (genreName.equals(unknownGenreName, ignoreCase = true)) {
                         "unknown"
                     } else {
@@ -164,10 +164,10 @@ class LibraryStateHolder @Inject constructor(
         
         songsJob = scope?.launch {
             _isLoadingLibrary.value = true
-            audiobookRepository.getTracks().collect { songs ->
+            audiobookRepository.getTracks().collect { tracks ->
                  // When the repository emits a new list (triggered by directory changes),
                  // we update our state and re-apply current sorting.
-                 _allTracks.value = songs.toImmutableList()
+                 _allTracks.value = tracks.toImmutableList()
                  // Apply sort to the new data
                  sortSongs(_currentTrackSortOption.value, persist = false)
                  _isLoadingLibrary.value = false
@@ -176,8 +176,8 @@ class LibraryStateHolder @Inject constructor(
         
         albumsJob = scope?.launch {
             _isLoadingCategories.value = true
-            audiobookRepository.getBooks().collect { albums ->
-                _albums.value = albums.toImmutableList()
+            audiobookRepository.getBooks().collect { books ->
+                _albums.value = books.toImmutableList()
                 sortAlbums(_currentAlbumSortOption.value, persist = false)
                 _isLoadingCategories.value = false
             }
@@ -185,8 +185,8 @@ class LibraryStateHolder @Inject constructor(
         
         artistsJob = scope?.launch {
             _isLoadingCategories.value = true
-            audiobookRepository.getAuthors().collect { artists ->
-                _artists.value = artists.toImmutableList()
+            audiobookRepository.getAuthors().collect { authors ->
+                _artists.value = authors.toImmutableList()
                 sortArtists(_currentArtistSortOption.value, persist = false)
                 _isLoadingCategories.value = false
             }
@@ -329,7 +329,7 @@ class LibraryStateHolder @Inject constructor(
     }
 
     /**
-     * Updates a single song in the in-memory list.
+     * Updates a single track in the in-memory list.
      * Used effectively after metadata edits to reflect changes immediately.
      */
     fun updateSong(updatedSong: Track) {

@@ -57,8 +57,8 @@ class StatsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val songs = loadSongs()
-                    playbackStatsRepository.loadSummary(StatsTimeRange.WEEK, songs)
+                    val tracks = loadSongs()
+                    playbackStatsRepository.loadSummary(StatsTimeRange.WEEK, tracks)
                 }
             }.onSuccess { summary ->
                 _weeklyOverview.value = summary
@@ -74,8 +74,8 @@ class StatsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, selectedRange = range) }
             val summary = runCatching {
                 withContext(Dispatchers.IO) {
-                    val songs = loadSongs()
-                    playbackStatsRepository.loadSummary(range, songs)
+                    val tracks = loadSongs()
+                    playbackStatsRepository.loadSummary(range, tracks)
                 }
             }
             _uiState.update { current ->
@@ -99,9 +99,9 @@ class StatsViewModel @Inject constructor(
         cachedSongs?.let { existing ->
             if (existing.isNotEmpty()) return existing
         }
-        val songs = audiobookRepository.getTracks().first()
-        cachedSongs = songs
-        return songs
+        val tracks = audiobookRepository.getTracks().first()
+        cachedSongs = tracks
+        return tracks
     }
 }
 

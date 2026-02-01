@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 
 /**
- * Efficient color scheme processor for album art.
+ * Efficient color scheme processor for book art.
  * 
  * Optimizations:
  * - In-memory LRU cache to avoid disk reads for recently accessed schemes
@@ -61,12 +61,12 @@ class ColorSchemeProcessor @Inject constructor(
     val requestChannel = Channel<String>(Channel.UNLIMITED)
 
     /**
-     * Gets or generates a color scheme for the given album art URI.
+     * Gets or generates a color scheme for the given book art URI.
      * Checks memory cache first, then database, then generates new.
      * All heavy operations are performed on appropriate dispatchers.
      */
     /**
-     * Gets or generates a color scheme for the given album art URI.
+     * Gets or generates a color scheme for the given book art URI.
      * Checks memory cache first, then database, then generates new.
      * @param forceRefresh If true, bypasses caches and forces regeneration from source image.
      */
@@ -100,7 +100,7 @@ class ColorSchemeProcessor @Inject constructor(
     }
 
     /**
-     * Generates a color scheme from the album art bitmap.
+     * Generates a color scheme from the book art bitmap.
      * All processing done on Default dispatcher for CPU-bound work.
      */
     private suspend fun generateAndCacheColorScheme(bookArtUri: String, forceRefresh: Boolean = false): ColorSchemePair? {

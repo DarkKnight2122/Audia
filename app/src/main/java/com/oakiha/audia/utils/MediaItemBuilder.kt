@@ -24,35 +24,35 @@ object MediaItemBuilder {
 
     fun build(track: Track): MediaItem {
         return MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri(song.contentUriString.toUri())
-            .setMediaMetadata(buildMediaMetadataForSong(song))
+            .setMediaId(track.id)
+            .setUri(track.contentUriString.toUri())
+            .setMediaMetadata(buildMediaMetadataForSong(track))
             .build()
     }
 
     private fun buildMediaMetadataForSong(track: Track): MediaMetadata {
         val metadataBuilder = MediaMetadata.Builder()
-            .setTitle(song.title)
-            .setArtist(song.displayAuthor)
-            .setAlbumTitle(song.book)
+            .setTitle(track.title)
+            .setArtist(track.displayAuthor)
+            .setAlbumTitle(track.book)
 
-        song.bookArtUriString?.toUri()?.let { artworkUri ->
+        track.bookArtUriString?.toUri()?.let { artworkUri ->
             metadataBuilder.setArtworkUri(artworkUri)
         }
 
         val extras = Bundle().apply {
-            putBoolean(EXTERNAL_EXTRA_FLAG, song.id.startsWith(EXTERNAL_MEDIA_ID_PREFIX))
-            putString(EXTERNAL_EXTRA_ALBUM, song.book)
-            putLong(EXTERNAL_EXTRA_DURATION, song.duration)
-            putString(EXTERNAL_EXTRA_CONTENT_URI, song.contentUriString)
-            song.bookArtUriString?.let { putString(EXTERNAL_EXTRA_ALBUM_ART, it) }
-            song.genre?.let { putString(EXTERNAL_EXTRA_GENRE, it) }
-            putInt(EXTERNAL_EXTRA_TRACK, song.trackNumber)
-            putInt(EXTERNAL_EXTRA_YEAR, song.year)
-            putLong(EXTERNAL_EXTRA_DATE_ADDED, song.dateAdded)
-            putString(EXTERNAL_EXTRA_MIME_TYPE, song.mimeType)
-            putInt(EXTERNAL_EXTRA_BITRATE, song.bitrate ?: 0)
-            putInt(EXTERNAL_EXTRA_SAMPLE_RATE, song.sampleRate ?: 0)
+            putBoolean(EXTERNAL_EXTRA_FLAG, track.id.startsWith(EXTERNAL_MEDIA_ID_PREFIX))
+            putString(EXTERNAL_EXTRA_ALBUM, track.book)
+            putLong(EXTERNAL_EXTRA_DURATION, track.duration)
+            putString(EXTERNAL_EXTRA_CONTENT_URI, track.contentUriString)
+            track.bookArtUriString?.let { putString(EXTERNAL_EXTRA_ALBUM_ART, it) }
+            track.genre?.let { putString(EXTERNAL_EXTRA_GENRE, it) }
+            putInt(EXTERNAL_EXTRA_TRACK, track.trackNumber)
+            putInt(EXTERNAL_EXTRA_YEAR, track.year)
+            putLong(EXTERNAL_EXTRA_DATE_ADDED, track.dateAdded)
+            putString(EXTERNAL_EXTRA_MIME_TYPE, track.mimeType)
+            putInt(EXTERNAL_EXTRA_BITRATE, track.bitrate ?: 0)
+            putInt(EXTERNAL_EXTRA_SAMPLE_RATE, track.sampleRate ?: 0)
         }
 
         metadataBuilder.setExtras(extras)

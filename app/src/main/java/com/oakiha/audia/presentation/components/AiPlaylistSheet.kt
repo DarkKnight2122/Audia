@@ -274,7 +274,7 @@ fun AiPlaylistSheet(
                         OutlinedTextField(
                             value = minLength,
                             onValueChange = { minLength = it.filter { char -> char.isDigit() } },
-                            label = { Text("Min songs") },
+                            label = { Text("Min tracks") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
@@ -284,7 +284,7 @@ fun AiPlaylistSheet(
                         OutlinedTextField(
                             value = maxLength,
                             onValueChange = { maxLength = it.filter { char -> char.isDigit() } },
-                            label = { Text("Max songs") },
+                            label = { Text("Max tracks") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,

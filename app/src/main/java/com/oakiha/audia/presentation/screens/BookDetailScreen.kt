@@ -143,7 +143,7 @@ fun BookDetailScreen(
 
         uiState.book != null -> {
             val book = uiState.book!!
-            val songs = uiState.tracks
+            val tracks = uiState.tracks
             val lazyListState = rememberLazyListState()
 
             val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -240,28 +240,28 @@ fun BookDetailScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(songs, key = { song -> "album_song_${song.id}" }) { song ->
-                        EnhancedTrackListItem(track = song,
-                            isCurrentSong = stablePlayerState.currentTrack?.id == song.id,
+                    items(tracks, key = { track -> "album_song_${track.id}" }) { track ->
+                        EnhancedTrackListItem(track = track,
+                            isCurrentSong = stablePlayerState.currentTrack?.id == track.id,
                             isPlaying = stablePlayerState.isPlaying,
                             onMoreOptionsClick = {
-                                playerViewModel.selectSongForInfo(song)
+                                playerViewModel.selectSongForInfo(track)
                                 showTrackInfoBottomSheet = true
                             },
-                            onClick = { playerViewModel.showAndPlaySong(song, songs) }
+                            onClick = { playerViewModel.showAndPlaySong(track, tracks) }
                         )
                     }
                 }
                 CollapsingAlbumTopBar(
                     book = book,
-                    songsCount = songs.size,
+                    songsCount = tracks.size,
                     collapseFraction = collapseFraction,
                     headerHeight = currentTopBarHeightDp,
                     onBackPressed = { navController.popBackStack() },
                     onPlayClick = {
-                        if (songs.isNotEmpty()) {
-                            val randomSong = songs.random()
-                            playerViewModel.showAndPlaySong(randomSong, songs)
+                        if (tracks.isNotEmpty()) {
+                            val randomSong = tracks.random()
+                            playerViewModel.showAndPlaySong(randomSong, tracks)
                         }
                     }
                 )
@@ -281,7 +281,7 @@ fun BookDetailScreen(
                 }
             }
             TrackInfoBottomSheet(
-                song = currentTrack,
+                track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     playerViewModel.toggleFavoriteSpecificSong(currentTrack)
@@ -333,7 +333,7 @@ fun BookDetailScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentTrack,
+                    track = currentTrack,
                     onDismiss = { showPlaylistBottomSheet = false },
                     bottomBarHeight = bottomBarHeightDp,
                     playerViewModel = playerViewModel
@@ -346,7 +346,7 @@ fun BookDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CollapsingAlbumTopBar(
-    album: Book,
+    book: Book,
     songsCount: Int,
     collapseFraction: Float,
     headerHeight: Dp,
@@ -387,8 +387,8 @@ private fun CollapsingAlbumTopBar(
                 .graphicsLayer { alpha = headerContentAlpha }
         ) {
             SmartImage(
-                model = album.bookArtUriString,
-                contentDescription = "Cover of ${album.title}",
+                model = book.bookArtUriString,
+                contentDescription = "Cover of ${book.title}",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -456,7 +456,7 @@ private fun CollapsingAlbumTopBar(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = album.title,
+                        text = book.title,
                         style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = (-1).sp, lineHeight = 32.sp, 
                             fontSize = 26.sp,
                             textGeometricTransform = TextGeometricTransform(scaleX = 1.2f),
@@ -467,7 +467,7 @@ private fun CollapsingAlbumTopBar(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${album.author} Ã¢â‚¬Â¢ $songsCount songs",
+                        text = "${book.author} Ã¢â‚¬Â¢ $songsCount tracks",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

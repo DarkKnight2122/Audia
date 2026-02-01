@@ -464,7 +464,7 @@ class SettingsViewModel @Inject constructor(
 
     /**
      * Performs a full library rescan - rescans all files from scratch.
-     * Use when songs are missing or metadata is incorrect.
+     * Use when tracks are missing or metadata is incorrect.
      */
     fun fullSyncLibrary() {
         viewModelScope.launch {

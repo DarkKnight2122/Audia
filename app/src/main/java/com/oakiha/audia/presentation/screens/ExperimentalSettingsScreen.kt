@@ -217,8 +217,8 @@ fun ExperimentalSettingsScreen(
                             )
 
                             SwitchSettingItem(
-                                title = "Album carousel",
-                                subtitle = "Delay album art and carousel until the sheet is expanded.",
+                                title = "Book carousel",
+                                subtitle = "Delay book art and carousel until the sheet is expanded.",
                                 checked = uiState.fullPlayerLoadingTweaks.delayAlbumCarousel,
                                 onCheckedChange = settingsViewModel::setDelayAlbumCarousel,
                                 enabled = !delayAllEnabled,
@@ -232,8 +232,8 @@ fun ExperimentalSettingsScreen(
                             )
 
                             SwitchSettingItem(
-                                title = "Song metadata",
-                                subtitle = "Delay title, artist, and lyrics/queue actions.",
+                                title = "Track metadata",
+                                subtitle = "Delay title, author, and lyrics/queue actions.",
                                 checked = uiState.fullPlayerLoadingTweaks.delayTrackMetadata,
                                 onCheckedChange = settingsViewModel::setDelayTrackMetadata,
                                 enabled = !delayAllEnabled,
@@ -387,7 +387,7 @@ fun ExperimentalSettingsScreen(
                 val bookArtQuality = uiState.bookArtQuality
                 
                  SettingsSection(
-                    title = "Album Art Resolution",
+                    title = "Book Art Resolution",
                     icon = {
                         Icon(
                             imageVector = Icons.Rounded.MusicNote, // Or Image/Photo icon

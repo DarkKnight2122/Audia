@@ -72,7 +72,7 @@ class CastStateHolder @Inject constructor(
     var lastRemoteItemId: Int? = null
         private set
     
-    // Pending remote song tracking
+    // Pending remote track tracking
     var pendingRemoteSongId: String? = null
         private set
     var pendingRemoteSongMarkedAt: Long = 0L

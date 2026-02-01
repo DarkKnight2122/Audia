@@ -9,12 +9,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Manages album art cache with LRU eviction policy.
+ * Manages book art cache with LRU eviction policy.
  * 
  * Features:
  * - Configurable max cache size (default 200MB)
  * - LRU eviction based on file lastModified timestamp
- * - Cleanup of orphaned cache files for deleted songs
+ * - Cleanup of orphaned cache files for deleted tracks
  * - Thread-safe operations
  */
 object BookArtCacheManager {
@@ -27,7 +27,7 @@ object BookArtCacheManager {
     private const val MAX_CACHE_SIZE_BYTES = 200L * 1024 * 1024
     
     /**
-     * Prefix for album art cache files
+     * Prefix for book art cache files
      */
     private const val CACHE_PREFIX = "song_art_"
     
@@ -78,7 +78,7 @@ object BookArtCacheManager {
             }
             
             val cacheDir = context.cacheDir
-            val artFiles = getAlbumArtFiles(cacheDir)
+            val artFiles = getBookArtFiles(cacheDir)
             
             if (artFiles.isEmpty()) {
                 return@withLock 0
@@ -117,11 +117,11 @@ object BookArtCacheManager {
     }
     
     /**
-     * Cleans orphaned cache files for songs that no longer exist.
+     * Cleans orphaned cache files for tracks that no longer exist.
      * Should be called after sync operations.
      * 
      * @param context Application context
-     * @param validSongIds Set of song IDs that still exist in the library
+     * @param validSongIds Set of track IDs that still exist in the library
      * @return Number of orphaned files deleted
      */
     suspend fun cleanOrphanedCacheFiles(
@@ -148,7 +148,7 @@ object BookArtCacheManager {
             }
             
             if (deletedCount > 0) {
-                Log.d(TAG, "Cleaned $deletedCount orphaned album art files")
+                Log.d(TAG, "Cleaned $deletedCount orphaned book art files")
             }
             
             deletedCount
@@ -159,10 +159,10 @@ object BookArtCacheManager {
      * Gets the current cache size in bytes.
      * 
      * @param context Application context
-     * @return Total size of album art cache in bytes
+     * @return Total size of book art cache in bytes
      */
     fun getCacheSizeBytes(context: Context): Long {
-        return getAlbumArtFiles(context.cacheDir).sumOf { it.length() }
+        return getBookArtFiles(context.cacheDir).sumOf { it.length() }
     }
     
     /**
@@ -178,17 +178,17 @@ object BookArtCacheManager {
     }
     
     /**
-     * Gets the number of cached album art files.
+     * Gets the number of cached book art files.
      * 
      * @param context Application context
      * @return Number of cached files
      */
     fun getCachedFileCount(context: Context): Int {
-        return getAlbumArtFiles(context.cacheDir).size
+        return getBookArtFiles(context.cacheDir).size
     }
     
     /**
-     * Clears all album art cache files.
+     * Clears all book art cache files.
      * 
      * @param context Application context
      * @return Number of files deleted
@@ -204,15 +204,15 @@ object BookArtCacheManager {
                 }
             }
             
-            Log.d(TAG, "Cleared all album art cache: $deletedCount files")
+            Log.d(TAG, "Cleared all book art cache: $deletedCount files")
             deletedCount
         }
     }
     
     /**
-     * Gets all album art cache files (excluding "no art" markers).
+     * Gets all book art cache files (excluding "no art" markers).
      */
-    private fun getAlbumArtFiles(cacheDir: File): List<File> {
+    private fun getBookArtFiles(cacheDir: File): List<File> {
         return cacheDir.listFiles { file ->
             file.isFile &&
             file.name.startsWith(CACHE_PREFIX) &&
@@ -221,7 +221,7 @@ object BookArtCacheManager {
     }
     
     /**
-     * Gets all album art related files (including "no art" markers).
+     * Gets all book art related files (including "no art" markers).
      */
     private fun getAllAlbumArtRelatedFiles(cacheDir: File): List<File> {
         return cacheDir.listFiles { file ->
@@ -230,11 +230,11 @@ object BookArtCacheManager {
     }
     
     /**
-     * Extracts song ID from cache filename.
+     * Extracts track ID from cache filename.
      * Handles formats: "song_art_123.jpg" and "song_art_123_no.jpg"
      * 
      * @param filename The filename to parse
-     * @return Song ID or null if parsing fails
+     * @return Track ID or null if parsing fails
      */
     private fun extractSongIdFromFilename(filename: String): Long? {
         return try {

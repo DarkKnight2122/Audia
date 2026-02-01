@@ -340,13 +340,13 @@ class FileExplorerStateHolder(
                         }
                     }
                     // Optimization: If we have found enough files to know it's populated, we can stop counting strictly?
-                    // But we need the counts for the UI ("12 songs").
-                    // If the user has 10,000 songs, this loop is slow.
+                    // But we need the counts for the UI ("12 tracks").
+                    // If the user has 10,000 tracks, this loop is slow.
                     // Let's cap at 500 for display purposes to keep it fast, or rely on MediaStore later?
                     // For now, let's keep the 100 limit from original code or bump slightly,
                     // but the original code had `if (totalCount > 100) return`.
                     // This implies the UI shows "100+" or similar?
-                    // The UI shows `"$displayCount songs"`. If we return 100, it says "100 songs".
+                    // The UI shows `"$displayCount tracks"`. If we return 100, it says "100 tracks".
                     // If we stop at 100, the user won't know the real count.
                     // But for performance, avoiding deep traversal of massive folders is key.
                     if (totalCount > 99) {

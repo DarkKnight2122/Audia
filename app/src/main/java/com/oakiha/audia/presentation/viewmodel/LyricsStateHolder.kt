@@ -45,7 +45,7 @@ class LyricsStateHolder @Inject constructor(
     private var loadingJob: Job? = null
     private var loadCallback: LyricsLoadCallback? = null
 
-    // Sync offset per song in milliseconds
+    // Sync offset per track in milliseconds
     private val _currentTrackSyncOffset = MutableStateFlow(0)
     val currentTrackSyncOffset: StateFlow<Int> = _currentTrackSyncOffset.asStateFlow()
 
@@ -79,13 +79,13 @@ class LyricsStateHolder @Inject constructor(
     }
 
     /**
-     * Load lyrics for a song.
-     * @param song The song to load lyrics for
+     * Load lyrics for a track.
+     * @param track The track to load lyrics for
      * @param sourcePreference The preferred source for lyrics
      */
     fun loadLyricsForSong(track: Track, sourcePreference: LyricsSourcePreference) {
         loadingJob?.cancel()
-        val targetTrackId = song.id
+        val targetTrackId = track.id
 
         loadingJob = scope?.launch {
             loadCallback?.onLoadingStarted(targetTrackId)
@@ -93,7 +93,7 @@ class LyricsStateHolder @Inject constructor(
             val fetchedLyrics = try {
                 withContext(Dispatchers.IO) {
                     audiobookRepository.getLyrics(
-                        song = song,
+                        track = track,
                         sourcePreference = sourcePreference
                     )
                 }
@@ -115,7 +115,7 @@ class LyricsStateHolder @Inject constructor(
     }
 
     /**
-     * Set sync offset for a song.
+     * Set sync offset for a track.
      */
     fun setSyncOffset(trackId: String, offsetMs: Int) {
         scope?.launch {
@@ -125,7 +125,7 @@ class LyricsStateHolder @Inject constructor(
     }
 
     /**
-     * Update sync offset from song ID (called when song changes).
+     * Update sync offset from track ID (called when track changes).
      */
     suspend fun updateSyncOffsetForSong(trackId: String) {
         val offset = userPreferencesRepository.getLyricsSyncOffset(trackId)
@@ -146,8 +146,8 @@ class LyricsStateHolder @Inject constructor(
         _searchUiState.value = LyricsSearchUiState.Idle
     }
 
-    // Event to notify ViewModel of song updates (e.g. lyrics added)
-    private val _songUpdates = kotlinx.coroutines.flow.MutableSharedFlow<Pair<Song, Lyrics?>>()
+    // Event to notify ViewModel of track updates (e.g. lyrics added)
+    private val _songUpdates = kotlinx.coroutines.flow.MutableSharedFlow<Pair<Track, Lyrics?>>()
     val songUpdates = _songUpdates.asSharedFlow()
 
     // Event for Toasts
@@ -155,7 +155,7 @@ class LyricsStateHolder @Inject constructor(
     val messageEvents = _messageEvents.asSharedFlow()
 
     /**
-     * Fetch lyrics for the given song from the remote service.
+     * Fetch lyrics for the given track from the remote service.
      */
     fun fetchLyricsForSong(
         track: Track,
@@ -172,7 +172,7 @@ class LyricsStateHolder @Inject constructor(
         loadingJob = scope?.launch {
             _searchUiState.value = LyricsSearchUiState.Loading
             if (forcePickResults) {
-                audiobookRepository.searchRemoteLyrics(song)
+                audiobookRepository.searchRemoteLyrics(track)
                     .onSuccess { (query, results) ->
                         _searchUiState.value = LyricsSearchUiState.PickResult(query, results)
                     }
@@ -180,16 +180,16 @@ class LyricsStateHolder @Inject constructor(
                         handleError(error)
                     }
             } else {
-                audiobookRepository.getLyricsFromRemote(song)
+                audiobookRepository.getLyricsFromRemote(track)
                     .onSuccess { (lyrics, rawLyrics) ->
                         _searchUiState.value = LyricsSearchUiState.Success(lyrics)
-                        val updatedSong = song.copy(lyrics = rawLyrics)
+                        val updatedSong = track.copy(lyrics = rawLyrics)
                         _songUpdates.emit(updatedSong to lyrics)
                     }
                     .onFailure { error ->
                         if (error is NoLyricsFoundException) {
                             // Fallback to search
-                             audiobookRepository.searchRemoteLyrics(song)
+                             audiobookRepository.searchRemoteLyrics(track)
                                 .onSuccess { (query, results) ->
                                     _searchUiState.value = LyricsSearchUiState.PickResult(query, results)
                                 }
@@ -205,12 +205,12 @@ class LyricsStateHolder @Inject constructor(
     /**
      * Manual search by query.
      */
-    fun searchLyricsManually(title: String, artist: String?) {
+    fun searchLyricsManually(title: String, author: String?) {
         if (title.isBlank()) return
         loadingJob?.cancel()
         loadingJob = scope?.launch {
             _searchUiState.value = LyricsSearchUiState.Loading
-            audiobookRepository.searchRemoteLyricsByQuery(title, artist)
+            audiobookRepository.searchRemoteLyricsByQuery(title, author)
                 .onSuccess { (q, results) ->
                     _searchUiState.value = LyricsSearchUiState.PickResult(q, results)
                 }
@@ -257,7 +257,7 @@ class LyricsStateHolder @Inject constructor(
                 // and let the VM parse OR add the import. 
                 // Let's Try to add the import in a follow up or just emit "null" for parsed lyrics 
                 // and let the VM re-parse/reload?
-                // Better: Emit the raw lyrics. The event is (Song, Lyrics?). 
+                // Better: Emit the raw lyrics. The event is (Track, Lyrics?). 
                 // If we pass null, the VM might keep old lyrics? 
                 
                 // Let's just emit (UpdatedSong, null) and let VM re-load or handle it.
@@ -269,7 +269,7 @@ class LyricsStateHolder @Inject constructor(
                 // Wait, I can add the import for LyricsUtils if I know where it is.
                 // It was in `com.oakiha.audia.utils.LyricsUtils`.
             } else {
-                _searchUiState.value = LyricsSearchUiState.Error("Could not associate lyrics with the current song.")
+                _searchUiState.value = LyricsSearchUiState.Error("Could not associate lyrics with the current track.")
             }
         }
     }

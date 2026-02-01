@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
- * Tracks listening statistics for songs.
+ * Tracks listening statistics for tracks.
  * Extracted from PlayerViewModel to reduce its size and improve modularity.
  *
  * Responsibilities:
@@ -46,7 +46,7 @@ class ListeningStatsTracker @Inject constructor(
         isPlaying: Boolean
     ) {
         finalizeCurrentSession()
-        if (song == null) {
+        if (track == null) {
             return
         }
 
@@ -54,12 +54,12 @@ class ListeningStatsTracker @Inject constructor(
         val nowEpoch = System.currentTimeMillis()
         val normalizedDuration = when {
             durationMs > 0 && durationMs != C.TIME_UNSET -> durationMs
-            song.duration > 0 -> song.duration
+            track.duration > 0 -> track.duration
             else -> 0L
         }
 
         currentSession = ActiveSession(
-            trackId = song.id,
+            trackId = track.id,
             totalDurationMs = normalizedDuration,
             startedAtEpochMs = nowEpoch,
             lastKnownPositionMs = positionMs.coerceAtLeast(0L),
@@ -67,9 +67,9 @@ class ListeningStatsTracker @Inject constructor(
             lastRealtimeMs = nowRealtime,
             lastUpdateEpochMs = nowEpoch,
             isPlaying = isPlaying,
-            isVoluntary = pendingVoluntarySongId == song.id
+            isVoluntary = pendingVoluntarySongId == track.id
         )
-        if (pendingVoluntarySongId == song.id) {
+        if (pendingVoluntarySongId == track.id) {
             pendingVoluntarySongId = null
         }
     }
@@ -107,12 +107,12 @@ class ListeningStatsTracker @Inject constructor(
         durationMs: Long,
         isPlaying: Boolean
     ) {
-        if (song == null) {
+        if (track == null) {
             finalizeCurrentSession()
             return
         }
         val existing = currentSession
-        if (existing?.trackId == song.id) {
+        if (existing?.trackId == track.id) {
             updateDuration(durationMs)
             val nowRealtime = SystemClock.elapsedRealtime()
             if (existing.isPlaying) {
@@ -124,7 +124,7 @@ class ListeningStatsTracker @Inject constructor(
             existing.lastUpdateEpochMs = System.currentTimeMillis()
             return
         }
-        onSongChanged(song, positionMs, durationMs, isPlaying)
+        onSongChanged(track, positionMs, durationMs, isPlaying)
     }
 
     fun updateDuration(durationMs: Long) {
@@ -183,7 +183,7 @@ class ListeningStatsTracker @Inject constructor(
 }
 
 /**
- * Represents an active listening session for a song.
+ * Represents an active listening session for a track.
  */
 data class ActiveSession(
     val trackId: String,

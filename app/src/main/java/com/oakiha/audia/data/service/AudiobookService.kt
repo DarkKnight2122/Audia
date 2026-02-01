@@ -260,7 +260,7 @@ class AudiobookService : MediaSessionService() {
                     val isFavorite = ids.contains(currentTrackId)
                     if (wasFavorite != isFavorite) {
                         Timber.tag("AudiobookService")
-                            .d("Favorite status changed for current song. Updating notification.")
+                            .d("Favorite status changed for current track. Updating notification.")
                         mediaSession?.let { refreshMediaSessionUi(it) }
                     }
                 }
@@ -412,11 +412,11 @@ class AudiobookService : MediaSessionService() {
         val artworkUri = currentItem?.mediaMetadata?.artworkUri
         val artworkData = currentItem?.mediaMetadata?.artworkData
 
-        val (artBytes, artUriString) = getAlbumArtForWidget(artworkData, artworkUri)
+        val (artBytes, artUriString) = getBookArtForWidget(artworkData, artworkUri)
 
         val isFavorite = false
 //        val isFavorite = mediaId?.let {
-//            //audiobookRepository.getFavoriteTracks().firstOrNull()?.any { song -> song.id.toString() == it }
+//            //audiobookRepository.getFavoriteTracks().firstOrNull()?.any { track -> track.id.toString() == it }
 //        } ?: false
 
         val queueItems = mutableListOf<com.oakiha.audia.data.model.QueueItem>()
@@ -435,7 +435,7 @@ class AudiobookService : MediaSessionService() {
                 val mediaItem = window.mediaItem
                 val trackId = mediaItem.mediaId.toLongOrNull()
                 if (trackId != null) {
-                    val (artBytes, _) = getAlbumArtForWidget(
+                    val (artBytes, _) = getBookArtForWidget(
                         embeddedArt = mediaItem.mediaMetadata?.artworkData,
                         artUri = mediaItem.mediaMetadata?.artworkUri
                     )
@@ -450,8 +450,8 @@ class AudiobookService : MediaSessionService() {
         }
 
         return PlayerInfo(
-            songTitle = title,
-            artistName = artist,
+            trackTitle = title,
+            authorName = author,
             isPlaying = isPlaying,
             bookArtUri = artUriString,
             bookArtBitmapData = artBytes,
@@ -464,7 +464,7 @@ class AudiobookService : MediaSessionService() {
 
     private val widgetArtByteArrayCache = LruCache<String, ByteArray>(5)
 
-    private suspend fun getAlbumArtForWidget(embeddedArt: ByteArray?, artUri: Uri?): Pair<ByteArray?, String?> = withContext(Dispatchers.IO) {
+    private suspend fun getBookArtForWidget(embeddedArt: ByteArray?, artUri: Uri?): Pair<ByteArray?, String?> = withContext(Dispatchers.IO) {
         if (embeddedArt != null && embeddedArt.isNotEmpty()) {
             return@withContext embeddedArt to artUri?.toString()
         }
@@ -637,7 +637,7 @@ class AudiobookService : MediaSessionService() {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 if (!countedPlayActive) return
 
-                // If user manually changes the song -> cancel
+                // If user manually changes the track -> cancel
                 if (mediaItem?.mediaId != countedOriginalId) {
                     stopCountedPlay()
                 }

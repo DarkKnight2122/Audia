@@ -28,7 +28,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Orchestrates song transitions by observing the player state and
+ * Orchestrates track transitions by observing the player state and
  * commanding the DualPlayerEngine.
  */
 @OptIn(UnstableApi::class)
@@ -68,7 +68,7 @@ class TransitionController @Inject constructor(
         transitionListener = object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 Timber.tag("TransitionDebug").d("onMediaItemTransition: %s (reason=%d)", mediaItem?.mediaId, reason)
-                // When we naturally move to a new song, ensure pauseAtEnd is OFF by default.
+                // When we naturally move to a new track, ensure pauseAtEnd is OFF by default.
                 engine.setPauseAtEndOfMediaItems(false)
 
                 if (mediaItem != null) {

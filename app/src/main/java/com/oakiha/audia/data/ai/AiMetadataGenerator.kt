@@ -16,7 +16,7 @@ import kotlin.Result
 data class TrackMetadata(
     val title: String? = null,
     val author: String? = null,
-    val album: String? = null,
+    val book: String? = null,
     val genre: String? = null
 )
 
@@ -49,27 +49,27 @@ class AiMetadataGenerator @Inject constructor(
             val fieldsJson = fieldsToComplete.joinToString(separator = ", ") { "\"$it\"" }
 
             val systemPrompt = """
-            You are a music metadata expert. Your task is to find and complete missing metadata for a given song.
-            You will be given the song's title and artist, and a list of fields to complete.
+            You are a music metadata expert. Your task is to find and complete missing metadata for a given track.
+            You will be given the track's title and author, and a list of fields to complete.
             Your response MUST be a raw JSON object, without any markdown, backticks or other formatting.
-            The JSON keys MUST be lowercase and match the requested fields (e.g., "title", "artist", "album", "genre").
-            For the genre, you must provide only one, the most accurate, single genre for the song.
+            The JSON keys MUST be lowercase and match the requested fields (e.g., "title", "author", "book", "genre").
+            For the genre, you must provide only one, the most accurate, single genre for the track.
             If you cannot find a specific piece of information, you should return an empty string for that field.
 
-            Example response for a request to complete "album" and "genre":
+            Example response for a request to complete "book" and "genre":
             {
-                "album": "Some Album",
+                "book": "Some Book",
                 "genre": "Indie Pop"
             }
             """.trimIndent()
 
-            val albumInfo = if (track.book.isNotBlank()) "Album: \"${track.book}\"" else ""
+            val albumInfo = if (track.book.isNotBlank()) "Book: \"${track.book}\"" else ""
 
             val fullPrompt = """
             $systemPrompt
 
-            Song title: "${track.title}"
-            Song artist: "${track.displayAuthor}"
+            Track title: "${track.title}"
+            Track author: "${track.displayAuthor}"
             $albumInfo
             Fields to complete: [$fieldsJson]
             """.trimIndent()

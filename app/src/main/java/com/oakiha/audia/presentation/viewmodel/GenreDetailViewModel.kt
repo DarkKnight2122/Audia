@@ -17,13 +17,13 @@ import javax.inject.Inject
 // Define Item Types for LazyColumn
 sealed interface GroupedTrackListItem {
     data class AuthorHeader(val name: String) : GroupedTrackListItem
-    data class BookHeader(val name: String, val artistName: String, val bookArtUri: String?) : GroupedTrackListItem
+    data class BookHeader(val name: String, val authorName: String, val bookArtUri: String?) : GroupedTrackListItem
     data class TrackItem(val track: Track) : GroupedTrackListItem
 }
 
 data class GenreDetailUiState(
     val genre: Genre? = null,
-    val songs: List<Track> = emptyList(),
+    val tracks: List<Track> = emptyList(),
     val groupedSongs: List<GroupedTrackListItem> = emptyList(),
     val isLoadingGenreName: Boolean = false,
     val isLoadingSongs: Boolean = false,
@@ -65,14 +65,14 @@ class GenreDetailViewModel @Inject constructor(
 
                 _uiState.value = _uiState.value.copy(genre = foundGenre, isLoadingGenreName = false, isLoadingSongs = true)
 
-                // Step 2: Fetch songs using the genre's NAME.
+                // Step 2: Fetch tracks using the genre's NAME.
                 val listOfSongs = audiobookRepository.getMusicByGenre(foundGenre.name).first()
 
-                // Step 3: Group the songs for display.
+                // Step 3: Group the tracks for display.
                 val groupedSongs = groupSongs(listOfSongs)
 
                 _uiState.value = _uiState.value.copy(
-                    songs = listOfSongs,
+                    tracks = listOfSongs,
                     groupedSongs = groupedSongs,
                     isLoadingSongs = false
                 )
@@ -86,17 +86,17 @@ class GenreDetailViewModel @Inject constructor(
         }
     }
 
-    private fun groupSongs(songs: List<Track>): List<GroupedTrackListItem> {
+    private fun groupSongs(tracks: List<Track>): List<GroupedTrackListItem> {
         val newGroupedList = mutableListOf<GroupedTrackListItem>()
-        songs.groupBy { it.author }
-            .forEach { (artistName, artistSongs) ->
-                newGroupedList.add(GroupedTrackListItem.ArtistHeader(artistName))
+        tracks.groupBy { it.author }
+            .forEach { (authorName, artistSongs) ->
+                newGroupedList.add(GroupedTrackListItem.ArtistHeader(authorName))
                 artistSongs.groupBy { it.book }
-                    .forEach { (albumName, bookTracks) ->
+                    .forEach { (bookName, bookTracks) ->
                         val bookArtUri = bookTracks.firstOrNull()?.bookArtUriString
-                        newGroupedList.add(GroupedTrackListItem.AlbumHeader(albumName, artistName, bookArtUri))
-                        bookTracks.forEach { song ->
-                            newGroupedList.add(GroupedTrackListItem.SongItem(song))
+                        newGroupedList.add(GroupedTrackListItem.AlbumHeader(bookName, authorName, bookArtUri))
+                        bookTracks.forEach { track ->
+                            newGroupedList.add(GroupedTrackListItem.SongItem(track))
                         }
                     }
             }

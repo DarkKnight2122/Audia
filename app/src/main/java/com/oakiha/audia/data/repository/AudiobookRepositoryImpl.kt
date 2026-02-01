@@ -111,7 +111,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.getRandomTracks(limit).map { it.toTrack() }
     }
 
-    override fun getAlbums(): Flow<List<Book>> {
+    override fun getBooks(): Flow<List<Book>> {
         return getTracks().map { tracks ->
             tracks.groupBy { it.bookId }
                 .map { (bookId, tracksInBook) ->
@@ -119,7 +119,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     Book(
                         id = bookId,
                         title = first.book,
-                        artist = first.author, // Or bookArtist if available
+                        author = first.author, // Or bookArtist if available
                         bookArtUriString = first.bookArtUriString,
                         trackCount = tracksInBook.size,
                         year = first.year
@@ -130,12 +130,12 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getBookById(id: Long): Flow<Book?> {
-        return getAlbums().map { albums -> 
-            albums.find { it.id == id }
+        return getBooks().map { books -> 
+            books.find { it.id == id }
         }
     }
 
-    override fun getArtists(): Flow<List<Author>> {
+    override fun getAuthors(): Flow<List<Author>> {
         return getTracks().map { tracks ->
             tracks.groupBy { it.authorId }
                 .map { (authorId, tracksInAuthor) ->
@@ -158,18 +158,18 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getAuthorById(authorId: Long): Flow<Author?> {
-         return getArtists().map { artists ->
-             artists.find { it.id == authorId }
+         return getAuthors().map { authors ->
+             authors.find { it.id == authorId }
          }
     }
 
     override fun getAuthorsForTrack(trackId: Long): Flow<List<Author>> {
-        // Simple implementation assuming single artist per song as per MediaStore
-        // For multi-artist, we would parse the separator/delimiter here.
+        // Simple implementation assuming single author per track as per MediaStore
+        // For multi-author, we would parse the separator/delimiter here.
         return getTracks().map { tracks ->
             val track = tracks.find { it.id == trackId.toString() }
             if (track != null) {
-                listOf(Artist(id = track.authorId, name = track.author, trackCount = 1, imageUrl = null))
+                listOf(Author(id = track.authorId, name = track.author, trackCount = 1, imageUrl = null))
             } else {
                 emptyList()
             }
@@ -263,8 +263,8 @@ class AudiobookRepositoryImpl @Inject constructor(
                 }
             }
             SearchFilterType.TRACKS -> searchTracks(query).map { tracks -> tracks.map { SearchResultItem.TrackItem(it) } }
-            SearchFilterType.BOOKS -> searchBooks(query).map { albums -> albums.map { SearchResultItem.BookItem(it) } }
-            SearchFilterType.AUTHORS -> searchAuthors(query).map { artists -> artists.map { SearchResultItem.AuthorItem(it) } }
+            SearchFilterType.BOOKS -> searchBooks(query).map { books -> books.map { SearchResultItem.BookItem(it) } }
+            SearchFilterType.AUTHORS -> searchAuthors(query).map { authors -> authors.map { SearchResultItem.AuthorItem(it) } }
             SearchFilterType.PLAYLISTS -> playlistsFlow.map { playlists -> playlists.map { SearchResultItem.PlaylistItem(it) } }
         }.flowOn(Dispatchers.Default)
     }
@@ -306,10 +306,10 @@ class AudiobookRepositoryImpl @Inject constructor(
                 // Real mode: Use the genreId directly, which corresponds to the actual genre name from metadata.
                 getTracks().map { tracks ->
                     if (genreId.equals("unknown", ignoreCase = true)) {
-                        // Filter for songs with no genre or an empty genre string.
+                        // Filter for tracks with no genre or an empty genre string.
                         tracks.filter { it.genre.isNullOrBlank() }
                     } else {
-                        // Filter for songs that match the given genre name.
+                        // Filter for tracks that match the given genre name.
                         tracks.filter { it.genre.equals(genreId, ignoreCase = true) }
                     }
                 }
@@ -416,7 +416,7 @@ class AudiobookRepositoryImpl @Inject constructor(
      * Obtiene la letra de una canciÃƒÂ³n desde la API de LRCLIB, la persiste en la base de datos
      * y la devuelve como un objeto Lyrics parseado.
      *
-     * @param song La canciÃƒÂ³n para la cual se buscarÃƒÂ¡ la letra.
+     * @param track La canciÃƒÂ³n para la cual se buscarÃƒÂ¡ la letra.
      * @return Un objeto Result que contiene el objeto Lyrics si se encontrÃƒÂ³, o un error.
      */
     override suspend fun getLyricsFromRemote(track: Track): Result<Pair<Lyrics, String>> {
@@ -427,8 +427,8 @@ class AudiobookRepositoryImpl @Inject constructor(
         return lyricsRepository.searchRemote(track)
     }
 
-    override suspend fun searchRemoteLyricsByQuery(title: String, artist: String?): Result<Pair<String, List<LyricsSearchResult>>> {
-        return lyricsRepository.searchRemoteByQuery(title, artist)
+    override suspend fun searchRemoteLyricsByQuery(title: String, author: String?): Result<Pair<String, List<LyricsSearchResult>>> {
+        return lyricsRepository.searchRemoteByQuery(title, author)
     }
 
     override suspend fun updateLyrics(trackId: Long, lyrics: String) {
@@ -461,7 +461,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     !resolver.isBlocked(normalized)
                 }
             } else {
-                songs
+                tracks
             }
 
             if (tracksToProcess.isEmpty()) return@combine emptyList()
@@ -475,7 +475,7 @@ class AudiobookRepositoryImpl @Inject constructor(
 
             val tempFolders = mutableMapOf<String, TempFolder>()
 
-            // Optimization: Group songs by parent folder first to reduce File object creations and loop iterations
+            // Optimization: Group tracks by parent folder first to reduce File object creations and loop iterations
             val tracksByFolder = tracksToProcess.groupBy { File(it.path).parent }
 
             tracksByFolder.forEach { (folderPath, tracksInFolder) ->
@@ -483,7 +483,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     val folderFile = File(folderPath)
                     // Create or get the leaf folder
                     val leafFolder = tempFolders.getOrPut(folderPath) { TempFolder(folderPath, folderFile.name) }
-                    leafFolder.songs.addAll(tracksInFolder)
+                    leafFolder.tracks.addAll(tracksInFolder)
 
                     // Build hierarchy upwards
                     var currentPath = folderPath
@@ -518,7 +518,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                 return AudiobookFolder(
                     path = tempFolder.path,
                     name = tempFolder.name,
-                    tracks = tempFolder.songs
+                    tracks = tempFolder.tracks
                         .sortedWith(
                             compareBy<Track> { if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE }
                                 .thenBy { it.title.lowercase() }

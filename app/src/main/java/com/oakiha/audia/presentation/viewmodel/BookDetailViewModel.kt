@@ -20,8 +20,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class BookDetailUiState(
-    val album: Book? = null,
-    val songs: List<Track> = emptyList(),
+    val book: Book? = null,
+    val tracks: List<Track> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -57,11 +57,11 @@ class BookDetailViewModel @Inject constructor(
                 val albumDetailsFlow = audiobookRepository.getBookById(id)
                 val bookTracksFlow = audiobookRepository.getTracksForAlbum(id)
 
-                combine(albumDetailsFlow, bookTracksFlow) { album, songs ->
-                    if (album != null) {
+                combine(albumDetailsFlow, bookTracksFlow) { book, tracks ->
+                    if (book != null) {
                         BookDetailUiState(
-                            album = album,
-                            songs = songs.sortedBy { it.trackNumber },
+                            book = book,
+                            tracks = tracks.sortedBy { it.trackNumber },
                             isLoading = false
                         )
                     } else {
@@ -94,11 +94,11 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun update(songs: List<Track>) {
+    fun update(tracks: List<Track>) {
         _uiState.update {
             it.copy(
                 isLoading = false,
-                songs = songs
+                tracks = tracks
             )
         }
     }

@@ -244,7 +244,7 @@ fun PlaylistDetailScreen(
                 subtitle = {
                     Text(
                         modifier = Modifier.padding(start = 8.dp),
-                        text = "${songsInPlaylist.size} songs Ã¢â‚¬Â¢ ${
+                        text = "${songsInPlaylist.size} tracks Ã¢â‚¬Â¢ ${
                             formatTotalDuration(
                                 songsInPlaylist
                             )
@@ -443,7 +443,7 @@ fun PlaylistDetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Add,
-                                contentDescription = "Add songs",
+                                contentDescription = "Add tracks",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
@@ -470,7 +470,7 @@ fun PlaylistDetailScreen(
                             Icon(
                                 modifier = Modifier.size(18.dp),
                                 imageVector = Icons.Default.RemoveCircleOutline,
-                                contentDescription = "Remove songs",
+                                contentDescription = "Remove tracks",
                                 tint = removeIconColor
                             )
                             Spacer(Modifier.width(6.dp))
@@ -499,7 +499,7 @@ fun PlaylistDetailScreen(
                             Icon(
                                 modifier = Modifier.size(22.dp),
                                 painter = painterResource(R.drawable.drag_order_icon),
-                                contentDescription = "Reorder songs",
+                                contentDescription = "Reorder tracks",
                                 tint = reorderIconColor
                             )
                             Spacer(Modifier.width(6.dp))
@@ -522,7 +522,7 @@ fun PlaylistDetailScreen(
                             Spacer(Modifier.height(8.dp))
                             Text("This playlist is empty.", style = MaterialTheme.typography.titleMedium)
                             val emptyMessage = if (isFolderPlaylist) {
-                                "This folder doesn't contain songs."
+                                "This folder doesn't contain tracks."
                             } else {
                                 "Tap on 'Add Songs' to begin."
                             }
@@ -617,7 +617,7 @@ fun PlaylistDetailScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Rounded.DragIndicator,
-                                                contentDescription = "Reorder song",
+                                                contentDescription = "Reorder track",
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
@@ -796,7 +796,7 @@ fun PlaylistDetailScreen(
 
         if (currentTrack != null) {
             TrackInfoBottomSheet(
-                song = currentTrack,
+                track = currentTrack,
                 isFavorite = isFavorite,
                 onToggleFavorite = {
                     // Directly use PlayerViewModel's method to toggle, which should handle UserPreferencesRepository
@@ -853,7 +853,7 @@ fun PlaylistDetailScreen(
 
                 PlaylistBottomSheet(
                     playlistUiState = playlistUiState,
-                    song = currentTrack,
+                    track = currentTrack,
                     onDismiss = {
                         showPlaylistBottomSheet = false
                     },

@@ -38,9 +38,9 @@ class ExternalMediaStateHolder @Inject constructor(
         }
 
         val queue = mutableListOf(result.track)
-        continuation.forEach { song ->
-            if (queue.none { it.id == song.id }) {
-                queue.add(song)
+        continuation.forEach { track ->
+            if (queue.none { it.id == track.id }) {
+                queue.add(track)
             }
         }
 
@@ -94,10 +94,10 @@ class ExternalMediaStateHolder @Inject constructor(
                 }
             }
         } catch (securityException: SecurityException) {
-            Timber.w(securityException, "Unable to load sibling songs for uri: $originalUri")
+            Timber.w(securityException, "Unable to load sibling tracks for uri: $originalUri")
             return@withContext emptyList()
         } catch (illegalArgumentException: IllegalArgumentException) {
-            Timber.w(illegalArgumentException, "Invalid query while loading sibling songs for uri: $originalUri")
+            Timber.w(illegalArgumentException, "Invalid query while loading sibling tracks for uri: $originalUri")
             return@withContext emptyList()
         }
 
@@ -116,7 +116,7 @@ class ExternalMediaStateHolder @Inject constructor(
             siblings.drop(startIndex + 1)
         } else {
             // Include everything except target if not found in list (fallback) or logic implies future only?
-            // "drop startIndex + 1" implies queue continues AFTER current song.
+            // "drop startIndex + 1" implies queue continues AFTER current track.
             siblings.filterNot { (itemUri, displayName) ->
                 itemUri == originalUri ||
                     itemUri.toString() == normalizedTargetUri ||
@@ -130,8 +130,8 @@ class ExternalMediaStateHolder @Inject constructor(
         for ((candidateUri, _) in candidates) {
             val additional = buildExternalSongFromUri(candidateUri, captureFolderInfo = false)
             val track = additional?.track ?: continue
-            if (song.id != reference.track.id) {
-                resolved.add(song)
+            if (track.id != reference.track.id) {
+                resolved.add(track)
             }
         }
 
@@ -217,8 +217,8 @@ class ExternalMediaStateHolder @Inject constructor(
         }
 
         val finalTitle = storeTitle ?: metadata.title ?: displayName ?: "Unknown Title"
-        val finalArtist = storeArtist ?: metadata.author ?: "Unknown Artist"
-        val finalAlbum = storeAlbum ?: metadata.book ?: "Unknown Album"
+        val finalArtist = storeArtist ?: metadata.author ?: "Unknown Author"
+        val finalAlbum = storeAlbum ?: metadata.book ?: "Unknown Book"
         // Use metadata duration if store duration is missing or 0
         val finalDuration = storeDuration?.takeIf { it > 0 } ?: metadata.durationMs ?: 0L
 
@@ -229,9 +229,9 @@ class ExternalMediaStateHolder @Inject constructor(
         val track = Track(
             id = trackId, 
             title = finalTitle,
-            artist = finalArtist,
+            author = finalArtist,
             authorId = -1, // No DB ID
-            album = finalAlbum,
+            book = finalAlbum,
             bookId = -1, // No DB ID
             bookArtist = metadata.bookArtist,
             path = uri.toString(), // Path is URI
@@ -248,7 +248,7 @@ class ExternalMediaStateHolder @Inject constructor(
         )
         
         ExternalSongLoadResult(
-            song = song,
+            track = track,
             relativePath = if (captureFolderInfo) relativePath else null,
             bucketId = if (captureFolderInfo) bucketId else null,
             displayName = displayName
@@ -258,7 +258,7 @@ class ExternalMediaStateHolder @Inject constructor(
     private fun persistExternalAlbumArt(uri: Uri, data: ByteArray, mimeType: String? = null): String? {
         return runCatching {
             if (!isValidImageData(data)) {
-                throw IllegalArgumentException("Invalid embedded album art for uri: $uri")
+                throw IllegalArgumentException("Invalid embedded book art for uri: $uri")
             }
             val directory = File(context.cacheDir, "external_artwork")
             if (!directory.exists()) {
@@ -277,7 +277,7 @@ class ExternalMediaStateHolder @Inject constructor(
             }
             Uri.fromFile(file).toString()
         }.onFailure { throwable ->
-            Timber.w(throwable, "Unable to persist album art for external uri: $uri")
+            Timber.w(throwable, "Unable to persist book art for external uri: $uri")
         }.getOrNull()
     }
 }

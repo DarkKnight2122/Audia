@@ -22,7 +22,7 @@ class M3uManager @Inject constructor(
         val trackIds = mutableListOf<String>()
         var playlistName = "Imported Playlist"
 
-        // Pre-load all songs once for efficient lookup (fixes performance issue with large M3U files)
+        // Pre-load all tracks once for efficient lookup (fixes performance issue with large M3U files)
         val allTracks = audiobookRepository.getAudioFiles().first()
         
         // Build lookup maps for fast matching
@@ -41,7 +41,7 @@ class M3uManager @Inject constructor(
                     }
                     
                     // trimmedLine is likely a file path or URI
-                    // We need to find a song in our database that matches this path
+                    // We need to find a track in our database that matches this path
                     
                     // First try exact path match from pre-loaded map
                     val songByPath = songsByPath[trimmedLine]
@@ -71,12 +71,12 @@ class M3uManager @Inject constructor(
         return Pair(playlistName, trackIds)
     }
 
-    fun generateM3u(playlist: Playlist, songs: List<Track>): String {
+    fun generateM3u(playlist: Playlist, tracks: List<Track>): String {
         val sb = StringBuilder()
         sb.append("#EXTM3U\n")
-        for (song in songs) {
-            sb.append("#EXTINF:${song.duration / 1000},${song.author} - ${song.title}\n")
-            sb.append("${song.path}\n")
+        for (track in tracks) {
+            sb.append("#EXTINF:${track.duration / 1000},${track.author} - ${track.title}\n")
+            sb.append("${track.path}\n")
         }
         return sb.toString()
     }

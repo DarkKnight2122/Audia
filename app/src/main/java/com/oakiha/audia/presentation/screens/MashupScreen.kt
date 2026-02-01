@@ -140,11 +140,11 @@ fun MashupScreen(
                     sheetState = sheetState
                 ) {
                     SongPickerSheet(
-                        songs = mashupUiState.allTracks,
-                        onSongSelected = { song ->
+                        tracks = mashupUiState.allTracks,
+                        onSongSelected = { track ->
                             scope.launch {
                                 val deck = mashupUiState.showSongPickerForDeck ?: return@launch
-                                mashupViewModel.loadSong(deck, song)
+                                mashupViewModel.loadSong(deck, track)
                             }
                         }
                     )
@@ -202,15 +202,15 @@ private fun DeckUi(
                         if (deckState.track != null) {
                             SmartImage(
                                 model = deckState.track.bookArtUriString,
-                                contentDescription = "Song Cover",
+                                contentDescription = "Track Cover",
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            Icon(painterResource(id = R.drawable.rounded_playlist_add_24), "Load Song", modifier = Modifier.size(40.dp))
+                            Icon(painterResource(id = R.drawable.rounded_playlist_add_24), "Load Track", modifier = Modifier.size(40.dp))
                         }
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(deckState.track?.title ?: "No song loaded", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(deckState.track?.title ?: "No track loaded", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(deckState.track?.author ?: "...", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Spacer(Modifier.height(8.dp))
                         AudioWaveform(
@@ -307,16 +307,16 @@ private fun Crossfader(value: Float, onValueChange: (Float) -> Unit, modifier: M
 }
 
 @Composable
-private fun SongPickerSheet(songs: List<Track>, onSongSelected: (Track) -> Unit) {
+private fun SongPickerSheet(tracks: List<Track>, onSongSelected: (Track) -> Unit) {
     Column(modifier = Modifier.navigationBarsPadding()) {
-        Text("Select a Song", style = MaterialTheme.typography.titleLarge, modifier = Modifier
+        Text("Select a Track", style = MaterialTheme.typography.titleLarge, modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp), textAlign = TextAlign.Center)
         LazyColumn(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)) {
-            items(songs, key = { it.id }) { song ->
-                SongPickerItem(song = song, onClick = { onSongSelected(song) })
+            items(tracks, key = { it.id }) { track ->
+                SongPickerItem(track = track, onClick = { onSongSelected(track) })
                 HorizontalDivider()
             }
         }
@@ -334,13 +334,13 @@ private fun SongPickerItem(track: Track, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SmartImage(
-            model = song.bookArtUriString,
-            contentDescription = "Song Cover",
+            model = track.bookArtUriString,
+            contentDescription = "Track Cover",
             modifier = Modifier.size(40.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = song.title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold)
-            Text(text = song.displayAuthor, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+            Text(text = track.title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold)
+            Text(text = track.displayAuthor, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

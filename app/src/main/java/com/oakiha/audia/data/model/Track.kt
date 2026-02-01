@@ -9,16 +9,16 @@ data class Track(
     val id: String,
     val title: String,
     /**
-     * Legacy artist display string.
-     * - With multi-artist parsing enabled by default, this typically contains only the primary artist for backward compatibility.
-     * For accurate display of all artists, use the [artists] list and [displayAuthor] property.
+     * Legacy author display string.
+     * - With multi-author parsing enabled by default, this typically contains only the primary author for backward compatibility.
+     * For accurate display of all authors, use the [authors] list and [displayAuthor] property.
      */
     val author: String,
-    val authorId: Long, // Primary artist ID for backward compatibility
-    val authors: List<AuthorRef> = emptyList(), // All artists for multi-artist support
+    val authorId: Long, // Primary author ID for backward compatibility
+    val authors: List<AuthorRef> = emptyList(), // All authors for multi-author support
     val book: String,
     val bookId: Long,
-    val bookAuthor: String? = null, // Album artist from metadata
+    val bookAuthor: String? = null, // Book author from metadata
     val path: String, // Added for direct file system access
     val contentUriString: String,
     val bookArtUriString: String?,
@@ -37,10 +37,10 @@ data class Track(
     private val defaultArtistDelimiters = listOf("/", ";", ",", "+", "&")
 
     /**
-     * Returns the display string for artists.
-     * If multiple artists exist, joins them with ", ".
-     * Falls back to splitting the legacy artist string using common delimiters,
-     * and finally the raw artist field if nothing else is available.
+     * Returns the display string for authors.
+     * If multiple authors exist, joins them with ", ".
+     * Falls back to splitting the legacy author string using common delimiters,
+     * and finally the raw author field if nothing else is available.
      */
     val displayAuthor: String
         get() {
@@ -52,8 +52,8 @@ data class Track(
         }
 
     /**
-     * Returns the primary artist from the artists list,
-     * or creates one from the legacy artist field.
+     * Returns the primary author from the authors list,
+     * or creates one from the legacy author field.
      */
     val primaryAuthor: AuthorRef
         get() = authors.find { it.isPrimary }

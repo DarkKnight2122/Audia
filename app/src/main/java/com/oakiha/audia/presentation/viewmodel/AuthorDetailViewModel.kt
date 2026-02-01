@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 data class AuthorDetailUiState(
     val author: Author? = null,
-    val songs: List<Track> = emptyList(),
+    val tracks: List<Track> = emptyList(),
     val bookSections: List<AuthorBookSection> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
@@ -36,7 +36,7 @@ data class AuthorBookSection(
     val title: String,
     val year: Int?,
     val bookArtUriString: String?,
-    val songs: List<Track>
+    val tracks: List<Track>
 )
 
 @HiltViewModel
@@ -72,14 +72,14 @@ class AuthorDetailViewModel @Inject constructor(
                 val artistDetailsFlow = audiobookRepository.getAuthorById(id)
                 val artistSongsFlow = audiobookRepository.getTracksForArtist(id)
 
-                combine(artistDetailsFlow, artistSongsFlow) { artist, songs ->
-                    Log.d("AuthorDebug", "loadAuthorData: id=$id found=${artist != null} songs=${songs.size}")
-                    if (artist != null) {
-                        val bookSections = buildBookSections(songs)
+                combine(artistDetailsFlow, artistSongsFlow) { author, tracks ->
+                    Log.d("AuthorDebug", "loadAuthorData: id=$id found=${author != null} tracks=${tracks.size}")
+                    if (author != null) {
+                        val bookSections = buildBookSections(tracks)
                         val orderedSongs = bookSections.flatMap { it.tracks }
                         AuthorDetailUiState(
-                            artist = artist,
-                            songs = orderedSongs,
+                            author = author,
+                            tracks = orderedSongs,
                             bookSections = bookSections,
                             isLoading = false
                         )
@@ -103,19 +103,19 @@ class AuthorDetailViewModel @Inject constructor(
                     .collect { newState ->
                         _uiState.value = newState
                         
-                        // Fetch artist image from Deezer if not already cached
-                        newState.author?.let { artist ->
-                            if (artist.imageUrl.isNullOrEmpty()) {
+                        // Fetch author image from Deezer if not already cached
+                        newState.author?.let { author ->
+                            if (author.imageUrl.isNullOrEmpty()) {
                                 launch {
                                     try {
-                                        val imageUrl = artistImageRepository.getArtistImageUrl(artist.name, artist.id)
+                                        val imageUrl = artistImageRepository.getAuthorImageUrl(author.name, author.id)
                                         if (!imageUrl.isNullOrEmpty()) {
                                             _uiState.update { state ->
-                                                state.copy(artist = state.author?.copy(imageUrl = imageUrl))
+                                                state.copy(author = state.author?.copy(imageUrl = imageUrl))
                                             }
                                         }
                                     } catch (e: Exception) {
-                                        Log.w("AuthorDebug", "Failed to fetch artist image: ${e.message}")
+                                        Log.w("AuthorDebug", "Failed to fetch author image: ${e.message}")
                                     }
                                 }
                             }
@@ -135,15 +135,15 @@ class AuthorDetailViewModel @Inject constructor(
     fun removeTrackFromBookSection(trackId: String) {
         _uiState.update { currentState ->
             val updatedAlbumSections = currentState.bookSections.map { section ->
-                // Remove the song from this section if it exists
+                // Remove the track from this section if it exists
                 val updatedSongs = section.tracks.filterNot { it.id == trackId }
-                // Return updated section only if it still has songs, otherwise filter out empty sections
-                section.copy(songs = updatedSongs)
-            }.filter { it.tracks.isNotEmpty() } // Remove empty album sections
+                // Return updated section only if it still has tracks, otherwise filter out empty sections
+                section.copy(tracks = updatedSongs)
+            }.filter { it.tracks.isNotEmpty() } // Remove empty book sections
 
             currentState.copy(
                 bookSections = updatedAlbumSections,
-                songs = currentState.tracks.filterNot { it.id == trackId } // Also update the main songs list
+                tracks = currentState.tracks.filterNot { it.id == trackId } // Also update the main tracks list
             )
         }
     }
@@ -153,21 +153,21 @@ private val trackDisplayComparator = compareBy<Track> {
     if (it.trackNumber > 0) it.trackNumber else Int.MAX_VALUE
 }.thenBy { it.title.lowercase() }
 
-private fun buildBookSections(songs: List<Track>): List<AuthorBookSection> {
-    if (songs.isEmpty()) return emptyList()
+private fun buildBookSections(tracks: List<Track>): List<AuthorBookSection> {
+    if (tracks.isEmpty()) return emptyList()
 
-    val sections = songs
+    val sections = tracks
         .groupBy { it.bookId to it.book }
         .map { (key, bookTracks) ->
             val sortedSongs = bookTracks.sortedWith(trackDisplayComparator)
-            val albumYear = bookTracks.mapNotNull { song -> song.year.takeIf { it > 0 } }.maxOrNull()
+            val albumYear = bookTracks.mapNotNull { track -> track.year.takeIf { it > 0 } }.maxOrNull()
             val bookArtUri = bookTracks.firstNotNullOfOrNull { it.bookArtUriString }
             AuthorBookSection(
                 bookId = key.first,
-                title = (key.second.takeIf { it.isNotBlank() } ?: "Unknown Album"),
+                title = (key.second.takeIf { it.isNotBlank() } ?: "Unknown Book"),
                 year = albumYear,
                 bookArtUriString = bookArtUri,
-                songs = sortedSongs
+                tracks = sortedSongs
             )
         }
 

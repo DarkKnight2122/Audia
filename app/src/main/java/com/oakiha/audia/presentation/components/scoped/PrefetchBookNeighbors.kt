@@ -33,8 +33,8 @@ fun PrefetchBookNeighborsImg(
             queue[i].bookArtUriString?.let { data ->
                 val req = coil.request.ImageRequest.Builder(context)
                     .data(data)
-                    .memoryCacheKey("album:$data")
-                    .diskCacheKey("album:$data")
+                    .memoryCacheKey("book:$data")
+                    .diskCacheKey("book:$data")
                     .size(coil.size.Size.ORIGINAL)
                     .build()
                 loader.enqueue(req)

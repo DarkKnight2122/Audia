@@ -72,7 +72,7 @@ val changelog = listOf(
                     "New Library Sync Flow",
                     "AI Integration (Gemini Models)",
                     "M3U Playlist Import/Export",
-                    "Deezer Artist Artwork Integration",
+                    "Deezer Author Artwork Integration",
                     "Custom Playlist Covers"
                 )
             ),
@@ -138,7 +138,7 @@ val changelog = listOf(
                     "Refined the overall Material 3 UI for a cleaner and more cohesive experience.",
                     "Metadata editing now supports cover art change.",
                     "Smoothed out animations and transitions across the app for more fluid navigation.",
-                    "Enhanced the artist screen layout with richer details and polish.",
+                    "Enhanced the author screen layout with richer details and polish.",
                     "Upgraded DailyMix and YourMix generation with smarter, more diverse selections.",
                     "Strengthened the AI playlist generation.",
                     "Improved search relevance and presentation for faster discovery.",
@@ -148,7 +148,7 @@ val changelog = listOf(
             ChangelogSection(
                 title = "Fixes",
                 items = listOf(
-                    "Resolved metadata quirks so song details stay accurate everywhere.",
+                    "Resolved metadata quirks so track details stay accurate everywhere.",
                     "Restored notification shortcuts so they reliably jump back into playback."
                 )
             )
@@ -165,9 +165,9 @@ val changelog = listOf(
                     "In-app changelog to keep you updated on the latest features.",
                     "Support for .LRC files, both embedded and external.",
                     "Offline lyrics support.",
-                    "Synchronized lyrics (synced with the song).",
+                    "Synchronized lyrics (synced with the track).",
                     "New screen to view the full queue.",
-                    "Reorder and remove songs from the queue.",
+                    "Reorder and remove tracks from the queue.",
                     "Mini-player gestures (swipe down to close).",
                     "Added more material animations.",
                     "New settings to customize the look and feel.",

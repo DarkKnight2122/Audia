@@ -48,7 +48,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun DailyMixSection(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     playerViewModel: PlayerViewModel,
     onClickOpen: () -> Unit = {}
 ) {
@@ -58,19 +58,19 @@ fun DailyMixSection(
             .padding(horizontal = 16.dp)
     ) {
         Spacer(Modifier.height(16.dp))
-        DailyMixCard(songs = songs, playerViewModel = playerViewModel, onClickOpen =  onClickOpen)
+        DailyMixCard(tracks = tracks, playerViewModel = playerViewModel, onClickOpen =  onClickOpen)
     }
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun DailyMixCard(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     onClickOpen: () -> Unit,
     playerViewModel: PlayerViewModel
 ) {
-    val headerSongs = songs.take(3).toImmutableList()
-    val songsToPlay = songs.take(4).toImmutableList()
+    val headerSongs = tracks.take(3).toImmutableList()
+    val songsToPlay = tracks.take(4).toImmutableList()
     val cornerRadius = 30.dp
     Card(
         shape = AbsoluteSmoothCornerShape(
@@ -89,7 +89,7 @@ private fun DailyMixCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             DailyMixHeader(thumbnails = headerSongs)
-            DailyMixSongList(songs = songsToPlay, playerViewModel)
+            DailyMixSongList(tracks = songsToPlay, playerViewModel)
             ViewAllDailyMixButton(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -160,7 +160,7 @@ fun DailyMixHeader(thumbnails: ImmutableList<Track>) {
                 modifier = Modifier,
                 horizontalArrangement = Arrangement.spacedBy((-16).dp)
             ) {
-                thumbnails.forEachIndexed { index, song ->
+                thumbnails.forEachIndexed { index, track ->
                     val modifier = shapeConditionalModifier(index)
                     Box(
                         modifier = modifier
@@ -169,7 +169,7 @@ fun DailyMixHeader(thumbnails: ImmutableList<Track>) {
                             .border(2.dp, MaterialTheme.colorScheme.surface, threeShapeSwitch(index))
                     ) {
                         SmartImage(
-                            model = song.bookArtUriString,
+                            model = track.bookArtUriString,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -206,21 +206,21 @@ fun threeShapeSwitch(index: Int, thirdShapeCornerRadius: Dp = 16.dp): Shape { //
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun DailyMixSongList(
-    songs: ImmutableList<Track>,
+    tracks: ImmutableList<Track>,
     playerViewModel: PlayerViewModel
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        songs.forEach { song ->
+        tracks.forEach { track ->
             TrackListItemFavsWrapper(
-                song = song,
+                track = track,
                 playerViewModel = playerViewModel,
                 onClick = {
                     playerViewModel.playSongs(
-                        songsToPlay = songs,
-                        startSong = song,
+                        songsToPlay = tracks,
+                        startSong = track,
                         queueName = "DailyMix"
                     )
                 },

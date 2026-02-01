@@ -38,7 +38,7 @@ class MetadataEditStateHolder @Inject constructor(
          */
         fun getUserFriendlyErrorMessage(): String {
             return when (error) {
-                MetadataEditError.FILE_NOT_FOUND -> "The song file could not be found. It may have been moved or deleted."
+                MetadataEditError.FILE_NOT_FOUND -> "The track file could not be found. It may have been moved or deleted."
                 MetadataEditError.NO_WRITE_PERMISSION -> "Cannot edit this file. You may need to grant additional permissions or the file is on read-only storage."
                 MetadataEditError.INVALID_INPUT -> errorMessage ?: "Invalid input provided."
                 MetadataEditError.UNSUPPORTED_FORMAT -> "This file format is not supported for editing."
@@ -62,14 +62,14 @@ class MetadataEditStateHolder @Inject constructor(
         coverArtUpdate: CoverArtUpdate?
     ): MetadataEditResult = withContext(Dispatchers.IO) {
         
-        Log.d("MetadataEditStateHolder", "Starting saveMetadata for: ${song.title}")
+        Log.d("MetadataEditStateHolder", "Starting saveMetadata for: ${track.title}")
 
         // CRITICAL FIX: Preserve existing embedded artwork if the user didn't provide a new one.
         // Editing text metadata might strip the artwork if the underlying tagging library
         // overwrites the file structure. Explicitly re-saving the existing artwork prevents this.
         val finalCoverArtUpdate = if (coverArtUpdate == null) {
             val existingMetadata = try {
-                 com.oakiha.audia.data.media.AudioMetadataReader.read(java.io.File(song.path))
+                 com.oakiha.audia.data.media.AudioMetadataReader.read(java.io.File(track.path))
             } catch (e: Exception) {
                 null
             }
@@ -97,42 +97,42 @@ class MetadataEditStateHolder @Inject constructor(
             newLyrics = trimmedLyrics,
             newTrackNumber = newTrackNumber,
             coverArtUpdate = finalCoverArtUpdate,
-            trackId = song.id.toLong(),
+            trackId = track.id.toLong(),
         )
 
         Log.d("MetadataEditStateHolder", "Editor result: success=${result.success}, error=${result.error}")
 
         if (result.success) {
-            val refreshedAlbumArtUri = result.updatedAlbumArtUri ?: song.bookArtUriString
+            val refreshedAlbumArtUri = result.updatedAlbumArtUri ?: track.bookArtUriString
             
             // Update Repository (Lyrics)
             if (normalizedLyrics != null) {
-                audiobookRepository.updateLyrics(song.id.toLong(), normalizedLyrics)
+                audiobookRepository.updateLyrics(track.id.toLong(), normalizedLyrics)
             } else {
-                audiobookRepository.resetLyrics(song.id.toLong())
+                audiobookRepository.resetLyrics(track.id.toLong())
             }
 
-            val updatedSong = song.copy(
+            val updatedSong = track.copy(
                 title = newTitle,
-                artist = newArtist,
-                album = newAlbum,
+                author = newArtist,
+                book = newAlbum,
                 genre = newGenre,
                 lyrics = normalizedLyrics,
                 trackNumber = newTrackNumber,
                 bookArtUriString = refreshedAlbumArtUri,
             )
 
-            // CRITICAL: Fetch the authoritative song object from the repository (MediaStore/DB).
-            // When metadata changes (especially album/artist), MediaStore might re-index the song
-            // and assign it a NEW album ID, resulting in a NEW bookArtUri.
+            // CRITICAL: Fetch the authoritative track object from the repository (MediaStore/DB).
+            // When metadata changes (especially book/author), MediaStore might re-index the track
+            // and assign it a NEW book ID, resulting in a NEW bookArtUri.
             // Using the 'updatedSong' copy above might retain a STALE bookArtUri.
             val freshSong = try {
-                audiobookRepository.getTrack(song.id).first() ?: updatedSong
+                audiobookRepository.getTrack(track.id).first() ?: updatedSong
             } catch (e: Exception) {
                 updatedSong
             }
 
-            // Force cache invalidation if album art might have changed
+            // Force cache invalidation if book art might have changed
             if (refreshedAlbumArtUri != null) {
                 // Invalidate Coil/Glide caches
                 imageCacheManager.invalidateCoverArtCaches(refreshedAlbumArtUri)
@@ -158,21 +158,21 @@ class MetadataEditStateHolder @Inject constructor(
     }
 
     suspend fun deleteSong(track: Track): Boolean = withContext(Dispatchers.IO) {
-        val fileInfo = FileDeletionUtils.getFileInfo(song.path)
+        val fileInfo = FileDeletionUtils.getFileInfo(track.path)
         if (fileInfo.exists && fileInfo.canWrite) {
-            val success = FileDeletionUtils.deleteFile(context, song.path)
+            val success = FileDeletionUtils.deleteFile(context, track.path)
             if (success) {
                 // Remove from DB happens in ViewModel call logic or should happen here?
                 // VM's deleteFromDevice calls removeSong -> toggleFavorite(false) -> updates lists.
                 // It does NOT explicitly call repository.deleteSong() because MediaStore/FileObserver handles it?
-                // Or maybe explicit deletion IS needed but VM logic (Line 3687) says "removeSong(song)".
+                // Or maybe explicit deletion IS needed but VM logic (Line 3687) says "removeSong(track)".
                 // removeSong(3698) toggles favorites and updates _masterAllTracks. It implies memory update.
                 // FileDeletionUtils deletes the physical file. The MediaScanner should eventually pick it up, 
                 // but for immediate UI responsiveness, manual update is good.
                 // Also, AudiobookRepository.deleteById(id) exists.
                 // ViewModel did NOT call audiobookRepository.deleteById(). It relied on "removeSong" which is UI state only? 
                 // Wait, removeSong updates UI state. Does it update DB?
-                // Line 3698: toggleFavoriteSpecificSong(song, true)?? Wait.
+                // Line 3698: toggleFavoriteSpecificSong(track, true)?? Wait.
                 
                 // Let's stick to returning success and letting ViewModel handle UI updates for now, 
                 // or if we want to be thorough, we call repository delete.

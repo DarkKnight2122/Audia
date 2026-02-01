@@ -796,7 +796,7 @@ fun UnifiedPlayerSheet(
 
     val updatedPendingSaveOverlay = rememberUpdatedState(pendingSaveQueueOverlay)
     fun launchSaveQueueOverlay(
-        songs: List<Track>,
+        tracks: List<Track>,
         defaultName: String,
         onConfirm: (String, Set<String>) -> Unit
     ) {
@@ -805,12 +805,12 @@ fun UnifiedPlayerSheet(
             animateQueueSheetInternal(false)
             playerViewModel.collapsePlayerSheet()
             delay(ANIMATION_DURATION_MS.toLong())
-            pendingSaveQueueOverlay = SaveQueueOverlayData(songs, defaultName, onConfirm)
+            pendingSaveQueueOverlay = SaveQueueOverlayData(tracks, defaultName, onConfirm)
         }
     }
 
     var internalIsKeyboardVisible by remember { mutableStateOf(false) }
-    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) } // State for the selected song info
+    var selectedTrackForInfo by remember { mutableStateOf<Track?>(null) } // State for the selected track info
 
     val imeInsets = WindowInsets.ime
     LaunchedEffect(imeInsets, density) {
@@ -1384,8 +1384,8 @@ fun UnifiedPlayerSheet(
                                 val onCancelCountedPlay = remember { playerViewModel::cancelCountedPlay }
                                 val onPlayCounter = remember { playerViewModel::playCounted }
                                 val onRequestSavePlaylist = remember {
-                                    { songs: List<Track>, defName: String, onConf: (String, Set<String>) -> Unit ->
-                                        launchSaveQueueOverlay(songs, defName, onConf)
+                                    { tracks: List<Track>, defName: String, onConf: (String, Set<String>) -> Unit ->
+                                        launchSaveQueueOverlay(tracks, defName, onConf)
                                     }
                                 }
                                 val onQueueStartDrag = remember { { beginQueueDrag() } }
@@ -1449,7 +1449,7 @@ fun UnifiedPlayerSheet(
                                 )
                               }
 
-                            // Show TrackInfoBottomSheet when a song is selected
+                            // Show TrackInfoBottomSheet when a track is selected
                             selectedTrackForInfo?.let { staticSong ->
                                 // Observar cambios en la canciÃƒÂ³n (metadata o favorite status) reactivamente
                                 val liveSongState by remember(staticSong.id) {
@@ -1460,7 +1460,7 @@ fun UnifiedPlayerSheet(
                                 val liveSong = liveSongState ?: staticSong
 
                                 TrackInfoBottomSheet(
-                                    song = liveSong,
+                                    track = liveSong,
                                     isFavorite = liveSong.isFavorite,
                                     
                                     onToggleFavorite = { playerViewModel.toggleFavoriteSpecificSong(liveSong) },
@@ -1522,8 +1522,8 @@ fun UnifiedPlayerSheet(
                                             navController.navigate(Screen.AuthorDetail.createRoute(liveSong.authorId))
                                         }
                                     },
-                                    onEditSong = { title, artist, album, genre, lyrics, trackNumber, coverArtUpdate ->
-                                        playerViewModel.editTrackMetadata(liveSong, title, artist, album, genre, lyrics, trackNumber, coverArtUpdate)
+                                    onEditSong = { title, author, book, genre, lyrics, trackNumber, coverArtUpdate ->
+                                        playerViewModel.editTrackMetadata(liveSong, title, author, book, genre, lyrics, trackNumber, coverArtUpdate)
                                          selectedTrackForInfo = null
                                     },
                                     generateAiMetadata = { fields -> playerViewModel.generateAiMetadata(liveSong, fields) },

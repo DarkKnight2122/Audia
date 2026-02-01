@@ -5,24 +5,24 @@ import androidx.compose.runtime.Immutable
 // Sealed class for Sort Options
 @Immutable
 sealed class SortOption(val storageKey: String, val displayName: String) {
-    // Song Sort Options
+    // Track Sort Options
     object SongDefaultOrder : SortOption("song_default_order", "Default Order")
     object SongTitleAZ : SortOption("song_title_az", "Title (A-Z)")
     object SongTitleZA : SortOption("song_title_za", "Title (Z-A)")
-    object SongArtist : SortOption("song_artist", "Artist")
-    object SongAlbum : SortOption("song_album", "Album")
+    object SongArtist : SortOption("song_artist", "Author")
+    object SongAlbum : SortOption("song_album", "Book")
     object SongDateAdded : SortOption("song_date_added", "Date Added")
     object SongDuration : SortOption("song_duration", "Duration")
 
-    // Album Sort Options
+    // Book Sort Options
     object AlbumTitleAZ : SortOption("album_title_az", "Title (A-Z)")
     object AlbumTitleZA : SortOption("album_title_za", "Title (Z-A)")
-    object AlbumArtist : SortOption("album_artist", "Artist")
+    object AlbumArtist : SortOption("album_artist", "Author")
     object AlbumReleaseYear : SortOption("album_release_year", "Release Year")
     object AlbumSizeAsc : SortOption("album_size_asc", "Fewest Songs")
     object AlbumSizeDesc : SortOption("album_size_desc", "Most Songs")
 
-    // Artist Sort Options
+    // Author Sort Options
     object ArtistNameAZ : SortOption("artist_name_az", "Name (A-Z)")
     object ArtistNameZA : SortOption("artist_name_za", "Name (Z-A)")
     // object ArtistNumSongs : SortOption("artist_num_songs", "Number of Songs") // Requires ViewModel change & data
@@ -36,8 +36,8 @@ sealed class SortOption(val storageKey: String, val displayName: String) {
     // Liked Sort Options (similar to Songs)
     object LikedSongTitleAZ : SortOption("liked_title_az", "Title (A-Z)")
     object LikedSongTitleZA : SortOption("liked_title_za", "Title (Z-A)")
-    object LikedSongArtist : SortOption("liked_artist", "Artist")
-    object LikedSongAlbum : SortOption("liked_album", "Album")
+    object LikedSongArtist : SortOption("liked_artist", "Author")
+    object LikedSongAlbum : SortOption("liked_album", "Book")
     object LikedSongDateLiked : SortOption("liked_date_liked", "Date Liked")
 
     // Folder Sort Options

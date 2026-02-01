@@ -166,7 +166,7 @@ class PlaylistViewModel @Inject constructor(
 
             Log.d(
                 "PlaylistVM",
-                "Loading songs for selection. Page: $pageToLoad, PageSize: $SONG_SELECTION_PAGE_SIZE"
+                "Loading tracks for selection. Page: $pageToLoad, PageSize: $SONG_SELECTION_PAGE_SIZE"
             )
 
             try {
@@ -175,7 +175,7 @@ class PlaylistViewModel @Inject constructor(
                     withContext(kotlinx.coroutines.Dispatchers.IO) {
                         audiobookRepository.getTracks().first()
                     }
-                Log.d("PlaylistVM", "Loaded ${actualNewSongsList.size} songs for selection.")
+                Log.d("PlaylistVM", "Loaded ${actualNewSongsList.size} tracks for selection.")
 
                 // La actualizaciÃƒÂ³n del UI se hace en el hilo principal (contexto por defecto de viewModelScope.launch)
                 _uiState.update { currentStateAfterLoad ->
@@ -203,7 +203,7 @@ class PlaylistViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                Log.e("PlaylistVM", "Error loading songs for selection. Page: $pageToLoad", e)
+                Log.e("PlaylistVM", "Error loading tracks for selection. Page: $pageToLoad", e)
                 _uiState.update {
                     it.copy(
                         isLoadingSongSelection = false
@@ -480,8 +480,8 @@ class PlaylistViewModel @Inject constructor(
     fun exportM3u(playlist: Playlist, uri: Uri, context: android.content.Context) {
         viewModelScope.launch {
             try {
-                val songs = audiobookRepository.getTracksByIds(playlist.trackIds).first()
-                val m3uContent = m3uManager.generateM3u(playlist, songs)
+                val tracks = audiobookRepository.getTracksByIds(playlist.trackIds).first()
+                val m3uContent = m3uManager.generateM3u(playlist, tracks)
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     OutputStreamWriter(outputStream).use { writer ->
                         writer.write(m3uContent)
@@ -610,7 +610,7 @@ class PlaylistViewModel @Inject constructor(
     }
 
     /**
-     * @param playlistIds Ids of playlists to add the song to
+     * @param playlistIds Ids of playlists to add the track to
      * */
     fun addOrRemoveSongFromPlaylists(
         trackId: String,
@@ -694,7 +694,7 @@ class PlaylistViewModel @Inject constructor(
                         playlistId,
                         MANUAL_ORDER_MODE
                     )
-                    // Reload the playlist to get original song order
+                    // Reload the playlist to get original track order
                     loadPlaylistDetails(playlistId)
                 }
             }
@@ -758,18 +758,18 @@ class PlaylistViewModel @Inject constructor(
     }
 
     private fun com.oakiha.audia.data.model.AudiobookFolder.collectAllSongs(): List<Track> {
-        return songs + subFolders.flatMap { it.collectAllSongs() }
+        return tracks + subFolders.flatMap { it.collectAllSongs() }
     }
 
-    private fun applySortToSongs(songs: List<Track>, sortOption: SortOption): List<Track> {
+    private fun applySortToSongs(tracks: List<Track>, sortOption: SortOption): List<Track> {
         return when (sortOption) {
-            SortOption.SongTitleAZ -> songs.sortedBy { it.title.lowercase() }
-            SortOption.SongTitleZA -> songs.sortedByDescending { it.title.lowercase() }
-            SortOption.SongArtist -> songs.sortedBy { it.author.lowercase() }
-            SortOption.SongAlbum -> songs.sortedBy { it.book.lowercase() }
-            SortOption.SongDuration -> songs.sortedBy { it.duration }
-            SortOption.SongDateAdded -> songs.sortedByDescending { it.dateAdded }
-            else -> songs
+            SortOption.SongTitleAZ -> tracks.sortedBy { it.title.lowercase() }
+            SortOption.SongTitleZA -> tracks.sortedByDescending { it.title.lowercase() }
+            SortOption.SongArtist -> tracks.sortedBy { it.author.lowercase() }
+            SortOption.SongAlbum -> tracks.sortedBy { it.book.lowercase() }
+            SortOption.SongDuration -> tracks.sortedBy { it.duration }
+            SortOption.SongDateAdded -> tracks.sortedByDescending { it.dateAdded }
+            else -> tracks
         }
     }
 

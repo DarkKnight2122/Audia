@@ -9,8 +9,8 @@ import com.google.gson.annotations.SerializedName
 data class LrcLibResponse(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
-    @SerializedName("artistName") val artistName: String,
-    @SerializedName("albumName") val albumName: String,
+    @SerializedName("authorName") val authorName: String,
+    @SerializedName("bookName") val bookName: String,
     @SerializedName("duration") val duration: Double,
     @SerializedName("plainLyrics") val plainLyrics: String?,
     @SerializedName("syncedLyrics") val syncedLyrics: String?

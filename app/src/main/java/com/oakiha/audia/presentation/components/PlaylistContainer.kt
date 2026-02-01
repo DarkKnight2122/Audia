@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.MicExternalOn
@@ -86,7 +86,7 @@ import com.oakiha.audia.utils.shapes.RoundedStarShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.MicExternalOn
@@ -386,7 +386,7 @@ fun PlaylistItem(
                    }
                } else {
                     PlaylistArtCollage(
-                        songs = playlistSongs,
+                        tracks = playlistSongs,
                         modifier = Modifier.fillMaxSize()
                     )
                }
@@ -439,7 +439,7 @@ private fun getIconByName(name: String?): ImageVector? {
     return when (name) {
         "MusicNote" -> Icons.Rounded.MusicNote
         "Headphones" -> Icons.Rounded.Headphones
-        "Album" -> Icons.Rounded.Album
+        "Book" -> Icons.Rounded.Book
         "Mic" -> Icons.Rounded.MicExternalOn
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite

@@ -6,9 +6,9 @@ import com.oakiha.audia.data.model.Track
 
 interface LyricsRepository {
     /**
-     * Get lyrics for a song with source preference support.
+     * Get lyrics for a track with source preference support.
      * 
-     * @param song The song to get lyrics for
+     * @param track The track to get lyrics for
      * @param sourcePreference The preferred order of sources to try (API, Embedded, Local)
      * @param forceRefresh If true, bypasses in-memory cache
      * @return Lyrics object or null if not found
@@ -30,17 +30,17 @@ interface LyricsRepository {
     suspend fun searchRemote(track: Track): Result<Pair<String, List<LyricsSearchResult>>>
   
     /**
-     * Search for lyrics on remote API using query title and artist, and return multiple results.
+     * Search for lyrics on remote API using query title and author, and return multiple results.
      */
-    suspend fun searchRemoteByQuery(title: String, artist: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
+    suspend fun searchRemoteByQuery(title: String, author: String? = null): Result<Pair<String, List<LyricsSearchResult>>>
     
     /**
-     * Update lyrics for a song in the database.
+     * Update lyrics for a track in the database.
      */
     suspend fun updateLyrics(trackId: Long, lyricsContent: String)
     
     /**
-     * Reset lyrics for a song (remove from database and cache).
+     * Reset lyrics for a track (remove from database and cache).
      */
     suspend fun resetLyrics(trackId: Long)
     
@@ -55,14 +55,14 @@ interface LyricsRepository {
     fun clearCache()
 
     /**
-     * Scans local .lrc files for the provided songs and updates the database if found.
+     * Scans local .lrc files for the provided tracks and updates the database if found.
      * 
-     * @param songs List of songs to scan for
+     * @param tracks List of tracks to scan for
      * @param onProgress Callback for progress updates (current, total)
-     * @return Number of songs updated
+     * @return Number of tracks updated
      */
     suspend fun scanAndAssignLocalLrcFiles(
-        songs: List<Track>,
+        tracks: List<Track>,
         onProgress: suspend (current: Int, total: Int) -> Unit
     ): Int
 }

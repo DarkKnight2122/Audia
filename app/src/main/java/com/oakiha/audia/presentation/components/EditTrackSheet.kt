@@ -15,7 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.Info
@@ -91,7 +91,7 @@ fun EditTrackSheet(
     visible: Boolean,
     track: Track,
     onDismiss: () -> Unit,
-    onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    onSave: (title: String, author: String, book: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
     val transitionState = remember { MutableTransitionState(false) }
@@ -111,7 +111,7 @@ fun EditTrackSheet(
                 exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200))
             ) {
                 EditSongContent(
-                    song = song,
+                    track = track,
                     onDismiss = onDismiss,
                     onSave = onSave,
                     generateAiMetadata = generateAiMetadata
@@ -126,15 +126,15 @@ fun EditTrackSheet(
 private fun EditSongContent(
     track: Track,
     onDismiss: () -> Unit,
-    onSave: (title: String, artist: String, album: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
+    onSave: (title: String, author: String, book: String, genre: String, lyrics: String, trackNumber: Int, coverArtUpdate: CoverArtUpdate?) -> Unit,
     generateAiMetadata: suspend (List<String>) -> Result<com.oakiha.audia.data.ai.TrackMetadata>
 ) {
-    var title by remember { mutableStateOf(song.title) }
-    var artist by remember { mutableStateOf(song.displayAuthor) }
-    var album by remember { mutableStateOf(song.book) }
-    var genre by remember { mutableStateOf(song.genre ?: "") }
-    var lyrics by remember { mutableStateOf(song.lyrics ?: "") }
-    var trackNumber by remember { mutableStateOf(song.trackNumber.toString()) }
+    var title by remember { mutableStateOf(track.title) }
+    var author by remember { mutableStateOf(track.displayAuthor) }
+    var book by remember { mutableStateOf(track.book) }
+    var genre by remember { mutableStateOf(track.genre ?: "") }
+    var lyrics by remember { mutableStateOf(track.lyrics ?: "") }
+    var trackNumber by remember { mutableStateOf(track.trackNumber.toString()) }
     var coverArtPreview by remember { mutableStateOf<ImageBitmap?>(null) }
     var editedCoverArt by remember { mutableStateOf<CoverArtUpdate?>(null) }
     var showCoverArtCropper by remember { mutableStateOf(false) }
@@ -152,13 +152,13 @@ private fun EditSongContent(
         }
     }
 
-    LaunchedEffect(song) {
-        title = song.title
-        artist = song.displayAuthor
-        album = song.book
-        genre = song.genre ?: ""
-        lyrics = song.lyrics ?: ""
-        trackNumber = song.trackNumber.toString()
+    LaunchedEffect(track) {
+        title = track.title
+        author = track.displayAuthor
+        book = track.book
+        genre = track.genre ?: ""
+        lyrics = track.lyrics ?: ""
+        trackNumber = track.trackNumber.toString()
         coverArtPreview = null
         editedCoverArt = null
     }
@@ -178,7 +178,7 @@ private fun EditSongContent(
 
     if (showAiDialog) {
         AiMetadataDialog(
-            song = song,
+            track = track,
             onDismiss = { showAiDialog = false },
             onGenerate = { fields ->
                 scope.launch {
@@ -187,8 +187,8 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        artist = metadata.author ?: artist
-                        album = metadata.book ?: album
+                        author = metadata.author ?: author
+                        book = metadata.book ?: book
                         genre = metadata.genre ?: genre
                     }.onFailure { error ->
                         Timber.e(error, "Failed to generate AI metadata")
@@ -247,8 +247,8 @@ private fun EditSongContent(
         AlertDialog(
             onDismissRequest = { showInfoDialog = false },
             icon = { Icon(Icons.Rounded.Info, contentDescription = "Information Icon") },
-            title = { Text("Editing Song Metadata") },
-            text = { Text("Editing a song's metadata can affect how it's displayed and organized in your library. Changes are permanent and may not be reversible.") },
+            title = { Text("Editing Track Metadata") },
+            text = { Text("Editing a track's metadata can affect how it's displayed and organized in your library. Changes are permanent and may not be reversible.") },
             confirmButton = {
                 TextButton(onClick = { showInfoDialog = false }) {
                     Text("Got it")
@@ -267,7 +267,7 @@ private fun EditSongContent(
                 title = {
                     Text(
                         modifier = Modifier.padding(start = 10.dp),
-                        text = "Edit Song",
+                        text = "Edit Track",
                         fontFamily = GoogleSansRounded,
                         style = MaterialTheme.typography.displaySmall
                     )
@@ -334,7 +334,7 @@ private fun EditSongContent(
             item {
                 CoverArtEditorCard(
                     modifier = Modifier.fillMaxWidth(),
-                    bookArtUri = song.bookArtUriString,
+                    bookArtUri = track.bookArtUriString,
                     preview = coverArtPreview,
                     onPickNewArt = {
                         pickCoverArtLauncher.launch(
@@ -403,17 +403,17 @@ private fun EditSongContent(
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Artist",
+                        text = "Author",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelLarge
                     )
                     OutlinedTextField(
-                        value = artist,
+                        value = author,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { artist = it },
-                        placeholder = { Text("Artist") },
-                        leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Artist Icon") },
+                        onValueChange = { author = it },
+                        placeholder = { Text("Author") },
+                        leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Author Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -427,17 +427,17 @@ private fun EditSongContent(
                 ) {
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = "Album",
+                        text = "Book",
                         color = MaterialTheme.colorScheme.tertiary,
                         style = MaterialTheme.typography.labelLarge
                     )
                     OutlinedTextField(
-                        value = album,
+                        value = book,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { album = it },
-                        placeholder = { Text("Album") },
-                        leadingIcon = { Icon(Icons.Rounded.Album, tint = MaterialTheme.colorScheme.tertiary, contentDescription = "Album Icon") },
+                        onValueChange = { book = it },
+                        placeholder = { Text("Book") },
+                        leadingIcon = { Icon(Icons.Rounded.Book, tint = MaterialTheme.colorScheme.tertiary, contentDescription = "Book Icon") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -498,7 +498,7 @@ private fun EditSongContent(
                         FilledTonalIconButton(
                             onClick = {
                                 val encodedTitle = URLEncoder.encode(title, "UTF-8")
-                                val encodedArtist = URLEncoder.encode(artist, "UTF-8")
+                                val encodedArtist = URLEncoder.encode(author, "UTF-8")
                                 val url = "https://lrclib.net/search/$encodedTitle%20$encodedArtist"
                                 val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse(url))
                                 context.startActivity(intent)
@@ -545,11 +545,11 @@ private fun EditSongContent(
                         )
                         Button(
                             onClick = {
-                                val resolvedTrackNumber = trackNumber.toIntOrNull() ?: song.trackNumber
+                                val resolvedTrackNumber = trackNumber.toIntOrNull() ?: track.trackNumber
                                 onSave(
                                     title.trim(),
-                                    artist.trim(),
-                                    album.trim(),
+                                    author.trim(),
+                                    book.trim(),
                                     genre.trim(),
                                     lyrics,
                                     resolvedTrackNumber,
@@ -629,7 +629,7 @@ private fun CoverArtEditorCard(
                         bookArtUri != null -> {
                             SmartImage(
                                 model = bookArtUri,
-                                contentDescription = "Current song cover art",
+                                contentDescription = "Current track cover art",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
                                 placeholderResId = R.drawable.rounded_book_24,

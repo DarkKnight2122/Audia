@@ -41,7 +41,7 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.LibraryMusic
@@ -184,10 +184,10 @@ fun AuthorSettingsScreen(
                 }
             }
 
-            // Multi-Artist Parsing Section
+            // Multi-Author Parsing Section
             item {
                 SettingsSection(
-                    title = "Multi-Artist Parsing",
+                    title = "Multi-Author Parsing",
                     icon = {
                         Icon(
                             imageVector = Icons.Outlined.Person,
@@ -237,13 +237,13 @@ fun AuthorSettingsScreen(
                 ) {
                     Column(modifier = Modifier.clip(shape = RoundedCornerShape(24.dp))) {
                         SwitchSettingItem(
-                            title = "Group by Album Artist",
-                            subtitle = "Show collaboration albums under main artist",
+                            title = "Group by Book Author",
+                            subtitle = "Show collaboration books under main author",
                             checked = uiState.groupByAlbumArtist,
                             onCheckedChange = { viewModel.setGroupByAlbumArtist(it) },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Rounded.Album,
+                                    imageVector = Icons.Rounded.Book,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.secondary
                                 )
@@ -256,8 +256,8 @@ fun AuthorSettingsScreen(
             // Info Card
             item {
                 InfoCard(
-                    title = "About Multi-Artist Parsing",
-                    content = "AudioBookPlayer automatically splits artist tags containing multiple artists. This is useful for songs downloaded with yt-dlp or other tools that use delimiters like '/' to separate artists.\n\nBackslash (\\) can be used to escape delimiters."
+                    title = "About Multi-Author Parsing",
+                    content = "AudioBookPlayer automatically splits author tags containing multiple authors. This is useful for tracks downloaded with yt-dlp or other tools that use delimiters like '/' to separate authors.\n\nBackslash (\\) can be used to escape delimiters."
                 )
             }
 
@@ -357,7 +357,7 @@ private fun RescanRequiredBanner(
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
                 Text(
-                    text = "Artist settings have changed. Rescan your library to apply.",
+                    text = "Author settings have changed. Rescan your library to apply.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
                 )

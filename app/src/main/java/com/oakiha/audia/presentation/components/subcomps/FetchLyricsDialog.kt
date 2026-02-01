@@ -128,8 +128,8 @@ fun FetchLyricsDialog(
                             message = uiState.message,
                             initialTitle = currentTrack?.title.orEmpty(),
                             initialArtist = currentTrack?.displayAuthor,
-                            onManualSearch = { title, artist ->
-                                onManualSearch(title, artist)
+                            onManualSearch = { title, author ->
+                                onManualSearch(title, author)
                             },
                             onCancel = onDismiss
                         )
@@ -460,7 +460,7 @@ fun NotFoundContent(
     }
 
     var title by rememberSaveable { mutableStateOf(initialTitle) }
-    var artist by rememberSaveable { mutableStateOf(normalizedArtist) }
+    var author by rememberSaveable { mutableStateOf(normalizedArtist) }
 
     Box(
         modifier = Modifier
@@ -515,19 +515,19 @@ fun NotFoundContent(
 
     Spacer(Modifier.height(8.dp))
 
-    // Artist input
+    // Author input
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "Artist (optional)",
+            text = "Author (optional)",
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge
         )
         OutlinedTextField(
-            value = artist,
-            onValueChange = { artist = it },
-            placeholder = { Text("Artist (optional)") },
+            value = author,
+            onValueChange = { author = it },
+            placeholder = { Text("Author (optional)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -539,7 +539,7 @@ fun NotFoundContent(
         onClick = {
             onManualSearch(
                 title,
-                artist.takeIf { it.isNotBlank() }
+                author.takeIf { it.isNotBlank() }
             )
         },
         enabled = title.isNotBlank(),
@@ -867,13 +867,13 @@ private fun ErrorContent(
 //            )
 //            Spacer(modifier = Modifier.height(2.dp))
 //            Text(
-//                text = artist,
+//                text = author,
 //                style = MaterialTheme.typography.bodyMedium,
 //                color = MaterialTheme.colorScheme.onSurfaceVariant
 //            )
 //            Spacer(modifier = Modifier.height(2.dp))
 //            Text(
-//                text = album,
+//                text = book,
 //                style = MaterialTheme.typography.bodySmall,
 //                color = MaterialTheme.colorScheme.onSurfaceVariant
 //            )

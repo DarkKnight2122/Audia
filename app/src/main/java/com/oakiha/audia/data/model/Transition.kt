@@ -6,11 +6,11 @@ import androidx.room.Embedded
  * Defines the available transition modes between tracks.
  */
 enum class TransitionMode {
-    /** No transition, the next song starts after the previous one ends. */
+    /** No transition, the next track starts after the previous one ends. */
     NONE,
-    /** The current song fades out completely before the next song fades in. */
+    /** The current track fades out completely before the next track fades in. */
     FADE_IN_OUT,
-    /** The current song fades out while the next song fades in, overlapping them. */
+    /** The current track fades out while the next track fades in, overlapping them. */
     OVERLAP,
     /** A smooth, S-shaped curve is used for fading in and out during the overlap. */
     SMOOTH

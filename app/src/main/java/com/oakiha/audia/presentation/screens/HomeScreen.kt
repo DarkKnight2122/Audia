@@ -122,7 +122,7 @@ fun HomeScreen(
                 if (currentTrack != null) {
                     item(key = "continue_listening_header") {
                         ContinueListeningHeader(
-                            song = currentTrack?.title ?: "",
+                            track = currentTrack?.title ?: "",
                             author = currentTrack?.displayAuthor ?: "",
                             onPlayPressed = {
                                 currentTrack?.let {
@@ -146,12 +146,12 @@ fun HomeScreen(
                     }
 
                     val recentSubset = allTracks.take(10)
-                    items(items = recentSubset, key = { "recent_${it.id}" }) { song ->
+                    items(items = recentSubset, key = { "recent_${it.id}" }) { track ->
                         TrackListItemFavsWrapper(
-                            song = song,
+                            track = track,
                             playerViewModel = playerViewModel,
                             onClick = {
-                                playerViewModel.showAndPlaySong(song, allTracks, "Library")
+                                playerViewModel.showAndPlaySong(track, allTracks, "Library")
                             },
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -208,7 +208,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ContinueListeningHeader(
-    song: String,
+    track: String,
     author: String,
     onPlayPressed: () -> Unit
 ) {
@@ -234,7 +234,7 @@ fun ContinueListeningHeader(
             )
 
             Text(
-                text = "$song \u2022 $author",
+                text = "$track \u2022 $author",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(start = 8.dp),
@@ -274,7 +274,7 @@ fun TrackListItemFavs(
     modifier: Modifier = Modifier,
     cardCorners: Dp = 12.dp,
     title: String,
-    artist: String,
+    author: String,
     bookArtUrl: String?,
     isPlaying: Boolean,
     isCurrentSong: Boolean,
@@ -321,7 +321,7 @@ fun TrackListItemFavs(
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = artist, style = MaterialTheme.typography.bodyMedium,
+                        text = author, style = MaterialTheme.typography.bodyMedium,
                         color = contentColor.copy(alpha = 0.7f),
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
@@ -355,11 +355,11 @@ fun TrackListItemFavsWrapper(
     TrackListItemFavs(
         modifier = modifier,
         cardCorners = 0.dp,
-        title = song.title,
-        artist = song.displayAuthor,
-        bookArtUrl = song.bookArtUriString,
+        title = track.title,
+        author = track.displayAuthor,
+        bookArtUrl = track.bookArtUriString,
         isPlaying = stablePlayerState.isPlaying,
-        isCurrentSong = song.id == stablePlayerState.currentTrack?.id,
+        isCurrentSong = track.id == stablePlayerState.currentTrack?.id,
         onClick = onClick
     )
 }

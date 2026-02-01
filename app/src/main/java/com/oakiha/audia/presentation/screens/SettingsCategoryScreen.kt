@@ -317,7 +317,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             SettingsItem(
                                 title = "Artists",
-                                subtitle = "Multi-artist parsing and organization options.",
+                                subtitle = "Multi-author parsing and organization options.",
                                 leadingIcon = { Icon(Icons.Outlined.Person, null, tint = MaterialTheme.colorScheme.secondary) },
                                 trailingIcon = { Icon(Icons.Rounded.ChevronRight, "Open", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                                 onClick = { navController.navigate(Screen.AuthorSettings.route) }
@@ -352,7 +352,7 @@ fun SettingsCategoryScreen(
                                 label = "Player Theme",
                                 description = "Choose the appearance for the floating player.",
                                 options = mapOf(
-                                    ThemePreference.ALBUM_ART to "Album Art",
+                                    ThemePreference.ALBUM_ART to "Book Art",
                                     ThemePreference.DYNAMIC to "System Dynamic"
                                 ),
                                 selectedKey = uiState.playerThemePreference,
@@ -409,7 +409,7 @@ fun SettingsCategoryScreen(
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(
                                 label = "Carousel Style",
-                                description = "Choose the appearance for the album carousel.",
+                                description = "Choose the appearance for the book carousel.",
                                 options = mapOf(
                                     CarouselStyle.NO_PEEK to "No Peek",
                                     CarouselStyle.ONE_PEEK to "One Peek"

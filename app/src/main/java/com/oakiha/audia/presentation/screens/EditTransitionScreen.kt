@@ -507,12 +507,12 @@ private fun CrossfadeVisualizer(durationMs: Int) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Current Song",
+                "Current Track",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.tertiary
             )
             Text(
-                "Next Song",
+                "Next Track",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -540,7 +540,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                             shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
                         )
                 ) {
-                    // ExtensiÃ³n visual de la barra superior (Song 1 Ending)
+                    // ExtensiÃ³n visual de la barra superior (Track 1 Ending)
                     // Esta lÃ³gica es visual para representar el "overlap"
                 }
 

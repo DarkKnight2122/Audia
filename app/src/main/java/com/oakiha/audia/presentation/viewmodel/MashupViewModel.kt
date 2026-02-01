@@ -62,15 +62,15 @@ class MashupViewModel @Inject constructor(
 
     private fun loadAllSongs() {
         viewModelScope.launch {
-            audiobookRepository.getTracks().collect { songs ->
-                _uiState.update { it.copy(allTracks = songs) }
+            audiobookRepository.getTracks().collect { tracks ->
+                _uiState.update { it.copy(allTracks = tracks) }
             }
         }
     }
 
     fun loadSong(deck: Int, track: Track) {
-        updateDeckState(deck) { it.copy(song = song) }
-        val songUri = Uri.parse(song.contentUriString)
+        updateDeckState(deck) { it.copy(track = track) }
+        val songUri = Uri.parse(track.contentUriString)
         val controller = if (deck == 1) deck1Controller else deck2Controller
         controller.loadSong(songUri)
         controller.player?.addListener(object : Player.Listener {

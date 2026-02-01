@@ -45,7 +45,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
@@ -486,7 +486,7 @@ private fun CreatePlaylistContent(
                            modifier = Modifier
                                .fillMaxWidth()
                                .padding(16.dp),
-                           label = { Text("Search songs") },
+                           label = { Text("Search tracks") },
                            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                            trailingIcon = if (searchQuery.isNotEmpty()) {
                                { IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Rounded.Clear, null) } }
@@ -1062,7 +1062,7 @@ private fun PlaylistFormContent(
                      )
 
                      val icons = listOf(
-                        "MusicNote", "Headphones", "Album", "Mic", "Speaker", "Favorite", "Piano", "Queue"
+                        "MusicNote", "Headphones", "Book", "Mic", "Speaker", "Favorite", "Piano", "Queue"
                      )
                      
                      FlowRow(
@@ -1190,7 +1190,7 @@ fun getIconByName(name: String?): ImageVector? {
     return when (name) {
         "MusicNote" -> Icons.Rounded.MusicNote
         "Headphones" -> Icons.Rounded.Headphones
-        "Album" -> Icons.Rounded.Album
+        "Book" -> Icons.Rounded.Book
         "Mic" -> Icons.Rounded.MicExternalOn 
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite

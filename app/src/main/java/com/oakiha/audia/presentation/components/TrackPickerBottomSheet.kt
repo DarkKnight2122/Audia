@@ -153,7 +153,7 @@ fun SongPickerContent(
                             focusedSupportingTextColor = Color.Transparent,
                         ),
                         onValueChange = onSearchQueryChange,
-                        label = { Text("Search for songs...") },
+                        label = { Text("Search for tracks...") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -225,14 +225,14 @@ fun SongPickerList(
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(filteredSongs, key = { it.id }) { song ->
+            items(filteredSongs, key = { it.id }) { track ->
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .clip(CircleShape)
                         .clickable {
-                            val currentSelection = selectedTrackIds[song.id] ?: false
-                            selectedTrackIds[song.id] = !currentSelection
+                            val currentSelection = selectedTrackIds[track.id] ?: false
+                            selectedTrackIds[track.id] = !currentSelection
                         }
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -242,9 +242,9 @@ fun SongPickerList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = selectedTrackIds[song.id] ?: false,
+                        checked = selectedTrackIds[track.id] ?: false,
                         onCheckedChange = { isChecked ->
-                            selectedTrackIds[song.id] = isChecked
+                            selectedTrackIds[track.id] = isChecked
                         }
                     )
                     Box(
@@ -256,8 +256,8 @@ fun SongPickerList(
                             )
                     ) {
                         SmartImage(
-                            model = song.bookArtUriString,
-                            contentDescription = song.title,
+                            model = track.bookArtUriString,
+                            contentDescription = track.title,
                             shape = albumShape,
                             targetSize = Size(
                                 168,
@@ -268,9 +268,9 @@ fun SongPickerList(
                     }
                     Spacer(Modifier.width(16.dp))
                     Column {
-                        Text(song.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(
-                            song.displayAuthor,
+                            track.displayAuthor,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

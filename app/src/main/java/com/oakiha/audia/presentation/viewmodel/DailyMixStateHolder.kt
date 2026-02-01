@@ -53,7 +53,7 @@ class DailyMixStateHolder @Inject constructor(
     }
 
     /**
-     * Remove a song from the daily mix.
+     * Remove a track from the daily mix.
      */
     fun removeFromDailyMix(trackId: String) {
         _dailyMixSongs.update { currentList ->
@@ -62,9 +62,9 @@ class DailyMixStateHolder @Inject constructor(
     }
 
     /**
-     * Update the daily mix with new songs.
-     * @param allTracksFlow Flow of all available songs
-     * @param favoriteTrackIdsFlow Flow of favorite song IDs
+     * Update the daily mix with new tracks.
+     * @param allTracksFlow Flow of all available tracks
+     * @param favoriteTrackIdsFlow Flow of favorite track IDs
      */
     fun updateDailyMix(allTracksFlow: Flow<List<Track>>, favoriteTrackIdsFlow: Flow<Set<String>>) {
         updateJob?.cancel()
@@ -162,12 +162,12 @@ class DailyMixStateHolder @Inject constructor(
     }
 
     /**
-     * Set the daily mix songs directly (used for AI-generated mixes).
+     * Set the daily mix tracks directly (used for AI-generated mixes).
      */
-    fun setDailyMixSongs(songs: List<Track>) {
-        _dailyMixSongs.value = songs.toImmutableList()
+    fun setDailyMixSongs(tracks: List<Track>) {
+        _dailyMixSongs.value = tracks.toImmutableList()
         scope?.launch {
-            userPreferencesRepository.saveDailyMixSongIds(songs.map { it.id })
+            userPreferencesRepository.saveDailyMixSongIds(tracks.map { it.id })
         }
     }
 

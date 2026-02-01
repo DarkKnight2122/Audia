@@ -29,7 +29,7 @@ data class Author(
     val id: Long, // MediaStore.Audio.Artists._ID
     val name: String,
     val trackCount: Int,
-    val imageUrl: String? = null // Deezer artist image URL
+    val imageUrl: String? = null // Deezer author image URL
 ) {
     companion object {
         fun empty() = Author(
@@ -42,8 +42,8 @@ data class Author(
 }
 
 /**
- * Represents a simplified artist reference for multi-artist support.
- * Used when displaying multiple artists for a song.
+ * Represents a simplified author reference for multi-author support.
+ * Used when displaying multiple authors for a track.
  */
 @Immutable
 data class AuthorRef(

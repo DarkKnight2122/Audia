@@ -12,7 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for fetching and caching artist images from Deezer API.
+ * Repository for fetching and caching author images from Deezer API.
  * Uses both in-memory LRU cache and Room database for persistent storage.
  */
 @Singleton
@@ -22,26 +22,26 @@ class AuthorImageRepository @Inject constructor(
 ) {
     companion object {
         private const val TAG = "ArtistImageRepository"
-        private const val CACHE_SIZE = 100 // Number of artist images to cache in memory
+        private const val CACHE_SIZE = 100 // Number of author images to cache in memory
     }
 
     // In-memory LRU cache for quick access
     private val memoryCache = LruCache<String, String>(CACHE_SIZE)
     
-    // Mutex to prevent duplicate API calls for the same artist
+    // Mutex to prevent duplicate API calls for the same author
     private val fetchMutex = Mutex()
     private val pendingFetches = mutableSetOf<String>()
 
     /**
-     * Get artist image URL, fetching from Deezer if not cached.
-     * @param artistName Name of the artist
-     * @param authorId Room database ID of the artist (for caching)
+     * Get author image URL, fetching from Deezer if not cached.
+     * @param authorName Name of the author
+     * @param authorId Room database ID of the author (for caching)
      * @return Image URL or null if not found
      */
-    suspend fun getArtistImageUrl(artistName: String, authorId: Long): String? {
-        if (artistName.isBlank()) return null
+    suspend fun getAuthorImageUrl(authorName: String, authorId: Long): String? {
+        if (authorName.isBlank()) return null
 
-        val normalizedName = artistName.trim().lowercase()
+        val normalizedName = authorName.trim().lowercase()
 
         // Check memory cache first
         memoryCache.get(normalizedName)?.let { cachedUrl ->
@@ -50,7 +50,7 @@ class AuthorImageRepository @Inject constructor(
 
         // Check database cache
         val dbCachedUrl = withContext(Dispatchers.IO) {
-            audiobookDao.getArtistImageUrl(authorId)
+            audiobookDao.getAuthorImageUrl(authorId)
         }
         if (!dbCachedUrl.isNullOrEmpty()) {
             memoryCache.put(normalizedName, dbCachedUrl)
@@ -58,31 +58,31 @@ class AuthorImageRepository @Inject constructor(
         }
 
         // Fetch from Deezer API
-        return fetchAndCacheArtistImage(artistName, authorId, normalizedName)
+        return fetchAndCacheArtistImage(authorName, authorId, normalizedName)
     }
 
     /**
-     * Prefetch artist images for a list of artists in background.
-     * Useful for batch loading when displaying artist lists.
+     * Prefetch author images for a list of authors in background.
+     * Useful for batch loading when displaying author lists.
      */
-    suspend fun prefetchArtistImages(artists: List<Pair<Long, String>>) {
+    suspend fun prefetchArtistImages(authors: List<Pair<Long, String>>) {
         withContext(Dispatchers.IO) {
-            artists.forEach { (authorId, artistName) ->
+            authors.forEach { (authorId, authorName) ->
                 try {
-                    getArtistImageUrl(artistName, authorId)
+                    getAuthorImageUrl(authorName, authorId)
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to prefetch image for $artistName: ${e.message}")
+                    Log.w(TAG, "Failed to prefetch image for $authorName: ${e.message}")
                 }
             }
         }
     }
 
     private suspend fun fetchAndCacheArtistImage(
-        artistName: String,
+        authorName: String,
         authorId: Long,
         normalizedName: String
     ): String? {
-        // Prevent duplicate fetches for the same artist
+        // Prevent duplicate fetches for the same author
         fetchMutex.withLock {
             if (pendingFetches.contains(normalizedName)) {
                 return null // Already fetching
@@ -92,7 +92,7 @@ class AuthorImageRepository @Inject constructor(
 
         return try {
             withContext(Dispatchers.IO) {
-                val response = deezerApiService.searchArtist(artistName, limit = 1)
+                val response = deezerApiService.searchArtist(authorName, limit = 1)
                 val deezerArtist = response.data.firstOrNull()
 
                 if (deezerArtist != null) {
@@ -109,18 +109,18 @@ class AuthorImageRepository @Inject constructor(
                         // Cache in database
                         audiobookDao.updateArtistImageUrl(authorId, imageUrl)
                         
-                        Log.d(TAG, "Fetched and cached image for $artistName: $imageUrl")
+                        Log.d(TAG, "Fetched and cached image for $authorName: $imageUrl")
                         imageUrl
                     } else {
                         null
                     }
                 } else {
-                    Log.d(TAG, "No Deezer artist found for: $artistName")
+                    Log.d(TAG, "No Deezer author found for: $authorName")
                     null
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching artist image for $artistName: ${e.message}")
+            Log.e(TAG, "Error fetching author image for $authorName: ${e.message}")
             null
         } finally {
             fetchMutex.withLock {

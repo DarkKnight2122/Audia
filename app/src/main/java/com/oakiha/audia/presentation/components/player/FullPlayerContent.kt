@@ -259,7 +259,7 @@ fun FullPlayerContent(
     if (showFetchLyricsDialog) {
         FetchLyricsDialog(
             uiState = lyricsSearchUiState,
-            currentTrack = song, // Use 'song' which is derived from args/retained
+            currentTrack = track, // Use 'track' which is derived from args/retained
             onConfirm = { forcePick ->
                 // El usuario confirma, iniciamos la bÃƒÂºsqueda
                 playerViewModel.fetchLyricsForCurrentSong(forcePick)
@@ -267,8 +267,8 @@ fun FullPlayerContent(
             onPickResult = { result ->
                 playerViewModel.acceptLyricsSearchResultForCurrentSong(result)
             },
-            onManualSearch = { title, artist ->
-                playerViewModel.searchLyricsManually(title, artist)
+            onManualSearch = { title, author ->
+                playerViewModel.searchLyricsManually(title, author)
             },
             onDismiss = {
                 // El usuario cancela o cierra el diÃƒÂ¡logo
@@ -335,13 +335,13 @@ fun FullPlayerContent(
                 }
             ) {
                  AlbumCarouselSection(
-                    currentTrack = song,
+                    currentTrack = track,
                     queue = currentPlaybackQueue,
                     expansionFraction = 1f, // Static layout
                     onSongSelected = { newSong ->
-                        if (newSong.id != song.id) {
+                        if (newSong.id != track.id) {
                             playerViewModel.showAndPlaySong(
-                                song = newSong,
+                                track = newSong,
                                 contextSongs = currentPlaybackQueue,
                                 queueName = currentQueueSourceName
                             )
@@ -453,7 +453,7 @@ fun FullPlayerContent(
                 modifier = Modifier
                     .padding(start = 0.dp),
                 onClickLyrics = onLyricsClick,
-                song = song,
+                track = track,
                 currentTrackArtists = currentTrackArtists,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = LocalMaterialTheme.current.onPrimaryContainer,
@@ -469,7 +469,7 @@ fun FullPlayerContent(
                     if (currentTrackArtists.size > 1) {
                         showArtistPicker = true
                     } else {
-                        playerViewModel.triggerArtistNavigationFromPlayer(song.authorId)
+                        playerViewModel.triggerArtistNavigationFromPlayer(track.authorId)
                     }
                 }
             )
@@ -795,7 +795,7 @@ fun FullPlayerContent(
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.rounded_queue_audiobook_24),
-                                    contentDescription = "Song options",
+                                    contentDescription = "Track options",
                                     tint = LocalMaterialTheme.current.primary
                                 )
                             }
@@ -833,7 +833,7 @@ fun FullPlayerContent(
             },
             onSearchLyrics = { forcePick -> playerViewModel.fetchLyricsForCurrentSong(forcePick) },
             onPickResult = { playerViewModel.acceptLyricsSearchResultForCurrentSong(it) },
-            onManualSearch = { title, artist -> playerViewModel.searchLyricsManually(title, artist) },
+            onManualSearch = { title, author -> playerViewModel.searchLyricsManually(title, author) },
             onImportLyrics = { filePickerLauncher.launch("*/*") },
             onDismissLyricsSearch = { playerViewModel.resetLyricsSearchState() },
             lyricsSyncOffset = lyricsSyncOffset,
@@ -926,12 +926,12 @@ private fun TrackMetadataDisplaySection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        song?.let { currentTrack ->
+        track?.let { currentTrack ->
             PlayerSongInfo(
                 title = currentTrack.title,
-                artist = currentTrack.displayAuthor,
+                author = currentTrack.displayAuthor,
                 authorId = currentTrack.authorId,
-                artists = currentTrackArtists,
+                authors = currentTrackArtists,
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = textColor,
                 artistTextColor = artistTextColor,
@@ -1317,9 +1317,9 @@ private fun DelayedContent(
 @Composable
 private fun PlayerSongInfo(
     title: String,
-    artist: String,
+    author: String,
     authorId: Long,
-    artists: List<Author>,
+    authors: List<Author>,
     expansionFractionProvider: () -> Float,
     textColor: Color,
     artistTextColor: Color,
@@ -1368,7 +1368,7 @@ private fun PlayerSongInfo(
         Spacer(modifier = Modifier.height(4.dp))
 
         AutoScrollingTextOnDemand(
-            text = artist,
+            text = author,
             style = artistStyle,
             gradientEdgeColor = gradientEdgeColor,
             expansionFractionProvider = expansionFractionProvider,
@@ -1466,7 +1466,7 @@ private fun MetadataPlaceholder(expansionFraction: Float, color: Color, onColor:
             )
             PlaceholderBox(
                 modifier = Modifier
-                    .fillMaxWidth(0.4f) // Simulate artist length
+                    .fillMaxWidth(0.4f) // Simulate author length
                     .height(16.dp),
                 cornerRadius = 4.dp,
                 color = onColor

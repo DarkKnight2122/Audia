@@ -3,7 +3,7 @@ package com.oakiha.audia.data.network.deezer
 import com.google.gson.annotations.SerializedName
 
 /**
- * Response from Deezer artist search API.
+ * Response from Deezer author search API.
  */
 data class DeezerSearchResponse(
     @SerializedName("data") val data: List<DeezerArtist> = emptyList(),
@@ -11,7 +11,7 @@ data class DeezerSearchResponse(
 )
 
 /**
- * Artist data from Deezer API.
+ * Author data from Deezer API.
  * Contains multiple image sizes for different use cases.
  */
 data class DeezerArtist(

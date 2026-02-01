@@ -10,8 +10,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Helper to map MediaItem to Song.
- * Note: This does NOT have access to the full song library master list,
+ * Helper to map MediaItem to Track.
+ * Note: This does NOT have access to the full track library master list,
  * so it should be used for strictly metadata-based mapping or fallback.
  * The ViewModel should try lookup by ID first.
  */
@@ -39,7 +39,7 @@ class MediaMapper @Inject constructor(
         val dateAdded = extras?.getLong(MediaItemBuilder.EXTERNAL_EXTRA_DATE_ADDED) ?: System.currentTimeMillis()
         val id = mediaItem.mediaId
 
-        // Note: This creates a partial Song object. 
+        // Note: This creates a partial Track object. 
         // Some fields like path, genre, year might be missing if not in extras.
         return Track(
             id = id,

@@ -15,9 +15,9 @@ import java.io.FileInputStream
 object BookArtUtils {
 
     /**
-     * Main function to get album art - tries multiple methods
+     * Main function to get book art - tries multiple methods
      */
-    fun getAlbumArtUri(
+    fun getBookArtUri(
         appContext: Context,
         audiobookDao: AudiobookDao,
         path: String,
@@ -31,10 +31,10 @@ object BookArtUtils {
         // Method 2: Try embedded art from file
         getEmbeddedAlbumArtUri(appContext, path, trackId, deepScan)?.let { return it.toString() }
         // Method 3: try from db
-//        audiobookDao.getAlbumArtUriById(trackId)?.let {
+//        audiobookDao.getBookArtUriById(trackId)?.let {
 //            return it
 //        }
-        // Method 4: Try external album art files in directory
+        // Method 4: Try external book art files in directory
 //        getExternalAlbumArtUri(path)?.let { return it.toString() }
 
         return null
@@ -107,18 +107,18 @@ object BookArtUtils {
     }
 
     /**
-     * Look for external album art files in the same directory
+     * Look for external book art files in the same directory
      */
     fun getExternalAlbumArtUri(filePath: String): Uri? {
         return try {
             val audioFile = File(filePath)
             val parentDir = audioFile.parent ?: return null
 
-            // Extended list of common album art file names
+            // Extended list of common book art file names
             val commonNames = listOf(
                 "cover.jpg", "cover.png", "cover.jpeg",
                 "folder.jpg", "folder.png", "folder.jpeg",
-                "album.jpg", "album.png", "album.jpeg",
+                "book.jpg", "book.png", "book.jpeg",
                 "albumart.jpg", "albumart.png", "albumart.jpeg",
                 "artwork.jpg", "artwork.png", "artwork.jpeg",
                 "front.jpg", "front.png", "front.jpeg",
@@ -138,11 +138,11 @@ object BookArtUtils {
                     }
                 }
 
-                // Then, check any image files that might be album art
+                // Then, check any image files that might be book art
                 val imageFiles = dir.listFiles { file ->
                     file.isFile && (
                             file.name.contains("cover", ignoreCase = true) ||
-                                    file.name.contains("album", ignoreCase = true) ||
+                                    file.name.contains("book", ignoreCase = true) ||
                                     file.name.contains("folder", ignoreCase = true) ||
                                     file.name.contains("art", ignoreCase = true) ||
                                     file.name.contains("front", ignoreCase = true)

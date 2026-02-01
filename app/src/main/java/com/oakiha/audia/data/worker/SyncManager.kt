@@ -76,7 +76,7 @@ class SyncManager @Inject constructor(
     }
 
     /**
-     * Flow that exposes the detailed sync progress including song count.
+     * Flow that exposes the detailed sync progress including track count.
      */
     val syncProgress: Flow<SyncProgress> =
         workManager.getWorkInfosForUniqueWorkFlow(SyncWorker.WORK_NAME)
@@ -158,7 +158,7 @@ class SyncManager @Inject constructor(
     /**
      * Completely rebuilds the database from scratch.
      * Clears all existing data including user edits (lyrics, etc.) and rescans.
-     * Use when database is corrupted or songs are missing.
+     * Use when database is corrupted or tracks are missing.
      */
     fun rebuildDatabase() {
         Log.i(TAG, "Rebuild database requested - Triggering MediaStore rescan")

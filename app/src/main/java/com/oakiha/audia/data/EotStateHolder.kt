@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Singleton object to hold and share the state of the "End of Track" (EOT) timer,
- * specifically which song ID is targeted by an active EOT.
+ * specifically which track ID is targeted by an active EOT.
  * This allows communication between PlayerViewModel and AudiobookService regarding EOT state.
  */
 object EotStateHolder {
@@ -15,10 +15,10 @@ object EotStateHolder {
     val eotTargetTrackId: StateFlow<String?> = _eotTargetTrackId.asStateFlow()
 
     /**
-     * Sets the song ID for which the "End of Track" timer is active.
+     * Sets the track ID for which the "End of Track" timer is active.
      * Call with null to indicate EOT is not active or has been cleared.
      *
-     * @param trackId The ID of the song targeted by EOT, or null if EOT is inactive.
+     * @param trackId The ID of the track targeted by EOT, or null if EOT is inactive.
      */
     fun setEotTargetTrack(trackId: String?) {
         _eotTargetTrackId.value = trackId

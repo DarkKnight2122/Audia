@@ -73,7 +73,7 @@ fun PlaylistBottomSheet(
             filteredPlaylists.forEach {
                 put(
                     it.id,
-                    it.trackIds.contains(song.id)
+                    it.trackIds.contains(track.id)
                 )
             }
         }
@@ -162,7 +162,7 @@ fun PlaylistBottomSheet(
                     navController = null,
                     playerViewModel = playerViewModel,
                     isAddingToPlaylist = true,
-                    currentTrack = song,
+                    currentTrack = track,
                     filteredPlaylists = filteredPlaylists,
                     selectedPlaylists = selectedPlaylists
                 )
@@ -189,7 +189,7 @@ fun PlaylistBottomSheet(
                 shape = CircleShape,
                 onClick = {
                     playlistViewModel.addOrRemoveSongFromPlaylists(
-                        song.id,
+                        track.id,
                         selectedPlaylists.filter { it.value }.keys.toList(),
                         currentPlaylistId
                     )

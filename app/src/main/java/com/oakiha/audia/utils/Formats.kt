@@ -10,8 +10,8 @@ fun formatDuration(milliseconds: Long): String {
     return String.format("%02d:%02d", minutes, seconds)
 }
 
-fun formatTotalDuration(songs: List<Track>): String {
-    val totalMillis = songs.sumOf { it.duration }
+fun formatTotalDuration(tracks: List<Track>): String {
+    val totalMillis = tracks.sumOf { it.duration }
     val hours = TimeUnit.MILLISECONDS.toHours(totalMillis)
     val minutes = TimeUnit.MILLISECONDS.toMinutes(totalMillis) % 60
     return if (hours > 0) {

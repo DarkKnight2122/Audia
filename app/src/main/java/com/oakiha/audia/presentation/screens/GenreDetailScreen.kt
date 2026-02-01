@@ -60,12 +60,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
-import com.oakiha.audia.data.model.Track // Import Song
+import com.oakiha.audia.data.model.Track // Import Track
 import com.oakiha.audia.presentation.components.GenreGradientTopBar
 // Attempt to import ExpressiveTrackListItem. If this fails, a local one will be used.
 // import com.oakiha.audia.presentation.screens.ExpressiveTrackListItem // Path might vary
 import com.oakiha.audia.presentation.components.MiniPlayerHeight // For MiniPlayerHeight if needed for padding
-import com.oakiha.audia.presentation.components.SmartImage // For a simple song item
+import com.oakiha.audia.presentation.components.SmartImage // For a simple track item
 import com.oakiha.audia.presentation.viewmodel.GenreDetailViewModel
 import com.oakiha.audia.presentation.viewmodel.GroupedTrackListItem // Import the new sealed interface
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
@@ -185,7 +185,7 @@ fun GenreDetailScreen(
                     ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (uiState.tracks.isEmpty()) {
                     Text(
-                        if (uiState.error != null) "Error loading songs: ${uiState.error}" else "No tracks found for this genre.",
+                        if (uiState.error != null) "Error loading tracks: ${uiState.error}" else "No tracks found for this genre.",
                         modifier = Modifier.align(Alignment.Center).padding(16.dp)
                     )
                 } else {
@@ -215,7 +215,7 @@ fun GenreDetailScreen(
                                 is SectionData.ArtistSection -> {
                                     AuthorSectionCard(
                                         authorName = section.authorName,
-                                        albums = section.books,
+                                        books = section.books,
                                         onSongClick = { track ->
                                             playerViewModel.showAndPlaySong(
                                                 track,
@@ -243,17 +243,17 @@ private sealed class SectionData {
     data class AuthorSection(
         override val id: String,
         val authorName: String,
-        val albums: List<AlbumData>
+        val books: List<AlbumData>
     ) : SectionData()
 }
 
 private data class BookData(
     val name: String,
     val artUri: String?,
-    val songs: List<Track>
+    val tracks: List<Track>
 )
 
-// Helper function to build sections from grouped songs
+// Helper function to build sections from grouped tracks
 private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<SectionData> {
     val sections = mutableListOf<SectionData>()
     var currentArtist: String? = null
@@ -265,9 +265,9 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
     for (item in groupedSongs) {
         when (item) {
             is GroupedTrackListItem.AuthorHeader -> {
-                // Save previous artist section if exists
+                // Save previous author section if exists
                 if (currentArtist != null) {
-                    // Save current album if exists
+                    // Save current book if exists
                     if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                         currentAlbums.add(
                             AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
@@ -277,12 +277,12 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                         SectionData.AuthorSection(
                             id = "author_${currentArtist}",
                             authorName = currentArtist!!,
-                            albums = currentAlbums.toList()
+                            books = currentAlbums.toList()
                         )
                     )
                 }
 
-                // Start new artist
+                // Start new author
                 currentArtist = item.name
                 currentAlbums.clear()
                 currentAlbumSongs.clear()
@@ -291,14 +291,14 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
             }
 
             is GroupedTrackListItem.AlbumHeader -> {
-                // Save previous album if exists
+                // Save previous book if exists
                 if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                     currentAlbums.add(
                         AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
                     )
                 }
 
-                // Start new album
+                // Start new book
                 currentAlbumName = item.name
                 currentBookArt = item.bookArtUri
                 currentAlbumSongs.clear()
@@ -310,7 +310,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
         }
     }
 
-    // Save last artist section
+    // Save last author section
     if (currentArtist != null) {
         if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
             currentAlbums.add(
@@ -321,7 +321,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
             SectionData.AuthorSection(
                 id = "author_${currentArtist}",
                 authorName = currentArtist!!,
-                albums = currentAlbums.toList()
+                books = currentAlbums.toList()
             )
         )
     }
@@ -333,13 +333,13 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 @Composable
 private fun AuthorSectionCard(
     authorName: String,
-    albums: List<AlbumData>,
+    books: List<AlbumData>,
     onSongClick: (Track) -> Unit
 ) {
     Column(
         modifier = Modifier
     ) {
-        // Artist Header with gradient background
+        // Author Header with gradient background
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,7 +375,7 @@ private fun AuthorSectionCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = artistName,
+                    text = authorName,
                     style = MaterialTheme.typography.bodyLargeEmphasized,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
@@ -404,9 +404,9 @@ private fun AuthorSectionCard(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                albums.forEach { album ->
+                books.forEach { book ->
                     AlbumSection(
-                        album = album,
+                        book = book,
                         onSongClick = onSongClick
                     )
                 }
@@ -417,11 +417,11 @@ private fun AuthorSectionCard(
 
 @Composable
 private fun AlbumSection(
-    album: BookData,
+    book: BookData,
     onSongClick: (Track) -> Unit
 ) {
     Column {
-        // Album Header
+        // Book Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -429,8 +429,8 @@ private fun AlbumSection(
                 .padding(bottom = 12.dp)
         ) {
             SmartImage(
-                model = album.artUri,
-                contentDescription = "Album art for ${album.name}",
+                model = book.artUri,
+                contentDescription = "Book art for ${book.name}",
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(6.dp))
@@ -445,7 +445,7 @@ private fun AlbumSection(
                     letterSpacing = 0.5.sp
                 )
                 Text(
-                    text = album.name,
+                    text = book.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -457,12 +457,12 @@ private fun AlbumSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Horizontal scrolling songs
+        // Horizontal scrolling tracks
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             //contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            items(album.songs, key = { it.id }) { track ->
+            items(book.tracks, key = { it.id }) { track ->
                 SquareSongCard(
                     track = track,
                     onClick = { onSongClick(track) }
@@ -508,14 +508,14 @@ private fun SquareSongCard(
             Column(
                 modifier = Modifier.padding(12.dp)
             ) {
-                // Album Art
+                // Book Art
                 Card(
                     shape = RoundedCornerShape(6.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     SmartImage(
                         model = track.bookArtUriString,
-                        contentDescription = "Album art for ${track.title}",
+                        contentDescription = "Book art for ${track.title}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
@@ -524,7 +524,7 @@ private fun SquareSongCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Song Info
+                // Track Info
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.bodyMedium,

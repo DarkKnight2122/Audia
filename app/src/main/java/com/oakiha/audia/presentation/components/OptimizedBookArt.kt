@@ -61,7 +61,7 @@ fun OptimizedBookArt(
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .build()
         },
-        contentDescription = "Album art of $title",
+        contentDescription = "Book art of $title",
         modifier = modifier,
         contentScale = ContentScale.Crop,
         loading = {
@@ -107,7 +107,7 @@ private fun renderDirectAlbumArt(
         is ImageVector -> {
             Image(
                 imageVector = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -116,7 +116,7 @@ private fun renderDirectAlbumArt(
         is Painter -> {
             Image(
                 painter = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -125,7 +125,7 @@ private fun renderDirectAlbumArt(
         is ImageBitmap -> {
             Image(
                 bitmap = model,
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -134,7 +134,7 @@ private fun renderDirectAlbumArt(
         is Bitmap -> {
             Image(
                 bitmap = model.asImageBitmap(),
-                contentDescription = "Album art of $title",
+                contentDescription = "Book art of $title",
                 contentScale = ContentScale.Crop,
                 modifier = modifier.fillMaxSize()
             )
@@ -208,7 +208,7 @@ private fun renderDirectAlbumArt(
 //                    .e(currentState.result.throwable, "Displaying error placeholder for URI: $uri")
 //                Image(
 //                    painter = painterResource(id = R.drawable.rounded_broken_image_24),
-//                    contentDescription = "Error loading album art for $title",
+//                    contentDescription = "Error loading book art for $title",
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize()
 //                )
@@ -216,7 +216,7 @@ private fun renderDirectAlbumArt(
 //            is AsyncImagePainter.State.Success -> {
 //                Image(
 //                    painter = currentState.painter,
-//                    contentDescription = "Album art of $title",
+//                    contentDescription = "Book art of $title",
 //                    contentScale = ContentScale.Crop,
 //                    modifier = Modifier.fillMaxSize()
 //                )

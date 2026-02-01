@@ -61,15 +61,15 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
      */
     private fun validateMetadataInput(
         title: String,
-        artist: String,
-        album: String,
+        author: String,
+        book: String,
         genre: String,
         lyrics: String
     ): String? {
         if (title.isBlank()) return "Title cannot be empty"
         if (title.length > MetadataLimits.MAX_TITLE_LENGTH) return "Title too long"
-        if (artist.length > MetadataLimits.MAX_ARTIST_LENGTH) return "Artist name too long"
-        if (album.length > MetadataLimits.MAX_ALBUM_LENGTH) return "Album name too long"
+        if (author.length > MetadataLimits.MAX_ARTIST_LENGTH) return "Author name too long"
+        if (book.length > MetadataLimits.MAX_ALBUM_LENGTH) return "Book name too long"
         if (genre.length > MetadataLimits.MAX_GENRE_LENGTH) return "Genre too long"
         if (lyrics.length > MetadataLimits.MAX_LYRICS_LENGTH) return "Lyrics too long"
         return null
@@ -180,8 +180,8 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
             val mediaStoreSuccess = updateMediaStoreMetadata(
                 trackId = trackId,
                 title = newTitle,
-                artist = newArtist,
-                album = newAlbum,
+                author = newArtist,
+                book = newAlbum,
                 genre = trimmedGenre,
                 trackNumber = newTrackNumber
             )
@@ -534,8 +534,8 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
     private fun updateMediaStoreMetadata(
         trackId: Long,
         title: String,
-        artist: String,
-        album: String,
+        author: String,
+        book: String,
         genre: String,
         trackNumber: Int
     ): Boolean {
@@ -544,13 +544,13 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
 
             val values = ContentValues().apply {
                 put(MediaStore.Audio.Media.TITLE, title)
-                put(MediaStore.Audio.Media.ARTIST, artist)
-                put(MediaStore.Audio.Media.ALBUM, album)
+                put(MediaStore.Audio.Media.ARTIST, author)
+                put(MediaStore.Audio.Media.ALBUM, book)
                 put(MediaStore.Audio.Media.GENRE, genre)
                 put(MediaStore.Audio.Media.TRACK, trackNumber)
                 put(MediaStore.Audio.Media.DISPLAY_NAME, title)
                 put(MediaStore.Audio.Media.DATE_MODIFIED, System.currentTimeMillis() / 1000)
-                put(MediaStore.Audio.Media.ALBUM_ARTIST, artist)
+                put(MediaStore.Audio.Media.ALBUM_ARTIST, author)
             }
 
             val rowsUpdated = context.contentResolver.update(uri, values, null, null)
@@ -625,7 +625,7 @@ class TrackMetadataEditor(private val context: Context, private val audiobookDao
                 if (!exists()) mkdirs()
             }
 
-            // Clean up old cover art files for this song
+            // Clean up old cover art files for this track
             directory.listFiles { file ->
                 file.name.startsWith("song_art_${trackId}")
             }?.forEach { it.delete() }

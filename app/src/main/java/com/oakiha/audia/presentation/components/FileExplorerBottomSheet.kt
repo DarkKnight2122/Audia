@@ -528,7 +528,7 @@ private fun FileExplorerItem(
             ) {
                 val displayCount = if (audioCount > 99) "99+" else audioCount.toString()
                 Text(
-                    text = if (audioCount == 1) "1 song" else "$displayCount songs",
+                    text = if (audioCount == 1) "1 track" else "$displayCount tracks",
                     style = MaterialTheme.typography.labelMedium,
                     color = badgeColor,
                     maxLines = 1,
