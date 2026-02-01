@@ -59,18 +59,18 @@ abstract class AudioBookDatabase : RoomDatabase() {
 
         val MIGRATION_9_10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Add album_artist column to songs table
-                db.execSQL("ALTER TABLE tracks ADD COLUMN album_artist TEXT DEFAULT NULL")
+                // Add book_author column to tracks table
+                db.execSQL("ALTER TABLE tracks ADD COLUMN book_author TEXT DEFAULT NULL")
                 
-                // Create song_artist_cross_ref junction table for many-to-many relationship
+                // Create track_author_cross_ref junction table for many-to-many relationship
                 db.execSQL("""
                     CREATE TABLE IF NOT EXISTS track_author_cross_ref (
                         track_id INTEGER NOT NULL,
-                        artist_id INTEGER NOT NULL,
+                        author_id INTEGER NOT NULL,
                         is_primary INTEGER NOT NULL DEFAULT 0,
-                        PRIMARY KEY (song_id, artist_id),
-                        FOREIGN KEY (song_id) REFERENCES tracks(id) ON DELETE CASCADE,
-                        FOREIGN KEY (artist_id) REFERENCES authors(id) ON DELETE CASCADE
+                        PRIMARY KEY (track_id, author_id),
+                        FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+                        FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
                     )
                 """.trimIndent())
                 
@@ -79,25 +79,24 @@ abstract class AudioBookDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_track_author_cross_ref_author_id ON track_author_cross_ref(author_id)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_track_author_cross_ref_is_primary ON track_author_cross_ref(is_primary)")
                 
-                // Migrate existing song-artist relationships to junction table
-                // Each existing song gets its current artist as the primary artist
+                // Migrate existing track-author relationships to junction table
+                // Each existing track gets its current author as the primary author
                 db.execSQL("""
-                    INSERT OR REPLACE INTO track_author_cross_ref (track_id, author_id, is_primary)
-                    SELECT id, artist_id, 1 FROM tracks WHERE author_id IS NOT NULL
+                    INSERT OR REPLACE INTO track_author_cross_ref (track_id, author_id, is_primary) SELECT id, author_id, 1 FROM tracks WHERE author_id IS NOT NULL
                 """.trimIndent())
             }
         }
 
         val MIGRATION_10_11 = object : Migration(10, 11) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Add image_url column to artists table for Deezer artist images
+                // Add image_url column to authors table for Deezer author images
                 db.execSQL("ALTER TABLE authors ADD COLUMN image_url TEXT DEFAULT NULL")
             }
         }
 
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Create song_engagements table for tracking play statistics
+                // Create track_engagements table for tracking play statistics
                 db.execSQL("""
                     CREATE TABLE IF NOT EXISTS track_engagements (
                         track_id TEXT NOT NULL PRIMARY KEY,
@@ -119,7 +118,7 @@ abstract class AudioBookDatabase : RoomDatabase() {
                     )
                 """.trimIndent())
                 
-                // Migrate existing favorites from songs table if possible
+                // Migrate existing favorites from tracks table if possible
                 // Note: We need to cast is_favorite (boolean/int) to ensure compatibility
                 db.execSQL("""
                     INSERT OR IGNORE INTO favorites (trackId, isFavorite, timestamp)
@@ -139,4 +138,7 @@ abstract class AudioBookDatabase : RoomDatabase() {
         }
     }
 }
+
+
+
 

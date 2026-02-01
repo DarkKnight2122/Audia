@@ -81,7 +81,8 @@ data class AuthorWithSongs(
 /**
  * Data class for retrieving the primary author of a track efficiently.
  */
-data class PrimaryArtistInfo(
+data class PrimaryAuthorInfo(
     @ColumnInfo(name = "author_id") val authorId: Long,
-    @ColumnInfo(name = "name") val artistName: String
+    @ColumnInfo(name = "name") val authorName: String
 )
+

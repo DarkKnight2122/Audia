@@ -342,15 +342,15 @@ class AudiobookRepositoryImpl @Inject constructor(
 
     // ImplementaciÃƒÂ³n de las nuevas funciones suspend para carga ÃƒÂºnica
     override suspend fun getAllTracksOnce(): List<Track> = withContext(Dispatchers.IO) {
-        audiobookDao.getAllTracksList().map { it.toTrack() }
+        audiobookDao.getAllTracksOnce().map { it.toTrack() }
     }
 
     override suspend fun getAllAlbumsOnce(): List<Book> = withContext(Dispatchers.IO) {
-        audiobookDao.getAllAlbumsList(emptyList(), false).map { it.toAlbum() }
+        audiobookDao.getAllBooksOnce(emptyList(), false).map { it.toAlbum() }
     }
 
     override suspend fun getAllArtistsOnce(): List<Author> = withContext(Dispatchers.IO) {
-        audiobookDao.getAllArtistsListRaw().map { it.toArtist() }
+        audiobookDao.getAllAuthorsRawOnce().map { it.toArtist() }
     }
 
     override suspend fun toggleFavoriteStatus(trackId: String): Boolean = withContext(Dispatchers.IO) {
@@ -553,6 +553,9 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.deleteById(id)
     }
 }
+
+
+
 
 
 
