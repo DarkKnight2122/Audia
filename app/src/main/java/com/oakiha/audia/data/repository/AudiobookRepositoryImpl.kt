@@ -91,7 +91,7 @@ class AudiobookRepositoryImpl @Inject constructor(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getAudioFiles(): Flow<List<Track>> {
+    override fun getTracks(): Flow<List<Track>> {
         // Delegate to the reactive TrackRepository which queries MediaStore directly
         // and observes directory preference changes in real-time.
         return trackRepository.getTracks()
@@ -112,7 +112,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getAlbums(): Flow<List<Book>> {
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             tracks.groupBy { it.bookId }
                 .map { (bookId, tracksInBook) ->
                     val first = tracksInBook.first()
@@ -136,7 +136,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getArtists(): Flow<List<Author>> {
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             tracks.groupBy { it.authorId }
                 .map { (authorId, tracksInAuthor) ->
                     val first = tracksInBook.first()
@@ -151,7 +151,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getTracksForAlbum(bookId: Long): Flow<List<Track>> {
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             tracks.filter { it.bookId == bookId }
                 .sortedBy { it.trackNumber }
         }
@@ -166,7 +166,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     override fun getAuthorsForTrack(trackId: Long): Flow<List<Author>> {
         // Simple implementation assuming single artist per song as per MediaStore
         // For multi-artist, we would parse the separator/delimiter here.
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             val track = tracks.find { it.id == trackId.toString() }
             if (track != null) {
                 listOf(Artist(id = track.authorId, name = track.author, trackCount = 1, imageUrl = null))
@@ -177,7 +177,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getTracksForArtist(authorId: Long): Flow<List<Track>> {
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             tracks.filter { it.authorId == authorId }
                 .sortedBy { it.title }
         }
@@ -299,12 +299,12 @@ class AudiobookRepositoryImpl @Inject constructor(
             if (mockEnabled) {
                 // Mock mode: Use the static genre name for filtering.
                 val genreName = "Mock"//GenreDataSource.getStaticGenres().find { it.id.equals(genreId, ignoreCase = true) }?.name ?: genreId
-                getAudioFiles().map { tracks ->
+                getTracks().map { tracks ->
                     tracks.filter { it.genre.equals(genreName, ignoreCase = true) }
                 }
             } else {
                 // Real mode: Use the genreId directly, which corresponds to the actual genre name from metadata.
-                getAudioFiles().map { tracks ->
+                getTracks().map { tracks ->
                     if (genreId.equals("unknown", ignoreCase = true)) {
                         // Filter for songs with no genre or an empty genre string.
                         tracks.filter { it.genre.isNullOrBlank() }
@@ -371,7 +371,7 @@ class AudiobookRepositoryImpl @Inject constructor(
     }
 
     override fun getGenres(): Flow<List<Genre>> {
-        return getAudioFiles().map { tracks ->
+        return getTracks().map { tracks ->
             val genresMap = tracks.groupBy { track ->
                 track.genre?.trim()?.takeIf { it.isNotBlank() } ?: "Unknown"
             }
@@ -445,7 +445,7 @@ class AudiobookRepositoryImpl @Inject constructor(
 
     override fun getAudiobookFolders(): Flow<List<AudiobookFolder>> {
         return combine(
-            getAudioFiles(),
+            getTracks(),
             userPreferencesRepository.allowedDirectoriesFlow,
             userPreferencesRepository.blockedDirectoriesFlow,
             userPreferencesRepository.isFolderFilterActiveFlow
@@ -553,6 +553,8 @@ class AudiobookRepositoryImpl @Inject constructor(
         audiobookDao.deleteById(id)
     }
 }
+
+
 
 
 

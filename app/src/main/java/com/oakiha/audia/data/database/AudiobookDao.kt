@@ -356,7 +356,7 @@ interface AudiobookDao {
     suspend fun getCrossRefsForTrack(trackId: Long): List<TrackAuthorCrossRef>
 
     @Query("""
-        SELECT authors.id AS author_id, authors.name FROM authors
+        SELECT authors.id AS author_id, authors.name AS authorName FROM authors
         INNER JOIN track_author_cross_ref ON authors.id = track_author_cross_ref.author_id
         WHERE track_author_cross_ref.track_id = :trackId AND track_author_cross_ref.is_primary = 1
         LIMIT 1

@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.app.Application
 import android.net.Uri
@@ -62,7 +62,7 @@ class MashupViewModel @Inject constructor(
 
     private fun loadAllSongs() {
         viewModelScope.launch {
-            audiobookRepository.getAudioFiles().collect { songs ->
+            audiobookRepository.getTracks().collect { songs ->
                 _uiState.update { it.copy(allTracks = songs) }
             }
         }
@@ -136,3 +136,4 @@ class MashupViewModel @Inject constructor(
         progressJob?.cancel()
     }
 }
+

@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
@@ -54,7 +54,7 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val albumDetailsFlow = audiobookRepository.getAlbumById(id)
+                val albumDetailsFlow = audiobookRepository.getBookById(id)
                 val bookTracksFlow = audiobookRepository.getTracksForAlbum(id)
 
                 combine(albumDetailsFlow, bookTracksFlow) { album, songs ->
@@ -103,3 +103,4 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 }
+

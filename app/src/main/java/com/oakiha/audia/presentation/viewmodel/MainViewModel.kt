@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,14 +30,14 @@ class MainViewModel @Inject constructor(
         )
 
     /**
-     * Un Flow que emite `true` si el SyncWorker estÃ¡ encolado o en ejecuciÃ³n.
+     * Un Flow que emite `true` si el SyncWorker estÃƒÂ¡ encolado o en ejecuciÃƒÂ³n.
      * Ideal para mostrar un indicador de carga.
      */
     val isSyncing: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true // Asumimos que podrÃ­a estar sincronizando al inicio
+            initialValue = true // Asumimos que podrÃƒÂ­a estar sincronizando al inicio
         )
 
     /**
@@ -55,7 +55,7 @@ class MainViewModel @Inject constructor(
      * Nos ayuda a saber si es la primera vez que se abre la app.
      */
     val isLibraryEmpty: StateFlow<Boolean> = audiobookRepository
-        .getAudioFiles()
+        .getTracks()
         .map { it.isEmpty() }
         .stateIn(
             scope = viewModelScope,
@@ -64,8 +64,8 @@ class MainViewModel @Inject constructor(
         )
 
     /**
-     * FunciÃ³n para iniciar la sincronizaciÃ³n de la biblioteca de mÃºsica.
-     * Se debe llamar despuÃ©s de que los permisos hayan sido concedidos.
+     * FunciÃƒÂ³n para iniciar la sincronizaciÃƒÂ³n de la biblioteca de mÃƒÂºsica.
+     * Se debe llamar despuÃƒÂ©s de que los permisos hayan sido concedidos.
      */
     fun startSync() {
         LogUtils.i(this, "startSync called")
@@ -78,3 +78,4 @@ class MainViewModel @Inject constructor(
         }
     }
 }
+

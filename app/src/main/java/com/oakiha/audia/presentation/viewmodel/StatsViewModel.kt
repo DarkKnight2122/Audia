@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -99,8 +99,9 @@ class StatsViewModel @Inject constructor(
         cachedSongs?.let { existing ->
             if (existing.isNotEmpty()) return existing
         }
-        val songs = audiobookRepository.getAudioFiles().first()
+        val songs = audiobookRepository.getTracks().first()
         cachedSongs = songs
         return songs
     }
 }
+

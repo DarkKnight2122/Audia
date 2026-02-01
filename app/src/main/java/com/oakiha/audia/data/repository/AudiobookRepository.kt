@@ -18,7 +18,7 @@ interface AudiobookRepository {
      * Obtiene la lista de archivos de audio (canciones) filtrada por directorios permitidos.
      * @return Flow que emite una lista completa de objetos Song.
      */
-    fun getAudioFiles(): Flow<List<Track>> // Existing Flow for reactive updates
+    fun getTracks(): Flow<List<Track>> // Existing Flow for reactive updates
     
     /**
      * Returns paginated songs for efficient display of large libraries.
@@ -196,4 +196,5 @@ interface AudiobookRepository {
 
     suspend fun deleteById(id: Long)
 }
+
 

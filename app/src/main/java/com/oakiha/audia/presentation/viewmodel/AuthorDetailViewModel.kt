@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.content.Context
 import android.util.Log
@@ -69,7 +69,7 @@ class AuthorDetailViewModel @Inject constructor(
             Log.d("AuthorDebug", "loadAuthorData: id=$id")
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val artistDetailsFlow = audiobookRepository.getArtistById(id)
+                val artistDetailsFlow = audiobookRepository.getAuthorById(id)
                 val artistSongsFlow = audiobookRepository.getTracksForArtist(id)
 
                 combine(artistDetailsFlow, artistSongsFlow) { artist, songs ->
@@ -180,3 +180,4 @@ private fun buildBookSections(songs: List<Track>): List<AuthorBookSection> {
 
     return withYearSorted + withoutYearSorted
 }
+

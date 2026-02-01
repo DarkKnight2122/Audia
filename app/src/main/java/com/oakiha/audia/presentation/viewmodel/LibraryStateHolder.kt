@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.os.Trace
 import kotlinx.coroutines.flow.flowOn
@@ -164,7 +164,7 @@ class LibraryStateHolder @Inject constructor(
         
         songsJob = scope?.launch {
             _isLoadingLibrary.value = true
-            audiobookRepository.getAudioFiles().collect { songs ->
+            audiobookRepository.getTracks().collect { songs ->
                  // When the repository emits a new list (triggered by directory changes),
                  // we update our state and re-apply current sorting.
                  _allTracks.value = songs.toImmutableList()
@@ -176,7 +176,7 @@ class LibraryStateHolder @Inject constructor(
         
         albumsJob = scope?.launch {
             _isLoadingCategories.value = true
-            audiobookRepository.getAlbums().collect { albums ->
+            audiobookRepository.getBooks().collect { albums ->
                 _albums.value = albums.toImmutableList()
                 sortAlbums(_currentAlbumSortOption.value, persist = false)
                 _isLoadingCategories.value = false
@@ -185,7 +185,7 @@ class LibraryStateHolder @Inject constructor(
         
         artistsJob = scope?.launch {
             _isLoadingCategories.value = true
-            audiobookRepository.getArtists().collect { artists ->
+            audiobookRepository.getAuthors().collect { artists ->
                 _artists.value = artists.toImmutableList()
                 sortArtists(_currentArtistSortOption.value, persist = false)
                 _isLoadingCategories.value = false
@@ -342,3 +342,5 @@ class LibraryStateHolder @Inject constructor(
 private fun androidx.compose.ui.graphics.Color.toHexString(): String {
     return String.format("#%08X", this.toArgb())
 }
+
+

@@ -1,4 +1,4 @@
-package com.oakiha.audia.presentation.viewmodel
+﻿package com.oakiha.audia.presentation.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -169,7 +169,7 @@ class PlayerViewModel @Inject constructor(
         .flatMapLatest { trackId ->
             val idLong = trackId?.toLongOrNull()
             if (idLong == null) flowOf(emptyList())
-            else audiobookRepository.getArtistsForSong(idLong)
+            else audiobookRepository.getAuthorsForTrack(idLong)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -1189,7 +1189,7 @@ class PlayerViewModel @Inject constructor(
                     _isSheetVisible.value = true
                 } else {
                     Log.w("PlayerViewModel", "Artist '${artist.name}' has no playable songs.")
-                    // podrÃƒÂ­as emitir un evento Toast
+                    // podrÃƒÆ’Ã‚Â­as emitir un evento Toast
                 }
             } catch (e: Exception) {
                 Log.e("PlayerViewModel", "Error playing artist ${artist.name}", e)
@@ -2638,10 +2638,10 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
-     * Busca la letra de la canciÃƒÂ³n actual en el servicio remoto.
+     * Busca la letra de la canciÃƒÆ’Ã‚Â³n actual en el servicio remoto.
      */
     /**
-     * Busca la letra de la canciÃƒÂ³n actual en el servicio remoto.
+     * Busca la letra de la canciÃƒÆ’Ã‚Â³n actual en el servicio remoto.
      */
     fun fetchLyricsForCurrentSong(forcePickResults: Boolean = false) {
         val currentTrack = stablePlayerState.value.currentTrack ?: return
@@ -2675,7 +2675,7 @@ class PlayerViewModel @Inject constructor(
 
     /**
      * Procesa la letra importada de un archivo, la guarda y actualiza la UI.
-     * @param trackId El ID de la canciÃƒÂ³n para la que se importa la letra.
+     * @param trackId El ID de la canciÃƒÆ’Ã‚Â³n para la que se importa la letra.
      * @param lyricsContent El contenido de la letra como String.
      */
     fun importLyricsFromFile(trackId: Long, lyricsContent: String) {
@@ -2691,7 +2691,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     /**
-     * Resetea el estado de la bÃƒÂºsqueda de letras a Idle.
+     * Resetea el estado de la bÃƒÆ’Ã‚Âºsqueda de letras a Idle.
      */
     fun resetLyricsSearchState() {
         lyricsStateHolder.resetSearchState()
@@ -2704,3 +2704,4 @@ class PlayerViewModel @Inject constructor(
         }
     }
 }
+
