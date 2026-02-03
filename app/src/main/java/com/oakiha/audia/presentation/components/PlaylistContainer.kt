@@ -48,8 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import com.oakiha.audia.ui.theme.com.oakiha.audia.ui.theme.SmoothRect
-import com.oakiha.audia.ui.theme.com.oakiha.audia.ui.theme.RotatedPill
+import com.oakiha.audia.ui.theme.SmoothRect
+import com.oakiha.audia.ui.theme.RotatedPill
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -301,7 +301,7 @@ fun PlaylistItem(
     val shape = remember(playlist.coverShapeType, playlist.coverShapeDetail1, playlist.coverShapeDetail2, playlist.coverShapeDetail3) {
         when (playlist.coverShapeType) {
             PlaylistShapeType.Circle.name -> CircleShape
-            PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect.name -> {
+            PlaylistShapeType.SmoothRect.name -> {
                  // Scale radius relative to a 200dp reference (used in Creator)
                  // Current box is 48.dp
                  val referenceSize = 200f
@@ -311,7 +311,7 @@ fun PlaylistItem(
                  val s = (playlist.coverShapeDetail2 ?: 60f).toInt()
                  AbsoluteSmoothCornerShape(r, s, r, s, r, s, r, s)
             }
-            PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill.name -> {
+            PlaylistShapeType.RotatedPill.name -> {
                  // Narrow Pill Shape (Capsule)
                  androidx.compose.foundation.shape.GenericShape { size, _ ->
                      val w = size.width
@@ -338,14 +338,14 @@ fun PlaylistItem(
     // In Creator: `iconMod` counter-rotates. Image didn't have counter-rotation. 
     // Usually "Rotated Shape" implies the frame is rotated. Image handles itself. 
     // Let's keep existing rotation logic but apply the Narrow Pill Shape.
-    val shapeMod = if(playlist.coverShapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill.name) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+    val shapeMod = if(playlist.coverShapeType == PlaylistShapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
     // Counter rotate content?
     // If I rotate the container 45deg, the image is tilted.
     // If I want upright image, I apply counter-rotation to the Image.
     // Let's check Creator behavior: It didn't counter-rotate image.
     // I will stick to Creator behavior for consistency, or fix it if it looks bad.
     // Providing a rotated pill frame usually implies distinct style.
-    val iconMod = if(playlist.coverShapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill.name) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
+    val iconMod = if(playlist.coverShapeType == PlaylistShapeType.RotatedPill.name) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
     
     val scaleMod = if(playlist.coverShapeType == PlaylistShapeType.Star.name) {
           val s = playlist.coverShapeDetail3 ?: 1f

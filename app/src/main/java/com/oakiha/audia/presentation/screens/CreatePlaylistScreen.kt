@@ -376,7 +376,7 @@ private fun CreatePlaylistContent(
                             val shapeTypeForSave = if (selectedTab == 2) selectedShapeType.name else null
                             val (d1, d2, d3, d4) = if (selectedTab == 2) {
                                 when (selectedShapeType) {
-                                    PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
+                                    PlaylistShapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
                                     PlaylistShapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
                                     else -> Quadruple(0f, 0f, 0f, 0f)
                                 }
@@ -444,9 +444,9 @@ private fun CreatePlaylistContent(
                      selectedShapeType = selectedShapeType,
                      onShapeTypeChange = { selectedShapeType = it },
                      smoothRectCornerRadius = smoothRectCornerRadius,
-                     oncom.oakiha.audia.ui.theme.SmoothRectCornerRadiusChange = { smoothRectCornerRadius = it },
+                     onSmoothRectCornerRadiusChange = { smoothRectCornerRadius = it },
                      smoothRectSmoothness = smoothRectSmoothness,
-                     oncom.oakiha.audia.ui.theme.SmoothRectSmoothnessChange = { smoothRectSmoothness = it },
+                     onSmoothRectSmoothnessChange = { smoothRectSmoothness = it },
                      starSides = starSides,
                      onStarSidesChange = { starSides = it },
                      starCurve = starCurve,
@@ -658,7 +658,7 @@ fun EditPlaylistContent(
                         val shapeTypeForSave = if (selectedTab == 2) selectedShapeType.name else null
                         val (d1, d2, d3, d4) = if (selectedTab == 2) {
                             when (selectedShapeType) {
-                                PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
+                                PlaylistShapeType.SmoothRect -> Quadruple(smoothRectCornerRadius, smoothRectSmoothness, 0f, 0f)
                                 PlaylistShapeType.Star -> Quadruple(starCurve.toFloat(), starRotation, starScale, starSides.toFloat())
                                 else -> Quadruple(0f, 0f, 0f, 0f)
                             }
@@ -710,9 +710,9 @@ fun EditPlaylistContent(
              selectedShapeType = selectedShapeType,
              onShapeTypeChange = { selectedShapeType = it },
              smoothRectCornerRadius = smoothRectCornerRadius,
-             oncom.oakiha.audia.ui.theme.SmoothRectCornerRadiusChange = { smoothRectCornerRadius = it },
+             onSmoothRectCornerRadiusChange = { smoothRectCornerRadius = it },
              smoothRectSmoothness = smoothRectSmoothness,
-             oncom.oakiha.audia.ui.theme.SmoothRectSmoothnessChange = { smoothRectSmoothness = it },
+             onSmoothRectSmoothnessChange = { smoothRectSmoothness = it },
              starSides = starSides,
              onStarSidesChange = { starSides = it },
              starCurve = starCurve,
@@ -749,9 +749,9 @@ private fun PlaylistFormContent(
     selectedShapeType: PlaylistShapeType,
     onShapeTypeChange: (PlaylistShapeType) -> Unit,
     smoothRectCornerRadius: Float,
-    oncom.oakiha.audia.ui.theme.SmoothRectCornerRadiusChange: (Float) -> Unit,
+    onSmoothRectCornerRadiusChange: (Float) -> Unit,
     smoothRectSmoothness: Float,
-    oncom.oakiha.audia.ui.theme.SmoothRectSmoothnessChange: (Float) -> Unit,
+    onSmoothRectSmoothnessChange: (Float) -> Unit,
     starSides: Int,
     onStarSidesChange: (Int) -> Unit,
     starCurve: Double,
@@ -893,7 +893,7 @@ private fun PlaylistFormContent(
                          ) { currentShapeType ->
                              val currentShape: Shape = when(currentShapeType) {
                                  PlaylistShapeType.Circle -> CircleShape
-                                 PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect -> AbsoluteSmoothCornerShape(
+                                 PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(
                                      cornerRadiusTL = smoothRectCornerRadius.dp,
                                      smoothnessAsPercentTR = smoothRectSmoothness.toInt(),
                                      cornerRadiusTR = smoothRectCornerRadius.dp,
@@ -903,7 +903,7 @@ private fun PlaylistFormContent(
                                      cornerRadiusBL = smoothRectCornerRadius.dp,
                                      smoothnessAsPercentBL = smoothRectSmoothness.toInt(),
                                  )
-                                 PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill -> {
+                                 PlaylistShapeType.RotatedPill -> {
                                      androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
                                          val h = size.height
@@ -919,8 +919,8 @@ private fun PlaylistFormContent(
                                  )
                              }
                              
-                             val shapeMod = if(currentShapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
-                             val iconMod = if(currentShapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
+                             val shapeMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+                             val iconMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = -45f) else Modifier
                              val scaleMod = if(currentShapeType == PlaylistShapeType.Star) Modifier.graphicsLayer(scaleX = starScale, scaleY = starScale) else Modifier
 
                              Box(
@@ -1113,8 +1113,8 @@ private fun PlaylistFormContent(
                                  val isSelected = selectedShapeType == shapeType
                                  val previewShape = when(shapeType) {
                                      PlaylistShapeType.Circle -> CircleShape
-                                     PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect -> AbsoluteSmoothCornerShape(12.dp, 60, 12.dp, 60, 12.dp, 60, 12.dp, 60)
-                                     PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                     PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(12.dp, 60, 12.dp, 60, 12.dp, 60, 12.dp, 60)
+                                     PlaylistShapeType.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
                                          val h = size.height
                                          val pillW = w * 0.75f
@@ -1124,7 +1124,7 @@ private fun PlaylistFormContent(
                                      PlaylistShapeType.Star -> RoundedStarShape(5, 0.15, 0f)
                                  }
 
-                                 val rotationM = if(shapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
+                                 val rotationM = if(shapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
                                  val cornerRadius by animateDpAsState(targetValue = if (isSelected) 12.dp else 24.dp, label = "CornerRadius")
 
                                  Row(modifier = Modifier.padding(2.dp)) {
@@ -1153,14 +1153,14 @@ private fun PlaylistFormContent(
                      }
                      
                      // Params
-                     AnimatedVisibility(visible = selectedShapeType == PlaylistShapeType.com.oakiha.audia.ui.theme.SmoothRect) {
+                     AnimatedVisibility(visible = selectedShapeType == PlaylistShapeType.SmoothRect) {
                          Column(
                              modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 8.dp),
                              verticalArrangement = Arrangement.spacedBy(16.dp)
                          ) {
                              Text("Shape parameters", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                             ShapeParameterCard("Corner Radius", smoothRectCornerRadius, 0f..50f, oncom.oakiha.audia.ui.theme.SmoothRectCornerRadiusChange, { it.toInt().toString() })
-                             ShapeParameterCard("Smoothness", smoothRectSmoothness, 0f..100f, oncom.oakiha.audia.ui.theme.SmoothRectSmoothnessChange, { "${it.toInt()}%" })
+                             ShapeParameterCard("Corner Radius", smoothRectCornerRadius, 0f..50f, onSmoothRectCornerRadiusChange, { it.toInt().toString() })
+                             ShapeParameterCard("Smoothness", smoothRectSmoothness, 0f..100f, onSmoothRectSmoothnessChange, { "${it.toInt()}%" })
                          }
                      }
                      

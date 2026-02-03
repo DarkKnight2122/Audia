@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
-object com.oakiha.audia.ui.theme.SmoothRect : Shape {
+object SmoothRect : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -28,7 +28,7 @@ object com.oakiha.audia.ui.theme.SmoothRect : Shape {
     }
 }
 
-object com.oakiha.audia.ui.theme.RotatedPill : Shape {
+object RotatedPill : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
