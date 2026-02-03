@@ -299,13 +299,12 @@ class MediaStoreTrackRepository @Inject constructor(
 
                 while (cursor.moveToNext()) {
                     val path = cursor.getString(pathCol)
-                    if (isFilterActive) { {
+                    if (isFilterActive) {
                         val lastSlashIndex = path.lastIndexOf('/')
                         val parentPath = if (lastSlashIndex != -1) path.substring(0, lastSlashIndex) else ""
                         if (resolver.isBlocked(parentPath)) {
                             continue
                         }
-                    }
                     }
                     ids.add(cursor.getLong(idCol))
                 }

@@ -822,7 +822,7 @@ constructor(
                     val authorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
                     val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
                     val bookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                    val bookAuthorCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                    val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
                     val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                     val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
@@ -864,8 +864,8 @@ constructor(
                                                         .normalizeMetadataTextOrEmpty()
                                                         .ifEmpty { "Unknown Book" },
                                         bookAuthor =
-                                                if (bookAuthorCol >= 0)
-                                                        cursor.getString(bookAuthorCol)
+                                                if (bookArtistCol >= 0)
+                                                        cursor.getString(bookArtistCol)
                                                                 ?.normalizeMetadataTextOrEmpty()
                                                                 ?.takeIf { it.isNotBlank() }
                                                 else null,
