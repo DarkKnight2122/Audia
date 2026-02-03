@@ -62,6 +62,7 @@ fun HomeScreen(
     }
     val statsViewModel: StatsViewModel = hiltViewModel()
     val allTracks by playerViewModel.allTracksFlow.collectAsState(initial = emptyList())
+    val appThemeStyle by settingsViewModel.appThemeStyle.collectAsState()
 
     ReportDrawnWhen {
         allTracks.isNotEmpty() || isBenchmarkMode

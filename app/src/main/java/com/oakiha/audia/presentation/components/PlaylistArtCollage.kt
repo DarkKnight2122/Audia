@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.size.Size
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Track

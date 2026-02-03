@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.size.Size
 import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.ui.theme.GoogleSansRounded

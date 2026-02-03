@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.worker.SyncProgress
 import com.oakiha.audia.ui.theme.GoogleSansRounded

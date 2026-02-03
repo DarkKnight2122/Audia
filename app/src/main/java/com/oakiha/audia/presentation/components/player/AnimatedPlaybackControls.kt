@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oakiha.audia.R
 import com.oakiha.audia.presentation.components.LocalMaterialTheme
 import kotlinx.coroutines.delay

@@ -60,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oakiha.audia.data.model.Book
 import com.oakiha.audia.data.model.Author
@@ -767,7 +768,7 @@ fun SearchResultsList(
                                     }
                                 }
                                 SearchResultAuthorItem(
-                                    authorName = item.author,
+                                    author = item.author,
                                     onPlayClick = onPlayClick,
                                     onOpenClick = onOpenClick
                                 )

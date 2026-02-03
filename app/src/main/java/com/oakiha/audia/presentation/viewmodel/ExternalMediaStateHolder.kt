@@ -229,7 +229,7 @@ class ExternalMediaStateHolder @Inject constructor(
         val track = Track(
             id = trackId, 
             title = finalTitle,
-            authorName = finalArtist,
+            author = finalArtist,
             authorId = -1, // No DB ID
             book = finalAlbum,
             bookId = -1, // No DB ID

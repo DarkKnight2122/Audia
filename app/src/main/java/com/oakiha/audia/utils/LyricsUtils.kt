@@ -33,6 +33,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oakiha.audia.data.model.Lyrics
 import com.oakiha.audia.data.model.SyncedLine
 import com.oakiha.audia.data.model.SyncedWord

@@ -172,12 +172,12 @@ fun AuthorDetailScreen(
     ) {
         Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
             when {
-                uiState.isLoading && uiState.authorName == null -> {
+                uiState.isLoading && uiState.author == null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ContainedLoadingIndicator()
                     }
                 }
-                uiState.error != null && uiState.authorName == null -> {
+                uiState.error != null && uiState.author == null -> {
                     Box(
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Alignment.Center
@@ -254,7 +254,7 @@ fun AuthorDetailScreen(
 
                     }
 
-                    CustomCollapsingTopBar(authorName = author,
+                    CustomCollapsingTopBar(author = authorName,
                         songsCount = tracks.size,
                         collapseFraction = collapseFraction,
                         headerHeight = currentTopBarHeightDp,

@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Lyrics
 import androidx.compose.material.icons.rounded.Tune

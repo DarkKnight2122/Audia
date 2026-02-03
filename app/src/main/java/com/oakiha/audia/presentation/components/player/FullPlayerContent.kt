@@ -108,7 +108,6 @@ import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
-import com.oakiha.audia.data.preferences.AppThemeStyle
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.presentation.components.AlbumCarouselSection
 import com.oakiha.audia.presentation.components.AutoScrollingTextOnDemand

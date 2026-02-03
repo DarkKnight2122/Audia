@@ -58,6 +58,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oakiha.audia.R
 import java.net.URLEncoder
 import timber.log.Timber
@@ -154,7 +155,7 @@ private fun EditSongContent(
 
     LaunchedEffect(track) {
         title = track.title
-        authorName = track.displayAuthor
+        author = track.displayAuthor
         book = track.book
         genre = track.genre ?: ""
         lyrics = track.lyrics ?: ""
@@ -187,7 +188,7 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        authorName = metadata.author ?: author
+                        author = metadata.author ?: author
                         book = metadata.book ?: book
                         genre = metadata.genre ?: genre
                     }.onFailure { error ->
@@ -411,7 +412,7 @@ private fun EditSongContent(
                         value = author,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { authorName = it },
+                        onValueChange = { author = it },
                         placeholder = { Text("Author") },
                         leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Author Icon") },
                         modifier = Modifier.fillMaxWidth(),

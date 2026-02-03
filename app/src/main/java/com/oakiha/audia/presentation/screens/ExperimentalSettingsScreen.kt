@@ -61,6 +61,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
@@ -374,7 +375,7 @@ fun ExperimentalSettingsScreen(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
-                     androidx.compose.material3.androidx.compose.material3.HorizontalDivider(
+                     androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier
                             .weight(3f)
                             .padding(start = 8.dp),
