@@ -168,6 +168,15 @@ interface AudiobookDao {
     @Query("SELECT * FROM books WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
     fun searchBooks(query: String): Flow<List<BookEntity>>
 
+    @Query("""
+        SELECT DISTINCT books.* FROM books
+        INNER JOIN tracks ON books.id = tracks.book_id
+        WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
+        AND books.title LIKE '%' || :query || '%'
+        ORDER BY books.title ASC
+    """)
+    fun searchBooks(query: String, allowedParentDirs: List<String>, applyDirectoryFilter: Boolean): Flow<List<BookEntity>>
+
     @Query("SELECT COUNT(*) FROM books")
     fun getBookCount(): Flow<Int>
 
@@ -199,6 +208,15 @@ interface AudiobookDao {
 
     @Query("SELECT * FROM authors WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchAuthors(query: String): Flow<List<AuthorEntity>>
+
+    @Query("""
+        SELECT DISTINCT authors.* FROM authors
+        INNER JOIN tracks ON authors.id = tracks.author_id
+        WHERE (:applyDirectoryFilter = 0 OR tracks.parent_directory_path IN (:allowedParentDirs))
+        AND authors.name LIKE '%' || :query || '%'
+        ORDER BY authors.name ASC
+    """)
+    fun searchAuthors(query: String, allowedParentDirs: List<String>, applyDirectoryFilter: Boolean): Flow<List<AuthorEntity>>
 
     @Query("SELECT COUNT(*) FROM authors")
     fun getAuthorCount(): Flow<Int>

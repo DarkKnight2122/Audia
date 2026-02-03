@@ -126,12 +126,12 @@ class PlaybackStatsRepository @Inject constructor(
         val totalPlayCount: Int,
         val uniqueSongs: Int,
         val averageDailyDurationMs: Long,
-        val tracks: List<SongPlaybackSummary> = emptyList(),
-        val topSongs: List<SongPlaybackSummary> = emptyList(),
+        val tracks: List<TrackPlaybackSummary> = emptyList(),
+        val topTracks: List<TrackPlaybackSummary> = emptyList(),
         val topGenres: List<GenrePlaybackSummary> = emptyList(),
         val timeline: List<TimelineEntry>,
-        val topArtists: List<ArtistPlaybackSummary>,
-        val topAlbums: List<AlbumPlaybackSummary>,
+        val topAuthors: List<AuthorPlaybackSummary>,
+        val topBooks: List<BookPlaybackSummary>,
         val activeDays: Int,
         val longestStreakDays: Int,
         val totalSessions: Int,
@@ -235,7 +235,7 @@ class PlaybackStatsRepository @Inject constructor(
                 val title = track.title.takeIf { it.isNotBlank() }
                     ?: track.path.substringAfterLast('/').ifBlank { return@mapNotNull null }
                 val author = track.displayAuthor.takeIf { it.isNotBlank() } ?: "Unknown Author"
-                SongPlaybackSummary(
+                TrackPlaybackSummary(
                     trackId = trackId,
                     title = title,
                     author = author,
@@ -245,10 +245,10 @@ class PlaybackStatsRepository @Inject constructor(
                 )
             }
             .sortedWith(
-                compareByDescending<SongPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<TrackPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
-        val topSongs = allTracks.take(5)
+        val topTracks = allTracks.take(5)
 
         val topGenres = segmentsBySong.entries
             .groupBy { (trackId, _) ->
@@ -323,14 +323,14 @@ class PlaybackStatsRepository @Inject constructor(
         )
         val timelineEntries = accumulateTimelineEntries(timelineBuckets, overallSpans)
 
-        val topArtists = segmentsBySong.entries
+        val topAuthors = segmentsBySong.entries
             .groupBy { (trackId, _) ->
                 songMap[trackId]?.author?.takeIf { it.isNotBlank() } ?: "Unknown Author"
             }
             .map { (author, groupedSongs) ->
                 val flattened = groupedSongs.flatMap { it.value }
                 val uniqueSongCount = groupedSongs.size
-                ArtistPlaybackSummary(
+                AuthorPlaybackSummary(
                     author = author,
                     totalDurationMs = flattened.sumOf { it.durationMs },
                     playCount = flattened.size,
@@ -338,12 +338,12 @@ class PlaybackStatsRepository @Inject constructor(
                 )
             }
             .sortedWith(
-                compareByDescending<ArtistPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<AuthorPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
             .take(5)
 
-        val topAlbums = segmentsBySong.entries
+        val topBooks = segmentsBySong.entries
             .groupBy { (trackId, _) ->
                 val track = songMap[trackId]
                 track?.book?.takeIf { it.isNotBlank() } ?: "Unknown Book"
@@ -355,7 +355,7 @@ class PlaybackStatsRepository @Inject constructor(
                     .asSequence()
                     .mapNotNull { songMap[it.key] }
                     .firstOrNull()
-                AlbumPlaybackSummary(
+                BookPlaybackSummary(
                     book = book,
                     bookArtUri = firstSong?.bookArtUriString,
                     totalDurationMs = flattened.sumOf { it.durationMs },
@@ -364,7 +364,7 @@ class PlaybackStatsRepository @Inject constructor(
                 )
             }
             .sortedWith(
-                compareByDescending<AlbumPlaybackSummary> { it.totalDurationMs }
+                compareByDescending<BookPlaybackSummary> { it.totalDurationMs }
                     .thenByDescending { it.playCount }
             )
             .take(5)
@@ -398,11 +398,11 @@ class PlaybackStatsRepository @Inject constructor(
             uniqueSongs = uniqueSongs,
             averageDailyDurationMs = averageDailyDuration,
             tracks = allTracks,
-            topSongs = topSongs,
+            topTracks = topTracks,
             timeline = timelineEntries,
             topGenres = topGenres,
-            topArtists = topArtists,
-            topAlbums = topAlbums,
+            topAuthors = topAuthors,
+            topBooks = topBooks,
             activeDays = activeDays,
             longestStreakDays = longestStreak,
             totalSessions = totalSessions,

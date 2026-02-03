@@ -40,10 +40,10 @@ import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 data class TrackEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "author_name") val artistName: String, // Display string (combined or primary)
+    @ColumnInfo(name = "author_name") val authorName: String, // Display string (combined or primary)
     @ColumnInfo(name = "author_id") val authorId: Long, // Primary artist ID for backward compatibility
-    @ColumnInfo(name = "book_author") val bookArtist: String? = null, // Album artist from metadata
-    @ColumnInfo(name = "book_name") val albumName: String,
+    @ColumnInfo(name = "book_author") val bookAuthor: String? = null, // Album artist from metadata
+    @ColumnInfo(name = "book_name") val bookName: String,
     @ColumnInfo(name = "book_id") val bookId: Long, // index = true eliminado
     @ColumnInfo(name = "content_uri_string") val contentUriString: String,
     @ColumnInfo(name = "book_art_uri_string") val bookArtUriString: String?,
@@ -65,12 +65,12 @@ fun TrackEntity.toTrack(): Track {
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        author = this.artistName.normalizeMetadataTextOrEmpty(),
+        author = this.authorName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         authors = emptyList(), // Will be populated from junction table when needed
-        book = this.albumName.normalizeMetadataTextOrEmpty(),
+        book = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookAuthor = this.bookArtist?.normalizeMetadataText(),
+        bookAuthor = this.bookAuthor?.normalizeMetadataText(),
         path = this.filePath, // Map the file path
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -104,12 +104,12 @@ fun TrackEntity.toTrackWithAuthorRefs(artists: List<AuthorEntity>, crossRefs: Li
     return Track(
         id = this.id.toString(),
         title = this.title.normalizeMetadataTextOrEmpty(),
-        author = this.artistName.normalizeMetadataTextOrEmpty(),
+        author = this.authorName.normalizeMetadataTextOrEmpty(),
         authorId = this.authorId,
         authors = artistRefs,
-        book = this.albumName.normalizeMetadataTextOrEmpty(),
+        book = this.bookName.normalizeMetadataTextOrEmpty(),
         bookId = this.bookId,
-        bookAuthor = this.bookArtist?.normalizeMetadataText(),
+        bookAuthor = this.bookAuthor?.normalizeMetadataText(),
         path = this.filePath,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -137,10 +137,10 @@ fun Track.toEntity(filePathFromMediaStore: String, parentDirFromMediaStore: Stri
     return TrackEntity(
         id = this.id.toLong(), // Asumiendo que el ID del modelo Song puede convertirse a Long
         title = this.title,
-        artistName = this.author,
+        authorName = this.author,
         authorId = this.authorId,
-        bookArtist = this.bookAuthor,
-        albumName = this.book,
+        bookAuthor = this.bookAuthor,
+        bookName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,
@@ -163,10 +163,10 @@ fun Track.toEntityWithoutPaths(): TrackEntity {
     return TrackEntity(
         id = this.id.toLong(),
         title = this.title,
-        artistName = this.author,
+        authorName = this.author,
         authorId = this.authorId,
-        bookArtist = this.bookAuthor,
-        albumName = this.book,
+        bookAuthor = this.bookAuthor,
+        bookName = this.book,
         bookId = this.bookId,
         contentUriString = this.contentUriString,
         bookArtUriString = this.bookArtUriString,

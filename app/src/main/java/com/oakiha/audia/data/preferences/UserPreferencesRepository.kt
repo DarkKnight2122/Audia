@@ -321,7 +321,7 @@ constructor(
 
     // ===== Multi-Author Settings =====
 
-    val artistDelimitersFlow: Flow<List<String>> =
+    val authorDelimitersFlow: Flow<List<String>> =
             dataStore.data.map { preferences ->
                 val stored = preferences[PreferencesKeys.ARTIST_DELIMITERS]
                 if (stored != null) {
@@ -365,7 +365,7 @@ constructor(
         }
     }
 
-    val artistSettingsRescanRequiredFlow: Flow<Boolean> =
+    val authorSettingsRescanRequiredFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
                 preferences[PreferencesKeys.ARTIST_SETTINGS_RESCAN_REQUIRED] ?: false
             }
