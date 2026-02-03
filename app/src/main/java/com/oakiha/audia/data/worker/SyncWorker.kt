@@ -970,7 +970,7 @@ constructor(
                 try {
                     AudioMetadataReader.read(file)?.let { meta ->
                         if (!meta.title.isNullOrBlank()) title = meta.title
-                        if (!meta.author.isNullOrBlank()) author = meta.authorName
+                        if (!meta.author.isNullOrBlank()) author = meta.author
                         if (!meta.book.isNullOrBlank()) book = meta.book
                         if (!meta.genre.isNullOrBlank()) genre = meta.genre
                         if (meta.trackNumber != null) trackNumber = meta.trackNumber

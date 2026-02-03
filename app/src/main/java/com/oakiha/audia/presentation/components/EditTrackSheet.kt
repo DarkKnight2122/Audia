@@ -154,7 +154,7 @@ private fun EditSongContent(
 
     LaunchedEffect(track) {
         title = track.title
-        author = track.displayAuthor
+        authorName = track.displayAuthor
         book = track.book
         genre = track.genre ?: ""
         lyrics = track.lyrics ?: ""
@@ -187,7 +187,7 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        author = metadata.authorName ?: author
+                        authorName = metadata.author ?: author
                         book = metadata.book ?: book
                         genre = metadata.genre ?: genre
                     }.onFailure { error ->
@@ -411,7 +411,7 @@ private fun EditSongContent(
                         value = author,
                         colors = textFieldColors,
                         shape = textFieldShape,
-                        onValueChange = { author = it },
+                        onValueChange = { authorName = it },
                         placeholder = { Text("Author") },
                         leadingIcon = { Icon(Icons.Rounded.Person, tint = MaterialTheme.colorScheme.primary, contentDescription = "Author Icon") },
                         modifier = Modifier.fillMaxWidth(),

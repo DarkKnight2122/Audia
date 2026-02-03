@@ -88,7 +88,7 @@ class GenreDetailViewModel @Inject constructor(
 
     private fun groupSongs(tracks: List<Track>): List<GroupedTrackListItem> {
         val newGroupedList = mutableListOf<GroupedTrackListItem>()
-        tracks.groupBy { it.authorName }
+        tracks.groupBy { it.author }
             .forEach { (authorName, artistSongs) ->
                 newGroupedList.add(GroupedTrackListItem.AuthorHeader(authorName))
                 artistSongs.groupBy { it.book }

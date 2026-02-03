@@ -1059,7 +1059,7 @@ private fun CategoryMetricsSection(
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
                         if (it.author.isNotBlank()) {
-                            add(it.authorName)
+                            add(it.author)
                         }
                     }
                     CategoryMetricEntry(
@@ -1386,7 +1386,7 @@ private fun TopArtistsCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                ArtistAvatar(name = artistSummary.authorName)
+                                ArtistAvatar(name = artistSummary.author)
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "${index + 1}. ${artistSummary.author}",

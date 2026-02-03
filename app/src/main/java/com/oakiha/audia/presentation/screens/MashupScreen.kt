@@ -211,7 +211,7 @@ private fun DeckUi(
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(deckState.track?.title ?: "No track loaded", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(deckState.track?.authorName ?: "...", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(deckState.track?.author ?: "...", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Spacer(Modifier.height(8.dp))
                         AudioWaveform(
                             amplitudes = deckState.stemWaveforms["main"] ?: emptyList(),

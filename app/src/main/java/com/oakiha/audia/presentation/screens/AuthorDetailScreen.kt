@@ -189,8 +189,8 @@ fun AuthorDetailScreen(
                         )
                     }
                 }
-                uiState.authorName != null -> {
-                    val author = uiState.author!!
+                uiState.author != null -> {
+                    val authorName = uiState.author!!
                     val tracks = uiState.tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
 
@@ -254,7 +254,7 @@ fun AuthorDetailScreen(
 
                     }
 
-                    CustomCollapsingTopBar(author = author,
+                    CustomCollapsingTopBar(authorName = author,
                         songsCount = tracks.size,
                         collapseFraction = collapseFraction,
                         headerHeight = currentTopBarHeightDp,

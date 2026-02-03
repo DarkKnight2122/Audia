@@ -869,7 +869,7 @@ fun PlaylistDetailScreen(
 
     if (isSortSheetVisible) {
         // Check if playlist is in Manual mode (which corresponds to Default Order)
-        val isManualMode = uiState.PlaylistSongsOrderMode is PlaylistSongsOrderMode.Manual
+        val isManualMode = uiState.playlistTracksOrderMode is PlaylistSongsOrderMode.Manual
         val rawOption = uiState.currentPlaylistTracksSortOption
         // If in Manual mode, show SongDefaultOrder as selected; otherwise use the stored sort option
         val currentSortOption = if (isManualMode) {

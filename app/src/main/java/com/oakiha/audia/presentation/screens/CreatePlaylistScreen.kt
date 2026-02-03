@@ -917,6 +917,7 @@ private fun PlaylistFormContent(
                                      curve = starCurve,
                                      rotation = starRotation
                                  )
+                                 else -> CircleShape
                              }
                              
                              val shapeMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
@@ -1122,6 +1123,7 @@ private fun PlaylistFormContent(
                                          addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                                      }
                                      PlaylistShapeType.Star -> RoundedStarShape(5, 0.15, 0f)
+                                     else -> CircleShape
                                  }
 
                                  val rotationM = if(shapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier

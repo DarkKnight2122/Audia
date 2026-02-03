@@ -28,5 +28,7 @@ enum class PlaylistShapeType {
     Squircle,
     Star,
     Flower,
+    SmoothRect,
+    RotatedPill,
     Custom
 }

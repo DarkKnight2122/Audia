@@ -1,5 +1,6 @@
 ﻿package com.oakiha.audia.presentation.components.player
 import com.oakiha.audia.data.model.AppThemeStyle
+import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -191,6 +192,7 @@ fun FullPlayerContent(
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
     
+    val appThemeStyle by settingsViewModel.appThemeStyle.collectAsState()
     // REMOVED: val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     
     val lyricsSearchUiState by playerViewModel.lyricsSearchUiState.collectAsState()
