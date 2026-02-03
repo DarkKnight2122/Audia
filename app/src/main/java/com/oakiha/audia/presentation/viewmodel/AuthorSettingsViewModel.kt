@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AuthorSettingsUiState(
-    val artistDelimiters: List<String> = UserPreferencesRepository.DEFAULT_ARTIST_DELIMITERS,
+    val authorDelimiters: List<String> = UserPreferencesRepository.DEFAULT_ARTIST_DELIMITERS,
     val groupByAlbumArtist: Boolean = false,
     val rescanRequired: Boolean = false,
     val isResyncing: Boolean = false
@@ -40,7 +40,7 @@ class AuthorSettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             userPreferencesRepository.authorDelimitersFlow.collect { delimiters ->
-                _uiState.update { it.copy(artistDelimiters = delimiters) }
+                _uiState.update { it.copy(authorDelimiters = delimiters) }
             }
         }
 

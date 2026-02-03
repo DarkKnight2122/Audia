@@ -119,7 +119,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                     Book(
                         id = bookId,
                         title = first.book,
-                        author = first.author, // Or bookArtist if available
+                        author = first.author, // Or bookAuthor if available
                         bookArtUriString = first.bookArtUriString,
                         trackCount = tracksInBook.size,
                         year = first.year

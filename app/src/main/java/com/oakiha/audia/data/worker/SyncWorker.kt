@@ -79,7 +79,7 @@ constructor(
                         .i("Starting MediaStore synchronization (Mode: $syncMode, ForceMetadata: $forceMetadata)...")
                     val startTime = System.currentTimeMillis()
 
-                    val artistDelimiters = userPreferencesRepository.authorDelimitersFlow.first()
+                    val authorDelimiters = userPreferencesRepository.authorDelimitersFlow.first()
                     val groupByAlbumArtist =
                             userPreferencesRepository.groupByAlbumArtistFlow.first()
                     val rescanRequired =
@@ -93,7 +93,7 @@ constructor(
                     var lastSyncTimestamp = userPreferencesRepository.getLastSyncTimestamp()
 
                     Timber.tag(TAG)
-                        .d("Author parsing delimiters: $artistDelimiters, groupByAlbumArtist: $groupByAlbumArtist, rescanRequired: $rescanRequired")
+                        .d("Author parsing delimiters: $authorDelimiters, groupByAlbumArtist: $groupByAlbumArtist, rescanRequired: $rescanRequired")
 
                     // --- MEDIA SCAN PHASE ---
                     // For INCREMENTAL or FULL sync, trigger a media scan to detect new files
@@ -223,7 +223,7 @@ constructor(
                                                     val mediaStoreArtists =
                                                             mediaStoreSong.authorName
                                                                     .splitArtistsByDelimiters(
-                                                                            artistDelimiters
+                                                                            authorDelimiters
                                                                     )
                                                     val mediaStorePrimaryArtist =
                                                             mediaStoreArtists.firstOrNull()?.trim()
@@ -281,7 +281,7 @@ constructor(
                         val (correctedSongs, books, authors, crossRefs) =
                                 preProcessAndDeduplicateWithMultiArtist(
                                         tracks = songsToInsert,
-                                        artistDelimiters = artistDelimiters,
+                                        authorDelimiters = authorDelimiters,
                                         groupByAlbumArtist = groupByAlbumArtist,
                                         existingArtistImageUrls = existingArtistImageUrls,
                                         existingArtistIdMap = existingArtistIdMap,
@@ -305,7 +305,7 @@ constructor(
                                     books = books,
                                     authors = authors,
                                     crossRefs = crossRefs,
-                                    deletedSongIds = emptyList() // Already handled
+                                    deletedTrackIds = emptyList() // Already handled
                             )
                         }
 
@@ -479,7 +479,7 @@ constructor(
      */
     private fun preProcessAndDeduplicateWithMultiArtist(
             tracks: List<TrackEntity>,
-            artistDelimiters: List<String>,
+            authorDelimiters: List<String>,
             groupByAlbumArtist: Boolean,
             existingArtistImageUrls: Map<Long, String?>,
             existingArtistIdMap: MutableMap<String, Long>,
@@ -487,7 +487,7 @@ constructor(
     ): MultiArtistProcessResult {
         
         val nextArtistId = AtomicLong(initialMaxArtistId + 1)
-        val artistNameToId = existingArtistIdMap // Re-use the map passed in
+        val authorNameToId = existingArtistIdMap // Re-use the map passed in
         
         val allCrossRefs = mutableListOf<TrackAuthorCrossRef>()
         val artistTrackCounts = mutableMapOf<Long, Int>()
@@ -500,27 +500,27 @@ constructor(
             val songArtistNameTrimmed = rawArtistName.trim()
             val artistsForSong =
                     artistSplitCache.getOrPut(rawArtistName) {
-                        rawArtistName.splitArtistsByDelimiters(artistDelimiters)
+                        rawArtistName.splitArtistsByDelimiters(authorDelimiters)
                     }
 
             artistsForSong.forEach { authorName ->
                 val normalizedName = authorName.trim()
-                if (normalizedName.isNotEmpty() && !artistNameToId.containsKey(normalizedName)) {
+                if (normalizedName.isNotEmpty() && !authorNameToId.containsKey(normalizedName)) {
                      // Check if it's the track's primary author and we want to preserve that ID if possible?
                      // Actually, just generate new ID if not found in map.
                      val id = nextArtistId.getAndIncrement()
-                     artistNameToId[normalizedName] = id
+                     authorNameToId[normalizedName] = id
                 }
             }
             
             val primaryArtistName =
                     artistsForSong.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
                             ?: songArtistNameTrimmed
-            val primaryArtistId = artistNameToId[primaryArtistName] ?: track.authorId
+            val primaryArtistId = authorNameToId[primaryArtistName] ?: track.authorId
 
             artistsForSong.forEachIndexed { index, authorName ->
                 val normalizedName = authorName.trim()
-                val authorId = artistNameToId[normalizedName]
+                val authorId = authorNameToId[normalizedName]
                 if (authorId != null) {
                     val isPrimary = (index == 0) // First author is primary
                     allCrossRefs.add(
@@ -559,7 +559,7 @@ constructor(
         }
 
         // Build Entities
-        val artistEntities = artistNameToId.map { (name, id) ->
+        val artistEntities = authorNameToId.map { (name, id) ->
             val count = artistTrackCounts[id] ?: 0
             AuthorEntity(
                 id = id,
@@ -578,7 +578,7 @@ constructor(
                  ?: firstSong.authorName
                  
              // Determine Book Author ID (best effort lookup)
-             val determinedAlbumArtistId = artistNameToId[determinedAlbumArtist] ?: 0L
+             val determinedAlbumArtistId = authorNameToId[determinedAlbumArtist] ?: 0L
 
              BookEntity(
                  id = catAlbumId,
@@ -750,7 +750,7 @@ constructor(
             val title: String,
             val author: String,
             val book: String,
-            val bookArtist: String?,
+            val bookAuthor: String?,
             val duration: Long,
             val trackNumber: Int,
             val year: Int,
@@ -822,7 +822,7 @@ constructor(
                     val authorIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID)
                     val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
                     val bookIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
-                    val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                    val bookAuthorCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
                     val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                     val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
@@ -863,9 +863,9 @@ constructor(
                                                 cursor.getString(albumCol)
                                                         .normalizeMetadataTextOrEmpty()
                                                         .ifEmpty { "Unknown Book" },
-                                        bookArtist =
-                                                if (bookArtistCol >= 0)
-                                                        cursor.getString(bookArtistCol)
+                                        bookAuthor =
+                                                if (bookAuthorCol >= 0)
+                                                        cursor.getString(bookAuthorCol)
                                                                 ?.normalizeMetadataTextOrEmpty()
                                                                 ?.takeIf { it.isNotBlank() }
                                                 else null,
@@ -997,7 +997,7 @@ constructor(
                 title = title,
                 authorName = author,
                 authorId = raw.authorId,
-                bookArtist = raw.bookAuthor,
+                bookAuthor = raw.bookAuthor,
                 bookName = book,
                 bookId = raw.bookId,
                 contentUriString = contentUriString,

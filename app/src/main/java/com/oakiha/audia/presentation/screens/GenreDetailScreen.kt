@@ -290,7 +290,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                 currentBookArt = null
             }
 
-            is GroupedTrackListItem.AlbumHeader -> {
+            is GroupedTrackListItem.BookHeader -> {
                 // Save previous book if exists
                 if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                     currentAlbums.add(
@@ -304,7 +304,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                 currentAlbumSongs.clear()
             }
 
-            is GroupedTrackListItem.SongItem -> {
+            is GroupedTrackListItem.TrackItem -> {
                 currentAlbumSongs.add(item.track)
             }
         }

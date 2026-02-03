@@ -357,7 +357,7 @@ class PlayerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            lyricsStateHolder.trackUpdates.collect { update: Pair<com.oakiha.audia.data.model.Track, com.oakiha.audia.data.model.Lyrics?> ->
+            lyricsStateHolder.songUpdates.collect { update: Pair<com.oakiha.audia.data.model.Track, com.oakiha.audia.data.model.Lyrics?> ->
                 val track = update.first
                 val lyrics = update.second
                 // Check if this update is relevant to the currently playing track OR the selected track

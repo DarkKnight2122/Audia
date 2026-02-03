@@ -113,7 +113,7 @@ class MediaStorePagingSource(
                 val yearCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
                 val dateModifiedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-                val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
+                val bookAuthorCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
@@ -128,7 +128,7 @@ class MediaStorePagingSource(
                         authors = emptyList(),
                         book = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
                         bookId = bookId,
-                        bookAuthor = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
+                        bookAuthor = if (bookAuthorCol != -1) cursor.getString(bookAuthorCol).normalizeMetadataText() else null,
                         path = path,
                         contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString(),
                         bookArtUriString = ContentUris.withAppendedId(

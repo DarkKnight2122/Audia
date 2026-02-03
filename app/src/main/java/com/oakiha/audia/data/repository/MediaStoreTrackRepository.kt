@@ -118,7 +118,7 @@ class MediaStoreTrackRepository @Inject constructor(
                 val yearCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
                 val dateModifiedCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
-                val bookArtistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST) // Can be -1
+                val bookAuthorCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ARTIST) // Can be -1
 
                 val resolver = DirectoryRuleResolver(
                     allowedDirs.map(::normalizePath).toSet(),
@@ -149,7 +149,7 @@ class MediaStoreTrackRepository @Inject constructor(
                         authors = emptyList(), // TODO: Secondary query for Multi-Author or split string
                         book = cursor.getString(albumCol).normalizeMetadataTextOrEmpty(),
                         bookId = bookId,
-                        bookArtist = if (bookArtistCol != -1) cursor.getString(bookArtistCol).normalizeMetadataText() else null,
+                        bookAuthor = if (bookAuthorCol != -1) cursor.getString(bookAuthorCol).normalizeMetadataText() else null,
                         path = path,
                         contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id).toString(),
                         bookArtUriString = ContentUris.withAppendedId(

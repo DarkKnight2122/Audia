@@ -18,7 +18,7 @@ import com.oakiha.audia.utils.normalizeMetadataTextOrEmpty
 data class BookEntity(
     @PrimaryKey val id: Long,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "author_name") val artistName: String, // Nombre del artista del ÃƒÂ¡lbum
+    @ColumnInfo(name = "author_name") val authorName: String, // Nombre del artista del ÃƒÂ¡lbum
     @ColumnInfo(name = "author_id") val authorId: Long, // ID del artista principal del ÃƒÂ¡lbum (si aplica)
     @ColumnInfo(name = "book_art_uri_string") val bookArtUriString: String?,
     @ColumnInfo(name = "song_count") val trackCount: Int,
@@ -44,7 +44,7 @@ fun Book.toEntity(authorIdForBook: Long): BookEntity { // Necesitamos pasar el a
     return BookEntity(
         id = this.id,
         title = this.title,
-        artistName = this.author,
+        authorName = this.author,
         authorId = authorIdForBook, // Asignar el ID del artista
         bookArtUriString = this.bookArtUriString,
         trackCount = this.trackCount,
