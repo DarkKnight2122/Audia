@@ -155,7 +155,7 @@ fun GenreDetailScreen(
                     onClick = {
                         if (uiState.tracks.isNotEmpty()) {
                             val randomSong = uiState.tracks.random()
-                            playerViewModel.showAndPlaySong(randomtrack, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
+                            playerViewModel.showAndPlaySong(randomTrack, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -212,7 +212,7 @@ fun GenreDetailScreen(
 
                         items(sections, key = { it.id }) { section ->
                             when (section) {
-                                is SectionData.ArtistSection -> {
+                                is SectionData.AuthorSection -> {
                                     AuthorSectionCard(
                                         authorName = section.authorName,
                                         books = section.books,
@@ -243,7 +243,7 @@ private sealed class SectionData {
     data class AuthorSection(
         override val id: String,
         val authorName: String,
-        val books: List<AlbumData>
+        val books: List<BookData>
     ) : SectionData()
 }
 
@@ -257,7 +257,7 @@ private data class BookData(
 private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<SectionData> {
     val sections = mutableListOf<SectionData>()
     var currentArtist: String? = null
-    var currentAlbums = mutableListOf<AlbumData>()
+    var currentAlbums = mutableListOf<BookData>()
     var currentAlbumSongs = mutableListOf<Track>()
     var currentAlbumName: String? = null
     var currentBookArt: String? = null
@@ -270,7 +270,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                     // Save current book if exists
                     if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                         currentAlbums.add(
-                            AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
+                            BookData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
                         )
                     }
                     sections.add(
@@ -294,7 +294,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
                 // Save previous book if exists
                 if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
                     currentAlbums.add(
-                        AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
+                        BookData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
                     )
                 }
 
@@ -314,7 +314,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
     if (currentArtist != null) {
         if (currentAlbumName != null && currentAlbumSongs.isNotEmpty()) {
             currentAlbums.add(
-                AlbumData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
+                BookData(currentAlbumName!!, currentBookArt, currentAlbumSongs.toList())
             )
         }
         sections.add(
@@ -333,7 +333,7 @@ private fun buildSections(groupedSongs: List<GroupedTrackListItem>): List<Sectio
 @Composable
 private fun AuthorSectionCard(
     authorName: String,
-    books: List<AlbumData>,
+    books: List<BookData>,
     onSongClick: (Track) -> Unit
 ) {
     Column(

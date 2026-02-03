@@ -41,7 +41,7 @@ class BookDetailViewModel @Inject constructor(
         if (bookIdString != null) {
             val bookId = bookIdString.toLongOrNull()
             if (bookId != null) {
-                loadAlbumData(bookId)
+                loadBookData(bookId)
             } else {
                 _uiState.update { it.copy(error = context.getString(R.string.invalid_book_id), isLoading = false) }
             }
@@ -50,7 +50,7 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadAlbumData(id: Long) {
+    private fun loadBookData(id: Long) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {

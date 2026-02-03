@@ -1,7 +1,9 @@
-﻿package com.oakiha.audia.data.model
+package com.oakiha.audia.data.model
 
 enum class AppThemeStyle {
-    MATERIAL_3,
-    LIQUID_GLASS,
-    AMOLED_BLACK
+    System,
+    Light,
+    Dark,
+    Black, // For AMOLED
+    GLASS
 }

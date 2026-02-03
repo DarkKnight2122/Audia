@@ -1486,7 +1486,7 @@ fun UnifiedPlayerSheet(
                                         // Maybe we can skip this or implement if simple.
                                         // TrackInfoBottomSheet usually handles the UI for it? No, it has onAddToPlayList callback.
                                         // Let's leave it empty or log for now if we don't have a ready handler
-                                        Log.d("UnifiedPlayerSheet", "Add to playlist clicked for ${livetrack.title}")
+                                        Log.d("UnifiedPlayerSheet", "Add to playlist clicked for ${liveSong.title}")
                                          selectedTrackForInfo = null
                                     },
                                     onDeleteFromDevice = { activity, songToDelete, onResult ->
