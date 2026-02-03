@@ -280,14 +280,14 @@ class DailyMixManager @Inject constructor(
             val track = trackById[trackId] ?: return@forEach
             val weight = stats.playCount.toDouble() + (stats.totalPlayDurationMs / 60000.0)
             if (weight <= 0) return@forEach
-            artistAffinity.merge(track.authorNameId, weight, Double::plus)
+            artistAffinity.merge(track.authorId, weight, Double::plus)
             track.genre?.lowercase()?.let { genreAffinity.merge(it, weight, Double::plus) }
         }
 
         val favoriteArtistWeights = mutableMapOf<Long, Int>()
         favoriteTrackIds.forEach { id ->
             val track = trackById[id] ?: return@forEach
-            favoriteArtistWeights.merge(track.authorNameId, 1, Int::plus)
+            favoriteArtistWeights.merge(track.authorId, 1, Int::plus)
         }
 
         val maxPlayCount = engagements.values.maxOfOrNull { it.playCount }?.takeIf { it > 0 } ?: 1
@@ -303,9 +303,9 @@ class DailyMixManager @Inject constructor(
             val affinityScore = (playCountScore * 0.7 + durationScore * 0.3).coerceIn(0.0, 1.0)
 
             val genreKey = track.genre?.lowercase()
-            val artistPreference = artistAffinity[track.authorNameId]?.div(maxArtistAffinity) ?: 0.0
+            val artistPreference = artistAffinity[track.authorId]?.div(maxArtistAffinity) ?: 0.0
             val genrePreference = genreKey?.let { (genreAffinity[it] ?: 0.0) / maxGenreAffinity } ?: 0.0
-            val favoriteArtistPreference = favoriteArtistWeights[track.authorNameId]?.toDouble()?.div(maxFavoriteArtist) ?: 0.0
+            val favoriteArtistPreference = favoriteArtistWeights[track.authorId]?.toDouble()?.div(maxFavoriteArtist) ?: 0.0
             val preferenceScore = listOf(artistPreference, genrePreference, favoriteArtistPreference).maxOrNull() ?: 0.0
 
             val recencyScore = computeRecencyScore(stats?.lastPlayedTimestamp, now)
@@ -444,7 +444,7 @@ class DailyMixManager @Inject constructor(
 
         for (candidate in rankedTracks) {
             if (selected.size >= limit) break
-            val authorId = candidate.track.authorNameId
+            val authorId = candidate.track.authorId
             val maxPerArtist = if (favoriteTrackIds.contains(candidate.track.id)) 2 else 1
             val currentCount = artistCounts.getOrDefault(authorId, 0)
             if (currentCount >= maxPerArtist) continue

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Lyrics
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.draw.clip

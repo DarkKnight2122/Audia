@@ -496,7 +496,7 @@ constructor(
         val correctedSongs = ArrayList<TrackEntity>(tracks.size)
 
         tracks.forEach { track ->
-            val rawArtistName = track.authorNameName
+            val rawArtistName = track.authorName
             val songArtistNameTrimmed = rawArtistName.trim()
             val artistsForSong =
                     artistSplitCache.getOrPut(rawArtistName) {
@@ -516,7 +516,7 @@ constructor(
             val primaryArtistName =
                     artistsForSong.firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
                             ?: songArtistNameTrimmed
-            val primaryArtistId = authorNameToId[primaryArtistName] ?: track.authorNameId
+            val primaryArtistId = authorNameToId[primaryArtistName] ?: track.authorId
 
             artistsForSong.forEachIndexed { index, authorName ->
                 val normalizedName = authorName.trim()
