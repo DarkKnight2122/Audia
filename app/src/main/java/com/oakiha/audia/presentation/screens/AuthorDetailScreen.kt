@@ -172,12 +172,12 @@ fun AuthorDetailScreen(
     ) {
         Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
             when {
-                uiState.isLoading && uiState.author == null -> {
+                uiState.isLoading && uiState.authorName == null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ContainedLoadingIndicator()
                     }
                 }
-                uiState.error != null && uiState.author == null -> {
+                uiState.error != null && uiState.authorName == null -> {
                     Box(
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Alignment.Center
@@ -189,7 +189,7 @@ fun AuthorDetailScreen(
                         )
                     }
                 }
-                uiState.author != null -> {
+                uiState.authorName != null -> {
                     val author = uiState.author!!
                     val tracks = uiState.tracks
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }

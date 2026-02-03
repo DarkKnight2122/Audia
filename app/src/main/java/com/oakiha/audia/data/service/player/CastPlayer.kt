@@ -96,7 +96,7 @@ class CastPlayer(private val castSession: CastSession) {
     private fun Track.toMediaQueueItem(serverAddress: String): MediaQueueItem {
         val mediaMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
         mediaMetadata.putString(MediaMetadata.KEY_TITLE, this.title)
-        mediaMetadata.putString(MediaMetadata.KEY_ARTIST, this.author)
+        mediaMetadata.putString(MediaMetadata.KEY_ARTIST, this.authorName)
         val artUrl = "$serverAddress/art/${this.id}"
         mediaMetadata.addImage(WebImage(Uri.parse(artUrl)))
 

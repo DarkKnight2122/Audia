@@ -168,7 +168,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.unit.IntOffset
@@ -1282,7 +1282,7 @@ fun SaveQueueAsPlaylistSheet(
                                 )
                             )
                         }
-                        HorizontalDivider(
+                        androidx.compose.material3.HorizontalDivider(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
                     }

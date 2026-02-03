@@ -754,7 +754,7 @@ fun SearchResultsList(
                                     {
                                         Timber.tag("SearchScreen")
                                             .d("Author clicked: ${item.author.name}")
-                                        playerViewModel.playArtist(item.author)
+                                        playerViewModel.playArtist(item.authorName)
                                         onItemSelected()
                                     }
                                 }

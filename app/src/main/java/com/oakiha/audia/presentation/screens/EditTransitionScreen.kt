@@ -42,7 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -205,7 +205,7 @@ fun EditTransitionScreen(
                 }
 
                 item {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 }
 
                 item {

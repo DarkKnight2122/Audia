@@ -45,6 +45,7 @@ fun GenreGradientTopBar(
     contentColor: Color,
     scrollBehavior: TopAppBarScrollBehavior,
     onNavigationIconClick: () -> Unit,
+    isGlassEffectEnabled: Boolean = false
 ) {
     val gradientBrush = remember(startColor, endColor) {
         Brush.verticalGradient(colors = listOf(startColor, endColor))

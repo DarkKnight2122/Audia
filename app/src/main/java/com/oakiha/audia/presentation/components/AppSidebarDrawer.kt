@@ -14,7 +14,7 @@ import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -93,7 +93,7 @@ private fun DrawerContent(
             )
         }
         
-        HorizontalDivider(
+        androidx.compose.material3.HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
@@ -157,7 +157,7 @@ private fun DrawerContent(
         
         Spacer(modifier = Modifier.weight(1f))
         
-        HorizontalDivider(
+        androidx.compose.material3.HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )

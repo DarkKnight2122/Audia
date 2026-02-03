@@ -217,7 +217,7 @@ class ExternalMediaStateHolder @Inject constructor(
         }
 
         val finalTitle = storeTitle ?: metadata.title ?: displayName ?: "Unknown Title"
-        val finalArtist = storeArtist ?: metadata.author ?: "Unknown Author"
+        val finalArtist = storeArtist ?: metadata.authorName ?: "Unknown Author"
         val finalAlbum = storeAlbum ?: metadata.book ?: "Unknown Book"
         // Use metadata duration if store duration is missing or 0
         val finalDuration = storeDuration?.takeIf { it > 0 } ?: metadata.durationMs ?: 0L

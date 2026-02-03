@@ -117,7 +117,7 @@ import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel.Companion.FOLDER_PLAYLIST_PREFIX
 import com.oakiha.audia.ui.theme.GoogleSansRounded
-import com.oakiha.audia.presentation.viewmodel.PlaylistTracksOrderMode
+import com.oakiha.audia.presentation.viewmodel.PlaylistSongsOrderMode
 import com.oakiha.audia.utils.formatTotalDuration
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import sh.calvin.reorderable.ReorderableItem
@@ -634,7 +634,7 @@ fun PlaylistDetailScreen(
     if (showAddSongsSheet && currentPlaylist != null && !isFolderPlaylist) {
         TrackPickerBottomSheet(
             allTracks = uiState.trackSelectionForPlaylist,
-            isLoading = uiState.isLoadingSongSelection,
+            isLoading = uiState.isLoadingTrackSelection,
             initiallySelectedSongIds = currentPlaylist.trackIds.toSet(),
             onDismiss = { showAddSongsSheet = false },
             onConfirm = { selectedIds ->
@@ -869,7 +869,7 @@ fun PlaylistDetailScreen(
 
     if (isSortSheetVisible) {
         // Check if playlist is in Manual mode (which corresponds to Default Order)
-        val isManualMode = uiState.PlaylistTracksOrderMode is PlaylistTracksOrderMode.Manual
+        val isManualMode = uiState.PlaylistSongsOrderMode is PlaylistSongsOrderMode.Manual
         val rawOption = uiState.currentPlaylistTracksSortOption
         // If in Manual mode, show SongDefaultOrder as selected; otherwise use the stored sort option
         val currentSortOption = if (isManualMode) {

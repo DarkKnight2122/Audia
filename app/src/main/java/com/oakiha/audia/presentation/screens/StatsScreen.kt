@@ -54,7 +54,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -686,7 +686,7 @@ private fun ListeningHabitsCard(
                         value = String.format(Locale.US, "%.1f", summary.averageSessionsPerDay)
                     )
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                 HighlightRow(
                     title = "Most active day",
                     value = summary.peakDayLabel ?: "â€”",
@@ -1059,7 +1059,7 @@ private fun CategoryMetricsSection(
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
                         if (it.author.isNotBlank()) {
-                            add(it.author)
+                            add(it.authorName)
                         }
                     }
                     CategoryMetricEntry(
@@ -1185,7 +1185,7 @@ private fun CategoryVerticalBarChart(
             }
         }
 
-        HorizontalDivider(
+        androidx.compose.material3.HorizontalDivider(
             modifier = Modifier
                 .height(2.dp)
                 .clip(shape = CircleShape),
@@ -1386,7 +1386,7 @@ private fun TopArtistsCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                ArtistAvatar(name = artistSummary.author)
+                                ArtistAvatar(name = artistSummary.authorName)
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "${index + 1}. ${artistSummary.author}",

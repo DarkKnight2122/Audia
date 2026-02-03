@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MediumExtendedFloatingActionButton
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -383,7 +383,7 @@ fun ChangelogCategory(section: ChangelogSection) {
                 }
 
                 if (index != section.items.lastIndex) {
-                    HorizontalDivider(
+                    androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier.padding(vertical = 10.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                     )

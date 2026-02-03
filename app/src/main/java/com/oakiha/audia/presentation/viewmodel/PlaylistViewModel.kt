@@ -51,13 +51,13 @@ data class PlaylistUiState(
     //Sort option
     val currentPlaylistSortOption: SortOption = SortOption.PlaylistNameAZ,
     val currentPlaylistTracksSortOption: SortOption = SortOption.TrackTitleAZ,
-    val playlistTracksOrderMode: PlaylistTracksOrderMode = PlaylistTracksOrderMode.Sorted(SortOption.TrackTitleAZ),
-    val playlistOrderModes: Map<String, PlaylistTracksOrderMode> = emptyMap()
+    val playlistTracksOrderMode: PlaylistSongsOrderMode = PlaylistSongsOrderMode.Sorted(SortOption.TrackTitleAZ),
+    val playlistOrderModes: Map<String, PlaylistSongsOrderMode> = emptyMap()
 )
 
-sealed class PlaylistTracksOrderMode {
-    object Manual : PlaylistTracksOrderMode()
-    data class Sorted(val option: SortOption) : PlaylistTracksOrderMode()
+sealed class PlaylistSongsOrderMode {
+    object Manual : PlaylistSongsOrderMode()
+    data class Sorted(val option: SortOption) : PlaylistSongsOrderMode()
 }
 
 @HiltViewModel
@@ -243,7 +243,7 @@ class PlaylistViewModel @Inject constructor(
                             it.copy(
                                 currentPlaylistDetails = pseudoPlaylist,
                                 currentPlaylistTracks = applySortToTracks(tracksList, it.currentPlaylistTracksSortOption),
-                                playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(it.currentPlaylistTracksSortOption),
+                                playlistTracksOrderMode = PlaylistSongsOrderMode.Sorted(it.currentPlaylistTracksSortOption),
                                 isLoading = false,
                                 playlistNotFound = false
                             )
@@ -266,7 +266,7 @@ class PlaylistViewModel @Inject constructor(
 
                     if (playlist != null) {
                         val orderMode = _uiState.value.playlistOrderModes[playlistId]
-                            ?: PlaylistTracksOrderMode.Manual
+                            ?: PlaylistSongsOrderMode.Manual
 
                         // Colectar la lista de canciones del Flow devuelto por el repositorio en un hilo de IO
                         val tracksList: List<Track> = withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -274,8 +274,8 @@ class PlaylistViewModel @Inject constructor(
                         }
 
                         val orderedTracks = when (orderMode) {
-                            is PlaylistTracksOrderMode.Sorted -> applySortToTracks(tracksList, orderMode.option)
-                            PlaylistTracksOrderMode.Manual -> tracksList
+                            is PlaylistSongsOrderMode.Sorted -> applySortToTracks(tracksList, orderMode.option)
+                            PlaylistSongsOrderMode.Manual -> tracksList
                         }
 
                         // La actualizaciÃƒÂ³n del UI se hace en el hilo principal
@@ -283,7 +283,7 @@ class PlaylistViewModel @Inject constructor(
                             it.copy(
                                 currentPlaylistDetails = playlist,
                                 currentPlaylistTracks = orderedTracks,
-                                currentPlaylistTracksSortOption = (orderMode as? PlaylistTracksOrderMode.Sorted)?.option
+                                currentPlaylistTracksSortOption = (orderMode as? PlaylistSongsOrderMode.Sorted)?.option
                                     ?: it.currentPlaylistTracksSortOption,
                                 playlistTracksOrderMode = orderMode,
                                 playlistOrderModes = it.playlistOrderModes + (playlistId to orderMode),
@@ -652,10 +652,10 @@ class PlaylistViewModel @Inject constructor(
                     MANUAL_ORDER_MODE
                 )
                 _uiState.update {
-                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistTracksOrderMode.Manual)
+                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
                     it.copy(
                         currentPlaylistTracks = currentTracks,
-                        playlistTracksOrderMode = PlaylistTracksOrderMode.Manual,
+                        playlistTracksOrderMode = PlaylistSongsOrderMode.Manual,
                         playlistOrderModes = updatedModes
                     )
                 }
@@ -714,14 +714,14 @@ class PlaylistViewModel @Inject constructor(
 
         _uiState.update {
             val updatedModes = if (playlistId != null) {
-                it.playlistOrderModes + (playlistId to PlaylistTracksOrderMode.Sorted(sortOption))
+                it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Sorted(sortOption))
             } else {
                 it.playlistOrderModes
             }
             it.copy(
                 currentPlaylistTracks = sortedTracks,
                 currentPlaylistTracksSortOption = sortOption,
-                playlistTracksOrderMode = PlaylistTracksOrderMode.Sorted(sortOption),
+                playlistTracksOrderMode = PlaylistSongsOrderMode.Sorted(sortOption),
                 playlistOrderModes = updatedModes
             )
         }
@@ -773,12 +773,12 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    private fun decodeOrderMode(value: String): PlaylistTracksOrderMode {
+    private fun decodeOrderMode(value: String): PlaylistSongsOrderMode {
         return if (value == MANUAL_ORDER_MODE) {
-            PlaylistTracksOrderMode.Manual
+            PlaylistSongsOrderMode.Manual
         } else {
             val option = SortOption.fromStorageKey(value, SortOption.TRACKS, SortOption.TrackTitleAZ)
-            PlaylistTracksOrderMode.Sorted(option)
+            PlaylistSongsOrderMode.Sorted(option)
         }
     }
 }

@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -93,7 +93,7 @@ fun CustomPresetsSheet(
                             onPinClick = { onPinToggled(preset) },
                             onDeleteClick = { onDelete(preset) }
                         )
-                        HorizontalDivider(
+                        androidx.compose.material3.HorizontalDivider(
                             modifier = Modifier.padding(start = 72.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                         )

@@ -169,7 +169,7 @@ class AudiobookRepositoryImpl @Inject constructor(
         return getTracks().map { tracks ->
             val track = tracks.find { it.id == trackId.toString() }
             if (track != null) {
-                listOf(Author(id = track.authorId, name = track.author, trackCount = 1, imageUrl = null))
+                listOf(Author(id = track.authorNameId, name = track.authorName, trackCount = 1, imageUrl = null))
             } else {
                 emptyList()
             }

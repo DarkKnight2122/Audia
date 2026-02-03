@@ -187,7 +187,7 @@ private fun EditSongContent(
                     result.onSuccess { metadata ->
                         Timber.d("AI metadata generated successfully: $metadata")
                         title = metadata.title ?: title
-                        author = metadata.author ?: author
+                        author = metadata.authorName ?: author
                         book = metadata.book ?: book
                         genre = metadata.genre ?: genre
                     }.onFailure { error ->

@@ -374,7 +374,7 @@ fun ExperimentalSettingsScreen(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
-                     androidx.compose.material3.HorizontalDivider(
+                     androidx.compose.material3.androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier
                             .weight(3f)
                             .padding(start = 8.dp),

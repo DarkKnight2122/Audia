@@ -407,7 +407,7 @@ class AudiobookService : MediaSessionService() {
         val totalDuration = withContext(Dispatchers.Main) { player.duration.coerceAtLeast(0) }
 
         val title = currentItem?.mediaMetadata?.title?.toString().orEmpty()
-        val author = currentItem?.mediaMetadata?.author?.toString().orEmpty()
+        val author = currentItem?.mediaMetadata?.artist?.toString().orEmpty()
         val mediaId = currentItem?.mediaId
         val artworkUri = currentItem?.mediaMetadata?.artworkUri
         val artworkData = currentItem?.mediaMetadata?.artworkData

@@ -155,7 +155,7 @@ fun GenreDetailScreen(
                     onClick = {
                         if (uiState.tracks.isNotEmpty()) {
                             val randomSong = uiState.tracks.random()
-                            playerViewModel.showAndPlaySong(randomTrack, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
+                            playerViewModel.showAndPlaySong(randomSong, uiState.tracks, uiState.genre?.name ?: "Genre Shuffle")
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,

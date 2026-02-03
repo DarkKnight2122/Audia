@@ -1477,7 +1477,7 @@ fun FolderPlaylistItem(folder: AudiobookFolder, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    "${folder.totalSongCount} Songs",
+                    "${folder.totalTrackCount} Songs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1508,7 +1508,7 @@ fun FolderListItem(folder: AudiobookFolder, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(folder.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("${folder.totalSongCount} Songs", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${folder.totalTrackCount} Songs", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
