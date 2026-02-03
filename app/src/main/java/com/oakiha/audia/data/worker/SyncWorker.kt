@@ -106,7 +106,7 @@ constructor(
                     // Detect and remove deleted tracks efficiently using ID comparison
                     // We do this for INCREMENTAL and FULL modes. REBUILD clears everything anyway.
                     if (syncMode != SyncMode.REBUILD) {
-                        val localSongIds = audiobookDao.getAllSongIds().toHashSet()
+                        val localSongIds = audiobookDao.getAllTrackIds().toHashSet()
                         val mediaStoreIds = fetchMediaStoreIds(directoryResolver)
 
                         // Identify IDs that are in local DB but not in MediaStore
@@ -118,8 +118,8 @@ constructor(
                             // Chunk deletions to avoid SQLite variable limit (default 999)
                             val batchSize = 500
                             deletedIds.chunked(batchSize).forEach { chunk ->
-                                audiobookDao.deleteSongsByIds(chunk.toList())
-                                audiobookDao.deleteCrossRefsBySongIds(chunk.toList())
+                                audiobookDao.deleteTracksByIds(chunk.toList())
+                                audiobookDao.deleteCrossRefsByTrackIds(chunk.toList())
                             }
                         } else {
                             Timber.tag(TAG).d("No deleted tracks found.")
@@ -176,14 +176,14 @@ constructor(
                         if (syncMode == SyncMode.REBUILD) {
                             Timber.tag(TAG)
                                 .i("Rebuild mode: Clearing all music data before insert.")
-                            audiobookDao.clearAllMusicDataWithCrossRefs()
+                            audiobookDao.clearAllAudiobookDataWithCrossRefs()
                         }
 
                         val allExistingArtists =
                                 if (syncMode == SyncMode.REBUILD) {
                                     emptyList()
                                 } else {
-                                    audiobookDao.getAllArtistsListRaw()
+                                    audiobookDao.getAllAuthorsRawOnce()
                                 }
 
                         val existingArtistImageUrls =
@@ -191,13 +191,13 @@ constructor(
                         
                         // Load all existing author IDs to ensure stability across incremental syncs
                         val existingArtistIdMap = allExistingArtists.associate { it.name to it.id }.toMutableMap()
-                        val maxArtistId = audiobookDao.getMaxArtistId() ?: 0L
+                        val maxArtistId = audiobookDao.getMaxAuthorId() ?: 0L
 
                         // Prepare list of existing tracks to preserve user edits
                         // We only need to check against existing tracks if we are updating them
                         val localSongsMap =
                                 if (syncMode != SyncMode.REBUILD) {
-                                    audiobookDao.getAllTracksList().associateBy { it.id }
+                                    audiobookDao.getAllTracksOnce().associateBy { it.id }
                                 } else {
                                     emptyMap()
                                 }
@@ -288,19 +288,19 @@ constructor(
                                         initialMaxArtistId = maxArtistId
                                 )
 
-                        // Use incrementalSyncMusicData for all modes except REBUILD
+                        // Use incrementalSyncAudiobookData for all modes except REBUILD
                         // Even for FULL sync, we can just upsert the values
                         if (syncMode == SyncMode.REBUILD) {
-                            audiobookDao.insertMusicDataWithCrossRefs(
+                            audiobookDao.insertAudiobookDataWithCrossRefs(
                                     correctedSongs,
                                     books,
                                     authors,
                                     crossRefs
                             )
                         } else {
-                            // incrementalSyncMusicData handles upserts efficiently
+                            // incrementalSyncAudiobookData handles upserts efficiently
                             // processing deleted tracks was already handled at the start
-                            audiobookDao.incrementalSyncMusicData(
+                            audiobookDao.incrementalSyncAudiobookData(
                                     tracks = correctedSongs,
                                     books = books,
                                     authors = authors,
@@ -325,7 +325,7 @@ constructor(
                         if (autoScanLrc) {
                             Timber.tag(TAG).i("Auto-scan LRC files enabled. Starting scan phase...")
 
-                            val allTracksEntities = audiobookDao.getAllTracksList()
+                            val allTracksEntities = audiobookDao.getAllTracksOnce()
                             val allTracks =
                                     allTracksEntities.map { entity ->
                                         Track(
@@ -368,7 +368,7 @@ constructor(
                         }
                         
                         // Clean orphaned book art cache files
-                        val allSongIds = audiobookDao.getAllSongIds().toSet()
+                        val allSongIds = audiobookDao.getAllTrackIds().toSet()
                         BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
 
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
@@ -379,7 +379,7 @@ constructor(
                         if ((syncMode == SyncMode.REBUILD || isFreshInstall) &&
                                         mediaStoreSongs.isEmpty()
                         ) {
-                            audiobookDao.clearAllMusicDataWithCrossRefs()
+                            audiobookDao.clearAllAudiobookDataWithCrossRefs()
                             Log.w(
                                     TAG,
                                     "MediaStore fetch resulted in empty list. Local music data cleared."
@@ -396,7 +396,7 @@ constructor(
                         val totalSongs = audiobookDao.getTrackCount().first()
                         
                         // Clean orphaned book art cache files
-                        val allSongIds = audiobookDao.getAllSongIds().toSet()
+                        val allSongIds = audiobookDao.getAllTrackIds().toSet()
                         BookArtCacheManager.cleanOrphanedCacheFiles(applicationContext, allSongIds)
                         
                         Result.success(workDataOf(OUTPUT_TOTAL_SONGS to totalSongs))
@@ -537,7 +537,7 @@ constructor(
             // --- Book Logic ---
             val rawAlbumName = track.bookName.trim()
             val bookIdentityArtist = if (groupByAlbumArtist) {
-                track.bookArtist?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
+                track.bookAuthor?.trim()?.takeIf { it.isNotEmpty() } ?: primaryArtistName
             } else {
                 primaryArtistName
             }
@@ -574,7 +574,7 @@ constructor(
         val albumEntities = correctedSongs.groupBy { it.bookId }.map { (catAlbumId, songsInAlbum) ->
              val firstSong = songsInAlbum.first()
              // Determine Book Author Name
-             val determinedAlbumArtist = firstSong.bookArtist?.takeIf { it.isNotBlank() } 
+             val determinedAlbumArtist = firstSong.bookAuthor?.takeIf { it.isNotBlank() } 
                  ?: firstSong.authorName
                  
              // Determine Book Author ID (best effort lookup)
@@ -997,7 +997,7 @@ constructor(
                 title = title,
                 authorName = author,
                 authorId = raw.authorId,
-                bookArtist = raw.bookArtist,
+                bookArtist = raw.bookAuthor,
                 bookName = book,
                 bookId = raw.bookId,
                 contentUriString = contentUriString,

@@ -107,7 +107,7 @@ class AuthorImageRepository @Inject constructor(
                         memoryCache.put(normalizedName, imageUrl)
                         
                         // Cache in database
-                        audiobookDao.updateArtistImageUrl(authorId, imageUrl)
+                        audiobookDao.updateAuthorImageUrl(authorId, imageUrl)
                         
                         Log.d(TAG, "Fetched and cached image for $authorName: $imageUrl")
                         imageUrl

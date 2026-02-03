@@ -739,7 +739,7 @@ class PlayerViewModel @Inject constructor(
                 SortOption.AuthorNameAZ
             )
             val initialLikedSort = resolveSortOption(
-                userPreferencesRepository.likedSongsSortOptionFlow.first(),
+                userPreferencesRepository.likedTracksSortOptionFlow.first(),
                 SortOption.LIKED,
                 SortOption.LikedTrackDateLiked
             )

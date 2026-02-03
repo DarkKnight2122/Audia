@@ -1039,7 +1039,7 @@ private fun CategoryMetricsSection(
                     )
                 }
 
-                CategoryDimension.Author -> summary?.topArtists.orEmpty().map {
+                CategoryDimension.Author -> summary?.topAuthors.orEmpty().map {
                     CategoryMetricEntry(
                         label = it.author,
                         durationMs = it.totalDurationMs,
@@ -1047,7 +1047,7 @@ private fun CategoryMetricsSection(
                     )
                 }
 
-                CategoryDimension.Book -> summary?.topAlbums.orEmpty().map {
+                CategoryDimension.Book -> summary?.topBooks.orEmpty().map {
                     CategoryMetricEntry(
                         label = it.book,
                         durationMs = it.totalDurationMs,
@@ -1055,7 +1055,7 @@ private fun CategoryMetricsSection(
                     )
                 }
 
-                CategoryDimension.Track -> summary?.topSongs.orEmpty().map {
+                CategoryDimension.Track -> summary?.topTracks.orEmpty().map {
                     val supportingParts = buildList {
                         add("${it.playCount} plays")
                         if (it.author.isNotBlank()) {
@@ -1370,7 +1370,7 @@ private fun TopArtistsCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val authors = summary?.topArtists.orEmpty()
+            val authors = summary?.topAuthors.orEmpty()
             if (authors.isEmpty()) {
                 StatsEmptyState(
                     icon = Icons.Outlined.MusicNote,
@@ -1467,7 +1467,7 @@ private fun TopAlbumsCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            val books = summary?.topAlbums.orEmpty()
+            val books = summary?.topBooks.orEmpty()
             if (books.isEmpty()) {
                 StatsEmptyState(
                     icon = Icons.Outlined.Book,

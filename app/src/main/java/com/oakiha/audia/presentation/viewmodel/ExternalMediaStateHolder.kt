@@ -233,7 +233,7 @@ class ExternalMediaStateHolder @Inject constructor(
             authorId = -1, // No DB ID
             book = finalAlbum,
             bookId = -1, // No DB ID
-            bookArtist = metadata.bookArtist,
+            bookArtist = metadata.bookAuthor,
             path = uri.toString(), // Path is URI
             contentUriString = uri.toString(),
             bookArtUriString = bookArtUriString,

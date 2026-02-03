@@ -169,7 +169,7 @@ private fun OverviewContent(summary: PlaybackStatsRepository.PlaybackStatsSummar
                 )
             }
         }
-        val topTrack = summary.topSongs.firstOrNull()
+        val topTrack = summary.topTracks.firstOrNull()
         if (topTrack != null) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(

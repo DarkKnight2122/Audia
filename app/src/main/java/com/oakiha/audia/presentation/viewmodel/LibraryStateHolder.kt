@@ -136,7 +136,7 @@ class LibraryStateHolder @Inject constructor(
             _currentArtistSortOption.value = SortOption.AUTHORS.find { it.storageKey == artistSortKey } ?: SortOption.AuthorNameAZ
             
             
-            val likedSortKey = userPreferencesRepository.likedSongsSortOptionFlow.first()
+            val likedSortKey = userPreferencesRepository.likedTracksSortOptionFlow.first()
             _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedTrackDateLiked
         }
     }
@@ -241,7 +241,7 @@ class LibraryStateHolder @Inject constructor(
     fun sortSongs(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setSongsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setTracksSortOption(sortOption.storageKey)
             }
             _currentTrackSortOption.value = sortOption
 
@@ -261,7 +261,7 @@ class LibraryStateHolder @Inject constructor(
     fun sortAlbums(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setAlbumsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setBooksSortOption(sortOption.storageKey)
             }
             _currentAlbumSortOption.value = sortOption
 
@@ -281,7 +281,7 @@ class LibraryStateHolder @Inject constructor(
     fun sortArtists(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setArtistsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setAuthorsSortOption(sortOption.storageKey)
             }
             _currentArtistSortOption.value = sortOption
 
@@ -321,7 +321,7 @@ class LibraryStateHolder @Inject constructor(
     fun sortFavoriteSongs(sortOption: SortOption, persist: Boolean = true) {
         scope?.launch {
             if (persist) {
-                userPreferencesRepository.setLikedSongsSortOption(sortOption.storageKey)
+                userPreferencesRepository.setLikedTracksSortOption(sortOption.storageKey)
             }
             _currentFavoriteSortOption.value = sortOption
             // The actual filtering/sorting of favorites happens in ViewModel using this flow

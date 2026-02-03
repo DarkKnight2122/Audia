@@ -918,7 +918,7 @@ constructor(
     }
 
     // Flows for Sort Options
-    val songsSortOptionFlow: Flow<String> =
+    val tracksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.SONGS_SORT_OPTION],
@@ -928,7 +928,7 @@ constructor(
                         .storageKey
             }
 
-    val albumsSortOptionFlow: Flow<String> =
+    val booksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.ALBUMS_SORT_OPTION],
@@ -938,7 +938,7 @@ constructor(
                         .storageKey
             }
 
-    val artistsSortOptionFlow: Flow<String> =
+    val authorsSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.ARTISTS_SORT_OPTION],
@@ -958,7 +958,7 @@ constructor(
                         .storageKey
             }
 
-    val likedSongsSortOptionFlow: Flow<String> =
+    val likedTracksSortOptionFlow: Flow<String> =
             dataStore.data.map { preferences ->
                 SortOption.fromStorageKey(
                                 preferences[PreferencesKeys.LIKED_SONGS_SORT_OPTION],
@@ -969,20 +969,20 @@ constructor(
             }
 
     // Functions to update Sort Options
-    suspend fun setSongsSortOption(optionKey: String) {
+    suspend fun setTracksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SONGS_SORT_OPTION] = optionKey
             preferences[PreferencesKeys.SONGS_SORT_OPTION_MIGRATED] = true
         }
     }
 
-    suspend fun setAlbumsSortOption(optionKey: String) {
+    suspend fun setBooksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALBUMS_SORT_OPTION] = optionKey
         }
     }
 
-    suspend fun setArtistsSortOption(optionKey: String) {
+    suspend fun setAuthorsSortOption(optionKey: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ARTISTS_SORT_OPTION] = optionKey
         }
@@ -994,7 +994,7 @@ constructor(
         }
     }
 
-    suspend fun setLikedSongsSortOption(optionKey: String) {
+    suspend fun setLikedTracksSortOption(optionKey: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LIKED_SONGS_SORT_OPTION] = optionKey
         }

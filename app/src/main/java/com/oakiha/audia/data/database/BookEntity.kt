@@ -29,7 +29,7 @@ fun BookEntity.toBook(): Book {
     return Book(
         id = this.id,
         title = this.title.normalizeMetadataTextOrEmpty(),
-        author = this.artistName.normalizeMetadataTextOrEmpty(),
+        author = this.authorName.normalizeMetadataTextOrEmpty(),
         bookArtUriString = this.bookArtUriString, // El modelo Album usa bookArtUrl
         trackCount = this.trackCount,
         year = this.year
