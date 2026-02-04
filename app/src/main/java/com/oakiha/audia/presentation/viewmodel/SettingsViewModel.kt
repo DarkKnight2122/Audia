@@ -32,6 +32,7 @@ import java.io.File
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
     val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,
+    val appThemeStyle: AppThemeStyle = AppThemeStyle.System,
     val playerThemePreference: String = ThemePreference.ALBUM_ART,
     val mockGenresEnabled: Boolean = false,
     val navBarCornerRadius: Int = 32,
@@ -85,6 +86,7 @@ private sealed interface SettingsUiUpdate {
     data class Group1(
         val appRebrandDialogShown: Boolean,
         val appThemeMode: String,
+        val appThemeStyle: com.oakiha.audia.data.model.AppThemeStyle,
         val playerThemePreference: String,
         val mockGenresEnabled: Boolean,
         val navBarCornerRadius: Int,
@@ -131,6 +133,15 @@ class SettingsViewModel @Inject constructor(
     val geminiSystemPrompt: StateFlow<String> = userPreferencesRepository.geminiSystemPrompt
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesRepository.DEFAULT_SYSTEM_PROMPT)
 
+    val appThemeStyle: StateFlow<com.oakiha.audia.data.model.AppThemeStyle> = userPreferencesRepository.appThemeModeFlow
+        .map { mode ->
+            when (mode) {
+                AppThemeMode.LIGHT -> com.oakiha.audia.data.model.AppThemeStyle.Light
+                AppThemeMode.DARK -> com.oakiha.audia.data.model.AppThemeStyle.Dark
+                else -> com.oakiha.audia.data.model.AppThemeStyle.System
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.oakiha.audia.data.model.AppThemeStyle.System)
+
     private val fileExplorerStateHolder = FileExplorerStateHolder(userPreferencesRepository, viewModelScope, context)
 
     val currentPath = fileExplorerStateHolder.currentPath
@@ -173,9 +184,16 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.carouselStyleFlow,
                 userPreferencesRepository.launchTabFlow
             ) { values ->
+                val appThemeMode = values[1] as String
+                val appThemeStyle = when (appThemeMode) {
+                    AppThemeMode.LIGHT -> com.oakiha.audia.data.model.AppThemeStyle.Light
+                    AppThemeMode.DARK -> com.oakiha.audia.data.model.AppThemeStyle.Dark
+                    else -> com.oakiha.audia.data.model.AppThemeStyle.System
+                }
                 SettingsUiUpdate.Group1(
                     appRebrandDialogShown = values[0] as Boolean,
-                    appThemeMode = values[1] as String,
+                    appThemeMode = appThemeMode,
+                    appThemeStyle = appThemeStyle,
                     playerThemePreference = values[2] as String,
                     mockGenresEnabled = values[3] as Boolean,
                     navBarCornerRadius = values[4] as Int,
@@ -189,6 +207,7 @@ class SettingsViewModel @Inject constructor(
                     state.copy(
                         appRebrandDialogShown = update.appRebrandDialogShown,
                         appThemeMode = update.appThemeMode,
+                        appThemeStyle = update.appThemeStyle,
                         playerThemePreference = update.playerThemePreference,
                         mockGenresEnabled = update.mockGenresEnabled,
                         navBarCornerRadius = update.navBarCornerRadius,

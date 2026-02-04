@@ -26,12 +26,10 @@ import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.MicExternalOn
 import androidx.compose.material.icons.outlined.MusicVideo
 import androidx.compose.material.icons.outlined.Piano
-import androidx.compose.material.icons.outlined.QueueMusic
 import androidx.compose.material.icons.outlined.Speaker
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
-import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import com.oakiha.audia.utils.getContrastColor
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -95,7 +93,6 @@ import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.MicExternalOn
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Piano
-import androidx.compose.material.icons.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Speaker
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect

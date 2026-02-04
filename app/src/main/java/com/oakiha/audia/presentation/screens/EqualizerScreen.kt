@@ -111,7 +111,6 @@ import kotlin.math.roundToInt
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.SurroundSound
@@ -127,7 +126,6 @@ import com.oakiha.audia.presentation.components.MiniPlayerHeight
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.ShowChart
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -144,7 +142,6 @@ import com.oakiha.audia.presentation.components.CustomPresetsSheet
 import com.oakiha.audia.presentation.components.ReorderPresetsSheet
 import com.oakiha.audia.presentation.components.SavePresetDialog
 import com.oakiha.audia.data.preferences.UserPreferencesRepository.EqualizerViewMode
-import androidx.compose.material.icons.rounded.ViewQuilt
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.navigationBars
 

@@ -1549,7 +1549,6 @@ fun UnifiedPlayerSheet(
             ) {
                 CastBottomSheet(
                     playerViewModel = playerViewModel,
-                                                settingsViewModel = settingsViewModel,
                     onDismiss = {
                         castSheetOpenFraction = 0f
                         showCastSheet = false
