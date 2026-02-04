@@ -151,9 +151,8 @@ fun LibraryActionRow(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                         modifier = Modifier.height(genHeight)
                     ) {
-                        val icon = if (isPlaylistTab) Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
-                        val text = if (isPlaylistTab) "New" else if (isShuffleEnabled) "Shuffle On" else "Shuffle"
-                        val contentDesc = if (isPlaylistTab) "Create New Playlist" else "Shuffle Play"
+                val icon = if (isPlaylistTab) androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
+                val label = if (isPlaylistTab) "New Playlist" else "Shuffle all"
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -295,13 +294,9 @@ fun Breadcrumbs(
             .padding(start = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FilledTonalIconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.size(36.dp),
-            enabled = currentFolder != null
-        ) {
-            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-        }
+            IconButton(onClick = onBackClick) {
+                Icon(androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+            }
         Spacer(Modifier.width(8.dp))
 
         LazyRow(

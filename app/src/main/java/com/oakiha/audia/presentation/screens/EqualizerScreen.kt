@@ -420,8 +420,8 @@ fun EqualizerTopBar(
                 Icon(
                     imageVector = when(viewMode) {
                         EqualizerViewMode.SLIDERS -> Icons.Rounded.GraphicEq
-                        EqualizerViewMode.GRAPH -> Icons.AutoMirrored.Rounded.ShowChart
-                        EqualizerViewMode.HYBRID -> Icons.AutoMirrored.Rounded.ViewQuilt
+                        EqualizerViewMode.GRAPH -> androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ShowChart
+                        EqualizerViewMode.HYBRID -> androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ViewQuilt
                     },
                     contentDescription = "Change View Mode"
                 )
@@ -1492,7 +1492,7 @@ private fun VolumeControlCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.VolumeUp,
+                    imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.VolumeUp,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

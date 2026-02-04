@@ -1193,14 +1193,13 @@ fun getIconByName(name: String?): ImageVector? {
         "MusicNote" -> Icons.Rounded.MusicNote
         "Headphones" -> Icons.Rounded.Headphones
         "Book" -> Icons.Rounded.Book
-        "Mic" -> Icons.Rounded.MicExternalOn 
-        "Speaker" -> Icons.Rounded.Speaker
-        "Favorite" -> Icons.Rounded.Favorite
-        "Piano" -> Icons.Rounded.Piano
-        "Queue" -> Icons.AutoMirrored.Rounded.QueueMusic
-        else -> null
-    }
-}
+                                    "Mic" -> Icons.Rounded.MicExternalOn
+                                    "Speaker" -> Icons.Rounded.Speaker
+                                    "Favorite" -> Icons.Rounded.Favorite
+                                    "Piano" -> Icons.Rounded.Piano
+                                    "Queue" -> androidx.compose.material.icons.Icons.AutoMirrored.Rounded.QueueMusic
+                                    else -> Icons.Rounded.MusicNote
+                                }}
 
 @Composable
 fun ExpressiveButtonGroup(

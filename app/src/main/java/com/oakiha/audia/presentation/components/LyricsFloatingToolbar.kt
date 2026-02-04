@@ -74,17 +74,11 @@ fun LyricsFloatingToolbar(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = backgroundColor,
-                contentColor = onBackgroundColor
-            ),
-            onClick = onNavigateBack
-        ) {
+        IconButton(onClick = onBack) {
             Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Back",
-                tint = onBackgroundColor
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
 

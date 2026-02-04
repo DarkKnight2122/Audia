@@ -1001,7 +1001,7 @@ fun SearchResultPlaylistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Rounded.PlaylistPlay,
+                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistPlay,
                 contentDescription = "Playlist",
                 modifier = Modifier
                     .size(56.dp)

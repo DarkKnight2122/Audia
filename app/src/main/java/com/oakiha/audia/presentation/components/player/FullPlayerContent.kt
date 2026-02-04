@@ -64,6 +64,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -423,9 +424,9 @@ fun FullPlayerContent(
             expansionFractionProvider = expansionFractionProvider,
             isPlayingProvider = isPlayingProvider,
             currentSheetState = currentSheetState,
-            activeTrackColor = LocalMaterialTheme.current.primary,
-            inactiveTrackColor = LocalMaterialTheme.current.primary.copy(alpha = 0.2f),
-            thumbColor = LocalMaterialTheme.current.primary,
+            thumbColor = thumbColor,
+            activeTrackColor = activeTrackColor,
+            inactiveTrackColor = inactiveTrackColor,
             timeTextColor = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.7f),
             loadingTweaks = loadingTweaks,
             isGlassEffectEnabled = appThemeStyle == AppThemeStyle.GLASS

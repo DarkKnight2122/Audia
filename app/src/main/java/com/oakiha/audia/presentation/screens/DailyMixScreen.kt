@@ -328,7 +328,7 @@ fun DailyMixScreen(
                 .clip(CircleShape)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Back"
             )
         }
