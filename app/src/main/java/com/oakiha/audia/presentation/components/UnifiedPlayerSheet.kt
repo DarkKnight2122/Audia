@@ -116,6 +116,14 @@ import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
 import com.oakiha.audia.ui.theme.GoogleSansRounded
+import com.oakiha.audia.ui.theme.glass.library.drawBackdrop
+import com.oakiha.audia.ui.theme.glass.library.effects.blur
+import com.oakiha.audia.ui.theme.glass.library.effects.lens
+import com.oakiha.audia.ui.theme.glass.library.effects.vibrancy
+import com.oakiha.audia.ui.theme.glass.library.backdrops.rememberLayerBackdrop
+import com.oakiha.audia.ui.theme.glass.library.highlight.Highlight
+import com.oakiha.audia.ui.theme.glass.library.shadow.InnerShadow
+import com.oakiha.audia.ui.theme.glass.library.shadow.Shadow
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -155,7 +163,8 @@ fun UnifiedPlayerSheet(
     collapsedStateHorizontalPadding: Dp = 12.dp,
     navController: NavHostController,
     hideMiniPlayer: Boolean = false,
-    isNavBarHidden: Boolean = false
+    isNavBarHidden: Boolean = false,
+    backdrop: com.oakiha.audia.ui.theme.glass.library.Backdrop? = null
 ) {
     Trace.beginSection("UnifiedPlayerSheet.Composition")
     val context = LocalContext.current
@@ -1040,13 +1049,35 @@ fun UnifiedPlayerSheet(
                                     ),
                                     clip = false
                                 )
-                                .background(
-                                    color = if (settingsViewModel.uiState.value.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) {
-                                        albumColorScheme.primaryContainer.copy(alpha = 0.45f)
+                                .then(
+                                    if (settingsViewModel.uiState.value.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS && backdrop != null) {
+                                        Modifier.drawBackdrop(
+                                            backdrop = backdrop,
+                                            shape = {
+                                                RoundedCornerShape(
+                                                    topStart = overallSheetTopCornerRadius,
+                                                    topEnd = overallSheetTopCornerRadius,
+                                                    bottomStart = playerContentActualBottomRadius,
+                                                    bottomEnd = playerContentActualBottomRadius
+                                                )
+                                            },
+                                            effects = {
+                                                vibrancy()
+                                                blur(16f.dp.toPx())
+                                                lens(refractionHeight = 20f.dp.toPx(), refractionAmount = 30f.dp.toPx())
+                                            },
+                                            highlight = { Highlight.Default.copy(alpha = 0.3f) },
+                                            shadow = { Shadow.Default.copy(alpha = 0.1f) },
+                                            onDrawSurface = {
+                                                drawRect(albumColorScheme.primaryContainer.copy(alpha = 0.35f))
+                                            }
+                                        )
                                     } else {
-                                        albumColorScheme.primaryContainer
-                                    },
-                                    shape = playerShadowShape
+                                        Modifier.background(
+                                            color = albumColorScheme.primaryContainer,
+                                            shape = playerShadowShape
+                                        )
+                                    }
                                 )
                                 .clipToBounds()
                                 .pointerInput(Unit) {

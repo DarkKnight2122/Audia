@@ -68,6 +68,9 @@ import com.oakiha.audia.presentation.viewmodel.MainViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.presentation.components.GradientBackground
+import com.oakiha.audia.ui.theme.glass.library.backdrops.rememberLayerBackdrop
+import com.oakiha.audia.ui.theme.glass.library.backdrops.LayerBackdrop
+import com.oakiha.audia.ui.theme.glass.library.backdrops.emptyBackdrop
 import com.oakiha.audia.ui.theme.AudioBookPlayerTheme
 import com.oakiha.audia.ui.theme.glass.liquidGlass
 import com.oakiha.audia.utils.CrashHandler
@@ -226,9 +229,13 @@ class MainActivity : ComponentActivity() {
                     Modifier.fillMaxSize()
                 }
 
+                val backgroundBackdrop = if (isGlass) rememberLayerBackdrop() else null
+
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (isGlass) {
-                        GradientBackground(isDarkTheme = useDarkTheme)
+                    if (isGlass && backgroundBackdrop != null) {
+                        Box(Modifier.fillMaxSize().com.oakiha.audia.ui.theme.glass.library.backdrops.layerBackdrop(backgroundBackdrop)) {
+                            GradientBackground(isDarkTheme = useDarkTheme)
+                        }
                     }
                     
                     Surface(modifier = rootModifier, color = if (isGlass) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.background) {
@@ -707,7 +714,8 @@ class MainActivity : ComponentActivity() {
                     hideMiniPlayer = shouldHideMiniPlayer,
                     containerHeight = containerHeight,
                     navController = navController,
-                    isNavBarHidden = shouldHideNavigationBar
+                    isNavBarHidden = shouldHideNavigationBar,
+                    backdrop = backgroundBackdrop
                 )
 
                 val playerUiState by playerViewModel.playerUiState.collectAsState()
