@@ -232,45 +232,48 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     Surface(modifier = rootModifier, color = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background) {
-                        if (showSetupScreen != null) {
-                        AnimatedContent(
-                            targetState = showSetupScreen,
-                            transitionSpec = {
-                                if (targetState == false) {
-                                    // Transition from Setup to Main App
-                                    scaleIn(initialScale = 0.8f, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) togetherWith
-                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400))
-                                } else {
-                                    // Placeholder for other transitions, e.g., Main App to Setup
-                                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                        Box(modifier = Modifier.fillMaxSize()) { // Inner box for content
+                            if (showSetupScreen != null) {
+                                AnimatedContent(
+                                    targetState = showSetupScreen,
+                                    transitionSpec = {
+                                        if (targetState == false) {
+                                            // Transition from Setup to Main App
+                                            scaleIn(initialScale = 0.8f, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) togetherWith
+                                                    slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400))
+                                        } else {
+                                            // Placeholder for other transitions, e.g., Main App to Setup
+                                            fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                                        }
+                                    },
+                                    label = "SetupTransition"
+                                ) { targetState ->
+                                    if (targetState == true) {
+                                        SetupScreen(onSetupComplete = {
+                                            // Re-check permissions on completion.
+                                            // If permissions are still missing despite setup "completing" (e.g. user skipped or ignored?), 
+                                            // the LaunchedEffect(permissionsValid) above handles state, 
+                                            // but we explicitly update local state here too.
+                                            showSetupScreen = false
+                                        })
+                                    } else {
+                                        MainAppContent(playerViewModel, mainViewModel)
+                                    }
                                 }
-                            },
-                            label = "SetupTransition"
-                        ) { targetState ->
-                            if (targetState == true) {
-                                SetupScreen(onSetupComplete = {
-                                    // Re-check permissions on completion.
-                                    // If permissions are still missing despite setup "completing" (e.g. user skipped or ignored?), 
-                                    // the LaunchedEffect(permissionsValid) above handles state, 
-                                    // but we explicitly update local state here too.
-                                    showSetupScreen = false
-                                })
-                            } else {
-                                MainAppContent(playerViewModel, mainViewModel)
+                            }
+                            
+                            // Show crash report dialog if needed
+                            if (showCrashReportDialog && crashLogData != null) {
+                                CrashReportDialog(
+                                    crashLog = crashLogData!!,
+                                    onDismiss = {
+                                        CrashHandler.clearCrashLog()
+                                        crashLogData = null
+                                        showCrashReportDialog = false
+                                    }
+                                )
                             }
                         }
-                    }
-                    
-                    // Show crash report dialog if needed
-                    if (showCrashReportDialog && crashLogData != null) {
-                        CrashReportDialog(
-                            crashLog = crashLogData!!,
-                            onDismiss = {
-                                CrashHandler.clearCrashLog()
-                                crashLogData = null
-                                showCrashReportDialog = false
-                            }
-                        )
                     }
                 }
             }
