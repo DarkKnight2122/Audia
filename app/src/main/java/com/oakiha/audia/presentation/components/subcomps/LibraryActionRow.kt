@@ -29,6 +29,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Shuffle
@@ -151,7 +153,7 @@ fun LibraryActionRow(
                         modifier = Modifier.height(genHeight)
                     ) {
                         // Define variables here for use inside the Row
-                        val icon = if (isPlaylistTab) androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
+                        val icon = if (isPlaylistTab) Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
                         val label = if (isPlaylistTab) "New Playlist" else "Shuffle all"
 
                         Row(
@@ -295,7 +297,7 @@ fun Breadcrumbs(
         verticalAlignment = Alignment.CenterVertically
     ) {
             IconButton(onClick = onNavigateBack) {
-                Icon(androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
             }
         Spacer(Modifier.width(8.dp))
 

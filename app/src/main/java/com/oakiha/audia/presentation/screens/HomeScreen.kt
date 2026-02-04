@@ -34,6 +34,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.model.AppThemeStyle
 import com.oakiha.audia.presentation.components.*
 import com.oakiha.audia.presentation.components.subcomps.PlayingEqIcon
 import com.oakiha.audia.presentation.navigation.Screen
@@ -104,7 +105,7 @@ fun HomeScreen(
                     onBetaClick = {
                         showBetaInfoBottomSheet = true
                     },
-                    isGlassEffectEnabled = appThemeStyle == AppThemeStyle.GLASS, onMenuClick = {
+                    isGlassEffectEnabled = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS, onMenuClick = {
                     }
                 )
             }

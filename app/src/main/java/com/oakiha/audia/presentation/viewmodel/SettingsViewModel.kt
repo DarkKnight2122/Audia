@@ -13,6 +13,7 @@ import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
 import com.oakiha.audia.data.repository.LyricsRepository
 import com.oakiha.audia.data.repository.AudiobookRepository
 import com.oakiha.audia.data.model.LyricsSourcePreference
+import com.oakiha.audia.data.model.AppThemeStyle
 import com.oakiha.audia.data.worker.SyncManager
 import com.oakiha.audia.data.worker.SyncProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +33,7 @@ import java.io.File
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
     val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,
-    val appThemeStyle: AppThemeStyle = AppThemeStyle.System,
+    val appThemeStyle: com.oakiha.audia.data.model.AppThemeStyle = com.oakiha.audia.data.model.AppThemeStyle.System,
     val playerThemePreference: String = ThemePreference.ALBUM_ART,
     val mockGenresEnabled: Boolean = false,
     val navBarCornerRadius: Int = 32,

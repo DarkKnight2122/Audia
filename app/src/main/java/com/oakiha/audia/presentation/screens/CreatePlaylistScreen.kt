@@ -48,6 +48,7 @@ import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Headphones
@@ -1196,7 +1197,7 @@ fun getIconByName(name: String?): ImageVector? {
                                     "Speaker" -> Icons.Rounded.Speaker
                                     "Favorite" -> Icons.Rounded.Favorite
                                     "Piano" -> Icons.Rounded.Piano
-                                    "Queue" -> androidx.compose.material.icons.Icons.AutoMirrored.Rounded.QueueMusic
+                                    "Queue" -> Icons.AutoMirrored.Rounded.QueueMusic
                                     else -> Icons.Rounded.MusicNote
                                 }}
 

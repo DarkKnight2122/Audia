@@ -75,6 +75,7 @@ import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import android.util.Log
 import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -1000,7 +1001,7 @@ fun SearchResultPlaylistItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistPlay,
+                imageVector = Icons.AutoMirrored.Rounded.PlaylistPlay,
                 contentDescription = "Playlist",
                 modifier = Modifier
                     .size(56.dp)

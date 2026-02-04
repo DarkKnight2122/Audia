@@ -30,6 +30,8 @@ import androidx.compose.material.icons.outlined.Speaker
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
+import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import com.oakiha.audia.utils.getContrastColor
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -149,7 +151,7 @@ fun PlaylistContainer(
                     )
                     Spacer(Modifier.height(16.dp))
                     Icon(
-                        androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistPlay,
+                        Icons.AutoMirrored.Rounded.PlaylistPlay,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -444,7 +446,7 @@ private fun getIconByName(name: String?): ImageVector? {
         "Speaker" -> Icons.Rounded.Speaker
         "Favorite" -> Icons.Rounded.Favorite
         "Piano" -> Icons.Rounded.Piano
-        "Queue" -> androidx.compose.material.icons.Icons.AutoMirrored.Rounded.QueueMusic
+        "Queue" -> Icons.AutoMirrored.Rounded.QueueMusic
         else -> Icons.Rounded.MusicNote
     }
 }
