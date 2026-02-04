@@ -28,7 +28,7 @@ internal class InverseLayerScope : GraphicsLayerScope {
 
     override var scaleX: Float = 1f
     override var scaleY: Float = 1f
-    override var alpha: Float = 0f
+    override var alpha: Float = 1f
     override var translationX: Float = 0f
     override var translationY: Float = 0f
     override var shadowElevation: Float = 0f
@@ -42,8 +42,8 @@ internal class InverseLayerScope : GraphicsLayerScope {
     override var shape: Shape = RectangleShape
     override var clip: Boolean = false
     override var renderEffect: RenderEffect? = null
-    override var blendMode: BlendMode = BlendMode.SrcOver
-    override var colorFilter: ColorFilter? = null
+    var blendMode: BlendMode = BlendMode.SrcOver
+    var colorFilter: ColorFilter? = null
     override var compositingStrategy: CompositingStrategy = CompositingStrategy.Auto
 
     private var matrix: Matrix? = null
