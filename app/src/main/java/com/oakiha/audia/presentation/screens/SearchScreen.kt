@@ -187,7 +187,7 @@ fun SearchScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(if (settingsViewModel.uiState.value.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) Color.Transparent else MaterialTheme.colorScheme.background)
     ) {
         Box(
             modifier = Modifier

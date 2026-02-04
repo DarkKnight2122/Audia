@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oakiha.audia.R
 import com.oakiha.audia.data.worker.SyncProgress
+import com.oakiha.audia.data.model.AppThemeStyle
+import com.oakiha.audia.ui.theme.LocalGlassStyle
 import com.oakiha.audia.presentation.viewmodel.LyricsRefreshProgress
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import androidx.compose.ui.res.vectorResource
@@ -100,8 +102,9 @@ fun SettingsItem(
         trailingIcon: @Composable () -> Unit = {},
         onClick: () -> Unit
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
             modifier =
                     Modifier.fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
@@ -148,8 +151,9 @@ fun SwitchSettingItem(
         leadingIcon: @Composable (() -> Unit)? = null,
         enabled: Boolean = true
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Row(
@@ -212,9 +216,10 @@ fun ThemeSelectorItem(
 ) {
     var showSheet by remember { mutableStateOf(false) }
     val selectedOption = options[selectedKey] ?: selectedKey
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
 
     Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
             modifier =
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable {
                         showSheet = true
@@ -351,8 +356,9 @@ fun SliderSettingsItem(
         onValueChange: (Float) -> Unit,
         valueText: (Float) -> String
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -384,8 +390,9 @@ fun RefreshLibraryItem(
         onFullSync: () -> Unit,
         onRebuild: () -> Unit
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -493,8 +500,9 @@ fun RefreshLyricsItem(
         progress: LyricsRefreshProgress,
         onRefresh: () -> Unit
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+            color = if (isGlass) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -574,8 +582,9 @@ fun ActionSettingsItem(
     onSecondaryAction: (() -> Unit)? = null,
     enabled: Boolean = true
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -640,6 +649,7 @@ fun GeminiApiKeyItem(
     title: String,
     subtitle: String
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     var localApiKey by remember(apiKey) { mutableStateOf(apiKey) }
     val hasChanges = localApiKey != apiKey
     var showSaved by remember { mutableStateOf(false) }
@@ -652,7 +662,7 @@ fun GeminiApiKeyItem(
     }
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -711,6 +721,7 @@ fun GeminiSystemPromptItem(
     title: String,
     subtitle: String
 ) {
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     var localPrompt by remember(systemPrompt) { mutableStateOf(systemPrompt) }
     val hasChanges = localPrompt != systemPrompt
     val isDefault = systemPrompt == defaultPrompt
@@ -724,7 +735,7 @@ fun GeminiSystemPromptItem(
     }
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = if (isGlass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

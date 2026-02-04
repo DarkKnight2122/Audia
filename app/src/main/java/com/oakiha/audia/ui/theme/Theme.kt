@@ -24,6 +24,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.unit.dp
 
 val LocalAudioBookPlayerDarkTheme = staticCompositionLocalOf { false }
+val LocalGlassStyle = staticCompositionLocalOf { com.oakiha.audia.data.model.AppThemeStyle.System }
 
 val DarkColorScheme = darkColorScheme(
     primary = AudioBookPlayerPurplePrimary,
@@ -133,7 +134,10 @@ fun AudioBookPlayerTheme(
         }
     }
 
-    CompositionLocalProvider(LocalAudioBookPlayerDarkTheme provides darkTheme) {
+    CompositionLocalProvider(
+        LocalAudioBookPlayerDarkTheme provides darkTheme,
+        LocalGlassStyle provides appThemeStyle
+    ) {
         MaterialTheme(
             colorScheme = finalColorScheme,
             typography = Typography,

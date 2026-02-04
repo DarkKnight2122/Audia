@@ -330,7 +330,7 @@ fun LibraryScreen(
     val currentTabTitle = currentTab.displayTitle()
 
     Scaffold(
-        modifier = Modifier.background(brush = gradientBrush),
+        modifier = Modifier.background(brush = if (playerViewModel.appThemeStyle.value == com.oakiha.audia.data.model.AppThemeStyle.GLASS) Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)) else gradientBrush),
         topBar = {
             TopAppBar(
                 title = {

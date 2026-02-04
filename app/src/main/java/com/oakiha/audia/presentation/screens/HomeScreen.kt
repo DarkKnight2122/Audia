@@ -114,7 +114,7 @@ fun HomeScreen(
                 state = rememberLazyListState(),
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                    .background(if (appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) Color.Transparent else MaterialTheme.colorScheme.background),
                 contentPadding = PaddingValues(
                     top = scaffoldPadding.calculateTopPadding(),
                     bottom = paddingValuesParent.calculateBottomPadding()
@@ -183,12 +183,12 @@ fun HomeScreen(
                         colorStops = arrayOf(
                             0.0f to Color.Transparent,
                             0.2f to Color.Transparent,
-                            0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
-                            1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
+                            0.8f to (if (appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerLowest),
+                            1.0f to (if (appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerLowest)
                         )
                     )
                 )
-        ) { } // 
+        ) { }
     }
     
     if (showChangelogBottomSheet) {
