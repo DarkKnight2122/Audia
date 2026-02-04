@@ -74,7 +74,7 @@ fun LyricsFloatingToolbar(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBack) {
+        IconButton(onClick = onNavigateBack) {
             Icon(
                 imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Back",
