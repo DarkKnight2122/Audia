@@ -215,6 +215,8 @@ fun LibraryScreen(
     val libraryNavigationMode by playerViewModel.libraryNavigationMode.collectAsState()
     val isSortSheetVisible by playerViewModel.isSortingSheetVisible.collectAsState()
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
+    
+    val appThemeStyle by playerViewModel.appThemeStyle.collectAsState()
 
     val m3uImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -330,7 +332,7 @@ fun LibraryScreen(
     val currentTabTitle = currentTab.displayTitle()
 
     Scaffold(
-        modifier = Modifier.background(brush = if (playerViewModel.appThemeStyle.value == com.oakiha.audia.data.model.AppThemeStyle.GLASS) Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)) else gradientBrush),
+        modifier = Modifier.background(brush = if (appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)) else gradientBrush),
         topBar = {
             TopAppBar(
                 title = {

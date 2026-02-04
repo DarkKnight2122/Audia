@@ -336,12 +336,14 @@ fun SettingsCategoryScreen(
                             )
                             Spacer(Modifier.height(4.dp))
 
+                            val isGlassStyle = uiState.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
                             SwitchSettingItem(
                                 title = "Pure Black (AMOLED)",
-                                subtitle = "Force pure black backgrounds in dark mode to save battery on OLED screens.",
+                                subtitle = if (isGlassStyle) "Not available in Liquid Glass mode" else "Force pure black backgrounds in dark mode to save battery on OLED screens.",
                                 checked = uiState.pureBlackDarkMode,
                                 onCheckedChange = { settingsViewModel.setPureBlackDarkMode(it) },
-                                leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+                                leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) },
+                                enabled = !isGlassStyle
                             )
                             Spacer(Modifier.height(4.dp))
                             

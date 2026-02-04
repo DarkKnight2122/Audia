@@ -83,6 +83,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.MediumFloatingActionButton
+import com.oakiha.audia.data.model.AppThemeStyle
+import com.oakiha.audia.ui.theme.LocalGlassStyle
+import com.oakiha.audia.ui.theme.glass.library.drawBackdrop
+import com.oakiha.audia.ui.theme.glass.library.effects.blur
+import com.oakiha.audia.ui.theme.glass.library.effects.lens
+import com.oakiha.audia.ui.theme.glass.library.effects.vibrancy
+import com.oakiha.audia.ui.theme.glass.library.highlight.Highlight
+import com.oakiha.audia.ui.theme.glass.library.shadow.Shadow
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material.icons.filled.Add
@@ -218,6 +226,7 @@ fun QueueBottomSheet(
     modifier: Modifier = Modifier,
     tonalElevation: Dp = 10.dp,
     shape: RoundedCornerShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    backdrop: com.oakiha.audia.ui.theme.glass.library.Backdrop? = null
     ) {
     val colors = MaterialTheme.colorScheme
     var showTimerOptions by rememberSaveable { mutableStateOf(false) }
@@ -485,11 +494,31 @@ fun QueueBottomSheet(
         if (draggingSheetFromList && !listState.isScrollInProgress) finalizeListDrag()
     }
 
+    val isGlass = LocalGlassStyle.current == AppThemeStyle.GLASS
     Surface(
-        modifier = modifier,
+        modifier = modifier.then(
+            if (isGlass && backdrop != null) {
+                Modifier.drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { shape },
+                    effects = {
+                        vibrancy()
+                        blur(28f.dp.toPx()) // Heavy blur for stacked layers
+                        lens(refractionHeight = 12f.dp.toPx(), refractionAmount = 20f.dp.toPx())
+                    },
+                    highlight = { Highlight.Default.copy(alpha = 0.2f) },
+                    shadow = { Shadow.Default.copy(alpha = 0.1f) },
+                    onDrawSurface = {
+                        drawRect(colors.surfaceContainer.copy(alpha = 0.75f)) // Higher alpha for stacked readability
+                    }
+                )
+            } else {
+                Modifier
+            }
+        ),
         shape = shape,
-        tonalElevation = tonalElevation,
-        color = colors.surfaceContainer,
+        tonalElevation = if (isGlass) 0.dp else tonalElevation,
+        color = if (isGlass) Color.Transparent else colors.surfaceContainer,
     ) {
         Box(
             modifier = Modifier.fillMaxSize()

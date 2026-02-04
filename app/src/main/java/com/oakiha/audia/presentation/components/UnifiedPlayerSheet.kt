@@ -1480,7 +1480,8 @@ fun UnifiedPlayerSheet(
                                     onRequestSaveAsPlaylist = onRequestSavePlaylist,
                                     onQueueDragStart = onQueueStartDrag,
                                     onQueueDrag = onQueueDrag,
-                                    onQueueRelease = onQueueRelease
+                                    onQueueRelease = onQueueRelease,
+                                    backdrop = backdrop
                                 )
                               }
 
