@@ -243,9 +243,9 @@ fun CastBottomSheet(
         }
     }
 
-    val activeDevice = if (isRemoteSession && activeRoute != null) {
+    val activeDevice = if (isRemoteSession) {
         ActiveDeviceUi(
-            id = activeRoute.id,
+            id = activeRoute!!.id,
             title = activeRoute.name,
             subtitle = "Casting session",
             isRemote = true,

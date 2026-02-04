@@ -888,13 +888,12 @@ private fun CoverArtCropperDialog(
                                     val bytes = withContext(Dispatchers.IO) {
                                         imageBitmapToJpeg(captured)
                                     }
-                                    if (bytes != null) {
-                                        onConfirm(
-                                            CoverArtCropResult(
-                                                preview = captured,
-                                                update = CoverArtUpdate(bytes, COVER_ART_MIME_TYPE)
-                                            )
+                                    onConfirm(
+                                        CoverArtCropResult(
+                                            preview = captured,
+                                            update = CoverArtUpdate(bytes, COVER_ART_MIME_TYPE)
                                         )
+                                    )
                                     } else {
                                         Timber.w("Failed to convert captured cover art to JPEG")
                                     }
