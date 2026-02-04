@@ -67,7 +67,9 @@ import com.oakiha.audia.presentation.screens.SetupScreen
 import com.oakiha.audia.presentation.viewmodel.MainViewModel
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
 import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
+import com.oakiha.audia.presentation.components.GradientBackground
 import com.oakiha.audia.ui.theme.AudioBookPlayerTheme
+import com.oakiha.audia.ui.theme.glass.liquidGlass
 import com.oakiha.audia.utils.CrashHandler
 import com.oakiha.audia.utils.LogUtils
 import com.oakiha.audia.presentation.components.CrashReportDialog
@@ -217,8 +219,20 @@ class MainActivity : ComponentActivity() {
                 usePureBlack = usePureBlack,
                 appThemeStyle = appThemeStyle
             ) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    if (showSetupScreen != null) {
+                val isGlass = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
+                val rootModifier = if (isGlass) {
+                    Modifier.fillMaxSize().liquidGlass(cornerRadius = 0.dp)
+                } else {
+                    Modifier.fillMaxSize()
+                }
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (isGlass) {
+                        GradientBackground(isDarkTheme = useDarkTheme)
+                    }
+                    
+                    Surface(modifier = rootModifier, color = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background) {
+                        if (showSetupScreen != null) {
                         AnimatedContent(
                             targetState = showSetupScreen,
                             transitionSpec = {

@@ -894,9 +894,6 @@ private fun CoverArtCropperDialog(
                                             update = CoverArtUpdate(bytes, COVER_ART_MIME_TYPE)
                                         )
                                     )
-                                    } else {
-                                        Timber.w("Failed to convert captured cover art to JPEG")
-                                    }
                                 } else {
                                     Timber.w("CaptureController returned null bitmap")
                                 }

@@ -1041,7 +1041,11 @@ fun UnifiedPlayerSheet(
                                     clip = false
                                 )
                                 .background(
-                                    color = albumColorScheme.primaryContainer,
+                                    color = if (settingsViewModel.uiState.value.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS) {
+                                        albumColorScheme.primaryContainer.copy(alpha = 0.45f)
+                                    } else {
+                                        albumColorScheme.primaryContainer
+                                    },
                                     shape = playerShadowShape
                                 )
                                 .clipToBounds()

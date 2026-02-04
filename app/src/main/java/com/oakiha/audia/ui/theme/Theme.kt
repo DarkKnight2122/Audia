@@ -75,6 +75,8 @@ fun AudioBookPlayerTheme(
     val context = LocalContext.current
     val isBlackMode = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.Black || (darkTheme && usePureBlack)
     
+    val isGlassMode = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
+    
     val baseDarkScheme = if (isBlackMode) {
         DarkColorScheme.copy(
             background = Color.Black,
@@ -85,13 +87,23 @@ fun AudioBookPlayerTheme(
             surfaceContainerLow = Color(0xFF0A0A0A),
             surfaceContainerLowest = Color(0xFF050505)
         )
+    } else if (isGlassMode) {
+        DarkColorScheme.copy(
+            background = Color.Transparent,
+            surface = Color.White.copy(alpha = 0.05f),
+            surfaceContainer = Color.White.copy(alpha = 0.08f),
+            surfaceContainerHigh = Color.White.copy(alpha = 0.12f),
+            surfaceContainerHighest = Color.White.copy(alpha = 0.15f),
+            surfaceContainerLow = Color.Black.copy(alpha = 0.05f),
+            surfaceContainerLowest = Color.Black.copy(alpha = 0.1f)
+        )
     } else {
         DarkColorScheme
     }
 
     val finalColorScheme = when {
-        colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            // Tema dinÃ¡mico del sistema como prioridad si no hay override
+        colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !isBlackMode && !isGlassMode -> {
+            // Tema dinÃ¡mico del sistema como prioridad si no hay override Y no es un modo especial
             try {
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } catch (e: Exception) {
