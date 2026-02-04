@@ -19,7 +19,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         FavoritesEntity::class,
         LyricsEntity::class
     ],
-    version = 14, // Incremented version for lyrics table
+    version = 15, // Incremented version for terminology sync
     exportSchema = false
 )
 abstract class AudioBookDatabase : RoomDatabase() {

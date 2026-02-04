@@ -172,6 +172,18 @@ constructor(
         val TAP_BACKGROUND_CLOSES_PLAYER = booleanPreferencesKey("tap_background_closes_player")
         val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
         val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
+        val PURE_BLACK_DARK_MODE = booleanPreferencesKey("pure_black_dark_mode")
+    }
+
+    val pureBlackDarkModeFlow: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.PURE_BLACK_DARK_MODE] ?: true // Default to true for AMOLED-by-Default
+        }
+
+    suspend fun setPureBlackDarkMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PURE_BLACK_DARK_MODE] = enabled
+        }
     }
 
     val appRebrandDialogShownFlow: Flow<Boolean> =

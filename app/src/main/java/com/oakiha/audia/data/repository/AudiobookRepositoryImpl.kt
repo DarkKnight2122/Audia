@@ -482,7 +482,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                 if (folderPath != null) {
                     val folderFile = File(folderPath)
                     // Create or get the leaf folder
-                    val leafFolder = tempFolders.getOrPut(folderPath) { TempFolder(folderPath, folderFile.name) }
+                    val leafFolder = tempFolders.getOrPut(folderPath) { TempFolder(folderPath, folderFile.name ?: "") }
                     leafFolder.tracks.addAll(tracksInFolder)
 
                     // Build hierarchy upwards
@@ -493,7 +493,7 @@ class AudiobookRepositoryImpl @Inject constructor(
                         val parentFile = currentFile.parentFile!!
                         val parentPath = parentFile.path
 
-                        val parentFolder = tempFolders.getOrPut(parentPath) { TempFolder(parentPath, parentFile.name) }
+                        val parentFolder = tempFolders.getOrPut(parentPath) { TempFolder(parentPath, parentFile.name ?: "") }
                         val added = parentFolder.subFolderPaths.add(currentPath)
 
                         if (!added) {

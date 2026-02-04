@@ -147,12 +147,6 @@ class MainActivity : ComponentActivity() {
         LogUtils.d(this, "onCreate")
         installSplashScreen()
         enableEdgeToEdge()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            window.navigationBarColor = Color.TRANSPARENT
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
         super.onCreate(savedInstanceState)
 
         // LEER SEÃƒÆ’Ã¢â‚¬ËœAL DE BENCHMARK
@@ -162,6 +156,7 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = hiltViewModel()
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by userPreferencesRepository.appThemeModeFlow.collectAsState(initial = AppThemeMode.FOLLOW_SYSTEM)
+            val usePureBlack by userPreferencesRepository.pureBlackDarkModeFlow.collectAsState(initial = true)
             val useDarkTheme = when (appThemeMode) {
                 AppThemeMode.DARK -> true
                 AppThemeMode.LIGHT -> false
@@ -217,7 +212,8 @@ class MainActivity : ComponentActivity() {
             }
 
             AudioBookPlayerTheme(
-                darkTheme = useDarkTheme
+                darkTheme = useDarkTheme,
+                usePureBlack = usePureBlack
             ) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     if (showSetupScreen != null) {

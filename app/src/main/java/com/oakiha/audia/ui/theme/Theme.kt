@@ -67,10 +67,25 @@ val LightColorScheme = lightColorScheme(
 @Composable
 fun AudioBookPlayerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    usePureBlack: Boolean = false,
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val baseDarkScheme = if (usePureBlack) {
+        DarkColorScheme.copy(
+            background = Color.Black,
+            surface = Color.Black,
+            surfaceContainer = Color(0xFF111111),
+            surfaceContainerHigh = Color(0xFF1A111A),
+            surfaceContainerHighest = Color(0xFF222222),
+            surfaceContainerLow = Color(0xFF0A0A0A),
+            surfaceContainerLowest = Color(0xFF050505)
+        )
+    } else {
+        DarkColorScheme
+    }
+
     val finalColorScheme = when {
         colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             // Tema dinÃ¡mico del sistema como prioridad si no hay override
@@ -78,7 +93,7 @@ fun AudioBookPlayerTheme(
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } catch (e: Exception) {
                 // Fallback a los defaults si dynamic colors falla (raro, pero posible en algunos dispositivos)
-                if (darkTheme) DarkColorScheme else LightColorScheme
+                if (darkTheme) baseDarkScheme else LightColorScheme
             }
         }
         colorSchemePairOverride != null -> {
@@ -86,7 +101,7 @@ fun AudioBookPlayerTheme(
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
         // Fallback final a los defaults si no hay override ni dynamic colors aplicables
-        darkTheme -> DarkColorScheme
+        darkTheme -> baseDarkScheme
         else -> LightColorScheme
     }
 

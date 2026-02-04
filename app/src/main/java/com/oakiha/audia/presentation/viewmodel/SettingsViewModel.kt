@@ -175,15 +175,15 @@ class SettingsViewModel @Inject constructor(
         // Group 1: Core UI settings (theme, navigation, appearance)
         viewModelScope.launch {
             combine(
-                userPreferencesRepository.appRebrandDialogShownFlow,
-                userPreferencesRepository.appThemeModeFlow,
-                userPreferencesRepository.playerThemePreferenceFlow,
-                userPreferencesRepository.mockGenresEnabledFlow,
-                userPreferencesRepository.navBarCornerRadiusFlow,
-                userPreferencesRepository.navBarStyleFlow,
-                userPreferencesRepository.libraryNavigationModeFlow,
-                userPreferencesRepository.carouselStyleFlow,
-                userPreferencesRepository.launchTabFlow
+                userPreferencesRepository.appRebrandDialogShownFlow as Flow<Any>,
+                userPreferencesRepository.appThemeModeFlow as Flow<Any>,
+                userPreferencesRepository.playerThemePreferenceFlow as Flow<Any>,
+                userPreferencesRepository.mockGenresEnabledFlow as Flow<Any>,
+                userPreferencesRepository.navBarCornerRadiusFlow as Flow<Any>,
+                userPreferencesRepository.navBarStyleFlow as Flow<Any>,
+                userPreferencesRepository.libraryNavigationModeFlow as Flow<Any>,
+                userPreferencesRepository.carouselStyleFlow as Flow<Any>,
+                userPreferencesRepository.launchTabFlow as Flow<Any>
             ) { values ->
                 val appThemeMode = values[1] as String
                 val appThemeStyle = when (appThemeMode) {
@@ -224,17 +224,17 @@ class SettingsViewModel @Inject constructor(
         // Group 2: Playback and system settings
         viewModelScope.launch {
             combine(
-                userPreferencesRepository.keepPlayingInBackgroundFlow,
-                userPreferencesRepository.disableCastAutoplayFlow,
-                userPreferencesRepository.showQueueHistoryFlow,
-                userPreferencesRepository.isCrossfadeEnabledFlow,
-                userPreferencesRepository.crossfadeDurationFlow,
-                userPreferencesRepository.persistentShuffleEnabledFlow,
-                userPreferencesRepository.lyricsSourcePreferenceFlow,
-                userPreferencesRepository.autoScanLrcFilesFlow,
-                userPreferencesRepository.blockedDirectoriesFlow,
-                userPreferencesRepository.immersiveLyricsEnabledFlow,
-                userPreferencesRepository.immersiveLyricsTimeoutFlow
+                userPreferencesRepository.keepPlayingInBackgroundFlow as Flow<Any>,
+                userPreferencesRepository.disableCastAutoplayFlow as Flow<Any>,
+                userPreferencesRepository.showQueueHistoryFlow as Flow<Any>,
+                userPreferencesRepository.isCrossfadeEnabledFlow as Flow<Any>,
+                userPreferencesRepository.crossfadeDurationFlow as Flow<Any>,
+                userPreferencesRepository.persistentShuffleEnabledFlow as Flow<Any>,
+                userPreferencesRepository.lyricsSourcePreferenceFlow as Flow<Any>,
+                userPreferencesRepository.autoScanLrcFilesFlow as Flow<Any>,
+                userPreferencesRepository.blockedDirectoriesFlow as Flow<Any>,
+                userPreferencesRepository.immersiveLyricsEnabledFlow as Flow<Any>,
+                userPreferencesRepository.immersiveLyricsTimeoutFlow as Flow<Any>
             ) { values ->
                 SettingsUiUpdate.Group2(
                     keepPlayingInBackground = values[0] as Boolean,
