@@ -71,6 +71,7 @@ import com.oakiha.audia.presentation.components.GradientBackground
 import com.oakiha.audia.ui.theme.glass.library.backdrops.rememberLayerBackdrop
 import com.oakiha.audia.ui.theme.glass.library.backdrops.LayerBackdrop
 import com.oakiha.audia.ui.theme.glass.library.backdrops.emptyBackdrop
+import com.oakiha.audia.ui.theme.glass.library.backdrops.layerBackdrop
 import com.oakiha.audia.ui.theme.AudioBookPlayerTheme
 import com.oakiha.audia.ui.theme.glass.liquidGlass
 import com.oakiha.audia.utils.CrashHandler
@@ -171,6 +172,10 @@ class MainActivity : ComponentActivity() {
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsState()
             var showSetupScreen by remember { mutableStateOf<Boolean?>(null) }
             
+            val appThemeStyle by userPreferencesRepository.appThemeStyleFlow.collectAsState(initial = com.oakiha.audia.data.model.AppThemeStyle.System)
+            val isGlass = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
+            val backgroundBackdrop = if (isGlass) rememberLayerBackdrop() else null
+
             // Crash report dialog state
             var showCrashReportDialog by remember { mutableStateOf(false) }
             var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
@@ -222,18 +227,15 @@ class MainActivity : ComponentActivity() {
                 usePureBlack = usePureBlack,
                 appThemeStyle = appThemeStyle
             ) {
-                val isGlass = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
                 val rootModifier = if (isGlass) {
                     Modifier.fillMaxSize().liquidGlass(cornerRadius = 0.dp)
                 } else {
                     Modifier.fillMaxSize()
                 }
 
-                val backgroundBackdrop = if (isGlass) rememberLayerBackdrop() else null
-
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (isGlass && backgroundBackdrop != null) {
-                        Box(Modifier.fillMaxSize().com.oakiha.audia.ui.theme.glass.library.backdrops.layerBackdrop(backgroundBackdrop)) {
+                        Box(Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
                             GradientBackground(isDarkTheme = useDarkTheme)
                         }
                     }
