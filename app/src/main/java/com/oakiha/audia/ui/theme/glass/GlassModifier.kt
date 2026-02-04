@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.oakiha.audia.ui.theme.glass.library.RoundedRectRefractionShaderString
 
 /**
  * Applies a "Liquid Glass" refraction effect to the content.
@@ -26,7 +27,7 @@ fun Modifier.liquidGlass(
 
     val shader = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            RuntimeShader(GlassRefractionShaderString)
+            RuntimeShader(RoundedRectRefractionShaderString)
         } else null
     }
 

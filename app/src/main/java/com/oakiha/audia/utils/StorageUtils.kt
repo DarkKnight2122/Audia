@@ -77,18 +77,21 @@ object StorageUtils {
      * Get the file path for a StorageVolume
      */
     private fun getVolumePath(volume: StorageVolume): File? {
-        return try {
-            // Use directory property (API 30+)
-            volume.directory
-        } catch (e: Exception) {
-            // Fallback for older approach
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             try {
-                val getPath = volume.javaClass.getMethod("getPath")
-                val path = getPath.invoke(volume) as? String
-                path?.let { File(it) }
-            } catch (e: Exception) {
-                null
+                return volume.directory
+            } catch (e: Throwable) {
+                // Fallback if directory property access fails for some reason
             }
+        }
+
+        // Fallback for older approach
+        return try {
+            val getPath = volume.javaClass.getMethod("getPath")
+            val path = getPath.invoke(volume) as? String
+            path?.let { File(it) }
+        } catch (e: Exception) {
+            null
         }
     }
 

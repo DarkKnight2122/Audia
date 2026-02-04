@@ -156,11 +156,12 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = hiltViewModel()
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by userPreferencesRepository.appThemeModeFlow.collectAsState(initial = AppThemeMode.FOLLOW_SYSTEM)
+            val appThemeStyle by userPreferencesRepository.appThemeStyleFlow.collectAsState(initial = com.oakiha.audia.data.model.AppThemeStyle.System)
             val usePureBlack by userPreferencesRepository.pureBlackDarkModeFlow.collectAsState(initial = true)
             val useDarkTheme = when (appThemeMode) {
                 AppThemeMode.DARK -> true
                 AppThemeMode.LIGHT -> false
-                else -> systemDarkTheme
+                else -> systemDarkTheme || appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.Black
             }
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsState()
             var showSetupScreen by remember { mutableStateOf<Boolean?>(null) }
@@ -213,7 +214,8 @@ class MainActivity : ComponentActivity() {
 
             AudioBookPlayerTheme(
                 darkTheme = useDarkTheme,
-                usePureBlack = usePureBlack
+                usePureBlack = usePureBlack,
+                appThemeStyle = appThemeStyle
             ) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     if (showSetupScreen != null) {

@@ -55,6 +55,7 @@ data class SettingsUiState(
     val modelsFetchError: String? = null,
     val appRebrandDialogShown: Boolean = false,
     val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
+    val pureBlackDarkMode: Boolean = true,
     // Developer Options
     val bookArtQuality: BookArtQuality = BookArtQuality.MEDIUM,
     val tapBackgroundClosesPlayer: Boolean = true,
@@ -108,7 +109,8 @@ private sealed interface SettingsUiUpdate {
         val autoScanLrcFiles: Boolean,
         val blockedDirectories: Set<String>,
         val immersiveLyricsEnabled: Boolean,
-        val immersiveLyricsTimeout: Long
+        val immersiveLyricsTimeout: Long,
+        val pureBlackDarkMode: Boolean
     ) : SettingsUiUpdate
 }
 
@@ -134,14 +136,8 @@ class SettingsViewModel @Inject constructor(
     val geminiSystemPrompt: StateFlow<String> = userPreferencesRepository.geminiSystemPrompt
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesRepository.DEFAULT_SYSTEM_PROMPT)
 
-    val appThemeStyle: StateFlow<com.oakiha.audia.data.model.AppThemeStyle> = userPreferencesRepository.appThemeModeFlow
-        .map { mode ->
-            when (mode) {
-                AppThemeMode.LIGHT -> com.oakiha.audia.data.model.AppThemeStyle.Light
-                AppThemeMode.DARK -> com.oakiha.audia.data.model.AppThemeStyle.Dark
-                else -> com.oakiha.audia.data.model.AppThemeStyle.System
-            }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.oakiha.audia.data.model.AppThemeStyle.System)
+    val appThemeStyle: StateFlow<com.oakiha.audia.data.model.AppThemeStyle> = userPreferencesRepository.appThemeStyleFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.oakiha.audia.data.model.AppThemeStyle.System)
 
     private val fileExplorerStateHolder = FileExplorerStateHolder(userPreferencesRepository, viewModelScope, context)
 
@@ -183,18 +179,13 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.navBarStyleFlow as Flow<Any>,
                 userPreferencesRepository.libraryNavigationModeFlow as Flow<Any>,
                 userPreferencesRepository.carouselStyleFlow as Flow<Any>,
-                userPreferencesRepository.launchTabFlow as Flow<Any>
+                userPreferencesRepository.launchTabFlow as Flow<Any>,
+                userPreferencesRepository.appThemeStyleFlow as Flow<Any>
             ) { values ->
-                val appThemeMode = values[1] as String
-                val appThemeStyle = when (appThemeMode) {
-                    AppThemeMode.LIGHT -> com.oakiha.audia.data.model.AppThemeStyle.Light
-                    AppThemeMode.DARK -> com.oakiha.audia.data.model.AppThemeStyle.Dark
-                    else -> com.oakiha.audia.data.model.AppThemeStyle.System
-                }
                 SettingsUiUpdate.Group1(
                     appRebrandDialogShown = values[0] as Boolean,
-                    appThemeMode = appThemeMode,
-                    appThemeStyle = appThemeStyle,
+                    appThemeMode = values[1] as String,
+                    appThemeStyle = values[9] as com.oakiha.audia.data.model.AppThemeStyle,
                     playerThemePreference = values[2] as String,
                     mockGenresEnabled = values[3] as Boolean,
                     navBarCornerRadius = values[4] as Int,
@@ -234,7 +225,8 @@ class SettingsViewModel @Inject constructor(
                 userPreferencesRepository.autoScanLrcFilesFlow as Flow<Any>,
                 userPreferencesRepository.blockedDirectoriesFlow as Flow<Any>,
                 userPreferencesRepository.immersiveLyricsEnabledFlow as Flow<Any>,
-                userPreferencesRepository.immersiveLyricsTimeoutFlow as Flow<Any>
+                userPreferencesRepository.immersiveLyricsTimeoutFlow as Flow<Any>,
+                userPreferencesRepository.pureBlackDarkModeFlow as Flow<Any>
             ) { values ->
                 SettingsUiUpdate.Group2(
                     keepPlayingInBackground = values[0] as Boolean,
@@ -247,7 +239,8 @@ class SettingsViewModel @Inject constructor(
                     autoScanLrcFiles = values[7] as Boolean,
                     blockedDirectories = @Suppress("UNCHECKED_CAST") (values[8] as Set<String>),
                     immersiveLyricsEnabled = values[9] as Boolean,
-                    immersiveLyricsTimeout = values[10] as Long
+                    immersiveLyricsTimeout = values[10] as Long,
+                    pureBlackDarkMode = values[11] as Boolean
                 )
             }.collect { update ->
                 _uiState.update { state ->
@@ -262,7 +255,8 @@ class SettingsViewModel @Inject constructor(
                         autoScanLrcFiles = update.autoScanLrcFiles,
                         blockedDirectories = update.blockedDirectories,
                         immersiveLyricsEnabled = update.immersiveLyricsEnabled,
-                        immersiveLyricsTimeout = update.immersiveLyricsTimeout
+                        immersiveLyricsTimeout = update.immersiveLyricsTimeout,
+                        pureBlackDarkMode = update.pureBlackDarkMode
                     )
                 }
             }
@@ -502,6 +496,18 @@ class SettingsViewModel @Inject constructor(
     fun setImmersiveLyricsTimeout(timeout: Long) {
         viewModelScope.launch {
             userPreferencesRepository.setImmersiveLyricsTimeout(timeout)
+        }
+    }
+
+    fun setPureBlackDarkMode(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setPureBlackDarkMode(enabled)
+        }
+    }
+
+    fun setAppThemeStyle(style: com.oakiha.audia.data.model.AppThemeStyle) {
+        viewModelScope.launch {
+            userPreferencesRepository.setAppThemeStyle(style)
         }
     }
 

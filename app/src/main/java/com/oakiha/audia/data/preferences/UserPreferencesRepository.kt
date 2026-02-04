@@ -173,6 +173,24 @@ constructor(
         val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
         val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
         val PURE_BLACK_DARK_MODE = booleanPreferencesKey("pure_black_dark_mode")
+        val APP_THEME_STYLE = stringPreferencesKey("app_theme_style_v1")
+    }
+
+    val appThemeStyleFlow: Flow<com.oakiha.audia.data.model.AppThemeStyle> =
+        dataStore.data.map { preferences ->
+            val name = preferences[PreferencesKeys.APP_THEME_STYLE]
+            try {
+                if (name != null) com.oakiha.audia.data.model.AppThemeStyle.valueOf(name)
+                else com.oakiha.audia.data.model.AppThemeStyle.System
+            } catch (e: Exception) {
+                com.oakiha.audia.data.model.AppThemeStyle.System
+            }
+        }
+
+    suspend fun setAppThemeStyle(style: com.oakiha.audia.data.model.AppThemeStyle) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_THEME_STYLE] = style.name
+        }
     }
 
     val pureBlackDarkModeFlow: Flow<Boolean> =

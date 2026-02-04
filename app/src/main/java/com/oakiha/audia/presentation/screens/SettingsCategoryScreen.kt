@@ -335,6 +335,15 @@ fun SettingsCategoryScreen(
                                 leadingIcon = { Icon(painterResource(R.drawable.rounded_rounded_corner_24), null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
+
+                            SwitchSettingItem(
+                                title = "Pure Black (AMOLED)",
+                                subtitle = "Force pure black backgrounds in dark mode to save battery on OLED screens.",
+                                checked = uiState.pureBlackDarkMode,
+                                onCheckedChange = { settingsViewModel.setPureBlackDarkMode(it) },
+                                leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+                            )
+                            Spacer(Modifier.height(4.dp))
                             
                             ThemeSelectorItem(
                                 label = "App Theme",
@@ -347,6 +356,26 @@ fun SettingsCategoryScreen(
                                 selectedKey = uiState.appThemeMode,
                                 onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
                                 leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+                            )
+                            Spacer(Modifier.height(4.dp))
+
+                            ThemeSelectorItem(
+                                label = "Visual Style",
+                                description = "Select the overall aesthetic style of the application.",
+                                options = mapOf(
+                                    com.oakiha.audia.data.model.AppThemeStyle.System.name to "Standard",
+                                    com.oakiha.audia.data.model.AppThemeStyle.GLASS.name to "Liquid Glass"
+                                ),
+                                selectedKey = uiState.appThemeStyle.name,
+                                onSelectionChanged = { key ->
+                                    try {
+                                        val style = com.oakiha.audia.data.model.AppThemeStyle.valueOf(key)
+                                        settingsViewModel.setAppThemeStyle(style)
+                                    } catch (e: Exception) {
+                                        // Ignore invalid keys
+                                    }
+                                },
+                                leadingIcon = { Icon(Icons.Outlined.Style, null, tint = MaterialTheme.colorScheme.secondary) }
                             )
                             Spacer(Modifier.height(4.dp))
                             ThemeSelectorItem(

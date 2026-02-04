@@ -68,11 +68,14 @@ val LightColorScheme = lightColorScheme(
 fun AudioBookPlayerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     usePureBlack: Boolean = false,
+    appThemeStyle: com.oakiha.audia.data.model.AppThemeStyle = com.oakiha.audia.data.model.AppThemeStyle.System,
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val baseDarkScheme = if (usePureBlack) {
+    val isBlackMode = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.Black || (darkTheme && usePureBlack)
+    
+    val baseDarkScheme = if (isBlackMode) {
         DarkColorScheme.copy(
             background = Color.Black,
             surface = Color.Black,
