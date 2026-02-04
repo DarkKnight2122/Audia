@@ -231,7 +231,7 @@ class MainActivity : ComponentActivity() {
                         GradientBackground(isDarkTheme = useDarkTheme)
                     }
                     
-                    Surface(modifier = rootModifier, color = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background) {
+                    Surface(modifier = rootModifier, color = if (isGlass) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.background) {
                         Box(modifier = Modifier.fillMaxSize()) { // Inner box for content
                             if (showSetupScreen != null) {
                                 AnimatedContent(
