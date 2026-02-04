@@ -164,6 +164,8 @@ class MainActivity : ComponentActivity() {
             val appThemeMode by userPreferencesRepository.appThemeModeFlow.collectAsState(initial = AppThemeMode.FOLLOW_SYSTEM)
             val appThemeStyle by userPreferencesRepository.appThemeStyleFlow.collectAsState(initial = com.oakiha.audia.data.model.AppThemeStyle.System)
             val usePureBlack by userPreferencesRepository.pureBlackDarkModeFlow.collectAsState(initial = true)
+            
+            val isGlass = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
             val useDarkTheme = when (appThemeMode) {
                 AppThemeMode.DARK -> true
                 AppThemeMode.LIGHT -> false
@@ -172,8 +174,6 @@ class MainActivity : ComponentActivity() {
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsState()
             var showSetupScreen by remember { mutableStateOf<Boolean?>(null) }
             
-            val appThemeStyle by userPreferencesRepository.appThemeStyleFlow.collectAsState(initial = com.oakiha.audia.data.model.AppThemeStyle.System)
-            val isGlass = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
             val backgroundBackdrop = if (isGlass) rememberLayerBackdrop() else null
 
             // Crash report dialog state
@@ -263,12 +263,13 @@ class MainActivity : ComponentActivity() {
                                             // If permissions are still missing despite setup "completing" (e.g. user skipped or ignored?), 
                                             // the LaunchedEffect(permissionsValid) above handles state, 
                                             // but we explicitly update local state here too.
-                                            showSetupScreen = false
-                                        })
-                                    } else {
-                                        MainAppContent(playerViewModel, mainViewModel)
-                                    }
-                                }
+                                                                                showSetupScreen = false
+                                                                            })
+                                                                        } else {
+                                                                            MainAppContent(playerViewModel, mainViewModel, backgroundBackdrop)
+                                                                        }
+                                                                    }
+                                            
                             }
                             
                             // Show crash report dialog if needed
@@ -385,7 +386,11 @@ class MainActivity : ComponentActivity() {
 
     @androidx.annotation.OptIn(UnstableApi::class)
     @Composable
-    private fun MainAppContent(playerViewModel: PlayerViewModel, mainViewModel: MainViewModel) {
+    private fun MainAppContent(
+        playerViewModel: PlayerViewModel,
+        mainViewModel: MainViewModel,
+        backgroundBackdrop: com.oakiha.audia.ui.theme.glass.library.backdrops.LayerBackdrop?
+    ) {
         Trace.beginSection("MainActivity.MainAppContent")
         val navController = rememberNavController()
         val isSyncing by mainViewModel.isSyncing.collectAsState()
@@ -470,7 +475,7 @@ class MainActivity : ComponentActivity() {
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            MainUI(playerViewModel, navController)
+            MainUI(playerViewModel, navController, backgroundBackdrop)
 
             // Muestra el LoadingOverlay solo si las condiciones se cumplen Y el delay ha pasado
             if (canShowLoadingIndicator) {
@@ -482,7 +487,11 @@ class MainActivity : ComponentActivity() {
 
     @androidx.annotation.OptIn(UnstableApi::class)
     @Composable
-    private fun MainUI(playerViewModel: PlayerViewModel, navController: NavHostController) {
+    private fun MainUI(
+        playerViewModel: PlayerViewModel,
+        navController: NavHostController,
+        backgroundBackdrop: com.oakiha.audia.ui.theme.glass.library.backdrops.LayerBackdrop?
+    ) {
         Trace.beginSection("MainActivity.MainUI")
 
         val commonNavItems = remember {

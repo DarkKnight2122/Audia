@@ -79,11 +79,9 @@ object StorageUtils {
     private fun getVolumePath(volume: StorageVolume): File? {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             try {
-                // Use reflection even for the standard property to avoid linking issues on some older devices
-                val getDirectory = volume.javaClass.getMethod("getDirectory")
-                return getDirectory.invoke(volume) as? File
+                return Api30Impl.getDirectory(volume)
             } catch (e: Throwable) {
-                // Fallback if directory property access fails
+                // Fallback
             }
         }
 
@@ -94,6 +92,13 @@ object StorageUtils {
             path?.let { File(it) }
         } catch (e: Exception) {
             null
+        }
+    }
+
+    @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.R)
+    private object Api30Impl {
+        fun getDirectory(volume: StorageVolume): File? {
+            return volume.directory
         }
     }
 
