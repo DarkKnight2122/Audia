@@ -1,6 +1,4 @@
-﻿package com.oakiha.audia.presentation.components.player
-import com.oakiha.audia.data.model.AppThemeStyle
-import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
+package com.oakiha.audia.presentation.components.player
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -68,7 +66,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.withFrameNanos
@@ -107,6 +104,7 @@ import androidx.media3.common.util.UnstableApi
 import com.oakiha.audia.R
 import com.oakiha.audia.data.model.Author
 import com.oakiha.audia.data.model.Track
+import com.oakiha.audia.data.model.AppThemeStyle
 import com.oakiha.audia.data.preferences.BookArtQuality
 import com.oakiha.audia.data.preferences.CarouselStyle
 import com.oakiha.audia.data.preferences.FullPlayerLoadingTweaks
@@ -122,6 +120,7 @@ import com.oakiha.audia.presentation.components.subcomps.FetchLyricsDialog
 import com.oakiha.audia.presentation.viewmodel.LyricsSearchUiState
 import com.oakiha.audia.presentation.viewmodel.PlayerSheetState
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
+import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.ui.theme.GoogleSansRounded
 import com.oakiha.audia.utils.AudioMetaUtils.mimeTypeToFormat
 import com.oakiha.audia.utils.formatDuration
@@ -133,8 +132,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import timber.log.Timber
 import kotlin.math.roundToLong
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.oakiha.audia.presentation.components.WavySliderExpressive
 import com.oakiha.audia.presentation.components.ToggleSegmentButton
@@ -193,7 +190,6 @@ fun FullPlayerContent(
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
     
     val appThemeStyle by settingsViewModel.appThemeStyle.collectAsState()
-    // REMOVED: val stablePlayerState by playerViewModel.stablePlayerState.collectAsState()
     
     val lyricsSearchUiState by playerViewModel.lyricsSearchUiState.collectAsState()
     val currentTrackArtists by playerViewModel.currentTrackArtists.collectAsState()
@@ -242,6 +238,11 @@ fun FullPlayerContent(
 
     val placeholderColor = LocalMaterialTheme.current.primary.copy(alpha = 0.08f)
     val placeholderOnColor = LocalMaterialTheme.current.primary.copy(alpha = 0.04f)
+    
+    // Define Slider Colors
+    val thumbColor = LocalMaterialTheme.current.primary
+    val activeTrackColor = LocalMaterialTheme.current.primary
+    val inactiveTrackColor = LocalMaterialTheme.current.surfaceContainerHighest.copy(alpha = 0.6f)
 
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -819,13 +820,6 @@ fun FullPlayerContent(
         enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut()
     ) {
-        // We can create a temporary StablePlayerState for LyricsSheet if needed, or update LyricsSheet to take Granular args.
-        // For now, let's keep LyricsSheet collecting stablePlayerState internally IF it must, OR better:
-        // Pass the subset we have.
-        // LyricsSheet signature: stablePlayerStateFlow: StateFlow<StablePlayerState>
-        // We can't change that easily without refactoring LyricsSheet too.
-        // For now, pass the flow but LyricsSheet is only visible when sheet is open.
-        // Ideally we should refactor LyricsSheet too, but let's stick to FullPlayerContent optimizations first.
         LyricsSheet(
             stablePlayerStateFlow = playerViewModel.stablePlayerState,
             playerUiStateFlow = playerViewModel.playerUiState,
@@ -1659,6 +1653,3 @@ private fun BottomToggleRow(
         }
     }
 }
-
-
-

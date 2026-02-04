@@ -216,12 +216,12 @@ constructor(
                                                 !rescanRequired &&
                                                         localSong.authorName.isNotBlank() &&
                                                         localSong.authorName !=
-                                                                mediaStoreSong.author
+                                                                mediaStoreSong.authorName
 
                                         val shouldPreserveArtistName =
                                                 if (needsArtistCompare) {
                                                     val mediaStoreArtists =
-                                                            mediaStoreSong.author
+                                                            mediaStoreSong.authorName
                                                                     .splitArtistsByDelimiters(
                                                                             authorDelimiters
                                                                     )
@@ -252,16 +252,16 @@ constructor(
                                                 authorName =
                                                         if (shouldPreserveArtistName)
                                                                 localSong.authorName
-                                                        else mediaStoreSong.author,
+                                                        else mediaStoreSong.authorName,
                                                 bookName =
                                                         if (localSong.bookName !=
-                                                                        mediaStoreSong.book &&
+                                                                        mediaStoreSong.bookName &&
                                                                         localSong.bookName
                                                                                 .isNotBlank()
                                                         )
                                                                 localSong.bookName
-                                                        else mediaStoreSong.book,
-                                                genre = localSong.genre ?: genreMap[mediaStoreSong.id],
+                                                        else mediaStoreSong.bookName,
+                                                genre = localSong.genre ?: mediaStoreSong.genre,
                                                 trackNumber =
                                                         if (localSong.trackNumber != 0 &&
                                                                         localSong.trackNumber !=
@@ -271,35 +271,10 @@ constructor(
                                                                 localSong.trackNumber
                                                         else mediaStoreSong.trackNumber,
                                                 bookArtUriString = localSong.bookArtUriString
-                                                                ?: bookArtByAlbumId[mediaStoreSong.bookId]
+                                                                ?: mediaStoreSong.bookArtUriString
                                         )
                                     } else {
-                                        // Handle New Song Mapping correctly from RawSongData
-                                        TrackEntity(
-                                            id = mediaStoreSong.id,
-                                            title = mediaStoreSong.title,
-                                            authorName = mediaStoreSong.author,
-                                            authorId = mediaStoreSong.authorId,
-                                            bookAuthor = mediaStoreSong.bookAuthor,
-                                            bookName = mediaStoreSong.book,
-                                            bookId = mediaStoreSong.bookId,
-                                            contentUriString = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mediaStoreSong.id).toString(),
-                                            bookArtUriString = bookArtByAlbumId[mediaStoreSong.bookId],
-                                            duration = mediaStoreSong.duration,
-                                            genre = genreMap[mediaStoreSong.id],
-                                            filePath = mediaStoreSong.filePath,
-                                            parentDirectoryPath = File(mediaStoreSong.filePath).parent ?: "",
-                                            trackNumber = mediaStoreSong.trackNumber,
-                                            year = mediaStoreSong.year,
-                                            dateAdded = mediaStoreSong.dateModified.let { seconds ->
-                                                if (seconds > 0) TimeUnit.SECONDS.toMillis(seconds)
-                                                else System.currentTimeMillis()
-                                            },
-                                            lyrics = null,
-                                            mimeType = null,
-                                            sampleRate = null,
-                                            bitrate = null
-                                        )
+                                        mediaStoreSong
                                     }
                                 }
 

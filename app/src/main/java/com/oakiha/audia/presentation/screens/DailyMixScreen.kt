@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia.presentation.screens
+package com.oakiha.audia.presentation.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -538,5 +538,3 @@ private fun ExpressiveDailyMixHeader(
     }
     Trace.endSection()
 }
-
-

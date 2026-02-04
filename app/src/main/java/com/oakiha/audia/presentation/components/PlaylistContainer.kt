@@ -1,4 +1,4 @@
-﻿package com.oakiha.audia.presentation.components
+package com.oakiha.audia.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -152,7 +152,7 @@ fun PlaylistContainer(
                     )
                     Spacer(Modifier.height(16.dp))
                     Icon(
-                        Icons.AutoMirrored.Rounded.PlaylistPlay,
+                        androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistPlay,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -555,4 +555,3 @@ fun CreatePlaylistDialogRedesigned(
         }
     }
 }
-

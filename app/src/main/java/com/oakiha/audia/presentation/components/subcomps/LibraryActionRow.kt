@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -151,8 +152,9 @@ fun LibraryActionRow(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                         modifier = Modifier.height(genHeight)
                     ) {
-                val icon = if (isPlaylistTab) androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
-                val label = if (isPlaylistTab) "New Playlist" else "Shuffle all"
+                        // Define variables here for use inside the Row
+                        val icon = if (isPlaylistTab) androidx.compose.material.icons.Icons.AutoMirrored.Rounded.PlaylistAdd else Icons.Rounded.Shuffle
+                        val label = if (isPlaylistTab) "New Playlist" else "Shuffle all"
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -160,12 +162,12 @@ fun LibraryActionRow(
                         ) {
                             Icon(
                                 imageVector = icon,
-                                contentDescription = contentDesc,
+                                contentDescription = label,
                                 modifier = Modifier.size(20.dp).rotate(iconRotation)
                             )
                             Text(
                                 modifier = Modifier.animateContentSize(),
-                                text = text,
+                                text = label,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium
@@ -177,7 +179,7 @@ fun LibraryActionRow(
                         visible = isPlaylistTab,
                         enter = fadeIn() + expandHorizontally(
                             expandFrom = Alignment.Start,
-                            clip = false, // <â€” evita el â€œcorteâ€ durante la expansiÃ³n
+                            clip = false,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
                                 stiffness = Spring.StiffnessLow
@@ -185,7 +187,7 @@ fun LibraryActionRow(
                         ),
                         exit = fadeOut() + shrinkHorizontally(
                             shrinkTowards = Alignment.Start,
-                            clip = false, // <â€” evita el â€œcorteâ€ durante la expansiÃ³n
+                            clip = false,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioNoBouncy,
                                 stiffness = Spring.StiffnessMedium
@@ -294,7 +296,7 @@ fun Breadcrumbs(
             .padding(start = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-            IconButton(onClick = onBackClick) {
+            IconButton(onClick = onNavigateBack) {
                 Icon(androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
             }
         Spacer(Modifier.width(8.dp))
@@ -304,33 +306,25 @@ fun Breadcrumbs(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f)
-                // 1. Forzamos que el contenido se dibuje en una capa separada.
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                 .drawWithContent {
-                    // 2. Dibujamos el contenido original (el LazyRow).
                     drawContent()
 
-                    // 3. Dibujamos los gradientes que actÃºan como "mÃ¡scaras de borrado".
                     val gradientWidth = 24.dp.toPx()
 
-                    // MÃ¡scara para el borde IZQUIERDO
                     if (showStartFade) {
                         drawRect(
                             brush = Brush.horizontalGradient(
-                                // Gradiente de transparente a opaco (negro)
                                 colors = listOf(Color.Transparent, Color.Black),
                                 endX = gradientWidth
                             ),
-                            // DstIn mantiene el contenido del LazyRow solo donde esta capa es opaca.
                             blendMode = BlendMode.DstIn
                         )
                     }
 
-                    // MÃ¡scara para el borde DERECHO
                     if (showEndFade) {
                         drawRect(
                             brush = Brush.horizontalGradient(
-                                // Gradiente de opaco (negro) a transparente
                                 colors = listOf(Color.Black, Color.Transparent),
                                 startX = this.size.width - gradientWidth
                             ),
