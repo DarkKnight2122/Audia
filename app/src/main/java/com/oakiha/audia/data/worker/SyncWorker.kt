@@ -453,12 +453,11 @@ constructor(
                     val dataCol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
                     if (idCol >= 0 && dataCol >= 0) {
                         while (cursor.moveToNext()) {
-                            val path = cursor.getString(dataCol)
-                            val parentPath = File(path).parent
-                            if (parentPath != null && directoryResolver.isBlocked(parentPath)) {
-                                continue 
+                            val path = cursor.getString(dataCol) ?: continue
+                            val normalizedPath = File(path).absolutePath
+                            if (!directoryResolver.isBlocked(normalizedPath)) {
+                                ids.add(cursor.getLong(idCol))
                             }
-                            ids.add(cursor.getLong(idCol))
                         }
                     }
                 }
@@ -832,13 +831,10 @@ constructor(
 
                     while (cursor.moveToNext()) {
                         try {
-                            val data = cursor.getString(dataCol)
-                            val parentPath = File(data).parent
-                            if (parentPath != null) {
-                                val normalizedParent = File(parentPath).absolutePath
-                                if (directoryResolver.isBlocked(normalizedParent)) {
-                                    continue
-                                }
+                            val data = cursor.getString(dataCol) ?: continue
+                            val normalizedPath = File(data).absolutePath
+                            if (directoryResolver.isBlocked(normalizedPath)) {
+                                continue
                             }
                         } catch (e: Exception) {
                             // Proceed on error

@@ -124,18 +124,13 @@ class MediaStoreTrackRepository @Inject constructor(
                     allowedDirs.map(::normalizePath).toSet(),
                     blockedDirs.map(::normalizePath).toSet() 
                 )
-                val isFilterActive = blockedDirs.isNotEmpty()
 
                 while (cursor.moveToNext()) {
-                    val path = cursor.getString(pathCol)
+                    val path = cursor.getString(pathCol) ?: continue
+                    val normalizedPath = File(path).absolutePath
                     
-                    // Directory Filtering
-                    if (isFilterActive) {
-                        val lastSlashIndex = path.lastIndexOf('/')
-                        val parentPath = if (lastSlashIndex != -1) path.substring(0, lastSlashIndex) else ""
-                        if (resolver.isBlocked(parentPath)) {
-                            continue
-                        }
+                    if (resolver.isBlocked(normalizedPath)) {
+                        continue
                     }
 
                     val id = cursor.getLong(idCol)
@@ -295,18 +290,13 @@ class MediaStoreTrackRepository @Inject constructor(
                     allowedDirs.map(::normalizePath).toSet(),
                     blockedDirs.map(::normalizePath).toSet()
                 )
-                val isFilterActive = blockedDirs.isNotEmpty()
 
                 while (cursor.moveToNext()) {
-                    val path = cursor.getString(pathCol)
-                    if (isFilterActive) {
-                        val lastSlashIndex = path.lastIndexOf('/')
-                        val parentPath = if (lastSlashIndex != -1) path.substring(0, lastSlashIndex) else ""
-                        if (resolver.isBlocked(parentPath)) {
-                            continue
-                        }
+                    val path = cursor.getString(pathCol) ?: continue
+                    val normalizedPath = File(path).absolutePath
+                    if (!resolver.isBlocked(normalizedPath)) {
+                        ids.add(cursor.getLong(idCol))
                     }
-                    ids.add(cursor.getLong(idCol))
                 }
             }
         } catch (e: Exception) {

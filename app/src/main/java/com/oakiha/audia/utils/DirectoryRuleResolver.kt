@@ -15,30 +15,20 @@ class DirectoryRuleResolver(
     private val allowedRoots = allowed.mapNotNull { normalize(it) }.toSet()
     private val blockedRoots = blocked.mapNotNull { normalize(it) }.toSet()
 
-    private val hasRules = allowedRoots.isNotEmpty() || blockedRoots.isNotEmpty()
+    private val hasAllowedRules = allowedRoots.isNotEmpty()
 
     fun isBlocked(path: String): Boolean {
-        if (!hasRules) return false
+        // If no allowed directories are set, we block everything (Deny by Default)
+        if (!hasAllowedRules) return true
         
-        // Logic: Find the most specific (longest) rule that matches the path.
-        // If the longest matching rule is a "blocked" rule, then it's blocked.
-        // If it's an "allowed" rule (nesting exception), or no rule matches, it's allowed.
+        // Logic:
+        // 1. Must be inside an "Allowed" tree.
+        // 2. Must NOT be inside a more specific "Blocked" tree.
 
         var deepestBlockLen = -1
         var deepestAllowLen = -1
 
-        for (root in blockedRoots) {
-            if (isParentOrSame(root, path)) {
-                if (root.length > deepestBlockLen) {
-                    deepestBlockLen = root.length
-                }
-            }
-        }
-
-        // Optimization: If no block rule matches, we don't need to check allow rules
-        // (unless we deny by default, but here default is allow)
-        if (deepestBlockLen == -1) return false
-
+        // Find the most specific "Allowed" rule
         for (root in allowedRoots) {
             if (isParentOrSame(root, path)) {
                 if (root.length > deepestAllowLen) {
@@ -47,6 +37,20 @@ class DirectoryRuleResolver(
             }
         }
 
+        // If not matched by any allow rule, it's blocked by default
+        if (deepestAllowLen == -1) return true
+
+        // Find the most specific "Blocked" rule
+        for (root in blockedRoots) {
+            if (isParentOrSame(root, path)) {
+                if (root.length > deepestBlockLen) {
+                    deepestBlockLen = root.length
+                }
+            }
+        }
+
+        // It's blocked if the most specific rule is a "blocked" rule
+        // (Nested Block > Nested Allow)
         return deepestBlockLen > deepestAllowLen
     }
 

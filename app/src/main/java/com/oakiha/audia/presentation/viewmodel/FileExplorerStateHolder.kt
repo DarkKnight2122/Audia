@@ -36,7 +36,7 @@ data class DirectoryEntry(
     val totalAudioCount: Int,
     val canonicalPath: String,
     val displayName: String? = null,
-    val isBlocked: Boolean = false
+    val isSelected: Boolean = false
 )
 
 private data class RawDirectoryEntry(
@@ -117,7 +117,7 @@ class FileExplorerStateHolder(
             }
             .launchIn(scope)
 
-        // Combiner to produce final UI list with isBlocked state
+        // Combiner to produce final UI list with isSelected state
         combine(
             _rawCurrentDirectoryChildren,
             _allowedDirectories,
@@ -134,7 +134,7 @@ class FileExplorerStateHolder(
                         totalAudioCount = raw.totalAudioCount,
                         canonicalPath = raw.canonicalPath,
                         displayName = raw.displayName,
-                        isBlocked = resolver.isBlocked(raw.canonicalPath)
+                        isSelected = !resolver.isBlocked(raw.canonicalPath)
                     )
                 }
             }
@@ -217,43 +217,34 @@ class FileExplorerStateHolder(
         val currentBlocked = _blockedDirectories.value.toMutableSet()
         val path = normalizePath(file)
 
-        // Check if explicitly blocked in the set (ignoring resolver logic for a moment)
-        val isExplicitlyBlocked = currentBlocked.contains(path)
+        val resolver = DirectoryRuleResolver(currentAllowed, currentBlocked)
+        val isCurrentlyAllowed = !resolver.isBlocked(path)
 
-        if (isExplicitlyBlocked) {
-            // Unblock operation
-            currentBlocked.remove(path)
+        if (isCurrentlyAllowed) {
+            // Deselect operation
+            // If it's explicitly in currentAllowed, just remove it
+            if (currentAllowed.contains(path)) {
+                currentAllowed.remove(path)
+            } else {
+                // It's implicitly allowed by a parent. We must explicitly block it.
+                currentBlocked.add(path)
+            }
             
             // Clean up: Remove any explicit "Allow" rules that are children of this path
-            // (since we are unblocking the parent, children are now implicitly allowed)
             currentAllowed.removeAll { it.startsWith("$path/") }
-            
-            // Crucial: Only add to "Allowed" if it is STILL blocked by a parent.
-            // If it's not blocked by any parent, we don't need to add it to allowed (Global Allow).
-            val resolver = DirectoryRuleResolver(currentAllowed, currentBlocked)
-            if (resolver.isBlocked(path)) {
-               currentAllowed.add(path)
+        } else {
+            // Select operation
+            // If it's explicitly in currentBlocked, just remove it
+            if (currentBlocked.contains(path)) {
+                currentBlocked.remove(path)
+            } else {
+                // It's blocked by default or by parent. We must explicitly allow it.
+                currentAllowed.add(path)
             }
-
-            // Optimistic Update directly to flows to prevent race conditions on rapid toggles
-            _allowedDirectories.value = currentAllowed
-            _blockedDirectories.value = currentBlocked
             
-            userPreferencesRepository.updateDirectorySelections(currentAllowed, currentBlocked)
-            return
+            // Clean up: Remove any explicit "Block" rules that are children of this path
+            currentBlocked.removeAll { it.startsWith("$path/") }
         }
-
-        // Block Operation
-        // Remove any explicit "Block" rules that are children (they are redundant now)
-        currentBlocked.removeAll { it.startsWith("$path/") }
-        // Remove any explicit "Allow" rules that are inside (they are overridden unless we want nested allow?)
-        // Wait, usually we want to Keep nested allows if we support "Block Music, Allow Music/Favorites".
-        // DirectoryRuleResolver supports nesting. 
-        // But the previous code removed them: `currentAllowed.removeAll { ... }`
-        // Let's stick to previous behavior of clearing conflicting rules to avoid confusion.
-        currentAllowed.removeAll { it == path || it.startsWith("$path/") }
-        
-        currentBlocked.add(path)
 
         // Optimistic Update
         _allowedDirectories.value = currentAllowed

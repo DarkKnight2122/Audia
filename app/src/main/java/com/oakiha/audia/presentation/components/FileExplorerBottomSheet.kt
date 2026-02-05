@@ -444,34 +444,31 @@ private fun ExplorerLoadingState() {
     }
 }
 
-@Composable
 private fun FileExplorerItem(
     file: File,
     audioCount: Int,
     displayName: String?,
-    isBlocked: Boolean,
+    isSelected: Boolean,
     onNavigate: () -> Unit,
     onToggleAllowed: () -> Unit,
     navigationEnabled: Boolean
 ) {
     val shape = RoundedCornerShape(18.dp)
 
-    val isAllowed = !isBlocked
-
-    val containerColor = if (isBlocked) {
-        MaterialTheme.colorScheme.errorContainer
+    val containerColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
-    val contentColor = if (isBlocked) {
-        MaterialTheme.colorScheme.onErrorContainer
+    val contentColor = if (isSelected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.onSurface
     }
 
-    val badgeColor = if (isBlocked) {
-        MaterialTheme.colorScheme.onErrorContainer
+    val badgeColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.secondary
     }
@@ -552,15 +549,15 @@ private fun FileExplorerItem(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = if (isBlocked) "Excluded" else "Included",
+                text = if (isSelected) "Selected" else "Pick",
                 style = MaterialTheme.typography.labelMedium,
-                color = if (isBlocked) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
             RadioButton(
-                selected = isBlocked,
+                selected = isSelected,
                 onClick = onToggleAllowed,
                 colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colorScheme.onErrorContainer,
+                    selectedColor = MaterialTheme.colorScheme.primary,
                     unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
