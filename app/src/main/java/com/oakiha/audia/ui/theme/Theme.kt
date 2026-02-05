@@ -78,15 +78,24 @@ fun AudioBookPlayerTheme(
     
     val isGlassMode = appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS
     
+    val dynamicDark = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicDarkColorScheme(context) else null
+    val dynamicLight = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicLightColorScheme(context) else null
+
     val baseDarkScheme = if (isBlackMode) {
-        DarkColorScheme.copy(
+        val base = dynamicDark ?: DarkColorScheme
+        base.copy(
+            primary = dynamicDark?.primary ?: AudioBookPlayerPurplePrimary,
+            secondary = dynamicDark?.secondary ?: Color.White,
+            tertiary = dynamicDark?.tertiary ?: Color.White,
             background = Color.Black,
             surface = Color.Black,
             surfaceContainer = Color(0xFF111111),
             surfaceContainerHigh = Color(0xFF1A111A),
             surfaceContainerHighest = Color(0xFF222222),
             surfaceContainerLow = Color(0xFF0A0A0A),
-            surfaceContainerLowest = Color(0xFF050505)
+            surfaceContainerLowest = Color(0xFF050505),
+            onBackground = Color.White,
+            onSurface = Color.White.copy(alpha = 0.9f)
         )
     } else if (isGlassMode) {
         DarkColorScheme.copy(
@@ -106,7 +115,7 @@ fun AudioBookPlayerTheme(
         colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !isBlackMode && !isGlassMode -> {
             // Tema dinÃ¡mico del sistema como prioridad si no hay override Y no es un modo especial
             try {
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                if (darkTheme) dynamicDark!! else dynamicLight!!
             } catch (e: Exception) {
                 // Fallback a los defaults si dynamic colors falla (raro, pero posible en algunos dispositivos)
                 if (darkTheme) baseDarkScheme else LightColorScheme

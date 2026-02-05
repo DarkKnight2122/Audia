@@ -233,15 +233,15 @@ class MainActivity : ComponentActivity() {
                     Modifier.fillMaxSize()
                 }
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (isGlass && backgroundBackdrop != null) {
-                        Box(Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
-                            GradientBackground(isDarkTheme = useDarkTheme)
-                        }
-                    }
-                    
-                    Surface(modifier = rootModifier, color = if (isGlass) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.background) {
-                        Box(modifier = Modifier.fillMaxSize()) { // Inner box for content
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    if (isGlass && backgroundBackdrop != null) {
+                                        Box(Modifier.fillMaxSize().layerBackdrop(backgroundBackdrop)) {
+                                            // Plain background instead of atrocious gradient
+                                            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+                                        }
+                                    }
+                                    
+                                    Surface(modifier = rootModifier, color = if (isGlass) androidx.compose.ui.graphics.Color.Transparent else MaterialTheme.colorScheme.background) {                        Box(modifier = Modifier.fillMaxSize()) { // Inner box for content
                             if (showSetupScreen != null) {
                                 AnimatedContent(
                                     targetState = showSetupScreen,
