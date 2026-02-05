@@ -276,6 +276,9 @@ class PlayerViewModel @Inject constructor(
     val bookArtQuality: StateFlow<BookArtQuality> = userPreferencesRepository.bookArtQualityFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BookArtQuality.MEDIUM)
 
+    val appThemeStyle: StateFlow<com.oakiha.audia.data.model.AppThemeStyle> = userPreferencesRepository.appThemeStyleFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.oakiha.audia.data.model.AppThemeStyle.System)
+
     fun setLyricsSyncOffset(trackId: String, offsetMs: Int) {
         lyricsStateHolder.setSyncOffset(trackId, offsetMs)
     }

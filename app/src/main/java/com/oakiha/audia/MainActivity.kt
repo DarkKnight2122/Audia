@@ -618,13 +618,13 @@ class MainActivity : ComponentActivity() {
                         val bottomRadius = if (navBarStyle == NavBarStyle.FULL_WIDTH) 0.dp else navBarCornerRadius.dp
                         AbsoluteSmoothCornerShape(
                             cornerRadiusTL = playerContentActualBottomRadius,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusTR = playerContentActualBottomRadius,
                             smoothnessAsPercentTL = 60,
-                            cornerRadiusBL = bottomRadius,
+                            cornerRadiusTR = playerContentActualBottomRadius,
                             smoothnessAsPercentTR = 60,
+                            cornerRadiusBL = bottomRadius,
+                            smoothnessAsPercentBL = 60,
                             cornerRadiusBR = bottomRadius,
-                            smoothnessAsPercentBL = 60
+                            smoothnessAsPercentBR = 60
                         )
                     }
 

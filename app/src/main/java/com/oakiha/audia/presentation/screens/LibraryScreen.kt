@@ -116,6 +116,7 @@ import com.oakiha.audia.presentation.components.subcomps.LibraryActionRow
 import com.oakiha.audia.presentation.navigation.Screen
 import com.oakiha.audia.presentation.viewmodel.ColorSchemePair
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
+import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import com.oakiha.audia.presentation.viewmodel.StablePlayerState
 import com.oakiha.audia.presentation.viewmodel.PlaylistUiState
 import com.oakiha.audia.presentation.viewmodel.PlaylistViewModel
@@ -194,7 +195,8 @@ val PlayerSheetCollapsedCornerRadius = 32.dp
 fun LibraryScreen(
     navController: NavController,
     playerViewModel: PlayerViewModel = hiltViewModel(),
-    playlistViewModel: PlaylistViewModel = hiltViewModel()
+    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // La recolecciÃƒÆ’Ã‚Â³n de estados de alto nivel se mantiene mÃƒÆ’Ã‚Â­nima.
     val context = LocalContext.current // Added context
@@ -216,7 +218,8 @@ fun LibraryScreen(
     val isSortSheetVisible by playerViewModel.isSortingSheetVisible.collectAsState()
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
     
-    val appThemeStyle by playerViewModel.appThemeStyle.collectAsState()
+    val settingsUiState by settingsViewModel.uiState.collectAsState()
+    val appThemeStyle = settingsUiState.appThemeStyle
 
     val m3uImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()

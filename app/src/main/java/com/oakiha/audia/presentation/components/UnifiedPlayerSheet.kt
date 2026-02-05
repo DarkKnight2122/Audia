@@ -868,13 +868,13 @@ fun UnifiedPlayerSheet(
         if (useSmoothShape) {
              AbsoluteSmoothCornerShape(
                 cornerRadiusTL = overallSheetTopCornerRadius,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusTR = overallSheetTopCornerRadius,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBR = playerContentActualBottomRadius,
                 smoothnessAsPercentTL = 60,
+                cornerRadiusTR = overallSheetTopCornerRadius,
+                smoothnessAsPercentTR = 60,
+                cornerRadiusBR = playerContentActualBottomRadius,
+                smoothnessAsPercentBR = 60,
                 cornerRadiusBL = playerContentActualBottomRadius,
-                smoothnessAsPercentTR = 60
+                smoothnessAsPercentBL = 60
             )
         } else {
             RoundedCornerShape(

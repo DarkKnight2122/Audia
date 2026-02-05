@@ -72,6 +72,7 @@ import com.oakiha.audia.data.model.Track
 import com.oakiha.audia.presentation.components.SmartImage
 import com.oakiha.audia.presentation.components.TrackInfoBottomSheet
 import com.oakiha.audia.presentation.viewmodel.PlayerViewModel
+import com.oakiha.audia.presentation.viewmodel.SettingsViewModel
 import android.util.Log
 import com.oakiha.audia.ui.theme.LocalAudioBookPlayerDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
