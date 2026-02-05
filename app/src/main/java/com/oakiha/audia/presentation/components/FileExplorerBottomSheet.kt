@@ -366,7 +366,7 @@ fun FileExplorerContent(
                                         file = directoryEntry.file,
                                         audioCount = displayCount,
                                         displayName = directoryEntry.displayName,
-                                        isBlocked = directoryEntry.isBlocked,
+                                        isSelected = directoryEntry.isSelected,
                                         onNavigate = { onNavigateTo(directoryEntry.file) },
                                         onToggleAllowed = { onToggleAllowed(directoryEntry.file) },
                                         navigationEnabled = true
@@ -444,6 +444,7 @@ private fun ExplorerLoadingState() {
     }
 }
 
+@Composable
 private fun FileExplorerItem(
     file: File,
     audioCount: Int,
