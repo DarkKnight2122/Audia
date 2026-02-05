@@ -247,6 +247,12 @@ fun FullPlayerContent(
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    val isActuallyExpanded by remember {
+        derivedStateOf {
+            currentSheetState == PlayerSheetState.EXPANDED && expansionFractionProvider() >= 0.985f
+        }
+    }
+
 
     // LÃƒÆ’Ã‚Â³gica para el botÃƒÆ’Ã‚Â³n de Lyrics en el reproductor expandido
     val onLyricsClick = {
@@ -327,7 +333,7 @@ fun FullPlayerContent(
                 shouldDelay = shouldDelay,
                 showPlaceholders = loadingTweaks.showPlaceholders,
                 expansionFractionProvider = expansionFractionProvider,
-                isExpandedOverride = currentSheetState == PlayerSheetState.EXPANDED,
+                isExpandedOverride = isActuallyExpanded,
                 normalStartThreshold = 0.08f,
                 delayAppearThreshold = loadingTweaks.contentAppearThresholdPercent / 100f,
                 placeholder = {
@@ -367,7 +373,7 @@ fun FullPlayerContent(
             shouldDelay = shouldDelay,
             showPlaceholders = loadingTweaks.showPlaceholders,
             expansionFractionProvider = expansionFractionProvider,
-            isExpandedOverride = currentSheetState == PlayerSheetState.EXPANDED,
+            isExpandedOverride = isActuallyExpanded,
             normalStartThreshold = 0.42f,
             delayAppearThreshold = loadingTweaks.contentAppearThresholdPercent / 100f,
             placeholder = {
@@ -442,7 +448,7 @@ fun FullPlayerContent(
             shouldDelay = shouldDelay,
             showPlaceholders = loadingTweaks.showPlaceholders,
             expansionFractionProvider = expansionFractionProvider,
-            isExpandedOverride = currentSheetState == PlayerSheetState.EXPANDED,
+            isExpandedOverride = isActuallyExpanded,
             normalStartThreshold = 0.20f,
             delayAppearThreshold = loadingTweaks.contentAppearThresholdPercent / 100f,
             placeholder = {
@@ -555,7 +561,7 @@ fun FullPlayerContent(
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
                 // Check condition AFTER the down event occurs
-                val isFullyExpanded = currentSheetState == PlayerSheetState.EXPANDED && expansionFractionProvider() >= 0.99f
+                val isFullyExpanded = isActuallyExpanded
 
                 if (!isFullyExpanded) {
                     return@awaitEachGesture
@@ -1036,11 +1042,7 @@ private fun PlayerProgressBarSection(
     
     val isVisible by remember { derivedStateOf { expansionFraction > 0.01f } }
 
-    val isExpanded by remember { 
-        derivedStateOf { 
-            currentSheetState == PlayerSheetState.EXPANDED && expansionFraction >= 0.995f 
-        } 
-    }
+    val isExpanded = isActuallyExpanded
 
     val durationForCalc = totalDurationValue.coerceAtLeast(1L)
     
@@ -1123,7 +1125,7 @@ private fun PlayerProgressBarSection(
         shouldDelay = shouldDelay,
         showPlaceholders = loadingTweaks?.showPlaceholders ?: false,
         expansionFractionProvider = expansionFractionProvider,
-        isExpandedOverride = currentSheetState == PlayerSheetState.EXPANDED,
+        isExpandedOverride = isActuallyExpanded,
         normalStartThreshold = 0.08f,
         delayAppearThreshold = (loadingTweaks?.contentAppearThresholdPercent ?: 100) / 100f,
         placeholder = {

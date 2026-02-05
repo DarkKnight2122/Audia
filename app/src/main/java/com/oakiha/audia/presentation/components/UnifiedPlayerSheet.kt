@@ -889,6 +889,12 @@ fun UnifiedPlayerSheet(
     val isCollapsedState =
         rememberUpdatedState(currentSheetContentState == PlayerSheetState.COLLAPSED)
 
+    val isGlassOptimizedByDelay by remember {
+        derivedStateOf {
+            playerContentExpansionFraction.value >= 0.8f
+        }
+    }
+
     val collapsedY = rememberUpdatedState(sheetCollapsedTargetY)
     val expandedY = rememberUpdatedState(sheetExpandedTargetY)
     val canShow = rememberUpdatedState(showPlayerContentArea)
@@ -1051,27 +1057,40 @@ fun UnifiedPlayerSheet(
                                 )
                                 .then(
                                     if (settingsViewModel.uiState.value.appThemeStyle == com.oakiha.audia.data.model.AppThemeStyle.GLASS && backdrop != null) {
-                                        Modifier.drawBackdrop(
-                                            backdrop = backdrop,
-                                            shape = {
-                                                RoundedCornerShape(
+                                        if (isGlassOptimizedByDelay) {
+                                            Modifier.drawBackdrop(
+                                                backdrop = backdrop,
+                                                shape = {
+                                                    RoundedCornerShape(
+                                                        topStart = overallSheetTopCornerRadius,
+                                                        topEnd = overallSheetTopCornerRadius,
+                                                        bottomStart = playerContentActualBottomRadius,
+                                                        bottomEnd = playerContentActualBottomRadius
+                                                    )
+                                                },
+                                                effects = {
+                                                    vibrancy()
+                                                    blur(16f.dp.toPx())
+                                                    lens(refractionHeight = 20f.dp.toPx(), refractionAmount = 30f.dp.toPx())
+                                                },
+                                                highlight = { Highlight.Default.copy(alpha = 0.3f) },
+                                                shadow = { Shadow.Default.copy(alpha = 0.1f) },
+                                                onDrawSurface = {
+                                                    drawRect(albumColorScheme.primaryContainer.copy(alpha = 0.35f))
+                                                }
+                                            )
+                                        } else {
+                                            // Simple background while sliding to maintain high FPS
+                                            Modifier.background(
+                                                color = albumColorScheme.primaryContainer.copy(alpha = 0.5f),
+                                                shape = RoundedCornerShape(
                                                     topStart = overallSheetTopCornerRadius,
                                                     topEnd = overallSheetTopCornerRadius,
                                                     bottomStart = playerContentActualBottomRadius,
                                                     bottomEnd = playerContentActualBottomRadius
                                                 )
-                                            },
-                                            effects = {
-                                                vibrancy()
-                                                blur(16f.dp.toPx())
-                                                lens(refractionHeight = 20f.dp.toPx(), refractionAmount = 30f.dp.toPx())
-                                            },
-                                            highlight = { Highlight.Default.copy(alpha = 0.3f) },
-                                            shadow = { Shadow.Default.copy(alpha = 0.1f) },
-                                            onDrawSurface = {
-                                                drawRect(albumColorScheme.primaryContainer.copy(alpha = 0.35f))
-                                            }
-                                        )
+                                            )
+                                        }
                                     } else {
                                         Modifier.background(
                                             color = albumColorScheme.primaryContainer,

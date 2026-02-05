@@ -2,11 +2,11 @@ package com.oakiha.audia.data.preferences
 
 data class FullPlayerLoadingTweaks(
     val delayAll: Boolean = true,
-    val delayAlbumCarousel: Boolean = false,
-    val delayTrackMetadata: Boolean = false,
-    val delayProgressBar: Boolean = false,
-    val delayControls: Boolean = false,
-    val showPlaceholders: Boolean = false,
+    val delayAlbumCarousel: Boolean = true,
+    val delayTrackMetadata: Boolean = true,
+    val delayProgressBar: Boolean = true,
+    val delayControls: Boolean = true,
+    val showPlaceholders: Boolean = true,
     val transparentPlaceholders: Boolean = false,
-    val contentAppearThresholdPercent: Int = 100
+    val contentAppearThresholdPercent: Int = 80
 )
